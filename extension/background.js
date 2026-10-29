@@ -417,7 +417,17 @@ const handlers = {
   },
   async PIP_RECT_UPDATED({ rect }, sender) {
     if (sender?.tab?.id != null && rect) {
-      await updatePipEntry(sender.tab.id, (prev) => (prev ? { ...prev, rect } : null));
+      const saved = await updatePipEntry(sender.tab.id, (prev) => (prev ? { ...prev, rect } : null));
+      if (saved && !saved.bound) {
+        postToEngine({
+          v: 1,
+          type: "PIP_OPENED",
+          tabId: saved.tabId,
+          kind: saved.kind,
+          rect: saved.rect,
+          dpr: saved.dpr,
+        });
+      }
     }
     return { ok: true };
   },

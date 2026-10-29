@@ -72,6 +72,8 @@ def cb(hwnd, _):
     hmon = u32.MonitorFromWindow(hwnd, 2)
     mi = MONITORINFO(); mi.cbSize = ctypes.sizeof(MONITORINFO)
     u32.GetMonitorInfoW(hmon, ctypes.byref(mi))
+    rgn_rc = wt.RECT()
+    rgn_type = u32.GetWindowRgnBox(hwnd, ctypes.byref(rgn_rc))
     cands.append({
         "hwnd": hwnd,
         "rect": {"l": l, "t": t, "r": r, "b": b, "w": r - l, "h": b - t},
@@ -79,6 +81,7 @@ def cb(hwnd, _):
         "layered": bool(ex & WS_EX_LAYERED),
         "transparent": bool(ex & WS_EX_TRANSPARENT),
         "alpha": alpha.value & 0xff,
+        "rgnTop": rgn_rc.top if rgn_type == 2 else 0,
         "score": abs((r - l) - ${expectedW}) + abs((b - t) - ${expectedH})
     })
     return True
@@ -197,6 +200,7 @@ try {
       s.dodge.autoReturn = false;
       await chrome.storage.local.set({ settings: s });
       GhostPiPBackground.postToEngine({ v: 1, type: "STATE", settings: s });
+      GhostPiPBackground.postToEngine({ v: 1, type: "TEST_CURSOR", cursor: { x: 100, y: 100 } });
     }, DEFAULTS);
 
     const vCenter = await videoPage.evaluate(() => {
@@ -237,7 +241,7 @@ try {
 
     const win = await poll(
       () => inspectWin32Pip(pipSize.w, pipSize.h),
-      (w) => w && w.layered && w.alpha === 179 && !w.transparent,
+      (w) => w && w.layered && w.alpha === 179 && !w.transparent && w.rgnTop > 0,
       3000,
     );
     const wantBr = Dodge.cornerRect("BR", { w: win.rect.w, h: win.rect.h }, win.work, DEFAULTS.dodge.edgeInsetPx);
@@ -246,10 +250,11 @@ try {
       win.layered === true &&
       win.transparent === false &&
       win.alpha === 179 &&
+      win.rgnTop > 0 &&
       near(win.rect, wantBr);
     return {
       ok,
-      info: `bound=${boundEntry?.bound} layered=${win.layered} transparent=${win.transparent} alpha=${win.alpha} rect=${fmt(win.rect)} want=${fmt(wantBr)}`,
+      info: `bound=${boundEntry?.bound} layered=${win.layered} transparent=${win.transparent} alpha=${win.alpha} rgnTop=${win.rgnTop} rect=${fmt(win.rect)} want=${fmt(wantBr)}`,
     };
   });
 

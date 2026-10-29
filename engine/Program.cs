@@ -422,8 +422,12 @@ public static unsafe class Program
         _wheelPreview = true;
         _dodgeState = _dodgeState with { HoverSince = null };
 
+        DodgePoint? cursor = GetVisibleCursor();
+        bool cursorInWindow = cursor is DodgePoint wp &&
+            wp.X >= rc.Left && wp.X <= rc.Right &&
+            wp.Y >= rc.Top && wp.Y <= rc.Bottom;
         bool effectiveClickThrough = _settings.ClickThrough && !holdDown;
-        _ghostStyle.Apply(pipHwnd, next, effectiveClickThrough);
+        _ghostStyle.Apply(pipHwnd, next, effectiveClickThrough, hideHeader: !holdDown && !cursorInWindow);
         _nativeHost?.Send(new IntentMessage("SET_OPACITY", Opacity: next));
         return true;
     }
@@ -619,6 +623,7 @@ public static unsafe class Program
                 {
                     _customPos = false;
                     var targetRect = DodgeSolver.CornerRect(targetCorner, winSize, area, _settings.Dodge.EdgeInsetPx);
+                    winRect = targetRect;
                     GhostStyle.SetWindowPos(
                         pipHwnd,
                         IntPtr.Zero,
@@ -631,14 +636,27 @@ public static unsafe class Program
             }
         }
 
+        DodgePoint? curPt = GetVisibleCursor();
+        bool cursorInWindow = curPt is DodgePoint wp &&
+            wp.X >= winRect.L && wp.X <= winRect.R &&
+            wp.Y >= winRect.T && wp.Y <= winRect.B;
+        bool cursorInHeader = false;
+        if (cursorInWindow && curPt is DodgePoint hp && _ghostStyle.TryGetContentRelRect(pipHwnd, out var contentRel))
+        {
+            cursorInHeader = hp.Y >= winRect.T && hp.Y < winRect.T + contentRel.Top;
+        }
+
+        bool hideHeader = !holdRes.IsInteractive && !cursorInWindow;
         double effectiveOpacity = (holdRes.IsInteractive && !_wheelPreview)
             ? 1.0
             : _dodgeState.Faded
                 ? 0.1
                 : _settings.Opacity;
-        bool effectiveClickThrough = _settings.ClickThrough && !holdRes.IsInteractive;
+        bool effectiveClickThrough = _settings.ClickThrough &&
+            !holdRes.IsInteractive &&
+            !(cursorInHeader && (!_settings.Dodge.Enabled || _waitCursorLeave));
 
-        _ghostStyle.Apply(pipHwnd, effectiveOpacity, effectiveClickThrough);
+        _ghostStyle.Apply(pipHwnd, effectiveOpacity, effectiveClickThrough, hideHeader);
     }
 
     private static DodgePoint? GetVisibleCursor()
