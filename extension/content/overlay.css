@@ -39,6 +39,11 @@
     transition: none !important;
   }
 
+  .ghostpip-docpip-source {
+    filter: brightness(0) !important;
+    pointer-events: none !important;
+  }
+
   #ghostpip-launcher:popover-open,
   #ghostpip-controller:popover-open {
     position: fixed !important;

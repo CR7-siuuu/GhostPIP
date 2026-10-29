@@ -341,6 +341,7 @@ async function runSite(page, target) {
         std: Math.round(Math.sqrt(sq / n - (sum / n) ** 2)),
         iframe: w.document.querySelector("iframe")?.src ?? null,
         inPlace: window.__gp.v.isConnected && window.__gp.v.parentNode === window.__gp.parent,
+        sourceHidden: window.__gp.v.classList.contains("ghostpip-docpip-source") && getComputedStyle(window.__gp.v).filter.includes("brightness(0)"),
         live: { x: w.screenX, y: w.screenY, w: w.outerWidth, h: w.outerHeight },
       };
     });
@@ -364,11 +365,13 @@ async function runSite(page, target) {
     await shot("7_docPip");
     await page.evaluate(() => documentPictureInPicture.window.close());
     const cleared = Object.keys(await poll(readPip, (p) => Object.keys(p).length === 0, 2000)).length === 0;
-    const ok = r.mirrorW > 0 && r.std > 5 && r.inPlace && adv.ok && rectMatches && cleared && chatRemoved
+    const restoredSource = await page.evaluate(() => !window.__gp.v.classList.contains("ghostpip-docpip-source"));
+    const ok = r.mirrorW > 0 && r.std > 5 && r.inPlace && r.sourceHidden && restoredSource
+      && adv.ok && rectMatches && cleared && chatRemoved
       && (!wantChat || r.iframe === wantChat);
     return {
       ok,
-      info: `mirrorW=${r.mirrorW} std=${r.std} inPlace=${r.inPlace} dt=${adv.dt} chatRemoved=${chatRemoved} PIP_OPENED=${reported ? JSON.stringify(reported.rect) : "none"} live=${JSON.stringify(r.live)} closedCleared=${cleared} iframe=${r.iframe}${wantChat ? ` want=${wantChat}` : ""}`,
+      info: `mirrorW=${r.mirrorW} std=${r.std} inPlace=${r.inPlace} srcHidden=${r.sourceHidden}->restored=${restoredSource} dt=${adv.dt} chatRemoved=${chatRemoved} PIP_OPENED=${reported ? JSON.stringify(reported.rect) : "none"} live=${JSON.stringify(r.live)} closedCleared=${cleared} iframe=${r.iframe}${wantChat ? ` want=${wantChat}` : ""}`,
     };
   });
 

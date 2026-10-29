@@ -3,6 +3,7 @@
   const Settings = globalThis.GhostPiPSettings;
 
   const FLOAT_CLASS = "ghostpip-inpage-target";
+  const DOCPIP_SOURCE_CLASS = "ghostpip-docpip-source";
   const DEFAULT_FLOAT_WIDTH = 480;
   const MIN_FLOAT_WIDTH = 140;
   const MAX_FLOAT_WIDTH = 2560;
@@ -1158,6 +1159,8 @@
 
   function enterDocPip({ stream: firstStream, chatUrl, win: winPromise }, leave) {
     const video = ctx.video;
+    const originalHasClass = video.hasAttribute("class");
+    video.classList.add(DOCPIP_SOURCE_CLASS);
     const ac = new AbortController();
     let stream = firstStream;
     let win = null;
@@ -1231,6 +1234,8 @@
       exit() {
         ac.abort();
         clearTimeout(hudTimer);
+        video.classList.remove(DOCPIP_SOURCE_CLASS);
+        if (!originalHasClass && !video.getAttribute("class")) video.removeAttribute("class");
         for (const t of stream.getTracks()) t.stop();
         if (!win) return;
         send({ type: "PIP_CLOSED" });
