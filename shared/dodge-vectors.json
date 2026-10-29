@@ -1,0 +1,230 @@
+{
+  "version": 1,
+  "notes": "Rect edges r,b are exclusive. step cases thread state through steps; start = initialState(corner) with listed fields overridden (lastMoveAt omitted means -Infinity). Default area {0,0,1920,1080}, size 480x270, edgeInsetPx 16, marginPx 20: TL={16,16,496,286} TR={1424,16,1904,286} BL={16,794,496,1064} BR={1424,794,1904,1064}.",
+  "cases": [
+    {
+      "name": "hover delay not reached stays",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"BR"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR","faded":false}},
+        {"input":{"now":1099,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR","faded":false}}
+      ]
+    },
+    {
+      "name": "hover triggers move to farthest corner, then cooldown blocks the next move",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"BR"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR"}},
+        {"input":{"now":1100,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"move","corner":"TL"},"corner":"TL"}},
+        {"input":{"now":1150,"cursor":{"x":300,"y":200},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":1250,"cursor":{"x":300,"y":200},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":1399,"cursor":{"x":300,"y":200},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":1400,"cursor":{"x":300,"y":200},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"move","corner":"BR"},"corner":"BR","faded":false}}
+      ]
+    },
+    {
+      "name": "margin edge is inclusive on the left, exclusive past the right",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":0,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"BR"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":1403,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR"}},
+        {"input":{"now":1001,"cursor":{"x":1404,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"move","corner":"TL"},"corner":"TL"}},
+        {"input":{"now":1400,"cursor":{"x":516,"y":100},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":1401,"cursor":{"x":515,"y":100},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"move","corner":"BR"},"corner":"BR"}}
+      ]
+    },
+    {
+      "name": "vertical axis only moves within the same column",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"vertical","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"BR"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR"}},
+        {"input":{"now":1100,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"move","corner":"TR"},"corner":"TR"}}
+      ]
+    },
+    {
+      "name": "horizontal axis only moves within the same row",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"horizontal","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"BR"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR"}},
+        {"input":{"now":1100,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"move","corner":"BL"},"corner":"BL"}}
+      ]
+    },
+    {
+      "name": "vertical axis with only the diagonal allowed fades, then unfades when the cursor leaves",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"vertical","allowed":["TL","BR"],"home":"BR","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"BR"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR","faded":false}},
+        {"input":{"now":1100,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"fade","on":true},"corner":"BR","faded":true}},
+        {"input":{"now":1200,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR","faded":true}},
+        {"input":{"now":1300,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"fade","on":false},"corner":"BR","faded":false}}
+      ]
+    },
+    {
+      "name": "only axis candidate contains the cursor so it is excluded and the window fades",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"vertical","allowed":["TL","TR","BL","BR"],"home":"TL","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":0,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"TL"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":100,"y":300},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1000,"b":600}},"expect":{"action":{"type":"fade","on":true},"corner":"TL","faded":true}}
+      ]
+    },
+    {
+      "name": "free axis skips the candidate containing the cursor; equal-distance tie goes to CORNERS order",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"TL","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":0,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"TL"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":500,"y":100},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1000,"b":600}},"expect":{"action":{"type":"move","corner":"BL"},"corner":"BL","faded":false}}
+      ]
+    },
+    {
+      "name": "every candidate contains the cursor so the window fades",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"TL","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":0,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"TL"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":500,"y":300},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1000,"b":600}},"expect":{"action":{"type":"fade","on":true},"corner":"TL","faded":true}}
+      ]
+    },
+    {
+      "name": "style fade turns on after hover delay and off when the cursor leaves",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"fade","ignoreScreenEdgePx":0},
+      "start": {"corner":"BR"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR","faded":false}},
+        {"input":{"now":1100,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"fade","on":true},"corner":"BR","faded":true}},
+        {"input":{"now":1200,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR","faded":true}},
+        {"input":{"now":1300,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"fade","on":false},"corner":"BR","faded":false}},
+        {"input":{"now":1400,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR","faded":false}}
+      ]
+    },
+    {
+      "name": "disabling while faded unfades once, then stays",
+      "fn": "step",
+      "cfg": {"enabled":false,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"fade","ignoreScreenEdgePx":0},
+      "start": {"corner":"BR","faded":true,"hoverSince":500},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"fade","on":false},"corner":"BR","faded":false}},
+        {"input":{"now":1200,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR","faded":false}}
+      ]
+    },
+    {
+      "name": "disabled never moves even with a long hover",
+      "fn": "step",
+      "cfg": {"enabled":false,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":true,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"BR"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR","faded":false}},
+        {"input":{"now":5000,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR","faded":false}}
+      ]
+    },
+    {
+      "name": "hidden cursor stays and restarts the hover timer",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"BR"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR"}},
+        {"input":{"now":1050,"cursor":null,"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR"}},
+        {"input":{"now":1100,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR"}},
+        {"input":{"now":1200,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"move","corner":"TL"},"corner":"TL"}}
+      ]
+    },
+    {
+      "name": "cursor in the screen-edge band is ignored and restarts the hover timer",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":8},
+      "start": {"corner":"BR"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":1915,"y":1075},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR"}},
+        {"input":{"now":1200,"cursor":{"x":1912,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR"}},
+        {"input":{"now":1300,"cursor":{"x":1911,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR"}},
+        {"input":{"now":1400,"cursor":{"x":1911,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"move","corner":"TL"},"corner":"TL"}}
+      ]
+    },
+    {
+      "name": "auto-return goes home after returnDelayMs, ignoring the axis",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"vertical","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":true,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"TL"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":3499,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":3500,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"move","corner":"BR"},"corner":"BR"}},
+        {"input":{"now":9000,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR"}}
+      ]
+    },
+    {
+      "name": "auto-return timer resets when the cursor enters the home rect",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":true,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"TL"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":2000,"cursor":{"x":1600,"y":900},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":3000,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":3500,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":5499,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":5500,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"move","corner":"BR"},"corner":"BR"}}
+      ]
+    },
+    {
+      "name": "auto-return timer only starts after the cooldown",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":true,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"TL","lastMoveAt":1000},
+      "steps": [
+        {"input":{"now":1100,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":1300,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":3799,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":3800,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"move","corner":"BR"},"corner":"BR"}}
+      ]
+    },
+    {
+      "name": "auto-return is skipped when home is not allowed",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"free","allowed":["TL","BL"],"home":"BR","autoReturn":true,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"move","ignoreScreenEdgePx":0},
+      "start": {"corner":"TL"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}},
+        {"input":{"now":9000,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}}
+      ]
+    },
+
+    {"name":"isValidDodge all corners free","fn":"isValidDodge","args":[["TL","TR","BL","BR"],"free","BR"],"expect":true},
+    {"name":"isValidDodge diagonal only under free","fn":"isValidDodge","args":[["TL","BR"],"free","BR"],"expect":true},
+    {"name":"isValidDodge diagonal only under vertical","fn":"isValidDodge","args":[["TL","BR"],"vertical","BR"],"expect":false},
+    {"name":"isValidDodge right column under vertical","fn":"isValidDodge","args":[["TR","BR"],"vertical","BR"],"expect":true},
+    {"name":"isValidDodge right column under horizontal","fn":"isValidDodge","args":[["TR","BR"],"horizontal","BR"],"expect":false},
+    {"name":"isValidDodge bottom row under horizontal","fn":"isValidDodge","args":[["BL","BR"],"horizontal","BL"],"expect":true},
+    {"name":"isValidDodge home not allowed","fn":"isValidDodge","args":[["TL","TR"],"horizontal","BR"],"expect":false},
+    {"name":"isValidDodge three corners but home missing","fn":"isValidDodge","args":[["TL","TR","BL"],"free","BR"],"expect":false},
+    {"name":"isValidDodge single corner","fn":"isValidDodge","args":[["BR"],"free","BR"],"expect":false},
+    {"name":"isValidDodge empty","fn":"isValidDodge","args":[[],"free","TL"],"expect":false},
+
+    {"name":"cornerRect TL","fn":"cornerRect","args":["TL",{"w":480,"h":270},{"l":0,"t":0,"r":1920,"b":1080},16],"expect":{"l":16,"t":16,"r":496,"b":286}},
+    {"name":"cornerRect TR","fn":"cornerRect","args":["TR",{"w":480,"h":270},{"l":0,"t":0,"r":1920,"b":1080},16],"expect":{"l":1424,"t":16,"r":1904,"b":286}},
+    {"name":"cornerRect BL","fn":"cornerRect","args":["BL",{"w":480,"h":270},{"l":0,"t":0,"r":1920,"b":1080},16],"expect":{"l":16,"t":794,"r":496,"b":1064}},
+    {"name":"cornerRect BR","fn":"cornerRect","args":["BR",{"w":480,"h":270},{"l":0,"t":0,"r":1920,"b":1080},16],"expect":{"l":1424,"t":794,"r":1904,"b":1064}},
+    {"name":"cornerRect BR on an offset monitor","fn":"cornerRect","args":["BR",{"w":400,"h":225},{"l":1920,"t":-200,"r":3840,"b":880},0],"expect":{"l":3440,"t":655,"r":3840,"b":880}},
+
+    {"name":"nearestCorner TL quadrant","fn":"nearestCorner","args":[{"l":100,"t":100,"r":580,"b":370},{"l":0,"t":0,"r":1920,"b":1080}],"expect":"TL"},
+    {"name":"nearestCorner TR quadrant","fn":"nearestCorner","args":[{"l":1300,"t":50,"r":1780,"b":320},{"l":0,"t":0,"r":1920,"b":1080}],"expect":"TR"},
+    {"name":"nearestCorner BL quadrant","fn":"nearestCorner","args":[{"l":10,"t":700,"r":490,"b":970},{"l":0,"t":0,"r":1920,"b":1080}],"expect":"BL"},
+    {"name":"nearestCorner BR quadrant","fn":"nearestCorner","args":[{"l":1400,"t":780,"r":1880,"b":1050},{"l":0,"t":0,"r":1920,"b":1080}],"expect":"BR"},
+    {"name":"nearestCorner exact center ties to TL","fn":"nearestCorner","args":[{"l":720,"t":405,"r":1200,"b":675},{"l":0,"t":0,"r":1920,"b":1080}],"expect":"TL"},
+    {"name":"nearestCorner vertical tie goes top","fn":"nearestCorner","args":[{"l":722,"t":405,"r":1202,"b":675},{"l":0,"t":0,"r":1920,"b":1080}],"expect":"TR"}
+  ]
+}
