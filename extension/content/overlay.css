@@ -19,7 +19,7 @@
     visibility: visible !important;
     overflow: visible !important;
     background: #000 !important;
-    object-fit: contain !important;
+    object-fit: fill !important;
     transform: none !important;
     translate: none !important;
     rotate: none !important;
@@ -67,5 +67,9 @@
     width: var(--gp-w) !important;
     height: var(--gp-h) !important;
     transform: none !important;
+  }
+
+  #ghostpip-controller:popover-open[data-bar-only] {
+    pointer-events: none !important;
   }
 }

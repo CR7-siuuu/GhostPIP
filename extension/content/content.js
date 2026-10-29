@@ -4,9 +4,11 @@
 
   const FLOAT_CLASS = "ghostpip-inpage-target";
   const DEFAULT_FLOAT_WIDTH = 480;
-  const MIN_FLOAT_WIDTH = 200;
-  const MAX_FLOAT_WIDTH = 1600;
-  const CORNER_SNAP_PX = 24;
+  const MIN_FLOAT_WIDTH = 140;
+  const MAX_FLOAT_WIDTH = 2560;
+  const MIN_FLOAT_HEIGHT = 90;
+  const MAX_FLOAT_HEIGHT = 2160;
+  const CORNER_SNAP_PX = 8;
   const WHEEL_OPACITY_STEP = 0.05;
   const FADED_OPACITY = 0.1;
   const DODGE_TICK_MS = 50;
@@ -21,7 +23,7 @@
 
   const ctx = {
     settings: Settings.merge(undefined),
-    layout: { width: DEFAULT_FLOAT_WIDTH, pos: null },
+    layout: { width: DEFAULT_FLOAT_WIDTH, height: null, pos: null },
     siteId: "generic",
     site: { video: null, chatPopoutUrl: null },
     video: null,
@@ -68,6 +70,10 @@
       Number.isFinite(raw?.width) && raw.width >= MIN_FLOAT_WIDTH && raw.width <= MAX_FLOAT_WIDTH
         ? Math.round(raw.width)
         : DEFAULT_FLOAT_WIDTH;
+    const height =
+      Number.isFinite(raw?.height) && raw.height >= MIN_FLOAT_HEIGHT && raw.height <= MAX_FLOAT_HEIGHT
+        ? Math.round(raw.height)
+        : null;
     const pos =
       raw?.pos &&
       typeof raw.pos === "object" &&
@@ -75,7 +81,7 @@
       Number.isFinite(raw.pos.ry)
         ? { rx: Math.min(1, Math.max(0, raw.pos.rx)), ry: Math.min(1, Math.max(0, raw.pos.ry)) }
         : null;
-    return { width, pos };
+    return { width, height, pos };
   }
 
   function toRelPos(l, t, s, vp) {
@@ -157,13 +163,13 @@
     .handle.sw::after { bottom: 4px; left: 4px; }
     .handle.se::after { bottom: 4px; right: 4px; }
     .bar { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 3;
-      opacity: 0; transition: opacity 0.15s ease; }
+      pointer-events: auto; }
     .hud { position: absolute; bottom: 8px; left: 8px; z-index: 3; pointer-events: none;
       padding: 4px 8px; border-radius: 5px; background: rgba(18, 18, 22, 0.85); color: #fff;
-      font: 600 12px/1 system-ui, "Malgun Gothic", sans-serif; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
-      opacity: 0; transition: opacity 0.15s ease; }
-    :host(:hover) .bar, :host([data-hovered]) .bar,
-    :host(:hover) .hud, :host([data-hovered]) .hud { opacity: 1; }
+      font: 600 12px/1 system-ui, "Malgun Gothic", sans-serif; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45); }
+    :host([data-bar-only]) .surface,
+    :host([data-bar-only]) .handle,
+    :host([data-bar-only]) .hud { display: none; }
     :host([data-remote]) button[data-mode="local"],
     :host(:not([data-remote])) button[data-mode="remote"] { display: none; }`;
 
@@ -227,13 +233,25 @@
     if (!dragSink || e.button !== 0 || e.target.closest?.(".bar")) return;
     const target = e.target;
     const resizeDir = target.dataset?.resize || null;
-    target.setPointerCapture?.(e.pointerId);
+    try {
+      target.setPointerCapture?.(e.pointerId);
+    } catch {}
     dragSink.start(e, resizeDir);
   });
-  controller.root.addEventListener("pointermove", (e) => {
-    if (e.target.hasPointerCapture?.(e.pointerId)) dragSink?.move(e);
-  });
-  controller.root.addEventListener("lostpointercapture", () => dragSink?.end());
+  window.addEventListener("pointermove", (e) => {
+    if (!dragSink?.active()) return;
+    if (e.isTrusted && (e.buttons & 1) === 0) {
+      dragSink.end();
+      return;
+    }
+    dragSink.move(e);
+  }, true);
+  window.addEventListener("pointerup", () => {
+    if (dragSink?.active()) dragSink.end();
+  }, true);
+  window.addEventListener("pointercancel", () => {
+    if (dragSink?.active()) dragSink.end();
+  }, true);
 
   function findVideo() {
     const area = (v) => {
@@ -337,12 +355,13 @@
     const viewport = () => ({
       l: 0,
       t: 0,
-      r: document.documentElement.clientWidth,
-      b: document.documentElement.clientHeight,
+      r: document.documentElement.clientWidth || window.innerWidth,
+      b: document.documentElement.clientHeight || window.innerHeight,
     });
     const cfg = () => ctx.settings.dodge;
 
     let floatWidth = ctx.layout.width || DEFAULT_FLOAT_WIDTH;
+    let floatHeight = ctx.layout.height || null;
     let customPos = ctx.layout.pos ? { ...ctx.layout.pos } : null;
     let lastHome = cfg().home;
     let corner = lastHome;
@@ -358,9 +377,16 @@
 
     function size() {
       const vp = viewport();
-      const maxH = floatWidth === DEFAULT_FLOAT_WIDTH ? vp.b * 0.6 : Math.max(180, vp.b - 16);
-      const maxW = Math.max(MIN_FLOAT_WIDTH, vp.r - 16);
-      return floatSize(video, floatWidth, maxH, ratioFallback, maxW);
+      const maxW = Math.max(MIN_FLOAT_WIDTH, vp.r);
+      const maxH = Math.max(MIN_FLOAT_HEIGHT, vp.b);
+      if (Number.isFinite(floatHeight) && floatHeight > 0) {
+        return {
+          w: Math.round(Math.min(Math.max(MIN_FLOAT_WIDTH, floatWidth), maxW)),
+          h: Math.round(Math.min(Math.max(MIN_FLOAT_HEIGHT, floatHeight), maxH)),
+        };
+      }
+      const defaultMaxH = floatWidth === DEFAULT_FLOAT_WIDTH ? vp.b * 0.6 : maxH;
+      return floatSize(video, floatWidth, defaultMaxH, ratioFallback, Math.max(MIN_FLOAT_WIDTH, vp.r - 16));
     }
 
     function rect() {
@@ -385,17 +411,19 @@
       const w = Math.round(r.r - r.l);
       const h = Math.round(r.b - r.t);
       const interactive = isInteractive();
+      const hovered =
+        drag !== null ||
+        (cursor !== null && cursor.x >= r.l && cursor.x <= r.r && cursor.y >= r.t && cursor.y <= r.b);
+      const showBarOnly = !interactive && hovered;
       const geometry = { x: px(r.l), y: px(r.t), w: px(w), h: px(h) };
       const opacity = interactive && !wheelPreview ? 1 : faded ? FADED_OPACITY : ctx.settings.opacity;
       setVars(video, { ...geometry, opacity: String(opacity) });
       video.toggleAttribute("data-gp-pass", !interactive && ctx.settings.clickThrough);
       video.toggleAttribute("data-gp-drag", drag !== null);
       hudEl.textContent = `투명도 ${Math.round(ctx.settings.opacity * 100)}% (휠 조절) · ${w}×${h}`;
-      const hovered =
-        drag !== null ||
-        (cursor !== null && cursor.x >= r.l && cursor.x <= r.r && cursor.y >= r.t && cursor.y <= r.b);
       controller.host.toggleAttribute("data-hovered", hovered);
-      if (interactive) controller.show(geometry);
+      controller.host.toggleAttribute("data-bar-only", showBarOnly);
+      if (interactive || showBarOnly) controller.show(geometry);
       else controller.hide();
     }
 
@@ -403,7 +431,7 @@
       if (cfg().home !== lastHome) {
         lastHome = cfg().home;
         corner = lastHome;
-        customPos = null;
+        customPos = ctx.layout.pos ? { ...ctx.layout.pos } : null;
         dodge = Dodge.initialState(corner);
         faded = false;
       }
@@ -413,6 +441,7 @@
     function layoutChanged() {
       if (drag) return;
       floatWidth = ctx.layout.width || DEFAULT_FLOAT_WIDTH;
+      floatHeight = ctx.layout.height || null;
       customPos = ctx.layout.pos ? { ...ctx.layout.pos } : null;
       render();
     }
@@ -521,6 +550,9 @@
     const timer = setInterval(tick, DODGE_TICK_MS);
 
     dragSink = {
+      active() {
+        return drag !== null;
+      },
       start(e, resizeDir) {
         wheelPreview = false;
         const r = rect();
@@ -559,42 +591,36 @@
           drag.x = Math.min(Math.max(0, e.clientX - drag.dx), Math.max(0, vp.r - s.w));
           drag.y = Math.min(Math.max(0, e.clientY - drag.dy), Math.max(0, vp.b - s.h));
         } else {
-          const ratio = videoRatio(video, ratioFallback);
           const sr = drag.startRect;
           const startW = sr.r - sr.l;
           const startH = sr.b - sr.t;
           const dx = e.clientX - drag.startX;
           const dy = e.clientY - drag.startY;
-          const hasH = drag.dir.includes("e") || drag.dir.includes("w");
-          const hasV = drag.dir.includes("s") || drag.dir.includes("n");
-          const dw = drag.dir.includes("e") ? dx : drag.dir.includes("w") ? -dx : 0;
-          const dh = drag.dir.includes("s") ? dy : drag.dir.includes("n") ? -dy : 0;
+          const hasW = drag.dir.includes("w");
+          const hasE = drag.dir.includes("e");
+          const hasN = drag.dir.includes("n");
+          const hasS = drag.dir.includes("s");
 
-          let rawW = startW;
-          if (hasH && hasV) {
-            rawW = Math.abs(dw) >= Math.abs(dh) ? startW + dw : (startH + dh) / ratio;
-          } else if (hasH) {
-            rawW = startW + dw;
-          } else if (hasV) {
-            rawW = (startH + dh) / ratio;
-          }
+          const maxW = hasW ? sr.r : hasE ? vp.r - sr.l : vp.r;
+          const maxH = hasN ? sr.b : hasS ? vp.b - sr.t : vp.b;
 
-          const maxW = Math.min(
-            MAX_FLOAT_WIDTH,
-            Math.max(MIN_FLOAT_WIDTH, vp.r - 16),
-            Math.max(MIN_FLOAT_WIDTH, Math.floor((vp.b - 16) / ratio)),
+          const rawW = hasE ? startW + dx : hasW ? startW - dx : startW;
+          const rawH = hasS ? startH + dy : hasN ? startH - dy : startH;
+
+          const nextW = Math.round(
+            Math.min(Math.max(MIN_FLOAT_WIDTH, rawW), Math.max(MIN_FLOAT_WIDTH, Math.min(MAX_FLOAT_WIDTH, maxW))),
           );
-          const nextW = Math.round(Math.min(Math.max(MIN_FLOAT_WIDTH, rawW), maxW));
-          const nextH = Math.round(nextW * ratio);
+          const nextH = Math.round(
+            Math.min(Math.max(MIN_FLOAT_HEIGHT, rawH), Math.max(MIN_FLOAT_HEIGHT, Math.min(MAX_FLOAT_HEIGHT, maxH))),
+          );
 
-          let nextX = drag.dir.includes("w") ? sr.r - nextW : sr.l;
-          let nextY = drag.dir.includes("n") ? sr.b - nextH : sr.t;
-          nextX = Math.min(Math.max(0, nextX), Math.max(0, vp.r - nextW));
-          nextY = Math.min(Math.max(0, nextY), Math.max(0, vp.b - nextH));
+          const nextX = hasW ? sr.r - nextW : sr.l;
+          const nextY = hasN ? sr.b - nextH : sr.t;
 
           floatWidth = nextW;
-          drag.x = nextX;
-          drag.y = nextY;
+          floatHeight = nextH;
+          drag.x = Math.max(0, nextX);
+          drag.y = Math.max(0, nextY);
           drag.w = nextW;
           drag.h = nextH;
         }
@@ -617,7 +643,7 @@
         faded = false;
         customPos = nearCorner ? null : toRelPos(r.l, r.t, s, vp);
 
-        persistLayout({ width: floatWidth, pos: customPos });
+        persistLayout({ width: floatWidth, height: floatHeight, pos: customPos });
         if (cfg().allowed.includes(nearest) && nearest !== cfg().home) {
           lastHome = nearest;
           persistHome(nearest, true);
