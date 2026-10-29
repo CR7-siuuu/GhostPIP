@@ -1,0 +1,15 @@
+{
+  "name": "ghostpip",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test:unit": "node --test test/unit/",
+    "test:e2e": "node test/e2e/run.mjs"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "puppeteer-core": "^24.43.1"
+  },
+  "type": "module"
+}

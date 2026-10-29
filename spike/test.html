@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>GhostPiP Spike</title>
+<style>body{margin:0;background:#222;color:#fff;font:14px sans-serif}video{width:640px;height:360px;background:#000}</style>
+</head>
+<body>
+<canvas id="c" width="640" height="360" style="display:none"></canvas>
+<video id="v" muted autoplay playsinline></video>
+<script>
+const c = document.getElementById('c'), g = c.getContext('2d'), v = document.getElementById('v');
+let t = 0;
+(function draw() {
+  g.fillStyle = '#00ff00'; g.fillRect(0, 0, 640, 360);
+  g.fillStyle = '#ffffff'; g.fillRect((t++ * 4) % 600, 4, 36, 36);
+  requestAnimationFrame(draw);
+})();
+v.srcObject = c.captureStream(30);
+v.play();
+
+window.openNativePip = async () => { await v.requestPictureInPicture(); return 'native-ok'; };
+
+window.openDocPip = async (title) => {
+  const w = await documentPictureInPicture.requestWindow({ width: 480, height: 300 });
+  w.document.body.style.cssText = 'margin:0;background:#00ff00';
+  w.document.title = title;
+  window._pip = w;
+  return { title: w.document.title, screenX: w.screenX, screenY: w.screenY,
+           outerWidth: w.outerWidth, outerHeight: w.outerHeight, dpr: w.devicePixelRatio };
+};
+</script>
+</body>
+</html>
