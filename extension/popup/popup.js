@@ -16,6 +16,7 @@
     showChat: document.getElementById("showChat"),
     opacity: document.getElementById("opacity"),
     opacityValue: document.getElementById("opacityValue"),
+    wheelSubHint: document.getElementById("wheelSubHint"),
     toggleMute: document.getElementById("toggleMute"),
     corners: [...document.querySelectorAll("input[data-corner]")],
     home: document.getElementById("home"),
@@ -82,6 +83,9 @@
     els.style.value = dodge.style;
     els.autoReturn.checked = dodge.autoReturn;
     els.hold.value = hotkeys.hold;
+    if (els.wheelSubHint) {
+      els.wheelSubHint.textContent = `클릭 통과 시 ${hotkeys.hold} + 휠`;
+    }
   }
 
   async function applyPatch(partial) {

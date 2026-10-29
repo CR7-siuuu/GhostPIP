@@ -357,7 +357,7 @@
       setVars(video, { ...geometry, opacity: String(opacity) });
       video.toggleAttribute("data-gp-pass", !interactive && ctx.settings.clickThrough);
       video.toggleAttribute("data-gp-drag", drag !== null);
-      hudEl.textContent = `투명도 ${Math.round(ctx.settings.opacity * 100)}% · ${w}×${h}`;
+      hudEl.textContent = `투명도 ${Math.round(ctx.settings.opacity * 100)}% (휠 조절) · ${w}×${h}`;
       if (interactive) controller.show(geometry);
       else controller.hide();
     }
