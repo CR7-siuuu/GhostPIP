@@ -17,8 +17,8 @@ const DEFAULTS = JSON.parse(JSON.stringify(lib.GhostPiPSettings.DEFAULTS));
 const STEPS = [
   "1 start inTab on youtube",
   "2 switch to Tab B -> remote overlay",
-  "3 ghost & dodge in Tab B",
-  "4 navigate or open Tab C -> follows to Tab C at BL",
+  "3 ghost, wheel opacity, resize & free move in Tab B",
+  "4 navigate or open Tab C -> follows custom size/pos/opacity",
   "5 restore from remote tab closes all",
 ];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -79,6 +79,7 @@ try {
     const s = structuredClone(defaults);
     s.dodge.autoReturn = false;
     await chrome.storage.local.set({ settings: s });
+    await chrome.storage.local.remove("floatLayout");
     await chrome.storage.session.remove(["pip", "engine", "inTab"]);
   }, DEFAULTS);
 
@@ -107,8 +108,8 @@ try {
         opacity: Number(getComputedStyle(v).opacity),
         area: { l: 0, t: 0, r: document.documentElement.clientWidth, b: document.documentElement.clientHeight },
         size: {
-          w: 480,
-          h: Math.round(480 * (v.videoWidth ? v.videoHeight / v.videoWidth : 9 / 16)),
+          w: Math.round(r.width),
+          h: Math.round(r.height),
         },
         frames: v.getVideoPlaybackQuality?.().totalVideoFrames ?? 0,
       };
@@ -210,7 +211,7 @@ try {
     };
   });
 
-  await step("3 ghost & dodge in Tab B", async () => {
+  await step("3 ghost, wheel opacity, resize & free move in Tab B", async () => {
     await patchSettings({ clickThrough: true, opacity: 0.5 });
     const ghost = await poll(
       () => readFloat(tabB),
@@ -233,19 +234,49 @@ try {
 
     await tabB.keyboard.down("Control");
     await tabB.keyboard.down("Alt");
-    const from = center(dodged.rect);
-    await tabB.mouse.move(from.x, from.y, { steps: 6 });
-    await sleep(150);
+    const sePos = await poll(
+      () =>
+        tabB.evaluate(() => {
+          const host = document.getElementById("ghostpip-controller");
+          const h = host?.shadowRoot?.querySelector('[data-resize="se"]');
+          if (!host?.matches(":popover-open") || !h) return null;
+          const r = h.getBoundingClientRect();
+          return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        }),
+      Boolean,
+      1500,
+    );
+    await tabB.mouse.move(sePos.x, sePos.y, { steps: 5 });
     await tabB.mouse.down();
-    await tabB.mouse.move(100, dodged.area.b - 120, { steps: 15 });
+    await tabB.mouse.move(sePos.x - 120, sePos.y - 90, { steps: 10 });
     await tabB.mouse.up();
-    await sleep(400);
-    const dragged = await readFloat(tabB);
-    const wantBl = cornerOf("BL", dragged);
-    const home = (await poll(readSettings, (s) => s?.dodge?.home === "BL", 1500))?.dodge?.home;
-    await tabB.mouse.move(dragged.area.r / 2, dragged.area.b / 2, { steps: 4 });
+    await sleep(150);
+    const resized = await readFloat(tabB);
+
+    const from = center(resized.rect);
+    const targetL = 80;
+    const targetT = 320;
+    await tabB.mouse.move(from.x, from.y, { steps: 5 });
+    await sleep(100);
+    await tabB.mouse.down();
+    await tabB.mouse.move(targetL + resized.size.w / 2, targetT + resized.size.h / 2, { steps: 12 });
+    await tabB.mouse.up();
+    await sleep(100);
+
+    const movedCenter = { x: targetL + resized.size.w / 2, y: targetT + resized.size.h / 2 };
+    await tabB.mouse.move(movedCenter.x, movedCenter.y);
+    await tabB.mouse.wheel({ deltaY: 100 });
+    await sleep(60);
+    await tabB.mouse.wheel({ deltaY: 100 });
+    await sleep(150);
+
     await tabB.keyboard.up("Alt");
     await tabB.keyboard.up("Control");
+    await sleep(300);
+
+    const finalB = await readFloat(tabB);
+    const wantCustom = { l: targetL, t: targetT, r: targetL + 360, b: targetT + 270 };
+    const stored = await poll(readSettings, (s) => s?.dodge?.home === "BL" && Math.abs(s.opacity - 0.6) < 0.02, 1500);
     await tabB.screenshot({ path: path.join(OUT, "crosstab_3_dodge_drag.png") }).catch(() => {});
 
     const ok =
@@ -253,27 +284,36 @@ try {
       Math.abs(ghost.opacity - 0.5) < 0.05 &&
       held?.pe === "auto" &&
       near(dodged?.rect, wantTl) &&
-      near(dragged?.rect, wantBl) &&
-      home === "BL";
+      Math.abs(resized.size.w - 360) <= 4 &&
+      near(finalB?.rect, wantCustom, 4) &&
+      Math.abs((finalB?.opacity ?? 0) - 0.6) < 0.02 &&
+      stored?.dodge?.home === "BL";
     return {
       ok,
-      info: `ghost=(${ghost?.pe},${ghost?.opacity}) held=${held?.pe} dodged=${fmt(dodged?.rect)}(want ${fmt(wantTl)}) dragged=${fmt(dragged?.rect)}(want ${fmt(wantBl)}) home=${home}`,
+      info: `ghost=(${ghost?.pe},${ghost?.opacity}) dodged=${fmt(dodged?.rect)} resized=${resized?.size.w}x${resized?.size.h} customRect=${fmt(finalB?.rect)}(want ${fmt(wantCustom)}) opacity=${finalB?.opacity} home=${stored?.dodge?.home}`,
     };
   });
 
-  await step("4 navigate or open Tab C -> follows to Tab C at BL", async () => {
+  await step("4 navigate or open Tab C -> follows custom size/pos/opacity", async () => {
     tabC = await browser.newPage();
     await tabC.goto("https://example.org", { waitUntil: "domcontentloaded", timeout: 30000 });
     await tabC.bringToFront();
 
     const { f, framesDelta, std } = await measureRemoteLive(tabC);
-    const wantBl = f && cornerOf("BL", f);
-    const fsettled = await poll(() => readFloat(tabC), (v) => near(v?.rect, wantBl), 2000);
+    const wantCustom = { l: 80, t: 320, r: 440, b: 590 };
+    const fsettled = await poll(() => readFloat(tabC), (v) => near(v?.rect, wantCustom, 4), 2000);
     await tabC.screenshot({ path: path.join(OUT, "crosstab_4_tabC_BL.png") }).catch(() => {});
-    const ok = Boolean(fsettled?.open && fsettled.videoWidth > 0 && near(fsettled.rect, wantBl) && framesDelta > 0 && std > 5);
+    const ok = Boolean(
+      fsettled?.open &&
+        fsettled.videoWidth > 0 &&
+        near(fsettled.rect, wantCustom, 4) &&
+        Math.abs(fsettled.opacity - 0.6) < 0.02 &&
+        framesDelta > 0 &&
+        std > 5,
+    );
     return {
       ok,
-      info: `open=${fsettled?.open} videoW=${fsettled?.videoWidth} rect=${fmt(fsettled?.rect)} want=${fmt(wantBl)} framesDelta=${framesDelta} std=${std}`,
+      info: `open=${fsettled?.open} size=${fsettled?.size.w}x${fsettled?.size.h} rect=${fmt(fsettled?.rect)} want=${fmt(wantCustom)} opacity=${fsettled?.opacity} framesDelta=${framesDelta} std=${std}`,
     };
   });
 

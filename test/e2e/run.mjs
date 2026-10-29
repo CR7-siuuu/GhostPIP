@@ -244,14 +244,15 @@ async function runSite(page, target) {
     await page.keyboard.down("Alt");
     const f0 = await float();
     const from = center(f0.rect);
+    const want = cornerOf("BR", f0);
+    const to = center(want);
     await page.mouse.move(from.x, from.y, { steps: 6 });
     await sleep(200);
     await page.mouse.down();
-    await page.mouse.move(f0.area.r - 200, f0.area.b - 150, { steps: 15 });
+    await page.mouse.move(to.x, to.y, { steps: 15 });
     await page.mouse.up();
     await sleep(500);
     const f = await float();
-    const want = cornerOf("BR", f);
     const home = (await poll(readSettings, (s) => s?.dodge?.home === "BR", 1500))?.dodge?.home;
     await shot("5_drag");
     await page.mouse.move(f.area.r / 2, f.area.b / 2, { steps: 5 });

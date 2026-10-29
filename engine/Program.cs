@@ -9,7 +9,12 @@ public static unsafe class Program
     private const uint WM_CLOSE = 0x0010;
     private const uint WM_QUIT = 0x0012;
     private const uint WM_TIMER = 0x0113;
+    private const uint WM_MOUSEWHEEL = 0x020A;
     private const uint WM_HOTKEY = 0x0312;
+
+    private const int WH_MOUSE_LL = 14;
+    private const int CORNER_SNAP_PX = 24;
+    private const double WHEEL_OPACITY_STEP = 0.05;
 
     private const nuint TIMER_ID_TICK = 1;
     private const uint TICK_INTERVAL_MS = 30;
@@ -30,12 +35,23 @@ public static unsafe class Program
     private const int TokenElevation = 20;
 
     private delegate nint WndProcDelegate(nint hWnd, uint msg, nint wParam, nint lParam);
+    private delegate nint LowLevelMouseProc(int nCode, nint wParam, nint lParam);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct POINT
     {
         public int X;
         public int Y;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MSLLHOOKSTRUCT
+    {
+        public POINT pt;
+        public uint mouseData;
+        public uint flags;
+        public uint time;
+        public nuint dwExtraInfo;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -161,7 +177,18 @@ public static unsafe class Program
     [DllImport("kernel32.dll")]
     private static extern bool CloseHandle(nint hObject);
 
+    [DllImport("user32.dll", EntryPoint = "SetWindowsHookExW", SetLastError = true)]
+    private static extern nint SetWindowsHookExW(int idHook, LowLevelMouseProc lpfn, nint hMod, uint dwThreadId);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool UnhookWindowsHookEx(nint hhk);
+
+    [DllImport("user32.dll")]
+    private static extern nint CallNextHookEx(nint hhk, int nCode, nint wParam, nint lParam);
+
     private static WndProcDelegate? _wndProcDelegate;
+    private static LowLevelMouseProc? _mouseHookDelegate;
+    private static nint _mouseHook;
     private static nint _hwnd;
     private static readonly Stopwatch _clock = Stopwatch.StartNew();
 
@@ -174,6 +201,10 @@ public static unsafe class Program
     private static NativeMessagingHost? _nativeHost;
     private static PipTracker? _pipTracker;
     private static nint _lastBoundHwnd;
+    private static bool _wasInteractive;
+    private static bool _waitCursorLeave;
+    private static bool _customPos;
+    private static bool _wheelPreview;
     private static bool _hasTestCursor;
     private static DodgePoint? _testCursor;
     private static bool _cleanedUp;
@@ -199,6 +230,9 @@ public static unsafe class Program
             _trayIcon = new TrayIcon(_hwnd);
             _nativeHost = new NativeMessagingHost(_hwnd);
             _pipTracker = new PipTracker(_hwnd, _ghostStyle, msg => _nativeHost.Send(msg));
+
+            _mouseHookDelegate = OnLowLevelMouse;
+            _mouseHook = SetWindowsHookExW(WH_MOUSE_LL, _mouseHookDelegate, GetModuleHandleW(null), 0);
 
             SetTimer(_hwnd, TIMER_ID_TICK, TICK_INTERVAL_MS, IntPtr.Zero);
             _nativeHost.Start();
@@ -336,8 +370,62 @@ public static unsafe class Program
                     _hasTestCursor = true;
                     _testCursor = cursorMsg.Cursor;
                     break;
+
+                case TestWheelMessage wheelMsg:
+                    HandleMouseWheel(wheelMsg.X, wheelMsg.Y, wheelMsg.Delta, wheelMsg.Hold);
+                    break;
             }
         }
+    }
+
+    private static bool IsHoldDown()
+    {
+        bool ctrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+        bool alt = (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
+        bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+        return _settings.Hotkeys.Hold == "Ctrl+Shift" ? (ctrl && shift) : (ctrl && alt);
+    }
+
+    private static nint OnLowLevelMouse(int nCode, nint wParam, nint lParam)
+    {
+        if (nCode >= 0 && (uint)wParam == WM_MOUSEWHEEL && lParam != IntPtr.Zero)
+        {
+            var info = *(MSLLHOOKSTRUCT*)lParam;
+            int delta = (short)(info.mouseData >> 16);
+            bool holdDown = IsHoldDown();
+            if (delta != 0 && HandleMouseWheel(info.pt.X, info.pt.Y, delta, holdDown) && holdDown)
+                return (nint)1;
+        }
+        return CallNextHookEx(_mouseHook, nCode, wParam, lParam);
+    }
+
+    private static bool HandleMouseWheel(int x, int y, int delta, bool holdDown)
+    {
+        if (delta == 0)
+            return false;
+
+        nint pipHwnd = _pipTracker?.BoundHwnd ?? IntPtr.Zero;
+        if (pipHwnd == IntPtr.Zero || !PipTracker.GetWindowRect(pipHwnd, out var rc))
+            return false;
+
+        if (x < rc.Left || x > rc.Right || y < rc.Top || y > rc.Bottom)
+            return false;
+
+        bool canAdjust = holdDown || (!_settings.ClickThrough && _pipTracker?.BoundKind == "native");
+        if (!canAdjust)
+            return false;
+
+        double step = delta > 0 ? WHEEL_OPACITY_STEP : -WHEEL_OPACITY_STEP;
+        double next = Math.Round(Math.Clamp(_settings.Opacity + step, 0.1, 1.0), 2, MidpointRounding.AwayFromZero);
+        _settings = _settings with { Opacity = next };
+        _waitCursorLeave = true;
+        _wheelPreview = true;
+        _dodgeState = _dodgeState with { HoverSince = null };
+
+        bool effectiveClickThrough = _settings.ClickThrough && !holdDown;
+        _ghostStyle.Apply(pipHwnd, next, effectiveClickThrough);
+        _nativeHost?.Send(new IntentMessage("SET_OPACITY", Opacity: next));
+        return true;
     }
 
     private static void SnapWindowToCorner(nint hwnd, string corner)
@@ -369,6 +457,7 @@ public static unsafe class Program
 
         if (homeChanged || Array.IndexOf(DodgeSolver.CORNERS, _dodgeState.Corner) < 0)
         {
+            _customPos = false;
             _dodgeState = DodgeSolver.InitialState(_settings.Dodge.Home);
             if (_pipTracker?.BoundHwnd is nint bound && bound != IntPtr.Zero)
                 SnapWindowToCorner(bound, _settings.Dodge.Home);
@@ -407,6 +496,10 @@ public static unsafe class Program
         if (pipHwnd == IntPtr.Zero)
         {
             _lastBoundHwnd = IntPtr.Zero;
+            _wasInteractive = false;
+            _waitCursorLeave = false;
+            _customPos = false;
+            _wheelPreview = false;
             _holdMachine.Reset();
             return;
         }
@@ -414,20 +507,27 @@ public static unsafe class Program
         if (pipHwnd != _lastBoundHwnd)
         {
             _lastBoundHwnd = pipHwnd;
+            _wasInteractive = false;
+            _waitCursorLeave = false;
+            _customPos = false;
+            _wheelPreview = false;
             _dodgeState = DodgeSolver.InitialState(_settings.Dodge.Home);
             SnapWindowToCorner(pipHwnd, _settings.Dodge.Home);
         }
 
-        bool ctrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
-        bool alt = (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
-        bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+        bool holdDown = IsHoldDown();
         bool lButton = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
 
-        bool holdDown = _settings.Hotkeys.Hold == "Ctrl+Shift"
-            ? (ctrl && shift)
-            : (ctrl && alt);
-
         var holdRes = _holdMachine.Step(holdDown, lButton);
+        if (_wasInteractive && !holdRes.IsInteractive)
+        {
+            _waitCursorLeave = true;
+            _wheelPreview = false;
+            _dodgeState = _dodgeState with { HoverSince = null };
+        }
+        if (holdRes.State == HoldState.Dragging)
+            _wheelPreview = false;
+        _wasInteractive = holdRes.IsInteractive;
 
         if (!PipTracker.GetWindowRect(pipHwnd, out var rc))
             return;
@@ -438,16 +538,29 @@ public static unsafe class Program
 
         if (holdRes.DragEnded)
         {
+            _waitCursorLeave = true;
             string nearest = DodgeSolver.NearestCorner(winRect, area);
             var targetRect = DodgeSolver.CornerRect(nearest, winSize, area, _settings.Dodge.EdgeInsetPx);
-            GhostStyle.SetWindowPos(
-                pipHwnd,
-                IntPtr.Zero,
-                targetRect.L,
-                targetRect.T,
-                0,
-                0,
-                SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+            double dist = Math.Sqrt(
+                (double)(winRect.L - targetRect.L) * (winRect.L - targetRect.L) +
+                (double)(winRect.T - targetRect.T) * (winRect.T - targetRect.T));
+
+            if (dist <= CORNER_SNAP_PX)
+            {
+                _customPos = false;
+                GhostStyle.SetWindowPos(
+                    pipHwnd,
+                    IntPtr.Zero,
+                    targetRect.L,
+                    targetRect.T,
+                    0,
+                    0,
+                    SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+            }
+            else
+            {
+                _customPos = true;
+            }
 
             _dodgeState = DodgeSolver.InitialState(nearest);
 
@@ -463,27 +576,62 @@ public static unsafe class Program
         else if (!holdRes.IsInteractive)
         {
             DodgePoint? cursor = GetVisibleCursor();
-            var stepRes = DodgeSolver.Step(
-                _dodgeState,
-                new DodgeInput(nowMs, cursor, winSize, area),
-                _settings.Dodge);
-            _dodgeState = stepRes.State;
+            int m = _settings.Dodge.MarginPx;
+            bool cursorInCurrent = cursor is DodgePoint p &&
+                p.X >= winRect.L - m && p.X < winRect.R + m &&
+                p.Y >= winRect.T - m && p.Y < winRect.B + m;
 
-            if (stepRes.Action.Type == "move" && stepRes.Action.Corner is string targetCorner)
+            if (_waitCursorLeave)
             {
-                var targetRect = DodgeSolver.CornerRect(targetCorner, winSize, area, _settings.Dodge.EdgeInsetPx);
-                GhostStyle.SetWindowPos(
-                    pipHwnd,
-                    IntPtr.Zero,
-                    targetRect.L,
-                    targetRect.T,
-                    0,
-                    0,
-                    SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+                if (cursorInCurrent)
+                {
+                    _dodgeState = _dodgeState with { HoverSince = null };
+                }
+                else
+                {
+                    _waitCursorLeave = false;
+                }
+            }
+
+            if (!_waitCursorLeave)
+            {
+                DodgePoint? stepCursor = cursor;
+                if (_customPos)
+                {
+                    if (cursorInCurrent)
+                    {
+                        var cr = DodgeSolver.CornerRect(_dodgeState.Corner, winSize, area, _settings.Dodge.EdgeInsetPx);
+                        stepCursor = new DodgePoint((cr.L + cr.R) / 2, (cr.T + cr.B) / 2);
+                    }
+                    else
+                    {
+                        stepCursor = null;
+                    }
+                }
+
+                var stepRes = DodgeSolver.Step(
+                    _dodgeState,
+                    new DodgeInput(nowMs, stepCursor, winSize, area),
+                    _settings.Dodge);
+                _dodgeState = stepRes.State;
+
+                if (stepRes.Action.Type == "move" && stepRes.Action.Corner is string targetCorner)
+                {
+                    _customPos = false;
+                    var targetRect = DodgeSolver.CornerRect(targetCorner, winSize, area, _settings.Dodge.EdgeInsetPx);
+                    GhostStyle.SetWindowPos(
+                        pipHwnd,
+                        IntPtr.Zero,
+                        targetRect.L,
+                        targetRect.T,
+                        0,
+                        0,
+                        SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+                }
             }
         }
 
-        double effectiveOpacity = holdRes.IsInteractive
+        double effectiveOpacity = (holdRes.IsInteractive && !_wheelPreview)
             ? 1.0
             : _dodgeState.Faded
                 ? 0.1
@@ -558,6 +706,7 @@ public static unsafe class Program
             return;
         _cleanedUp = true;
 
+        try { if (_mouseHook != IntPtr.Zero) { UnhookWindowsHookEx(_mouseHook); _mouseHook = IntPtr.Zero; } } catch { }
         try { if (_hwnd != IntPtr.Zero) KillTimer(_hwnd, TIMER_ID_TICK); } catch { }
         try { _pipTracker?.Dispose(); } catch { }
         try { _hotkeys?.Dispose(); } catch { }

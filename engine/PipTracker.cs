@@ -92,6 +92,7 @@ public sealed unsafe class PipTracker : IDisposable
 
     public nint BoundHwnd { get; private set; }
     public int BoundTabId { get; private set; } = -1;
+    public string BoundKind { get; private set; } = "document";
 
     public PipTracker(nint ownHwnd, GhostStyle ghostStyle, Action<OutgoingMessage> send)
     {
@@ -217,6 +218,7 @@ public sealed unsafe class PipTracker : IDisposable
         _pending = null;
         BoundHwnd = matched;
         BoundTabId = p.TabId;
+        BoundKind = p.Kind;
         _send(new PipBoundMessage(p.TabId));
         return true;
     }
@@ -233,6 +235,7 @@ public sealed unsafe class PipTracker : IDisposable
             {
                 BoundHwnd = hwnd;
                 BoundTabId = -1;
+                BoundKind = "native";
                 return;
             }
         }

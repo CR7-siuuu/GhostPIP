@@ -266,10 +266,37 @@ try {
       (w) => w && w.layered && w.transparent === true && w.alpha === 102,
       3000,
     );
-    const ok = win?.layered === true && win?.transparent === true && win?.alpha === 102;
+
+    const cx = Math.round((win.rect.l + win.rect.r) / 2);
+    const cy = Math.round((win.rect.t + win.rect.b) / 2);
+    await sw.evaluate(
+      (x, y) => {
+        GhostPiPBackground.postToEngine({ v: 1, type: "TEST_WHEEL", x, y, delta: 120, hold: true });
+        GhostPiPBackground.postToEngine({ v: 1, type: "TEST_WHEEL", x, y, delta: 120, hold: true });
+      },
+      cx,
+      cy,
+    );
+    const afterWheel = await poll(
+      () => inspectWin32Pip(pipSize.w, pipSize.h),
+      (w) => w && w.alpha === 128,
+      2000,
+    );
+    const syncedOpacity = await poll(
+      () => sw.evaluate(async () => (await chrome.storage.local.get("settings")).settings?.opacity),
+      (op) => Math.abs((op ?? 0) - 0.5) < 0.02,
+      2000,
+    );
+
+    const ok =
+      win?.layered === true &&
+      win?.transparent === true &&
+      win?.alpha === 102 &&
+      afterWheel?.alpha === 128 &&
+      Math.abs((syncedOpacity ?? 0) - 0.5) < 0.02;
     return {
       ok,
-      info: `layered=${win?.layered} transparent=${win?.transparent} alpha=${win?.alpha} (want 102)`,
+      info: `layered=${win?.layered} transparent=${win?.transparent} alpha=${win?.alpha}->wheel:${afterWheel?.alpha}(want 128, settings.opacity=${syncedOpacity})`,
     };
   });
 

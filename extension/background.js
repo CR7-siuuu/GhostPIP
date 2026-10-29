@@ -160,6 +160,8 @@ function onEngineMessage(msg) {
     case "INTENT": {
       if (msg.intent === "SET_HOME" && typeof msg.corner === "string") {
         updateSettings((s) => GhostPiPSettings.patch(s, { dodge: { home: msg.corner } }));
+      } else if (msg.intent === "SET_OPACITY" && Number.isFinite(msg.opacity)) {
+        updateSettings((s) => GhostPiPSettings.patch(s, { opacity: msg.opacity }));
       } else if (INTENTS[msg.intent]) {
         INTENTS[msg.intent]();
       }
@@ -382,7 +384,8 @@ const handlers = {
   },
   async PIP_OPENED({ kind, rect, dpr }, sender) {
     await pipChanged(sender.tab.id, { v: 1, type: "PIP_OPENED", tabId: sender.tab.id, kind, rect, dpr });
-    return { ok: true };
+    const { engine } = await chrome.storage.session.get("engine");
+    return { ok: true, engineConnected: Boolean(engine?.connected) };
   },
   async PIP_RECT_UPDATED({ rect }, sender) {
     if (sender?.tab?.id != null && rect) {
@@ -405,8 +408,15 @@ const handlers = {
       engine: { ...DEFAULT_ENGINE, ...(engine && typeof engine === "object" ? engine : {}) },
     };
   },
-  async PATCH_SETTINGS({ patch }) {
-    return updateSettings((current) => GhostPiPSettings.patch(current, patch));
+  async PATCH_SETTINGS({ patch, keepLayoutPos }) {
+    const res = await updateSettings((current) => GhostPiPSettings.patch(current, patch));
+    if (res.ok && patch?.dodge?.home && !keepLayoutPos) {
+      const { floatLayout } = await chrome.storage.local.get("floatLayout");
+      if (floatLayout?.pos) {
+        await chrome.storage.local.set({ floatLayout: { ...floatLayout, pos: null } });
+      }
+    }
+    return res;
   },
   async INTENT({ intent }) {
     const fn = INTENTS[intent];

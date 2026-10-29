@@ -52,10 +52,11 @@ public sealed record PipOpenedMessage(int TabId, string Kind, PipRect Rect, doub
 public sealed record PipClosedMessage(int TabId) : IncomingMessage("PIP_CLOSED");
 public sealed record PingMessage() : IncomingMessage("PING");
 public sealed record TestCursorMessage(DodgePoint? Cursor) : IncomingMessage("TEST_CURSOR");
+public sealed record TestWheelMessage(int X, int Y, int Delta, bool Hold = true) : IncomingMessage("TEST_WHEEL");
 
 public abstract record OutgoingMessage(string Type);
 public sealed record HelloMessage(string EngineVersion, bool Elevated, string[] HotkeyErrors) : OutgoingMessage("HELLO");
-public sealed record IntentMessage(string Intent, string? Corner = null) : OutgoingMessage("INTENT");
+public sealed record IntentMessage(string Intent, string? Corner = null, double? Opacity = null) : OutgoingMessage("INTENT");
 public sealed record PipBoundMessage(int TabId) : OutgoingMessage("PIP_BOUND");
 public sealed record PipLostMessage(int TabId, string Reason) : OutgoingMessage("PIP_LOST");
 public sealed record PongMessage() : OutgoingMessage("PONG");
@@ -96,6 +97,8 @@ public static class Protocol
                 "PING" => SetResult(new PingMessage(), out message),
                 "TEST_CURSOR" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
                     TryParseTestCursor(root, out message),
+                "TEST_WHEEL" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
+                    TryParseTestWheel(root, out message),
                 _ => false
             };
         }
@@ -243,6 +246,20 @@ public static class Protocol
         return true;
     }
 
+    private static bool TryParseTestWheel(JsonElement root, out IncomingMessage? message)
+    {
+        message = null;
+        if (!root.TryGetProperty("x", out var xEl) || xEl.ValueKind != JsonValueKind.Number || !xEl.TryGetInt32(out int x) ||
+            !root.TryGetProperty("y", out var yEl) || yEl.ValueKind != JsonValueKind.Number || !yEl.TryGetInt32(out int y) ||
+            !root.TryGetProperty("delta", out var dEl) || dEl.ValueKind != JsonValueKind.Number || !dEl.TryGetInt32(out int delta))
+        {
+            return false;
+        }
+        bool hold = GetBoolOrDefault(root, "hold", true);
+        message = new TestWheelMessage(x, y, delta, hold);
+        return true;
+    }
+
     private static bool GetBoolOrDefault(JsonElement obj, string prop, bool fallback) =>
         obj.TryGetProperty(prop, out var el) && el.ValueKind is JsonValueKind.True or JsonValueKind.False
             ? el.GetBoolean()
@@ -288,6 +305,8 @@ public static class Protocol
                     writer.WriteString("intent", intent.Intent);
                     if (!string.IsNullOrEmpty(intent.Corner))
                         writer.WriteString("corner", intent.Corner);
+                    if (intent.Opacity is double op && double.IsFinite(op))
+                        writer.WriteNumber("opacity", Math.Round(Math.Clamp(op, 0.1, 1.0), 2, MidpointRounding.AwayFromZero));
                     break;
 
                 case PipBoundMessage bound:

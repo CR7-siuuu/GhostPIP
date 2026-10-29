@@ -3,13 +3,18 @@
   const Settings = globalThis.GhostPiPSettings;
 
   const FLOAT_CLASS = "ghostpip-inpage-target";
-  const FLOAT_WIDTH = 480;
+  const DEFAULT_FLOAT_WIDTH = 480;
+  const MIN_FLOAT_WIDTH = 200;
+  const MAX_FLOAT_WIDTH = 1600;
+  const CORNER_SNAP_PX = 24;
+  const WHEEL_OPACITY_STEP = 0.05;
   const FADED_OPACITY = 0.1;
   const DODGE_TICK_MS = 50;
   const SCAN_THROTTLE_MS = 250;
   const PIP_CHAT_HEIGHT = 420;
   const PIP_TOGGLE_HEIGHT = 28;
   const GP_VARS = ["--gp-x", "--gp-y", "--gp-w", "--gp-h", "--gp-opacity"];
+  const RESIZE_DIRS = ["nw", "ne", "sw", "se", "n", "s", "e", "w"];
   const HOLD = {
     "Ctrl+Alt": (e) => e.ctrlKey && e.altKey,
     "Ctrl+Shift": (e) => e.ctrlKey && e.shiftKey,
@@ -17,6 +22,7 @@
 
   const ctx = {
     settings: Settings.merge(undefined),
+    layout: { width: DEFAULT_FLOAT_WIDTH, pos: null },
     siteId: "generic",
     site: { video: null, chatPopoutUrl: null },
     video: null,
@@ -45,11 +51,62 @@
     for (const [k, v] of Object.entries(vars)) el.style.setProperty(`--gp-${k}`, v);
   }
 
-  function floatSize(video, maxHeight, ratioFallback = 9 / 16) {
-    const ratio = video.videoWidth ? video.videoHeight / video.videoWidth : ratioFallback;
-    const height = Math.round(FLOAT_WIDTH * ratio);
-    if (height <= maxHeight) return { w: FLOAT_WIDTH, h: height };
-    return { w: Math.round(maxHeight / ratio), h: Math.round(maxHeight) };
+  function videoRatio(video, ratioFallback = 9 / 16) {
+    return video.videoWidth ? video.videoHeight / video.videoWidth : ratioFallback;
+  }
+
+  function floatSize(video, targetWidth, maxHeight, ratioFallback = 9 / 16, maxWidth = MAX_FLOAT_WIDTH) {
+    const ratio = videoRatio(video, ratioFallback);
+    const clampedW = Math.min(Math.max(MIN_FLOAT_WIDTH, targetWidth), Math.max(MIN_FLOAT_WIDTH, maxWidth));
+    const height = Math.round(clampedW * ratio);
+    if (height <= maxHeight) return { w: Math.round(clampedW), h: height };
+    const h = Math.round(Math.max(120, maxHeight));
+    return { w: Math.round(h / ratio), h };
+  }
+
+  function sanitizeLayout(raw) {
+    const width =
+      Number.isFinite(raw?.width) && raw.width >= MIN_FLOAT_WIDTH && raw.width <= MAX_FLOAT_WIDTH
+        ? Math.round(raw.width)
+        : DEFAULT_FLOAT_WIDTH;
+    const pos =
+      raw?.pos &&
+      typeof raw.pos === "object" &&
+      Number.isFinite(raw.pos.rx) &&
+      Number.isFinite(raw.pos.ry)
+        ? { rx: Math.min(1, Math.max(0, raw.pos.rx)), ry: Math.min(1, Math.max(0, raw.pos.ry)) }
+        : null;
+    return { width, pos };
+  }
+
+  function toRelPos(l, t, s, vp) {
+    const maxL = Math.max(1, vp.r - s.w);
+    const maxT = Math.max(1, vp.b - s.h);
+    return {
+      rx: Math.min(1, Math.max(0, l / maxL)),
+      ry: Math.min(1, Math.max(0, t / maxT)),
+    };
+  }
+
+  function fromRelPos(pos, s, vp) {
+    const maxL = Math.max(0, vp.r - s.w);
+    const maxT = Math.max(0, vp.b - s.h);
+    const l = Math.round(Math.min(1, Math.max(0, pos.rx)) * maxL);
+    const t = Math.round(Math.min(1, Math.max(0, pos.ry)) * maxT);
+    return { l, t, r: l + s.w, b: t + s.h };
+  }
+
+  function persistLayout(next) {
+    ctx.layout = sanitizeLayout(next);
+    chrome.storage.local.set({ floatLayout: ctx.layout }).catch(() => {});
+  }
+
+  function stepOpacity(delta) {
+    const next = Math.round(Math.min(1, Math.max(0.1, ctx.settings.opacity + delta)) * 100) / 100;
+    if (next === ctx.settings.opacity) return next;
+    ctx.settings = { ...ctx.settings, opacity: next };
+    send({ type: "PATCH_SETTINGS", patch: { opacity: next } });
+    return next;
   }
 
   function waitIceComplete(pc, timeoutMs = 800) {
@@ -78,7 +135,27 @@
   const CONTROLLER_CSS = `
     .surface { position: absolute; inset: 0; box-sizing: border-box; cursor: move; border-radius: 3px;
       border: 2px solid rgba(110, 170, 255, 0.95); background: rgba(110, 170, 255, 0.08); }
-    .bar { position: absolute; top: 8px; right: 8px; }
+    .handle { position: absolute; z-index: 2; }
+    .handle.n { top: -4px; left: 14px; right: 14px; height: 10px; cursor: ns-resize; }
+    .handle.s { bottom: -4px; left: 14px; right: 14px; height: 10px; cursor: ns-resize; }
+    .handle.w { left: -4px; top: 14px; bottom: 14px; width: 10px; cursor: ew-resize; }
+    .handle.e { right: -4px; top: 14px; bottom: 14px; width: 10px; cursor: ew-resize; }
+    .handle.nw { top: -5px; left: -5px; width: 18px; height: 18px; cursor: nwse-resize; }
+    .handle.ne { top: -5px; right: -5px; width: 18px; height: 18px; cursor: nesw-resize; }
+    .handle.sw { bottom: -5px; left: -5px; width: 18px; height: 18px; cursor: nesw-resize; }
+    .handle.se { bottom: -5px; right: -5px; width: 18px; height: 18px; cursor: nwse-resize; }
+    .handle.nw::after, .handle.ne::after, .handle.sw::after, .handle.se::after {
+      content: ""; position: absolute; width: 8px; height: 8px; border-radius: 2px;
+      background: rgba(110, 170, 255, 0.98); box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+    }
+    .handle.nw::after { top: 4px; left: 4px; }
+    .handle.ne::after { top: 4px; right: 4px; }
+    .handle.sw::after { bottom: 4px; left: 4px; }
+    .handle.se::after { bottom: 4px; right: 4px; }
+    .bar { position: absolute; top: 8px; right: 8px; z-index: 3; }
+    .hud { position: absolute; bottom: 8px; left: 8px; z-index: 3; pointer-events: none;
+      padding: 4px 8px; border-radius: 5px; background: rgba(18, 18, 22, 0.85); color: #fff;
+      font: 600 12px/1 system-ui, "Malgun Gothic", sans-serif; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45); }
     :host([data-remote]) button[data-mode="local"],
     :host(:not([data-remote])) button[data-mode="remote"] { display: none; }`;
 
@@ -118,10 +195,13 @@
       h("button", { "data-action": "docPip" }, "PiP + 채팅")),
   );
 
+  const hudEl = h("div", { class: "hud" }, "");
   const controller = overlayHost(
     "ghostpip-controller",
     BASE_CSS + CONTROLLER_CSS,
     h("div", { class: "surface" }),
+    ...RESIZE_DIRS.map((dir) => h("div", { class: `handle ${dir}`, "data-resize": dir })),
+    hudEl,
     h("div", { class: "bar" },
       h("button", { "data-action": "idle" }, "복귀"),
       h("button", { "data-action": "docPip", "data-mode": "local" }, "PiP + 채팅"),
@@ -129,16 +209,17 @@
   );
 
   let dragSink = null;
-  const surface = controller.root.querySelector(".surface");
-  surface.addEventListener("pointerdown", (e) => {
-    if (!dragSink || e.button !== 0) return;
-    surface.setPointerCapture(e.pointerId);
-    dragSink.start(e);
+  controller.root.addEventListener("pointerdown", (e) => {
+    if (!dragSink || e.button !== 0 || e.target.closest?.(".bar")) return;
+    const target = e.target;
+    const resizeDir = target.dataset?.resize || null;
+    target.setPointerCapture?.(e.pointerId);
+    dragSink.start(e, resizeDir);
   });
-  surface.addEventListener("pointermove", (e) => {
-    if (surface.hasPointerCapture(e.pointerId)) dragSink?.move(e);
+  controller.root.addEventListener("pointermove", (e) => {
+    if (e.target.hasPointerCapture?.(e.pointerId)) dragSink?.move(e);
   });
-  surface.addEventListener("lostpointercapture", () => dragSink?.end());
+  controller.root.addEventListener("lostpointercapture", () => dragSink?.end());
 
   function findVideo() {
     const area = (v) => {
@@ -168,8 +249,8 @@
     return id ? site.chatPopoutUrl.replace(/\{(?:videoId|channelId|channel)\}/g, encodeURIComponent(id)) : null;
   }
 
-  function persistHome(corner) {
-    send({ type: "PATCH_SETTINGS", patch: { dodge: { home: corner } } });
+  function persistHome(corner, keepLayoutPos = false) {
+    send({ type: "PATCH_SETTINGS", patch: { dodge: { home: corner } }, keepLayoutPos });
   }
 
   function enterIdle() {
@@ -217,31 +298,55 @@
     });
     const cfg = () => ctx.settings.dodge;
 
+    let floatWidth = ctx.layout.width || DEFAULT_FLOAT_WIDTH;
+    let customPos = ctx.layout.pos ? { ...ctx.layout.pos } : null;
     let lastHome = cfg().home;
     let corner = lastHome;
     let dodge = Dodge.initialState(corner);
     let faded = false;
     let held = false;
+    let wheelPreview = false;
+    let waitCursorLeave = false;
     let drag = null;
     let cursor = null;
 
     controller.host.toggleAttribute("data-remote", Boolean(isRemote));
 
-    const size = () => floatSize(video, viewport().b * 0.6, ratioFallback);
+    function size() {
+      const vp = viewport();
+      const maxH = floatWidth === DEFAULT_FLOAT_WIDTH ? vp.b * 0.6 : Math.max(180, vp.b - 16);
+      const maxW = Math.max(MIN_FLOAT_WIDTH, vp.r - 16);
+      return floatSize(video, floatWidth, maxH, ratioFallback, maxW);
+    }
+
     function rect() {
+      if (drag) return { l: drag.x, t: drag.y, r: drag.x + drag.w, b: drag.y + drag.h };
       const s = size();
-      if (drag) return { l: drag.x, t: drag.y, r: drag.x + s.w, b: drag.y + s.h };
-      return Dodge.cornerRect(corner, s, viewport(), cfg().edgeInsetPx);
+      const vp = viewport();
+      if (customPos) return fromRelPos(customPos, s, vp);
+      return Dodge.cornerRect(corner, s, vp, cfg().edgeInsetPx);
+    }
+
+    function isInteractive() {
+      if (held || drag !== null) return true;
+      if (!ctx.settings.clickThrough && !cfg().enabled && cursor) {
+        const r = rect();
+        return cursor.x >= r.l && cursor.x <= r.r && cursor.y >= r.t && cursor.y <= r.b;
+      }
+      return false;
     }
 
     function render() {
       const r = rect();
-      const interactive = held || drag !== null;
-      const geometry = { x: px(r.l), y: px(r.t), w: px(r.r - r.l), h: px(r.b - r.t) };
-      const opacity = interactive ? 1 : faded ? FADED_OPACITY : ctx.settings.opacity;
+      const w = Math.round(r.r - r.l);
+      const h = Math.round(r.b - r.t);
+      const interactive = isInteractive();
+      const geometry = { x: px(r.l), y: px(r.t), w: px(w), h: px(h) };
+      const opacity = interactive && !wheelPreview ? 1 : faded ? FADED_OPACITY : ctx.settings.opacity;
       setVars(video, { ...geometry, opacity: String(opacity) });
       video.toggleAttribute("data-gp-pass", !interactive && ctx.settings.clickThrough);
       video.toggleAttribute("data-gp-drag", drag !== null);
+      hudEl.textContent = `투명도 ${Math.round(ctx.settings.opacity * 100)}% · ${w}×${h}`;
       if (interactive) controller.show(geometry);
       else controller.hide();
     }
@@ -250,24 +355,77 @@
       if (cfg().home !== lastHome) {
         lastHome = cfg().home;
         corner = lastHome;
+        customPos = null;
         dodge = Dodge.initialState(corner);
         faded = false;
       }
       render();
     }
 
+    function layoutChanged() {
+      if (drag) return;
+      floatWidth = ctx.layout.width || DEFAULT_FLOAT_WIDTH;
+      customPos = ctx.layout.pos ? { ...ctx.layout.pos } : null;
+      render();
+    }
+
     function tick() {
-      if (held || drag) return;
-      const out = Dodge.step(dodge, { now: performance.now(), cursor, size: size(), area: viewport() }, cfg());
+      if (isInteractive()) return;
+      const vp = viewport();
+      const s = size();
+      const r = rect();
+      const m = cfg().marginPx;
+      const cursorInCurrent =
+        cursor !== null &&
+        cursor.x >= r.l - m &&
+        cursor.x < r.r + m &&
+        cursor.y >= r.t - m &&
+        cursor.y < r.b + m;
+
+      if (waitCursorLeave) {
+        if (cursorInCurrent) {
+          dodge = { ...dodge, hoverSince: null };
+          return;
+        }
+        waitCursorLeave = false;
+      }
+
+      let stepCursor = cursor;
+      if (customPos !== null) {
+        if (cursorInCurrent) {
+          const cr = Dodge.cornerRect(dodge.corner, s, vp, cfg().edgeInsetPx);
+          stepCursor = { x: (cr.l + cr.r) / 2, y: (cr.t + cr.b) / 2 };
+        } else {
+          stepCursor = null;
+        }
+      }
+
+      const out = Dodge.step(dodge, { now: performance.now(), cursor: stepCursor, size: s, area: vp }, cfg());
       dodge = out.state;
-      if (out.action.type === "move") corner = out.action.corner;
-      else if (out.action.type === "fade") faded = out.action.on;
-      else return;
+      if (out.action.type === "move") {
+        customPos = null;
+        corner = out.action.corner;
+      } else if (out.action.type === "fade") {
+        faded = out.action.on;
+      } else {
+        return;
+      }
       render();
     }
 
     function setHeld(next) {
       if (next === held) return;
+      if (held && !next) {
+        wheelPreview = false;
+        if (cursor) {
+          const r = rect();
+          const m = cfg().marginPx;
+          if (cursor.x >= r.l - m && cursor.x < r.r + m && cursor.y >= r.t - m && cursor.y < r.b + m) {
+            waitCursorLeave = true;
+            dodge = { ...dodge, hoverSince: null };
+          }
+        }
+      }
       held = next;
       render();
     }
@@ -275,11 +433,33 @@
 
     window.addEventListener("pointermove", (e) => {
       if (!e.isTrusted) return;
+      const prevInteractive = isInteractive();
       cursor = { x: e.clientX, y: e.clientY };
       holdFrom(e);
+      if (prevInteractive !== isInteractive()) render();
       tick();
     }, { capture: true, ...on });
-    document.documentElement.addEventListener("mouseleave", () => (cursor = null), on);
+
+    window.addEventListener("wheel", (e) => {
+      const r = rect();
+      const overRect = e.clientX >= r.l && e.clientX <= r.r && e.clientY >= r.t && e.clientY <= r.b;
+      if (!overRect && e.target !== video && e.target !== controller.host) return;
+      const modHeld = held || HOLD[ctx.settings.hotkeys.hold](e);
+      if (!modHeld && ctx.settings.clickThrough) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (!e.deltaY) return;
+      wheelPreview = true;
+      waitCursorLeave = true;
+      dodge = { ...dodge, hoverSince: null };
+      stepOpacity(e.deltaY < 0 ? WHEEL_OPACITY_STEP : -WHEEL_OPACITY_STEP);
+      render();
+    }, { capture: true, passive: false, ...on });
+
+    document.documentElement.addEventListener("mouseleave", () => {
+      cursor = null;
+      render();
+    }, on);
     window.addEventListener("keydown", holdFrom, { capture: true, ...on });
     window.addEventListener("keyup", holdFrom, { capture: true, ...on });
     window.addEventListener("blur", () => setHeld(false), on);
@@ -289,26 +469,106 @@
     const timer = setInterval(tick, DODGE_TICK_MS);
 
     dragSink = {
-      start(e) {
+      start(e, resizeDir) {
+        wheelPreview = false;
         const r = rect();
-        drag = { x: r.l, y: r.t, dx: e.clientX - r.l, dy: e.clientY - r.t };
+        if (resizeDir) {
+          drag = {
+            mode: "resize",
+            dir: resizeDir,
+            startRect: r,
+            startX: e.clientX,
+            startY: e.clientY,
+            x: r.l,
+            y: r.t,
+            w: r.r - r.l,
+            h: r.b - r.t,
+          };
+        } else {
+          drag = {
+            mode: "move",
+            x: r.l,
+            y: r.t,
+            w: r.r - r.l,
+            h: r.b - r.t,
+            dx: e.clientX - r.l,
+            dy: e.clientY - r.t,
+          };
+        }
         render();
       },
       move(e) {
-        drag.x = e.clientX - drag.dx;
-        drag.y = e.clientY - drag.dy;
+        if (!drag) return;
+        const vp = viewport();
+        if (drag.mode === "move") {
+          const s = size();
+          drag.w = s.w;
+          drag.h = s.h;
+          drag.x = Math.min(Math.max(0, e.clientX - drag.dx), Math.max(0, vp.r - s.w));
+          drag.y = Math.min(Math.max(0, e.clientY - drag.dy), Math.max(0, vp.b - s.h));
+        } else {
+          const ratio = videoRatio(video, ratioFallback);
+          const sr = drag.startRect;
+          const startW = sr.r - sr.l;
+          const startH = sr.b - sr.t;
+          const dx = e.clientX - drag.startX;
+          const dy = e.clientY - drag.startY;
+          const hasH = drag.dir.includes("e") || drag.dir.includes("w");
+          const hasV = drag.dir.includes("s") || drag.dir.includes("n");
+          const dw = drag.dir.includes("e") ? dx : drag.dir.includes("w") ? -dx : 0;
+          const dh = drag.dir.includes("s") ? dy : drag.dir.includes("n") ? -dy : 0;
+
+          let rawW = startW;
+          if (hasH && hasV) {
+            rawW = Math.abs(dw) >= Math.abs(dh) ? startW + dw : (startH + dh) / ratio;
+          } else if (hasH) {
+            rawW = startW + dw;
+          } else if (hasV) {
+            rawW = (startH + dh) / ratio;
+          }
+
+          const maxW = Math.min(
+            MAX_FLOAT_WIDTH,
+            Math.max(MIN_FLOAT_WIDTH, vp.r - 16),
+            Math.max(MIN_FLOAT_WIDTH, Math.floor((vp.b - 16) / ratio)),
+          );
+          const nextW = Math.round(Math.min(Math.max(MIN_FLOAT_WIDTH, rawW), maxW));
+          const nextH = Math.round(nextW * ratio);
+
+          let nextX = drag.dir.includes("w") ? sr.r - nextW : sr.l;
+          let nextY = drag.dir.includes("n") ? sr.b - nextH : sr.t;
+          nextX = Math.min(Math.max(0, nextX), Math.max(0, vp.r - nextW));
+          nextY = Math.min(Math.max(0, nextY), Math.max(0, vp.b - nextH));
+
+          floatWidth = nextW;
+          drag.x = nextX;
+          drag.y = nextY;
+          drag.w = nextW;
+          drag.h = nextH;
+        }
         render();
       },
       end() {
         if (!drag) return;
-        const r = rect();
+        const vp = viewport();
+        const r = { l: drag.x, t: drag.y, r: drag.x + drag.w, b: drag.y + drag.h };
+        const s = { w: drag.w, h: drag.h };
         drag = null;
-        corner = Dodge.nearestCorner(r, viewport());
+        waitCursorLeave = true;
+
+        const nearest = Dodge.nearestCorner(r, vp);
+        const cr = Dodge.cornerRect(nearest, s, vp, cfg().edgeInsetPx);
+        const nearCorner = Math.hypot(r.l - cr.l, r.t - cr.t) <= CORNER_SNAP_PX;
+
+        corner = nearest;
         dodge = Dodge.initialState(corner);
         faded = false;
-        if (cfg().allowed.includes(corner) && corner !== cfg().home) {
-          lastHome = corner;
-          persistHome(corner);
+        customPos = nearCorner ? null : toRelPos(r.l, r.t, s, vp);
+
+        persistLayout({ width: floatWidth, pos: customPos });
+        if (cfg().allowed.includes(nearest) && nearest !== cfg().home) {
+          lastHome = nearest;
+          persistHome(nearest, true);
         }
         render();
       },
@@ -331,7 +591,7 @@
       queueMicrotask(leave);
     }
 
-    return { exit, settingsChanged };
+    return { exit, settingsChanged, layoutChanged };
   }
 
   function enterInTab(_arg, leave) {
@@ -411,6 +671,7 @@
     return {
       exit,
       settingsChanged: floating.settingsChanged,
+      layoutChanged: floating.layoutChanged,
       createOffer,
       acceptAnswer,
       stopSender,
@@ -461,17 +722,22 @@
       video,
       exit,
       settingsChanged: floating.settingsChanged,
+      layoutChanged: floating.layoutChanged,
       ready,
     };
   }
 
   const PIP_CSS = `
     html, body { margin: 0; height: 100%; background: #000; color: #fff; font: 13px system-ui, "Malgun Gothic", sans-serif; }
-    body { display: flex; flex-direction: column; }
+    body { display: flex; flex-direction: column; position: relative; }
     video { flex: 1 1 auto; min-height: 0; width: 100%; object-fit: contain; background: #000; }
     button { flex: none; height: ${PIP_TOGGLE_HEIGHT}px; border: 0; background: #222; color: #fff; font: inherit; cursor: pointer; }
     iframe { flex: 0 0 ${PIP_CHAT_HEIGHT}px; width: 100%; border: 0; background: #fff; }
-    iframe[hidden] { display: none; }`;
+    iframe[hidden] { display: none; }
+    .pip-hud { position: fixed; top: 8px; left: 8px; padding: 4px 8px; border-radius: 5px; pointer-events: none;
+      background: rgba(18, 18, 22, 0.85); color: #fff; font: 600 12px/1 system-ui, "Malgun Gothic", sans-serif;
+      opacity: 0; transition: opacity 0.15s ease-out; }
+    .pip-hud[data-show] { opacity: 1; }`;
 
   function buildPipDocument(win, stream, chatUrl) {
     const doc = win.document;
@@ -483,7 +749,9 @@
     mirror.autoplay = true;
     mirror.playsInline = true;
     mirror.srcObject = stream;
-    doc.body.append(mirror);
+    const pipHud = doc.createElement("div");
+    pipHud.className = "pip-hud";
+    doc.body.append(mirror, pipHud);
     if (chatUrl) {
       const frame = doc.createElement("iframe");
       frame.src = chatUrl;
@@ -496,7 +764,7 @@
       doc.body.append(toggle, frame);
     }
     mirror.play().catch(() => {});
-    return mirror;
+    return { mirror, pipHud };
   }
 
   function enterDocPip({ stream: firstStream, chatUrl, win: winPromise }, leave) {
@@ -505,12 +773,36 @@
     let stream = firstStream;
     let win = null;
     let mirror = null;
+    let pipHud = null;
+    let hudTimer = null;
+    let engineConnected = true;
+
+    function syncPipOpacity(showToast = false) {
+      if (!mirror) return;
+      mirror.style.opacity = engineConnected ? "1" : String(ctx.settings.opacity);
+      if (showToast && pipHud) {
+        pipHud.textContent = `투명도 ${Math.round(ctx.settings.opacity * 100)}%`;
+        pipHud.setAttribute("data-show", "");
+        clearTimeout(hudTimer);
+        hudTimer = setTimeout(() => pipHud?.removeAttribute("data-show"), 900);
+      }
+    }
 
     winPromise.then((w) => {
       if (ac.signal.aborted) return w.close();
       win = w;
-      mirror = buildPipDocument(w, stream, chatUrl);
+      const built = buildPipDocument(w, stream, chatUrl);
+      mirror = built.mirror;
+      pipHud = built.pipHud;
       w.addEventListener("pagehide", leave, { signal: ac.signal });
+      w.addEventListener("wheel", (e) => {
+        if (e.target !== mirror && !HOLD[ctx.settings.hotkeys.hold](e)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (!e.deltaY) return;
+        stepOpacity(e.deltaY < 0 ? WHEEL_OPACITY_STEP : -WHEEL_OPACITY_STEP);
+        syncPipOpacity(true);
+      }, { capture: true, passive: false, signal: ac.signal });
       // Until its first resize the PiP window reports the opener's placeholder geometry, so the
       // rect handshake waits for it, with a timeout in case the platform never resizes.
       new Promise((placed) => {
@@ -524,6 +816,9 @@
           kind: "document",
           rect: readRect(),
           dpr: w.devicePixelRatio,
+        }).then((res) => {
+          engineConnected = Boolean(res?.engineConnected);
+          syncPipOpacity(false);
         });
         setTimeout(() => {
           if (!ac.signal.aborted) send({ type: "PIP_RECT_UPDATED", rect: readRect() });
@@ -538,8 +833,10 @@
     }, { signal: ac.signal });
 
     return {
+      settingsChanged: () => syncPipOpacity(false),
       exit() {
         ac.abort();
+        clearTimeout(hudTimer);
         for (const t of stream.getTracks()) t.stop();
         if (!win) return;
         send({ type: "PIP_CLOSED" });
@@ -587,7 +884,7 @@
     }
     if (!stream) return go("nativePip", video.requestPictureInPicture());
     const chatUrl = chatUrlFor(ctx.site);
-    const size = floatSize(video, FLOAT_WIDTH);
+    const size = floatSize(video, DEFAULT_FLOAT_WIDTH, DEFAULT_FLOAT_WIDTH);
     const height = size.h + (chatUrl ? PIP_TOGGLE_HEIGHT + PIP_CHAT_HEIGHT : 0);
     go("docPip", { stream, chatUrl, win: documentPictureInPicture.requestWindow({ width: size.w, height }) });
   }
@@ -619,13 +916,13 @@
     nativePip: ["idle"],
   };
   const noop = () => {};
-  let current = { name: "idle", video: null, exit: noop, settingsChanged: noop };
+  let current = { name: "idle", video: null, exit: noop, settingsChanged: noop, layoutChanged: noop };
 
   function go(next, arg) {
     if (!TRANSITIONS[current.name].includes(next)) return;
     if (next !== "idle" && next !== "remoteInTab" && !ctx.video) return;
     current.exit();
-    const inst = { name: next, video: ctx.video, exit: noop, settingsChanged: noop };
+    const inst = { name: next, video: ctx.video, exit: noop, settingsChanged: noop, layoutChanged: noop };
     current = inst;
     Object.assign(inst, ENTER[next](arg, () => current === inst && go("idle")));
   }
@@ -647,11 +944,21 @@
     current.settingsChanged();
   }
 
+  function applyLayout(stored) {
+    ctx.layout = sanitizeLayout(stored);
+    current.layoutChanged?.();
+  }
+
   const settingsReady = chrome.storage.local
-    .get("settings")
-    .then(({ settings }) => applySettings(settings), noop);
+    .get(["settings", "floatLayout"])
+    .then(({ settings, floatLayout }) => {
+      applyLayout(floatLayout);
+      applySettings(settings);
+    }, noop);
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === "local" && changes.settings) applySettings(changes.settings.newValue);
+    if (area !== "local") return;
+    if (changes.floatLayout) applyLayout(changes.floatLayout.newValue);
+    if (changes.settings) applySettings(changes.settings.newValue);
   });
 
   async function loadSite() {
