@@ -13,6 +13,7 @@
     engineWarning: document.getElementById("engineWarning"),
     clickThrough: document.getElementById("clickThrough"),
     dodgeEnabled: document.getElementById("dodgeEnabled"),
+    showChat: document.getElementById("showChat"),
     opacity: document.getElementById("opacity"),
     opacityValue: document.getElementById("opacityValue"),
     toggleMute: document.getElementById("toggleMute"),
@@ -54,6 +55,7 @@
 
     els.clickThrough.checked = settings.clickThrough;
     els.dodgeEnabled.checked = dodge.enabled;
+    if (els.showChat) els.showChat.checked = Boolean(settings.showChat);
 
     const pct = Math.round(settings.opacity * 100);
     els.opacity.value = String(pct);
@@ -105,6 +107,7 @@
 
   els.clickThrough.addEventListener("change", () => applyIntent("TOGGLE_CLICK_THROUGH"));
   els.dodgeEnabled.addEventListener("change", () => applyIntent("TOGGLE_DODGE"));
+  els.showChat?.addEventListener("change", () => applyPatch({ showChat: els.showChat.checked }));
 
   els.opacity.addEventListener("input", () => {
     const val = Number(els.opacity.value);

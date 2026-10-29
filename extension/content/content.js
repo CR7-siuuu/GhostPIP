@@ -109,11 +109,32 @@
     return next;
   }
 
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  function svgIcon(d) {
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("aria-hidden", "true");
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("d", d);
+    svg.append(path);
+    return svg;
+  }
+
+  const ICON_WEB_MODE =
+    "M2 3.5A1.5 1.5 0 0 1 3.5 2h9A1.5 1.5 0 0 1 14 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.5v-9ZM3.5 3.2a.3.3 0 0 0-.3.3v9a.3.3 0 0 0 .3.3h9a.3.3 0 0 0 .3-.3v-9a.3.3 0 0 0-.3-.3h-9ZM8 8.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v2.5a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5V8.5Z";
+  const ICON_FULL_MODE =
+    "M2.5 3A1.5 1.5 0 0 0 1 4.5v7A1.5 1.5 0 0 0 2.5 13h5a.6.6 0 0 0 0-1.2h-5a.3.3 0 0 1-.3-.3v-7a.3.3 0 0 1 .3-.3h7a.3.3 0 0 1 .3.3v2a.6.6 0 1 0 1.2 0v-2A1.5 1.5 0 0 0 9.5 3h-7Zm6.5 5.5A1.5 1.5 0 0 1 10.5 7h3A1.5 1.5 0 0 1 15 8.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 11.5v-3Z";
+
   const BASE_CSS = `
-    .bar { display: flex; gap: 6px; font: 600 13px/1 system-ui, "Malgun Gothic", sans-serif; color: #fff; }
-    button { all: unset; cursor: pointer; padding: 7px 10px; border-radius: 6px; white-space: nowrap;
-      background: rgba(18, 18, 22, 0.85); color: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45); }
-    button:hover { background: rgba(70, 70, 84, 0.95); }
+    .bar { display: inline-flex; align-items: center; gap: 3px; padding: 3px; border-radius: 999px;
+      background: rgba(14, 15, 20, 0.82); border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45); backdrop-filter: blur(6px);
+      font: 600 11px/1 system-ui, "Malgun Gothic", sans-serif; color: #fff; }
+    button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 8px; border-radius: 999px; white-space: nowrap; color: rgba(255, 255, 255, 0.92);
+      transition: background 0.12s ease, color 0.12s ease; }
+    button svg { width: 12px; height: 12px; fill: currentColor; flex: none; }
+    button:hover { background: rgba(110, 170, 255, 0.28); color: #fff; }
     :host([data-pinned]) .bar:not(:hover) { opacity: 0.55; }`;
 
   const CONTROLLER_CSS = `
@@ -136,7 +157,7 @@
     .handle.ne::after { top: 4px; right: 4px; }
     .handle.sw::after { bottom: 4px; left: 4px; }
     .handle.se::after { bottom: 4px; right: 4px; }
-    .bar { position: absolute; top: 8px; right: 8px; z-index: 3; }
+    .bar { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 3; }
     .hud { position: absolute; bottom: 8px; left: 8px; z-index: 3; pointer-events: none;
       padding: 4px 8px; border-radius: 5px; background: rgba(18, 18, 22, 0.85); color: #fff;
       font: 600 12px/1 system-ui, "Malgun Gothic", sans-serif; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45); }
@@ -175,8 +196,12 @@
     "ghostpip-launcher",
     BASE_CSS,
     h("div", { class: "bar" },
-      h("button", { "data-action": "inTab" }, "띄우기"),
-      h("button", { "data-action": "docPip" }, "PiP + 채팅")),
+      h("button", { "data-action": "inTab", title: "웹 모드 (브라우저 탭 내 오버레이)" },
+        svgIcon(ICON_WEB_MODE),
+        "웹 모드"),
+      h("button", { "data-action": "docPip", title: "전체 모드 (데스크톱 PiP 창)" },
+        svgIcon(ICON_FULL_MODE),
+        "전체 모드")),
   );
 
   const hudEl = h("div", { class: "hud" }, "");
@@ -188,7 +213,9 @@
     hudEl,
     h("div", { class: "bar" },
       h("button", { "data-action": "idle" }, "복귀"),
-      h("button", { "data-action": "docPip", "data-mode": "local" }, "PiP + 채팅"),
+      h("button", { "data-action": "docPip", "data-mode": "local" },
+        svgIcon(ICON_FULL_MODE),
+        "전체 모드"),
       h("button", { "data-action": "focusSource", "data-mode": "remote" }, "원본 탭")),
   );
 
@@ -244,10 +271,10 @@
     function update() {
       const r = ctx.video?.getBoundingClientRect();
       if (!r || r.width === 0) return launcher.hide();
-      const anchor = { x: r.right - 8, y: Math.max(r.top, 0) + 8 };
+      const anchor = { x: r.left + r.width / 2, y: Math.max(r.top, 0) + 6 };
       // Pointer events over an iframe (e.g. Twitch's extension overlay covering the player) never reach
       // this document, so a launcher spot covered by an iframe keeps the launcher pinned.
-      const below = document.elementsFromPoint(anchor.x - 16, anchor.y + 8).find((el) => el !== launcher.host);
+      const below = document.elementsFromPoint(anchor.x, anchor.y + 10).find((el) => el !== launcher.host);
       const pinned = below?.tagName === "IFRAME";
       launcher.host.toggleAttribute("data-pinned", pinned && !pointerOver);
       if (pointerOver || pinned) launcher.show({ x: px(anchor.x), y: px(anchor.y) });
@@ -859,7 +886,7 @@
       opacity: 0; transition: opacity 0.15s ease-out; }
     .pip-hud[data-show] { opacity: 1; }`;
 
-  function buildPipDocument(win, stream, chatUrl) {
+  function buildPipDocument(win, stream, chatUrl, showChat) {
     const doc = win.document;
     const style = doc.createElement("style");
     style.textContent = PIP_CSS;
@@ -872,19 +899,32 @@
     const pipHud = doc.createElement("div");
     pipHud.className = "pip-hud";
     doc.body.append(mirror, pipHud);
-    if (chatUrl) {
-      const frame = doc.createElement("iframe");
-      frame.src = chatUrl;
-      const toggle = doc.createElement("button");
-      toggle.textContent = "채팅 숨기기";
-      toggle.addEventListener("click", () => {
-        frame.hidden = !frame.hidden;
-        toggle.textContent = frame.hidden ? "채팅 보기" : "채팅 숨기기";
-      });
-      doc.body.append(toggle, frame);
+    let frame = null;
+    let toggle = null;
+
+    function syncChat(enabled) {
+      if (!chatUrl) return;
+      if (enabled) {
+        if (!frame) {
+          frame = doc.createElement("iframe");
+          frame.src = chatUrl;
+          toggle = doc.createElement("button");
+          toggle.textContent = "채팅 숨기기";
+          toggle.addEventListener("click", () => {
+            frame.hidden = !frame.hidden;
+            toggle.textContent = frame.hidden ? "채팅 보기" : "채팅 숨기기";
+          });
+        }
+        if (!toggle.isConnected) doc.body.append(toggle, frame);
+      } else if (frame) {
+        toggle?.remove();
+        frame.remove();
+      }
     }
+
+    syncChat(showChat);
     mirror.play().catch(() => {});
-    return { mirror, pipHud };
+    return { mirror, pipHud, syncChat };
   }
 
   function enterDocPip({ stream: firstStream, chatUrl, win: winPromise }, leave) {
@@ -894,6 +934,7 @@
     let win = null;
     let mirror = null;
     let pipHud = null;
+    let syncChat = null;
     let hudTimer = null;
     let engineConnected = true;
 
@@ -911,9 +952,10 @@
     winPromise.then((w) => {
       if (ac.signal.aborted) return w.close();
       win = w;
-      const built = buildPipDocument(w, stream, chatUrl);
+      const built = buildPipDocument(w, stream, chatUrl, Boolean(ctx.settings.showChat));
       mirror = built.mirror;
       pipHud = built.pipHud;
+      syncChat = built.syncChat;
       w.addEventListener("pagehide", leave, { signal: ac.signal });
       w.addEventListener("wheel", (e) => {
         if (e.target !== mirror && !HOLD[ctx.settings.hotkeys.hold](e)) return;
@@ -953,7 +995,10 @@
     }, { signal: ac.signal });
 
     return {
-      settingsChanged: () => syncPipOpacity(false),
+      settingsChanged: () => {
+        syncPipOpacity(false);
+        syncChat?.(Boolean(ctx.settings.showChat));
+      },
       exit() {
         ac.abort();
         clearTimeout(hudTimer);
@@ -1004,8 +1049,9 @@
     }
     if (!stream) return go("nativePip", video.requestPictureInPicture());
     const chatUrl = chatUrlFor(ctx.site);
+    const showChat = Boolean(ctx.settings.showChat && chatUrl);
     const size = floatSize(video, DEFAULT_FLOAT_WIDTH, DEFAULT_FLOAT_WIDTH);
-    const height = size.h + (chatUrl ? PIP_TOGGLE_HEIGHT + PIP_CHAT_HEIGHT : 0);
+    const height = size.h + (showChat ? PIP_TOGGLE_HEIGHT + PIP_CHAT_HEIGHT : 0);
     go("docPip", { stream, chatUrl, win: documentPictureInPicture.requestWindow({ width: size.w, height }) });
   }
 

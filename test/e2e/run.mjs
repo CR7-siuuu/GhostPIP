@@ -191,8 +191,24 @@ async function runSite(page, target) {
       return { open: !!host?.matches(":popover-open"), pinned: !!host?.hasAttribute("data-pinned") };
     });
     const b = await hoverLauncher("inTab");
-    const ok = !!b && (!before.open || before.pinned);
-    return { ok, info: `beforeHover open=${before.open} pinned=${before.pinned}; ${b ? `button at ${Math.round(b.x)},${Math.round(b.y)}` : "launcher not open after hover"}` };
+    const meta = await page.evaluate(() => {
+      const host = document.getElementById("ghostpip-launcher");
+      const bar = host?.shadowRoot?.querySelector(".bar");
+      const btns = [...(host?.shadowRoot?.querySelectorAll("button") ?? [])].map((el) => el.textContent.trim());
+      const vr = window.__gp.v.getBoundingClientRect();
+      const br = bar?.getBoundingClientRect();
+      const centerDiff = br ? Math.abs((br.left + br.right) / 2 - (vr.left + vr.right) / 2) : 999;
+      return { btns, centerDiff: Math.round(centerDiff), barW: Math.round(br?.width ?? 0) };
+    });
+    const ok =
+      !!b &&
+      (!before.open || before.pinned) &&
+      meta.btns.join(",") === "웹 모드,전체 모드" &&
+      meta.centerDiff <= 4;
+    return {
+      ok,
+      info: `beforeHover open=${before.open} pinned=${before.pinned}; btns=[${meta.btns.join(", ")}] centerDiff=${meta.centerDiff}px barW=${meta.barW}px`,
+    };
   });
 
   await step("2 inTab", async () => {
@@ -338,14 +354,21 @@ async function runSite(page, target) {
       const id = new URL(page.url()).pathname.split("/")[site.idFrom.pathIndex];
       wantChat = site.chatPopoutUrl.replace(/\{\w+\}/, encodeURIComponent(id));
     }
+    await patchSettings({ showChat: false });
+    const chatRemoved = await poll(
+      () => page.evaluate(() => documentPictureInPicture.window?.document.querySelector("iframe") === null),
+      Boolean,
+      1500,
+    );
+    await patchSettings({ showChat: true });
     await shot("7_docPip");
     await page.evaluate(() => documentPictureInPicture.window.close());
     const cleared = Object.keys(await poll(readPip, (p) => Object.keys(p).length === 0, 2000)).length === 0;
-    const ok = r.mirrorW > 0 && r.std > 5 && r.inPlace && adv.ok && rectMatches && cleared
+    const ok = r.mirrorW > 0 && r.std > 5 && r.inPlace && adv.ok && rectMatches && cleared && chatRemoved
       && (!wantChat || r.iframe === wantChat);
     return {
       ok,
-      info: `mirrorW=${r.mirrorW} std=${r.std} inPlace=${r.inPlace} dt=${adv.dt} PIP_OPENED=${reported ? JSON.stringify(reported.rect) : "none"} live=${JSON.stringify(r.live)} closedCleared=${cleared} iframe=${r.iframe}${wantChat ? ` want=${wantChat}` : ""}`,
+      info: `mirrorW=${r.mirrorW} std=${r.std} inPlace=${r.inPlace} dt=${adv.dt} chatRemoved=${chatRemoved} PIP_OPENED=${reported ? JSON.stringify(reported.rect) : "none"} live=${JSON.stringify(r.live)} closedCleared=${cleared} iframe=${r.iframe}${wantChat ? ` want=${wantChat}` : ""}`,
     };
   });
 

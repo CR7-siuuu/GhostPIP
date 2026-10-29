@@ -124,6 +124,7 @@ try {
       warningText: document.getElementById("engineWarning").textContent,
       clickThrough: document.getElementById("clickThrough").checked,
       dodgeEnabled: document.getElementById("dodgeEnabled").checked,
+      showChat: document.getElementById("showChat").checked,
       opacity: document.getElementById("opacity").value,
       opacityValue: document.getElementById("opacityValue").textContent,
       home: document.getElementById("home").value,
@@ -149,6 +150,7 @@ try {
       init.bannerHidden === false &&
       init.clickThrough === DEFAULTS.clickThrough &&
       init.dodgeEnabled === DEFAULTS.dodge.enabled &&
+      init.showChat === DEFAULTS.showChat &&
       init.opacity === String(DEFAULTS.opacity * 100) &&
       init.opacityValue === "70%" &&
       init.home === DEFAULTS.dodge.home &&
@@ -191,6 +193,7 @@ try {
 
   await step("2 popup -> content live", async () => {
     await popupPage.click("#clickThrough");
+    await popupPage.click("#showChat");
     await popupPage.evaluate(() => {
       const el = document.getElementById("opacity");
       el.value = "45";
@@ -219,10 +222,11 @@ try {
       videoState.pe === "none" &&
       Math.abs(videoState.opacity - 0.45) < 0.02 &&
       stored.clickThrough === true &&
+      stored.showChat === false &&
       Math.abs(stored.opacity - 0.45) < 0.001;
     return {
       ok,
-      info: `stored=(clickThrough=${stored.clickThrough}, opacity=${stored.opacity}) video=(pass=${videoState.pass}, pe=${videoState.pe}, opacity=${videoState.opacity})`,
+      info: `stored=(clickThrough=${stored.clickThrough}, showChat=${stored.showChat}, opacity=${stored.opacity}) video=(pass=${videoState.pass}, pe=${videoState.pe}, opacity=${videoState.opacity})`,
     };
   });
 

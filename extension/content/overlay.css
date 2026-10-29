@@ -60,7 +60,7 @@
   #ghostpip-launcher:popover-open {
     width: auto !important;
     height: auto !important;
-    transform: translateX(-100%) !important;
+    transform: translateX(-50%) !important;
   }
 
   #ghostpip-controller:popover-open {
