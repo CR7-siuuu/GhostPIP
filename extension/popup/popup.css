@@ -159,6 +159,7 @@ select {
   background: #1a1c23;
   color: #a5acbe;
   font-size: 12px;
+  word-break: keep-all;
 }
 
 .warning {
