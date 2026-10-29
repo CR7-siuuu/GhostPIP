@@ -111,6 +111,7 @@ try {
   await videoPage.mouse.click(inTabBtn.x, inTabBtn.y);
   await poll(() => videoPage.evaluate(() => window.__gpVideo.matches(":popover-open")), Boolean, 2000);
 
+  await sw.evaluate(() => chrome.storage.session.remove(["pip", "engine"]));
   const popupPage = await browser.newPage();
   await popupPage.goto(`chrome-extension://${extId}/popup/popup.html`, { waitUntil: "domcontentloaded" });
   await sleep(300);

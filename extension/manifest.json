@@ -10,6 +10,8 @@
     "nativeMessaging"
   ],
   "host_permissions": [
+    "http://*/*",
+    "https://*/*",
     "https://*.youtube.com/*",
     "https://chzzk.naver.com/*",
     "https://*.sooplive.com/*",
@@ -47,6 +49,8 @@
   "content_scripts": [
     {
       "matches": [
+        "http://*/*",
+        "https://*/*",
         "https://*.youtube.com/*",
         "https://chzzk.naver.com/*",
         "https://*.sooplive.com/*",

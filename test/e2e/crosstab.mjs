@@ -1,0 +1,326 @@
+import fs from "node:fs";
+import path from "node:path";
+import vm from "node:vm";
+import puppeteer from "puppeteer-core";
+
+const ROOT = path.resolve(import.meta.dirname, "../..");
+const OUT = path.join(ROOT, "test/e2e/out");
+const CHROME = "C:/Program Files/Google/Chrome/Application/chrome.exe";
+fs.mkdirSync(OUT, { recursive: true });
+
+const read = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
+const lib = {};
+vm.runInNewContext(read("extension/content/dodge.js") + "\n" + read("extension/shared/settings.js"), lib);
+const Dodge = lib.GhostPiPDodge;
+const DEFAULTS = JSON.parse(JSON.stringify(lib.GhostPiPSettings.DEFAULTS));
+
+const STEPS = [
+  "1 start inTab on youtube",
+  "2 switch to Tab B -> remote overlay",
+  "3 ghost & dodge in Tab B",
+  "4 navigate or open Tab C -> follows to Tab C at BL",
+  "5 restore from remote tab closes all",
+];
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const near = (a, b, tol = 2) => Boolean(a && b) && ["l", "t", "r", "b"].every((k) => Math.abs(a[k] - b[k]) <= tol);
+const fmt = (r) => r && `${Math.round(r.l)},${Math.round(r.t)}-${Math.round(r.r)},${Math.round(r.b)}`;
+const center = (r) => ({ x: (r.l + r.r) / 2, y: (r.t + r.b) / 2 });
+
+async function poll(fn, ok, timeout = 2500) {
+  const end = Date.now() + timeout;
+  let v = await fn();
+  while (!ok(v) && Date.now() < end) {
+    await sleep(80);
+    v = await fn();
+  }
+  return v;
+}
+
+const browser = await puppeteer.launch({
+  executablePath: CHROME,
+  headless: false,
+  pipe: true,
+  enableExtensions: true,
+  defaultViewport: null,
+  args: ["--autoplay-policy=no-user-gesture-required", "--no-first-run"],
+});
+
+const row = Object.fromEntries(STEPS.map((s) => [s, { status: "FAIL", info: "not reached" }]));
+
+async function step(name, fn) {
+  try {
+    const { ok, info } = await fn();
+    row[name] = { status: ok ? "PASS" : "FAIL", info };
+  } catch (e) {
+    row[name] = { status: "FAIL", info: `threw: ${String(e.message ?? e).slice(0, 180)}` };
+  }
+}
+
+try {
+  const extId = await browser.installExtension(path.join(ROOT, "extension"));
+  const swTarget = await browser.waitForTarget(
+    (t) => t.type() === "service_worker" && t.url().startsWith(`chrome-extension://${extId}/`),
+    { timeout: 10000 },
+  );
+  const sw = await swTarget.worker();
+
+  const patchSettings = async (patch) =>
+    sw.evaluate(async (patch) => {
+      const { settings } = await chrome.storage.local.get("settings");
+      const s = GhostPiPSettings.merge(settings);
+      await chrome.storage.local.set({
+        settings: { ...s, ...patch, dodge: { ...s.dodge, ...(patch.dodge ?? {}) } },
+      });
+    }, patch);
+
+  const readSettings = () => sw.evaluate(async () => (await chrome.storage.local.get("settings")).settings);
+
+  await sw.evaluate(async (defaults) => {
+    const s = structuredClone(defaults);
+    s.dodge.autoReturn = false;
+    await chrome.storage.local.set({ settings: s });
+    await chrome.storage.session.remove(["pip", "engine", "inTab"]);
+  }, DEFAULTS);
+
+  const tabA = (await browser.pages())[0] ?? (await browser.newPage());
+  {
+    const cdp = await tabA.createCDPSession();
+    const { windowId } = await cdp.send("Browser.getWindowForTarget");
+    await cdp.send("Browser.setWindowBounds", {
+      windowId,
+      bounds: { left: 0, top: 0, width: 1280, height: 900, windowState: "normal" },
+    });
+    await cdp.detach();
+  }
+
+  const readFloat = (page) =>
+    page.evaluate(() => {
+      const v = document.querySelector("video.ghostpip-inpage-target");
+      if (!v) return null;
+      const r = v.getBoundingClientRect();
+      return {
+        open: v.matches(":popover-open"),
+        videoWidth: v.videoWidth,
+        videoHeight: v.videoHeight,
+        rect: { l: r.left, t: r.top, r: r.right, b: r.bottom },
+        pe: getComputedStyle(v).pointerEvents,
+        opacity: Number(getComputedStyle(v).opacity),
+        area: { l: 0, t: 0, r: document.documentElement.clientWidth, b: document.documentElement.clientHeight },
+        size: {
+          w: 480,
+          h: Math.round(480 * (v.videoWidth ? v.videoHeight / v.videoWidth : 9 / 16)),
+        },
+        frames: v.getVideoPlaybackQuality?.().totalVideoFrames ?? 0,
+      };
+    });
+
+  const measureRemoteLive = async (page) => {
+    const f0 = await poll(
+      () => readFloat(page),
+      (f) => f?.open && f.videoWidth > 0 && f.frames > 0,
+      2500,
+    );
+    if (!f0) return { f: null, framesDelta: 0, std: 0 };
+    await sleep(450);
+    const res = await page.evaluate(() => {
+      const v = document.querySelector("video.ghostpip-inpage-target");
+      if (!v || !v.videoWidth) return { frames: 0, std: 0 };
+      const c = document.createElement("canvas");
+      c.width = 64;
+      c.height = 36;
+      const g = c.getContext("2d");
+      g.drawImage(v, 0, 0, 64, 36);
+      const px = g.getImageData(0, 0, 64, 36).data;
+      let sum = 0;
+      let sq = 0;
+      for (let i = 0; i < px.length; i += 4) {
+        const l = (px[i] + px[i + 1] + px[i + 2]) / 3;
+        sum += l;
+        sq += l * l;
+      }
+      const n = px.length / 4;
+      return {
+        frames: v.getVideoPlaybackQuality?.().totalVideoFrames ?? 0,
+        std: Math.round(Math.sqrt(sq / n - (sum / n) ** 2)),
+      };
+    });
+    const f1 = await readFloat(page);
+    return { f: f1, framesDelta: res.frames - f0.frames, std: res.std };
+  };
+
+  const shadowButton = (page, hostId, action) =>
+    page.evaluate(
+      (id, a) => {
+        const host = document.getElementById(id);
+        const b = host?.shadowRoot?.querySelector(`[data-action="${a}"]`);
+        if (!host?.matches(":popover-open") || !b) return null;
+        const r = b.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      },
+      hostId,
+      action,
+    );
+
+  const cornerOf = (corner, f) => Dodge.cornerRect(corner, f.size, f.area, DEFAULTS.dodge.edgeInsetPx);
+
+  let tabB = null;
+  let tabC = null;
+
+  await step("1 start inTab on youtube", async () => {
+    await tabA.goto("https://www.youtube.com/watch?v=jNQXAC9IVRw", {
+      waitUntil: "domcontentloaded",
+      timeout: 45000,
+    });
+    await tabA.waitForFunction(
+      () => [...document.querySelectorAll("video")].some((v) => v.videoWidth > 0 && !v.paused && v.readyState >= 2),
+      { timeout: 30000, polling: 500 },
+    );
+    await sleep(1500);
+
+    const vCenter = await tabA.evaluate(() => {
+      const v = document.querySelector("video.html5-main-video") || document.querySelector("video");
+      v.loop = true;
+      window.__gpSourceVideo = v;
+      const r = v.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    });
+    await tabA.mouse.move(vCenter.x, vCenter.y, { steps: 6 });
+    const btn = await poll(() => shadowButton(tabA, "ghostpip-launcher", "inTab"), Boolean, 2000);
+    if (!btn) return { ok: false, info: "launcher inTab button did not open" };
+    await tabA.mouse.click(btn.x, btn.y);
+
+    const f = await poll(() => readFloat(tabA), (v) => v?.open && near(v.rect, cornerOf("BR", v)), 2000);
+    const want = f && cornerOf("BR", f);
+    const ok = Boolean(f?.open && near(f.rect, want));
+    return { ok, info: `open=${f?.open} rect=${fmt(f?.rect)} want=${fmt(want)}` };
+  });
+
+  await step("2 switch to Tab B -> remote overlay", async () => {
+    tabB = await browser.newPage();
+    await tabB.goto("https://example.com", { waitUntil: "domcontentloaded", timeout: 30000 });
+    await tabB.bringToFront();
+
+    const { f, framesDelta, std } = await measureRemoteLive(tabB);
+    await tabB.screenshot({ path: path.join(OUT, "crosstab_2_tabB.png") }).catch(() => {});
+    const want = f && cornerOf("BR", f);
+    const ok = Boolean(f?.open && f.videoWidth > 0 && near(f.rect, want) && framesDelta > 0 && std > 5);
+    return {
+      ok,
+      info: `open=${f?.open} videoW=${f?.videoWidth} rect=${fmt(f?.rect)} want=${fmt(want)} framesDelta=${framesDelta} std=${std}`,
+    };
+  });
+
+  await step("3 ghost & dodge in Tab B", async () => {
+    await patchSettings({ clickThrough: true, opacity: 0.5 });
+    const ghost = await poll(
+      () => readFloat(tabB),
+      (f) => f?.pe === "none" && Math.abs(f.opacity - 0.5) < 0.05,
+      2000,
+    );
+    await tabB.keyboard.down("Control");
+    await tabB.keyboard.down("Alt");
+    const held = await poll(() => readFloat(tabB), (f) => f?.pe === "auto" && Math.abs(f.opacity - 1) < 0.05, 1500);
+    await tabB.keyboard.up("Alt");
+    await tabB.keyboard.up("Control");
+    await patchSettings({ clickThrough: false, opacity: DEFAULTS.opacity });
+    await poll(() => readFloat(tabB), (f) => f?.pe === "auto", 1500);
+
+    const f0 = await readFloat(tabB);
+    const c0 = center(f0.rect);
+    await tabB.mouse.move(c0.x, c0.y, { steps: 8 });
+    const wantTl = cornerOf("TL", f0);
+    const dodged = await poll(() => readFloat(tabB), (f) => near(f?.rect, wantTl), 2500);
+
+    await tabB.keyboard.down("Control");
+    await tabB.keyboard.down("Alt");
+    const from = center(dodged.rect);
+    await tabB.mouse.move(from.x, from.y, { steps: 6 });
+    await sleep(150);
+    await tabB.mouse.down();
+    await tabB.mouse.move(100, dodged.area.b - 120, { steps: 15 });
+    await tabB.mouse.up();
+    await sleep(400);
+    const dragged = await readFloat(tabB);
+    const wantBl = cornerOf("BL", dragged);
+    const home = (await poll(readSettings, (s) => s?.dodge?.home === "BL", 1500))?.dodge?.home;
+    await tabB.mouse.move(dragged.area.r / 2, dragged.area.b / 2, { steps: 4 });
+    await tabB.keyboard.up("Alt");
+    await tabB.keyboard.up("Control");
+    await tabB.screenshot({ path: path.join(OUT, "crosstab_3_dodge_drag.png") }).catch(() => {});
+
+    const ok =
+      ghost?.pe === "none" &&
+      Math.abs(ghost.opacity - 0.5) < 0.05 &&
+      held?.pe === "auto" &&
+      near(dodged?.rect, wantTl) &&
+      near(dragged?.rect, wantBl) &&
+      home === "BL";
+    return {
+      ok,
+      info: `ghost=(${ghost?.pe},${ghost?.opacity}) held=${held?.pe} dodged=${fmt(dodged?.rect)}(want ${fmt(wantTl)}) dragged=${fmt(dragged?.rect)}(want ${fmt(wantBl)}) home=${home}`,
+    };
+  });
+
+  await step("4 navigate or open Tab C -> follows to Tab C at BL", async () => {
+    tabC = await browser.newPage();
+    await tabC.goto("https://example.org", { waitUntil: "domcontentloaded", timeout: 30000 });
+    await tabC.bringToFront();
+
+    const { f, framesDelta, std } = await measureRemoteLive(tabC);
+    const wantBl = f && cornerOf("BL", f);
+    const fsettled = await poll(() => readFloat(tabC), (v) => near(v?.rect, wantBl), 2000);
+    await tabC.screenshot({ path: path.join(OUT, "crosstab_4_tabC_BL.png") }).catch(() => {});
+    const ok = Boolean(fsettled?.open && fsettled.videoWidth > 0 && near(fsettled.rect, wantBl) && framesDelta > 0 && std > 5);
+    return {
+      ok,
+      info: `open=${fsettled?.open} videoW=${fsettled?.videoWidth} rect=${fmt(fsettled?.rect)} want=${fmt(wantBl)} framesDelta=${framesDelta} std=${std}`,
+    };
+  });
+
+  await step("5 restore from remote tab closes all", async () => {
+    await tabC.keyboard.down("Control");
+    await tabC.keyboard.down("Alt");
+    await tabC.mouse.move(20, 20, { steps: 3 });
+    const btn = await poll(() => shadowButton(tabC, "ghostpip-controller", "idle"), Boolean, 1500);
+    if (!btn) {
+      await tabC.keyboard.up("Alt");
+      await tabC.keyboard.up("Control");
+      return { ok: false, info: "controller idle button not open in Tab C" };
+    }
+    await tabC.mouse.move(btn.x, btn.y, { steps: 5 });
+    await tabC.mouse.click(btn.x, btn.y);
+    await tabC.keyboard.up("Alt");
+    await tabC.keyboard.up("Control");
+
+    const removedInC = (await poll(() => readFloat(tabC), (f) => f === null, 2000)) === null;
+    await tabA.bringToFront();
+    const restoredInA = await poll(
+      () =>
+        tabA.evaluate(() => {
+          const v = window.__gpSourceVideo;
+          return {
+            open: v.matches(":popover-open"),
+            hasClass: v.classList.contains("ghostpip-inpage-target"),
+            hasPopover: v.hasAttribute("popover"),
+          };
+        }),
+      (s) => !s.open && !s.hasClass && !s.hasPopover,
+      2000,
+    );
+    await tabA.screenshot({ path: path.join(OUT, "crosstab_5_restored.png") }).catch(() => {});
+    const ok = removedInC && !restoredInA.open && !restoredInA.hasClass && !restoredInA.hasPopover;
+    return {
+      ok,
+      info: `removedInC=${removedInC} tabA=(open=${restoredInA.open}, hasClass=${restoredInA.hasClass}, hasPopover=${restoredInA.hasPopover})`,
+    };
+  });
+} finally {
+  await browser.close();
+}
+
+console.log("\n[crosstab e2e]");
+for (const s of STEPS) {
+  console.log(`  ${row[s].status.padEnd(4)} ${s.padEnd(48)} ${row[s].info}`);
+}
+const failed = STEPS.some((s) => row[s].status !== "PASS");
+process.exit(failed ? 1 : 0);

@@ -90,13 +90,13 @@ print(json.dumps(cands[0] if cands else None))
   return JSON.parse(out);
 }
 
-function countEngineProcesses() {
+function getEnginePids() {
   const out = execFileSync(
     "powershell",
-    ["-NoProfile", "-Command", "@(Get-Process GhostPiP.Engine -ErrorAction SilentlyContinue).Count"],
+    ["-NoProfile", "-Command", "@(Get-Process GhostPiP.Engine -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id) -join ','"],
     { encoding: "utf8" },
   ).trim();
-  return Number(out) || 0;
+  return out ? out.split(",").map(Number).filter(Number.isFinite) : [];
 }
 
 execFileSync(
@@ -114,6 +114,9 @@ async function step(name, fn) {
     row[name] = { status: "FAIL", info: `threw: ${String(e.message ?? e).slice(0, 180)}` };
   }
 }
+
+const initialPids = new Set(getEnginePids());
+let spawnedPids = [];
 
 const browser = await puppeteer.launch({
   executablePath: CHROME,
@@ -161,16 +164,16 @@ try {
       4000,
     );
     const engineState = await sw.evaluate(async () => (await chrome.storage.session.get("engine")).engine);
-    const procs = countEngineProcesses();
+    spawnedPids = getEnginePids().filter((pid) => !initialPids.has(pid));
     const ok =
       st.badge === "Engine Active" &&
       st.bannerHidden === true &&
       engineState?.connected === true &&
       engineState?.engineVersion === "0.1.0" &&
-      procs >= 1;
+      spawnedPids.length >= 1;
     return {
       ok,
-      info: `badge="${st.badge}" bannerHidden=${st.bannerHidden} version=${engineState?.engineVersion} elevated=${engineState?.elevated} procs=${procs}`,
+      info: `badge="${st.badge}" bannerHidden=${st.bannerHidden} version=${engineState?.engineVersion} elevated=${engineState?.elevated} spawnedPids=${spawnedPids.join(",")}`,
     };
   });
 
@@ -337,9 +340,13 @@ try {
       2500,
     );
     await browser.close();
-    const procsAfterClose = await poll(countEngineProcesses, (n) => n === 0, 4000);
-    const ok = cleared && procsAfterClose === 0;
-    return { ok, info: `pipCleared=${cleared} engineProcsAfterBrowserClose=${procsAfterClose}` };
+    const remainingSpawned = await poll(
+      () => getEnginePids().filter((pid) => spawnedPids.includes(pid)),
+      (pids) => pids.length === 0,
+      4000,
+    );
+    const ok = cleared && remainingSpawned.length === 0;
+    return { ok, info: `pipCleared=${cleared} remainingSpawnedPids=${remainingSpawned.length}` };
   });
 } finally {
   await browser.close().catch(() => {});

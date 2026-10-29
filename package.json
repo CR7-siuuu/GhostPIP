@@ -5,9 +5,9 @@
   "scripts": {
     "test:unit": "node --test \"test/unit/*.test.mjs\"",
     "test:e2e": "node test/e2e/run.mjs",
+    "test:crosstab": "node test/e2e/crosstab.mjs",
     "test:popup": "node test/e2e/popup.mjs",
-    "test:engine": "node test/e2e/engine.mjs",
-    "test:popup": "node test/e2e/popup.mjs"
+    "test:engine": "node test/e2e/engine.mjs"
   },
   "author": "",
   "license": "ISC",

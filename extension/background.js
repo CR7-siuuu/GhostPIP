@@ -14,6 +14,77 @@ let settingsQueue = Promise.resolve();
 let pipQueue = Promise.resolve();
 let sitesPromise = null;
 let nativePort = null;
+let inTabSession = null;
+let inTabSeq = 0;
+
+async function getInTab() {
+  if (inTabSession) return inTabSession;
+  const { inTab } = await chrome.storage.session.get("inTab");
+  if (inTab && Number.isFinite(inTab.sourceTabId)) {
+    inTabSession = inTab;
+    inTabSeq = Math.max(inTabSeq, inTab.connId || 0);
+  }
+  return inTabSession;
+}
+
+async function setInTab(next) {
+  inTabSession = next;
+  if (next) await chrome.storage.session.set({ inTab: next });
+  else await chrome.storage.session.remove("inTab");
+}
+
+function sendTab(tabId, msg) {
+  if (!Number.isFinite(tabId)) return Promise.resolve(null);
+  return chrome.tabs.sendMessage(tabId, { v: 1, ...msg }).catch(() => null);
+}
+
+async function syncActiveTab(activeTabId) {
+  if (!Number.isFinite(activeTabId)) return;
+  const session = await getInTab();
+  if (!session?.sourceTabId) return;
+
+  if (activeTabId === session.sourceTabId) {
+    if (session.receiverTabId) {
+      const oldReceiver = session.receiverTabId;
+      session.receiverTabId = null;
+      session.connId = ++inTabSeq;
+      await setInTab(session);
+      sendTab(oldReceiver, { type: "REMOTE_INTAB_STOP" });
+      sendTab(session.sourceTabId, { type: "RTC_STOP_SENDER" });
+    }
+    return;
+  }
+
+  if (session.receiverTabId && session.receiverTabId !== activeTabId) {
+    sendTab(session.receiverTabId, { type: "REMOTE_INTAB_STOP" });
+  }
+  const connId = ++inTabSeq;
+  const sourceTabId = session.sourceTabId;
+  session.receiverTabId = activeTabId;
+  session.connId = connId;
+  await setInTab(session);
+
+  const offer = await sendTab(sourceTabId, { type: "RTC_CREATE_OFFER", connId });
+  if (!offer?.ok || inTabSession?.connId !== connId) return;
+
+  const answer = await sendTab(activeTabId, {
+    type: "REMOTE_INTAB_START",
+    connId,
+    sdp: offer.sdp,
+    ratio: offer.ratio,
+    sourceTabId,
+  });
+  if (!answer?.ok || inTabSession?.connId !== connId) {
+    if (inTabSession?.connId === connId) {
+      inTabSession.receiverTabId = null;
+      await setInTab(inTabSession);
+      sendTab(sourceTabId, { type: "RTC_STOP_SENDER" });
+    }
+    return;
+  }
+
+  await sendTab(sourceTabId, { type: "RTC_ACCEPT_ANSWER", connId, sdp: answer.sdp });
+}
 
 function postToEngine(msg) {
   if (!nativePort) return false;
@@ -176,8 +247,23 @@ function loadSites() {
   return sitesPromise;
 }
 
-chrome.tabs.onRemoved.addListener((tabId) => {
+chrome.tabs.onActivated.addListener(({ tabId }) => {
+  syncActiveTab(tabId);
+});
+
+chrome.tabs.onRemoved.addListener(async (tabId) => {
   pipChanged(tabId, null);
+  const session = await getInTab();
+  if (!session) return;
+  if (session.sourceTabId === tabId) {
+    if (session.receiverTabId) sendTab(session.receiverTabId, { type: "REMOTE_INTAB_STOP" });
+    await setInTab(null);
+  } else if (session.receiverTabId === tabId) {
+    session.receiverTabId = null;
+    session.connId = ++inTabSeq;
+    await setInTab(session);
+    sendTab(session.sourceTabId, { type: "RTC_STOP_SENDER" });
+  }
 });
 
 async function findMuteTargetTab() {
@@ -186,6 +272,12 @@ async function findMuteTargetTab() {
   for (let i = pipIds.length - 1; i >= 0; i--) {
     try {
       return await chrome.tabs.get(pipIds[i]);
+    } catch {}
+  }
+  const session = await getInTab();
+  if (session?.sourceTabId) {
+    try {
+      return await chrome.tabs.get(session.sourceTabId);
     } catch {}
   }
   const tabs = await chrome.tabs.query({});
@@ -240,12 +332,62 @@ chrome.commands.onCommand.addListener((command) => {
 });
 
 const handlers = {
-  async GET_SITE_CONFIG({ url }) {
+  async GET_SITE_CONFIG({ url }, sender) {
     const found = (await loadSites()).find(({ re }) => re.test(url));
+    if (sender?.tab?.active && sender.tab.id != null) {
+      syncActiveTab(sender.tab.id);
+    }
     return found ? { siteId: found.siteId, site: found.site } : GENERIC_SITE;
+  },
+  async INTAB_OPENED(_msg, sender) {
+    const tabId = sender?.tab?.id;
+    if (!Number.isFinite(tabId)) return { ok: false };
+    const prev = await getInTab();
+    if (prev?.sourceTabId && prev.sourceTabId !== tabId) {
+      sendTab(prev.sourceTabId, { type: "INTAB_FORCE_IDLE" });
+      if (prev.receiverTabId) sendTab(prev.receiverTabId, { type: "REMOTE_INTAB_STOP" });
+    }
+    const next = { sourceTabId: tabId, receiverTabId: null, connId: ++inTabSeq };
+    await setInTab(next);
+    const [activeTab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    if (activeTab?.id != null && activeTab.id !== tabId) {
+      syncActiveTab(activeTab.id);
+    }
+    return { ok: true };
+  },
+  async INTAB_CLOSED(_msg, sender) {
+    const tabId = sender?.tab?.id;
+    const session = await getInTab();
+    if (session?.sourceTabId === tabId) {
+      if (session.receiverTabId) sendTab(session.receiverTabId, { type: "REMOTE_INTAB_STOP" });
+      await setInTab(null);
+    }
+    return { ok: true };
+  },
+  async INTAB_STOP_ALL() {
+    const session = await getInTab();
+    if (session) {
+      await setInTab(null);
+      if (session.sourceTabId) sendTab(session.sourceTabId, { type: "INTAB_FORCE_IDLE" });
+      if (session.receiverTabId) sendTab(session.receiverTabId, { type: "REMOTE_INTAB_STOP" });
+    }
+    return { ok: true };
+  },
+  async FOCUS_SOURCE_TAB() {
+    const session = await getInTab();
+    if (session?.sourceTabId) {
+      await chrome.tabs.update(session.sourceTabId, { active: true }).catch(() => {});
+    }
+    return { ok: true };
   },
   async PIP_OPENED({ kind, rect, dpr }, sender) {
     await pipChanged(sender.tab.id, { v: 1, type: "PIP_OPENED", tabId: sender.tab.id, kind, rect, dpr });
+    return { ok: true };
+  },
+  async PIP_RECT_UPDATED({ rect }, sender) {
+    if (sender?.tab?.id != null && rect) {
+      await updatePipEntry(sender.tab.id, (prev) => (prev ? { ...prev, rect } : null));
+    }
     return { ok: true };
   },
   async PIP_CLOSED(_msg, sender) {

@@ -45,11 +45,27 @@
     for (const [k, v] of Object.entries(vars)) el.style.setProperty(`--gp-${k}`, v);
   }
 
-  function floatSize(video, maxHeight) {
-    const ratio = video.videoWidth ? video.videoHeight / video.videoWidth : 9 / 16;
+  function floatSize(video, maxHeight, ratioFallback = 9 / 16) {
+    const ratio = video.videoWidth ? video.videoHeight / video.videoWidth : ratioFallback;
     const height = Math.round(FLOAT_WIDTH * ratio);
     if (height <= maxHeight) return { w: FLOAT_WIDTH, h: height };
     return { w: Math.round(maxHeight / ratio), h: Math.round(maxHeight) };
+  }
+
+  function waitIceComplete(pc, timeoutMs = 800) {
+    if (pc.iceGatheringState === "complete") return Promise.resolve();
+    return new Promise((resolve) => {
+      const done = () => {
+        pc.removeEventListener("icegatheringstatechange", check);
+        clearTimeout(timer);
+        resolve();
+      };
+      const check = () => {
+        if (pc.iceGatheringState === "complete") done();
+      };
+      const timer = setTimeout(done, timeoutMs);
+      pc.addEventListener("icegatheringstatechange", check);
+    });
   }
 
   const BASE_CSS = `
@@ -62,7 +78,9 @@
   const CONTROLLER_CSS = `
     .surface { position: absolute; inset: 0; box-sizing: border-box; cursor: move; border-radius: 3px;
       border: 2px solid rgba(110, 170, 255, 0.95); background: rgba(110, 170, 255, 0.08); }
-    .bar { position: absolute; top: 8px; right: 8px; }`;
+    .bar { position: absolute; top: 8px; right: 8px; }
+    :host([data-remote]) button[data-mode="local"],
+    :host(:not([data-remote])) button[data-mode="remote"] { display: none; }`;
 
   // Open shadow root so tests can pierce it; popover so it renders in the top layer above site overlays.
   function overlayHost(id, css, ...content) {
@@ -106,7 +124,8 @@
     h("div", { class: "surface" }),
     h("div", { class: "bar" },
       h("button", { "data-action": "idle" }, "복귀"),
-      h("button", { "data-action": "docPip" }, "PiP + 채팅")),
+      h("button", { "data-action": "docPip", "data-mode": "local" }, "PiP + 채팅"),
+      h("button", { "data-action": "focusSource", "data-mode": "remote" }, "원본 탭")),
   );
 
   let dragSink = null;
@@ -126,8 +145,19 @@
       const r = v.getBoundingClientRect();
       return r.width * r.height;
     };
-    const pick = (list) => [...list].filter((v) => v.videoWidth > 0).sort((a, b) => area(b) - area(a))[0] ?? null;
-    return (ctx.site.video && pick(document.querySelectorAll(ctx.site.video))) || pick(document.querySelectorAll("video"));
+    const pick = (list, minW = 0, minH = 0) =>
+      [...list]
+        .filter((v) => {
+          if (v.videoWidth <= 0 || v.hasAttribute("data-gp-remote")) return false;
+          if (!minW && !minH) return true;
+          const r = v.getBoundingClientRect();
+          return r.width >= minW && r.height >= minH;
+        })
+        .sort((a, b) => area(b) - area(a))[0] ?? null;
+    if (ctx.site.video) {
+      return pick(document.querySelectorAll(ctx.site.video)) || pick(document.querySelectorAll("video"));
+    }
+    return pick(document.querySelectorAll("video"), 200, 120);
   }
 
   function chatUrlFor(site) {
@@ -176,15 +206,9 @@
     };
   }
 
-  function enterInTab(_arg, leave) {
-    const video = ctx.video;
+  function enterFloating({ video, ratioFallback = 9 / 16, isRemote = false }, leave) {
     const ac = new AbortController();
     const on = { signal: ac.signal };
-    const original = {
-      popover: video.getAttribute("popover"),
-      class: video.hasAttribute("class"),
-      style: video.hasAttribute("style"),
-    };
     const viewport = () => ({
       l: 0,
       t: 0,
@@ -193,14 +217,17 @@
     });
     const cfg = () => ctx.settings.dodge;
 
-    let corner = cfg().home;
+    let lastHome = cfg().home;
+    let corner = lastHome;
     let dodge = Dodge.initialState(corner);
     let faded = false;
     let held = false;
     let drag = null;
     let cursor = null;
 
-    const size = () => floatSize(video, viewport().b * 0.6);
+    controller.host.toggleAttribute("data-remote", Boolean(isRemote));
+
+    const size = () => floatSize(video, viewport().b * 0.6, ratioFallback);
     function rect() {
       const s = size();
       if (drag) return { l: drag.x, t: drag.y, r: drag.x + s.w, b: drag.y + s.h };
@@ -217,6 +244,16 @@
       video.toggleAttribute("data-gp-drag", drag !== null);
       if (interactive) controller.show(geometry);
       else controller.hide();
+    }
+
+    function settingsChanged() {
+      if (cfg().home !== lastHome) {
+        lastHome = cfg().home;
+        corner = lastHome;
+        dodge = Dodge.initialState(corner);
+        faded = false;
+      }
+      render();
     }
 
     function tick() {
@@ -269,7 +306,10 @@
         corner = Dodge.nearestCorner(r, viewport());
         dodge = Dodge.initialState(corner);
         faded = false;
-        if (cfg().allowed.includes(corner) && corner !== cfg().home) persistHome(corner);
+        if (cfg().allowed.includes(corner) && corner !== cfg().home) {
+          lastHome = corner;
+          persistHome(corner);
+        }
         render();
       },
     };
@@ -280,15 +320,6 @@
       dragSink = null;
       controller.hide();
       if (video.matches(":popover-open")) video.hidePopover();
-      if (original.popover === null) video.removeAttribute("popover");
-      else video.setAttribute("popover", original.popover);
-      video.classList.remove(FLOAT_CLASS);
-      video.removeAttribute("data-gp-pass");
-      video.removeAttribute("data-gp-drag");
-      for (const name of GP_VARS) video.style.removeProperty(name);
-      for (const attr of ["class", "style"]) {
-        if (!original[attr] && !video.getAttribute(attr)) video.removeAttribute(attr);
-      }
     }
 
     video.setAttribute("popover", "manual");
@@ -300,7 +331,138 @@
       queueMicrotask(leave);
     }
 
-    return { exit, settingsChanged: render };
+    return { exit, settingsChanged };
+  }
+
+  function enterInTab(_arg, leave) {
+    const video = ctx.video;
+    const original = {
+      popover: video.getAttribute("popover"),
+      class: video.hasAttribute("class"),
+      style: video.hasAttribute("style"),
+    };
+    const floating = enterFloating({ video, isRemote: false }, leave);
+    let pc = null;
+    let activeConnId = 0;
+    let senderTracks = [];
+
+    function stopSender() {
+      activeConnId = 0;
+      if (pc) {
+        pc.close();
+        pc = null;
+      }
+      for (const t of senderTracks) t.stop();
+      senderTracks = [];
+    }
+
+    const onLoadedData = () => {
+      if (!pc) return;
+      for (const t of senderTracks) t.stop();
+      try {
+        const stream = video.captureStream();
+        senderTracks = stream.getTracks();
+        const track = stream.getVideoTracks()[0];
+        const sender = pc.getSenders().find((s) => !s.track || s.track.kind === "video");
+        if (sender && track) sender.replaceTrack(track).catch(() => {});
+      } catch {}
+    };
+    video.addEventListener("loadeddata", onLoadedData);
+
+    async function createOffer(connId) {
+      stopSender();
+      activeConnId = connId;
+      const nextPc = new RTCPeerConnection({ iceServers: [] });
+      pc = nextPc;
+      const stream = video.captureStream();
+      senderTracks = stream.getTracks();
+      for (const t of stream.getVideoTracks()) nextPc.addTrack(t, stream);
+      const offer = await nextPc.createOffer();
+      await nextPc.setLocalDescription(offer);
+      await waitIceComplete(nextPc);
+      if (pc !== nextPc || activeConnId !== connId) return { ok: false };
+      const ratio = video.videoWidth ? video.videoHeight / video.videoWidth : 9 / 16;
+      return { ok: true, sdp: nextPc.localDescription.sdp, ratio };
+    }
+
+    async function acceptAnswer(connId, sdp) {
+      if (!pc || activeConnId !== connId) return { ok: false };
+      await pc.setRemoteDescription({ type: "answer", sdp });
+      return { ok: true };
+    }
+
+    function exit() {
+      video.removeEventListener("loadeddata", onLoadedData);
+      stopSender();
+      send({ type: "INTAB_CLOSED" });
+      floating.exit();
+      if (original.popover === null) video.removeAttribute("popover");
+      else video.setAttribute("popover", original.popover);
+      video.classList.remove(FLOAT_CLASS);
+      video.removeAttribute("data-gp-pass");
+      video.removeAttribute("data-gp-drag");
+      for (const name of GP_VARS) video.style.removeProperty(name);
+      for (const attr of ["class", "style"]) {
+        if (!original[attr] && !video.getAttribute(attr)) video.removeAttribute(attr);
+      }
+    }
+
+    send({ type: "INTAB_OPENED" });
+    return {
+      exit,
+      settingsChanged: floating.settingsChanged,
+      createOffer,
+      acceptAnswer,
+      stopSender,
+    };
+  }
+
+  function enterRemoteInTab({ sdp, ratio }, leave) {
+    const video = h("video", {
+      class: FLOAT_CLASS,
+      "data-gp-remote": "",
+      popover: "manual",
+      muted: "",
+      autoplay: "",
+      playsinline: "",
+    });
+    video.muted = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    document.documentElement.append(video);
+
+    const pc = new RTCPeerConnection({ iceServers: [] });
+    pc.ontrack = (e) => {
+      video.srcObject = e.streams[0] ?? new MediaStream([e.track]);
+      video.play().catch(() => {});
+    };
+
+    const floating = enterFloating({ video, ratioFallback: ratio || 9 / 16, isRemote: true }, leave);
+
+    const ready = (async () => {
+      await pc.setRemoteDescription({ type: "offer", sdp });
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      await waitIceComplete(pc);
+      return { ok: true, sdp: pc.localDescription.sdp };
+    })().catch((e) => {
+      leave();
+      return { ok: false, error: String(e) };
+    });
+
+    function exit() {
+      pc.close();
+      video.srcObject = null;
+      floating.exit();
+      video.remove();
+    }
+
+    return {
+      video,
+      exit,
+      settingsChanged: floating.settingsChanged,
+      ready,
+    };
   }
 
   const PIP_CSS = `
@@ -356,12 +518,16 @@
         setTimeout(placed, 1000);
       }).then(() => {
         if (ac.signal.aborted) return;
+        const readRect = () => ({ x: w.screenX, y: w.screenY, w: w.outerWidth, h: w.outerHeight });
         send({
           type: "PIP_OPENED",
           kind: "document",
-          rect: { x: w.screenX, y: w.screenY, w: w.outerWidth, h: w.outerHeight },
+          rect: readRect(),
           dpr: w.devicePixelRatio,
         });
+        setTimeout(() => {
+          if (!ac.signal.aborted) send({ type: "PIP_RECT_UPDATED", rect: readRect() });
+        }, 600);
       });
     }, leave);
 
@@ -429,13 +595,26 @@
   const ACTIONS = {
     inTab: () => go("inTab"),
     docPip: startPip,
-    idle: () => go("idle"),
+    idle: () => {
+      send({ type: "INTAB_STOP_ALL" });
+      go("idle");
+    },
+    focusSource: () => {
+      send({ type: "FOCUS_SOURCE_TAB" });
+    },
   };
 
-  const ENTER = { idle: enterIdle, inTab: enterInTab, docPip: enterDocPip, nativePip: enterNativePip };
+  const ENTER = {
+    idle: enterIdle,
+    inTab: enterInTab,
+    remoteInTab: enterRemoteInTab,
+    docPip: enterDocPip,
+    nativePip: enterNativePip,
+  };
   const TRANSITIONS = {
-    idle: ["idle", "inTab", "docPip", "nativePip"],
+    idle: ["idle", "inTab", "remoteInTab", "docPip", "nativePip"],
     inTab: ["idle", "docPip", "nativePip"],
+    remoteInTab: ["idle", "remoteInTab"],
     docPip: ["idle"],
     nativePip: ["idle"],
   };
@@ -444,7 +623,7 @@
 
   function go(next, arg) {
     if (!TRANSITIONS[current.name].includes(next)) return;
-    if (next !== "idle" && !ctx.video) return;
+    if (next !== "idle" && next !== "remoteInTab" && !ctx.video) return;
     current.exit();
     const inst = { name: next, video: ctx.video, exit: noop, settingsChanged: noop };
     current = inst;
@@ -460,16 +639,7 @@
       return;
     }
     if (current.name === "idle") ctx.video = findVideo();
-    else if (!current.video.isConnected) go("idle");
-  }
-
-  async function loadSite() {
-    const url = location.href;
-    const res = await send({ type: "GET_SITE_CONFIG", url });
-    if (!res?.site || url !== location.href) return;
-    ctx.siteId = res.siteId;
-    ctx.site = res.site;
-    scan();
+    else if (current.video && !current.video.isConnected) go("idle");
   }
 
   function applySettings(stored) {
@@ -477,13 +647,61 @@
     current.settingsChanged();
   }
 
-  chrome.storage.local.get("settings").then(({ settings }) => applySettings(settings), noop);
+  const settingsReady = chrome.storage.local
+    .get("settings")
+    .then(({ settings }) => applySettings(settings), noop);
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area === "local" && changes.settings) applySettings(changes.settings.newValue);
   });
 
+  async function loadSite() {
+    const url = location.href;
+    await settingsReady;
+    const res = await send({ type: "GET_SITE_CONFIG", url });
+    if (!res?.site || url !== location.href) return;
+    ctx.siteId = res.siteId;
+    ctx.site = res.site;
+    scan();
+  }
+
+  const MSG_HANDLERS = {
+    async RTC_CREATE_OFFER({ connId }) {
+      if (current.name !== "inTab" || !current.createOffer) return { ok: false };
+      return current.createOffer(connId);
+    },
+    async RTC_ACCEPT_ANSWER({ connId, sdp }) {
+      if (current.name !== "inTab" || !current.acceptAnswer) return { ok: false };
+      return current.acceptAnswer(connId, sdp);
+    },
+    async RTC_STOP_SENDER() {
+      if (current.name === "inTab") current.stopSender?.();
+      return { ok: true };
+    },
+    async INTAB_FORCE_IDLE() {
+      if (current.name === "inTab" || current.name === "remoteInTab") go("idle");
+      return { ok: true };
+    },
+    async REMOTE_INTAB_START(msg) {
+      await settingsReady;
+      if (current.name !== "idle" && current.name !== "remoteInTab") return { ok: false };
+      go("remoteInTab", msg);
+      return current.name === "remoteInTab" && current.ready ? current.ready : { ok: false };
+    },
+    async REMOTE_INTAB_STOP() {
+      if (current.name === "remoteInTab") go("idle");
+      return { ok: true };
+    },
+  };
+
+  chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+    const fn = MSG_HANDLERS[msg?.type];
+    if (!fn) return false;
+    fn(msg).then(sendResponse, (e) => sendResponse({ ok: false, error: String(e) }));
+    return true;
+  });
+
   document.addEventListener("fullscreenchange", () => {
-    if (document.fullscreenElement && current.name === "inTab") go("idle");
+    if (document.fullscreenElement && (current.name === "inTab" || current.name === "remoteInTab")) go("idle");
   });
 
   let scanQueued = false;
