@@ -1,6 +1,8 @@
-﻿node_modules/
+node_modules/
 __pycache__/
 spike/out/
-*.pyc
-
 test/e2e/out/
+engine/bin/
+engine/obj/
+engine/installer/app.ghostpip.engine.json
+*.pyc

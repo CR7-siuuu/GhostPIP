@@ -1,27 +1,166 @@
 importScripts("shared/settings.js");
 
+const HOST_NAME = "app.ghostpip.engine";
 const GENERIC_SITE = { siteId: "generic", site: { video: null, chatPopoutUrl: null } };
-const DEFAULT_ENGINE = { connected: false, engineVersion: null, elevated: false, hotkeyErrors: [] };
+const DEFAULT_ENGINE = {
+  connected: false,
+  engineVersion: null,
+  elevated: false,
+  hotkeyErrors: [],
+  protocolMismatch: false,
+};
 
 let settingsQueue = Promise.resolve();
 let pipQueue = Promise.resolve();
 let sitesPromise = null;
+let nativePort = null;
+
+function postToEngine(msg) {
+  if (!nativePort) return false;
+  try {
+    nativePort.postMessage(msg);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function updateSettings(mutator) {
   const run = settingsQueue.then(async () => {
     const { settings } = await chrome.storage.local.get("settings");
     const current = GhostPiPSettings.merge(settings);
     const res = mutator(current);
-    if (res.ok) await chrome.storage.local.set({ settings: res.settings });
+    if (res.ok) {
+      await chrome.storage.local.set({ settings: res.settings });
+      postToEngine({ v: 1, type: "STATE", settings: res.settings });
+    }
     return res;
   });
   settingsQueue = run.catch(() => {});
   return run;
 }
 
+function updatePipEntry(tabId, mutator) {
+  const run = pipQueue.then(async () => {
+    const { pip = {} } = await chrome.storage.session.get("pip");
+    const next = mutator(pip[tabId]);
+    if (next) pip[tabId] = next;
+    else delete pip[tabId];
+    await chrome.storage.session.set({ pip });
+    return next;
+  });
+  pipQueue = run.catch(() => {});
+  return run;
+}
+
+function pipChanged(tabId, entry) {
+  const run = updatePipEntry(tabId, () => entry).then((saved) => {
+    if (!nativePort) connectEngine();
+    if (saved) {
+      postToEngine({
+        v: 1,
+        type: "PIP_OPENED",
+        tabId: saved.tabId,
+        kind: saved.kind,
+        rect: saved.rect,
+        dpr: saved.dpr,
+      });
+    } else {
+      postToEngine({ v: 1, type: "PIP_CLOSED", tabId });
+    }
+  });
+  return run;
+}
+
+function onEngineMessage(msg) {
+  if (!msg || typeof msg !== "object") return;
+  switch (msg.type) {
+    case "HELLO": {
+      const engine = {
+        connected: true,
+        engineVersion: typeof msg.engineVersion === "string" ? msg.engineVersion : "0.1.0",
+        elevated: Boolean(msg.elevated),
+        hotkeyErrors: Array.isArray(msg.hotkeyErrors) ? msg.hotkeyErrors.map(String) : [],
+        protocolMismatch: msg.v !== 1,
+      };
+      chrome.storage.session.set({ engine });
+      break;
+    }
+    case "INTENT": {
+      if (msg.intent === "SET_HOME" && typeof msg.corner === "string") {
+        updateSettings((s) => GhostPiPSettings.patch(s, { dodge: { home: msg.corner } }));
+      } else if (INTENTS[msg.intent]) {
+        INTENTS[msg.intent]();
+      }
+      break;
+    }
+    case "PIP_BOUND": {
+      if (Number.isFinite(msg.tabId)) {
+        updatePipEntry(msg.tabId, (prev) => (prev ? { ...prev, bound: true, lostReason: null } : null));
+      }
+      break;
+    }
+    case "PIP_LOST": {
+      if (Number.isFinite(msg.tabId)) {
+        const reason = typeof msg.reason === "string" ? msg.reason : "unknown";
+        updatePipEntry(msg.tabId, (prev) => (prev ? { ...prev, bound: false, lostReason: reason } : null));
+      }
+      break;
+    }
+  }
+}
+
+function onEngineDisconnect(port) {
+  void chrome.runtime.lastError;
+  if (nativePort === port) nativePort = null;
+  chrome.storage.session.set({ engine: { ...DEFAULT_ENGINE } });
+}
+
+function connectEngine() {
+  if (nativePort) return nativePort;
+  if (typeof chrome.runtime?.connectNative !== "function") return null;
+  let port;
+  try {
+    port = chrome.runtime.connectNative(HOST_NAME);
+  } catch {
+    return null;
+  }
+  nativePort = port;
+  port.onMessage.addListener(onEngineMessage);
+  port.onDisconnect.addListener(() => onEngineDisconnect(port));
+
+  Promise.all([chrome.storage.local.get("settings"), chrome.storage.session.get("pip")])
+    .then(([{ settings }, { pip = {} }]) => {
+      if (nativePort !== port) return;
+      postToEngine({ v: 1, type: "STATE", settings: GhostPiPSettings.merge(settings) });
+      for (const entry of Object.values(pip)) {
+        if (entry && Number.isFinite(entry.tabId) && entry.rect) {
+          postToEngine({
+            v: 1,
+            type: "PIP_OPENED",
+            tabId: entry.tabId,
+            kind: entry.kind,
+            rect: entry.rect,
+            dpr: entry.dpr,
+          });
+        }
+      }
+    })
+    .catch(() => {});
+
+  return port;
+}
+
 chrome.runtime.onInstalled.addListener(() => {
   updateSettings((s) => ({ ok: true, settings: s }));
+  connectEngine();
 });
+
+chrome.runtime.onStartup?.addListener(() => {
+  connectEngine();
+});
+
+connectEngine();
 
 function loadSites() {
   sitesPromise ??= fetch(chrome.runtime.getURL("config/selectors.json"))
@@ -35,18 +174,6 @@ function loadSites() {
       }));
     });
   return sitesPromise;
-}
-
-// Single place PiP lifecycle lands; Phase 4 also forwards these to the engine port from here.
-function pipChanged(tabId, entry) {
-  const run = pipQueue.then(async () => {
-    const { pip = {} } = await chrome.storage.session.get("pip");
-    if (entry) pip[tabId] = entry;
-    else delete pip[tabId];
-    await chrome.storage.session.set({ pip });
-  });
-  pipQueue = run.catch(() => {});
-  return run;
 }
 
 chrome.tabs.onRemoved.addListener((tabId) => {
@@ -101,7 +228,12 @@ function dispatchCommand(command) {
   return intent ? INTENTS[intent]() : Promise.resolve({ ok: false });
 }
 
-globalThis.GhostPiPBackground = { dispatchCommand };
+globalThis.GhostPiPBackground = {
+  dispatchCommand,
+  connectEngine,
+  onEngineMessage,
+  postToEngine,
+};
 
 chrome.commands.onCommand.addListener((command) => {
   dispatchCommand(command);
@@ -137,6 +269,14 @@ const handlers = {
   async INTENT({ intent }) {
     const fn = INTENTS[intent];
     return fn ? fn() : { ok: false };
+  },
+  async RECONNECT_ENGINE() {
+    connectEngine();
+    const { engine } = await chrome.storage.session.get("engine");
+    return {
+      ok: true,
+      engine: { ...DEFAULT_ENGINE, ...(engine && typeof engine === "object" ? engine : {}) },
+    };
   },
 };
 

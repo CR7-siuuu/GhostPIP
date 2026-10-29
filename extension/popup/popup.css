@@ -149,6 +149,17 @@ select {
   font-size: 12px;
 }
 
+.warning {
+  margin: 0 0 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #7f4f24;
+  background: #2e2015;
+  color: #fcd34d;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .banner {
   padding: 8px 10px;
   border-radius: 6px;
@@ -158,4 +169,9 @@ select {
   font-size: 12px;
   font-weight: 600;
   text-align: center;
+  cursor: pointer;
+}
+
+.banner:hover {
+  background: #23304b;
 }

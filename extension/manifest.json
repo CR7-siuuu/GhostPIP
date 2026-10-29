@@ -4,7 +4,11 @@
   "version": "0.1.0",
   "description": "화면을 안 가리는 투명/클릭통과/자동회피 PIP",
   "minimum_chrome_version": "116",
-  "permissions": ["storage", "scripting"],
+  "permissions": [
+    "storage",
+    "scripting",
+    "nativeMessaging"
+  ],
   "host_permissions": [
     "https://*.youtube.com/*",
     "https://chzzk.naver.com/*",
@@ -12,7 +16,9 @@
     "https://*.sooplive.co.kr/*",
     "https://*.twitch.tv/*"
   ],
-  "background": { "service_worker": "background.js" },
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_title": "GhostPiP",
     "default_popup": "popup/popup.html"
@@ -20,15 +26,21 @@
   "commands": {
     "_execute_action": {},
     "toggle-click-through": {
-      "suggested_key": { "default": "Alt+G" },
+      "suggested_key": {
+        "default": "Alt+G"
+      },
       "description": "클릭 통과 (Ghost Mode) 토글"
     },
     "toggle-dodge": {
-      "suggested_key": { "default": "Alt+Shift+D" },
+      "suggested_key": {
+        "default": "Alt+Shift+D"
+      },
       "description": "스마트 자동 회피 토글"
     },
     "toggle-mute": {
-      "suggested_key": { "default": "Alt+M" },
+      "suggested_key": {
+        "default": "Alt+M"
+      },
       "description": "영상 탭 음소거 토글"
     }
   },
@@ -41,9 +53,16 @@
         "https://*.sooplive.co.kr/*",
         "https://*.twitch.tv/*"
       ],
-      "js": ["shared/settings.js", "content/dodge.js", "content/content.js"],
-      "css": ["content/overlay.css"],
+      "js": [
+        "shared/settings.js",
+        "content/dodge.js",
+        "content/content.js"
+      ],
+      "css": [
+        "content/overlay.css"
+      ],
       "run_at": "document_idle"
     }
-  ]
+  ],
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5+FqCVUGzZFFRG/E8DijX9hKKOqrKs9kUREC8iXclcyKlrC7oIcMwytlRnsleMF0cIHGxV3ee3PSTv8wgvqaZ3JlxnqK7kINId00Uo610m0TcS4uzMMQkUISEHwBovb+HZFQaQxc7U2Lj6J6hBE1wQGMnkiPJIiEL1XmYXog92hr+cheacU1EmkiW0yWpgWjFjpfToduzUovu27QvVf7JTKGlfZnOI2ApXAJ6vK6msQ3DecesfYzRnEEkFuF3RVPeRFEETgfwrza69DcR9xRV2ZsEqSnV7di0miv6N17j5UOw8ezdtTzfM2FmIzgIFdNoll4TEynInpoXL2YiCNGIQIDAQAB"
 }

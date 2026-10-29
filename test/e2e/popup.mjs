@@ -119,6 +119,8 @@ try {
     popupPage.evaluate(() => ({
       badge: document.getElementById("modeBadge").textContent,
       bannerHidden: document.getElementById("engineBanner").hidden,
+      warningHidden: document.getElementById("engineWarning").hidden,
+      warningText: document.getElementById("engineWarning").textContent,
       clickThrough: document.getElementById("clickThrough").checked,
       dodgeEnabled: document.getElementById("dodgeEnabled").checked,
       opacity: document.getElementById("opacity").value,
@@ -153,20 +155,36 @@ try {
 
     await sw.evaluate(() =>
       chrome.storage.session.set({
-        engine: { connected: true, engineVersion: "0.1.0", elevated: false, hotkeyErrors: [] },
+        engine: { connected: true, engineVersion: "0.1.0", elevated: false, hotkeyErrors: ["Alt+G"], protocolMismatch: false },
       }),
     );
-    const active = await poll(readPopupState, (s) => s.badge === "Engine Active" && s.bannerHidden === true, 2000);
+    const active = await poll(
+      readPopupState,
+      (s) => s.badge === "Engine Active" && s.bannerHidden === true && s.warningHidden === false && s.warningText.includes("Alt+G"),
+      2000,
+    );
     await sw.evaluate(() =>
       chrome.storage.session.set({
-        engine: { connected: false, engineVersion: null, elevated: false, hotkeyErrors: [] },
+        engine: { connected: false, engineVersion: null, elevated: false, hotkeyErrors: [], protocolMismatch: false },
       }),
     );
-    const restored = await poll(readPopupState, (s) => s.badge === "In-Tab Mode" && s.bannerHidden === false, 2000);
-    const ok = initOk && active.badge === "Engine Active" && active.bannerHidden && restored.badge === "In-Tab Mode";
+    const restored = await poll(
+      readPopupState,
+      (s) => s.badge === "In-Tab Mode" && s.bannerHidden === false && s.warningHidden === true,
+      2000,
+    );
+    const ok =
+      initOk &&
+      init.warningHidden === true &&
+      active.badge === "Engine Active" &&
+      active.bannerHidden &&
+      !active.warningHidden &&
+      active.warningText.includes("Alt+G") &&
+      restored.badge === "In-Tab Mode" &&
+      restored.warningHidden === true;
     return {
       ok,
-      info: `init=${init.badge}(bannerHidden=${init.bannerHidden}) -> active=${active.badge}(bannerHidden=${active.bannerHidden})`,
+      info: `init=${init.badge}(bannerHidden=${init.bannerHidden}) -> active=${active.badge}(bannerHidden=${active.bannerHidden}, warning="${active.warningText}")`,
     };
   });
 

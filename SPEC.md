@@ -253,5 +253,5 @@ GhostPIP/
 | **0** | 위험 가정 실측 | ✅ 완료 — `spike/PHASE0_RESULTS.md` |
 | **1** | 확장 코어: Popover In-Tab, Shadow DOM 컨트롤러, 회피 솔버(JS), Document PiP(미러 + 채팅) | ✅ 완료 — 단위 테스트 51/51, 4개 사이트 E2E 28/28 통과 (`test/e2e/run.mjs`) |
 | **2** | 팝업, `Settings` 단일 소유, `chrome.commands` | ✅ 완료 — 단위 테스트 53/53, 팝업·콘텐츠 실시간 E2E 5/5 통과 (`test/e2e/popup.mjs`) |
-| **3** | 엔진: 추적, Ghost, Hold 상태 머신, 회피 솔버(C#), 핫키 | 같은 `dodge-vectors` 통과 + 실제 PiP 창 대상 통합 테스트 |
-| **4** | Native Messaging 연동, 인스톨러, 코드 서명 | 설치 → Chrome 재시작 → `Engine Active` → Alt+G로 클릭 통과 확인 |
+| **3** | 엔진: 추적, Ghost, Hold 상태 머신, 회피 솔버(C#), 핫키 | ✅ 완료 — C# Native AOT (`GhostPiP.Engine.exe`), `--self-test` 벡터 39/39 및 5/5 스위트 통과 |
+| **4** | Native Messaging 연동, 인스톨러, 코드 서명 | ✅ 완료 — `install.ps1`, Native Messaging 브릿지, Win32 OS PiP 통합 E2E 5/5 통과 (`test/e2e/engine.mjs`) |

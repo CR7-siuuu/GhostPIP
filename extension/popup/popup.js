@@ -1,9 +1,16 @@
 (() => {
   const Settings = globalThis.GhostPiPSettings;
-  const DEFAULT_ENGINE = { connected: false, engineVersion: null, elevated: false, hotkeyErrors: [] };
+  const DEFAULT_ENGINE = {
+    connected: false,
+    engineVersion: null,
+    elevated: false,
+    hotkeyErrors: [],
+    protocolMismatch: false,
+  };
 
   const els = {
     modeBadge: document.getElementById("modeBadge"),
+    engineWarning: document.getElementById("engineWarning"),
     clickThrough: document.getElementById("clickThrough"),
     dodgeEnabled: document.getElementById("dodgeEnabled"),
     opacity: document.getElementById("opacity"),
@@ -34,6 +41,16 @@
     els.modeBadge.textContent = engine.connected ? "Engine Active" : "In-Tab Mode";
     els.modeBadge.toggleAttribute("data-active", Boolean(engine.connected));
     els.engineBanner.hidden = Boolean(engine.connected);
+
+    const warnings = [];
+    if (engine.protocolMismatch) {
+      warnings.push("엔진 프로토콜 버전 불일치");
+    }
+    if (Array.isArray(engine.hotkeyErrors) && engine.hotkeyErrors.length > 0) {
+      warnings.push(`단축키 충돌: ${engine.hotkeyErrors.join(", ")}`);
+    }
+    els.engineWarning.hidden = warnings.length === 0;
+    els.engineWarning.textContent = warnings.join(" · ");
 
     els.clickThrough.checked = settings.clickThrough;
     els.dodgeEnabled.checked = dodge.enabled;
@@ -113,6 +130,14 @@
   els.style.addEventListener("change", () => applyPatch({ dodge: { style: els.style.value } }));
   els.autoReturn.addEventListener("change", () => applyPatch({ dodge: { autoReturn: els.autoReturn.checked } }));
   els.hold.addEventListener("change", () => applyPatch({ hotkeys: { hold: els.hold.value } }));
+
+  els.engineBanner.addEventListener("click", async () => {
+    const res = await send({ type: "RECONNECT_ENGINE" });
+    if (res?.engine) {
+      state.engine = { ...DEFAULT_ENGINE, ...res.engine };
+      render();
+    }
+  });
 
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area === "local" && changes.settings) {
