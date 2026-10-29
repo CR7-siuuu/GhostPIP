@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "sites": {
+    "youtube": {
+      "match": "^https://www\\.youtube\\.com/watch",
+      "video": "video.html5-main-video",
+      "chatPopoutUrl": "https://www.youtube.com/live_chat?is_popout=1&v={videoId}",
+      "idFrom": { "param": "v" }
+    },
+    "chzzk": {
+      "match": "^https://chzzk\\.naver\\.com/live/",
+      "video": "video.webplayer-internal-video",
+      "chatPopoutUrl": "https://chzzk.naver.com/live/{channelId}/chat",
+      "idFrom": { "pathIndex": 2 }
+    },
+    "soop": {
+      "match": "^https://play\\.sooplive\\.com/",
+      "video": "video.af_video",
+      "chatPopoutUrl": null
+    },
+    "twitch": {
+      "match": "^https://www\\.twitch\\.tv/[^/]+$",
+      "video": "video",
+      "chatPopoutUrl": "https://www.twitch.tv/popout/{channel}/chat",
+      "idFrom": { "pathIndex": 1 }
+    }
+  }
+}

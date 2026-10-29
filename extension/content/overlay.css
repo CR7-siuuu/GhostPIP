@@ -1,0 +1,71 @@
+/* Layered !important outranks the sites' unlayered !important rules (PHASE0 H6, SOOP). */
+@layer ghostpip {
+  .ghostpip-inpage-target:popover-open {
+    position: fixed !important;
+    inset: auto !important;
+    left: var(--gp-x) !important;
+    top: var(--gp-y) !important;
+    width: var(--gp-w) !important;
+    height: var(--gp-h) !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    visibility: visible !important;
+    overflow: visible !important;
+    background: #000 !important;
+    object-fit: contain !important;
+    transform: none !important;
+    translate: none !important;
+    rotate: none !important;
+    scale: none !important;
+    clip-path: none !important;
+    filter: none !important;
+    opacity: var(--gp-opacity) !important;
+    pointer-events: auto !important;
+    transition: left 0.15s ease-out, top 0.15s ease-out, opacity 0.15s ease-out !important;
+  }
+
+  .ghostpip-inpage-target:popover-open[data-gp-pass] {
+    pointer-events: none !important;
+  }
+
+  .ghostpip-inpage-target:popover-open[data-gp-drag] {
+    transition: none !important;
+  }
+
+  #ghostpip-launcher:popover-open,
+  #ghostpip-controller:popover-open {
+    position: fixed !important;
+    inset: auto !important;
+    left: var(--gp-x) !important;
+    top: var(--gp-y) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    filter: none !important;
+    pointer-events: auto !important;
+  }
+
+  #ghostpip-launcher:popover-open {
+    width: auto !important;
+    height: auto !important;
+    transform: translateX(-100%) !important;
+  }
+
+  #ghostpip-controller:popover-open {
+    width: var(--gp-w) !important;
+    height: var(--gp-h) !important;
+    transform: none !important;
+  }
+}

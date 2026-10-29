@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "GhostPiP",
+  "version": "0.1.0",
+  "description": "화면을 안 가리는 투명/클릭통과/자동회피 PIP",
+  "minimum_chrome_version": "116",
+  "permissions": ["storage", "scripting"],
+  "host_permissions": [
+    "https://*.youtube.com/*",
+    "https://chzzk.naver.com/*",
+    "https://*.sooplive.com/*",
+    "https://*.sooplive.co.kr/*",
+    "https://*.twitch.tv/*"
+  ],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.youtube.com/*",
+        "https://chzzk.naver.com/*",
+        "https://*.sooplive.com/*",
+        "https://*.sooplive.co.kr/*",
+        "https://*.twitch.tv/*"
+      ],
+      "js": ["shared/settings.js", "content/dodge.js", "content/content.js"],
+      "css": ["content/overlay.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
