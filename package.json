@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "build:zip": "node scripts/build-zip.mjs",
     "test:unit": "node --test \"test/unit/*.test.mjs\"",
     "test:e2e": "node test/e2e/run.mjs",
     "test:crosstab": "node test/e2e/crosstab.mjs",

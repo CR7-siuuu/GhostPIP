@@ -5,4 +5,5 @@ test/e2e/out/
 engine/bin/
 engine/obj/
 engine/installer/app.ghostpip.engine.json
+dist/
 *.pyc

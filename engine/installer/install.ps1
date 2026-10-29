@@ -11,6 +11,8 @@ $EngineDir = Split-Path -Parent $InstallerDir
 
 if ([string]::IsNullOrWhiteSpace($ExePath)) {
     $Candidates = @(
+        (Join-Path $InstallerDir "GhostPiP.Engine.exe"),
+        (Join-Path $EngineDir "GhostPiP.Engine.exe"),
         (Join-Path $EngineDir "bin\Release\net8.0-windows\win-x64\publish\GhostPiP.Engine.exe"),
         (Join-Path $EngineDir "bin\Release\net8.0-windows\win-x64\GhostPiP.Engine.exe"),
         (Join-Path $EngineDir "bin\Release\net8.0-windows\GhostPiP.Engine.exe"),
