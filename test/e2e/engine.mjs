@@ -137,6 +137,7 @@ try {
     { timeout: 10000 },
   );
   const sw = await swTarget.worker();
+  await poll(() => sw.evaluate(() => typeof globalThis.GhostPiPBackground === "object"), Boolean, 3000);
 
   const videoPage = (await browser.pages())[0] ?? (await browser.newPage());
   {

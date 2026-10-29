@@ -16,6 +16,8 @@ let sitesPromise = null;
 let nativePort = null;
 let inTabSession = null;
 let inTabSeq = 0;
+let senderStreamPort = null;
+let receiverStreamPort = null;
 
 async function getInTab() {
   if (inTabSession) return inTabSession;
@@ -50,7 +52,6 @@ async function syncActiveTab(activeTabId) {
       session.connId = ++inTabSeq;
       await setInTab(session);
       sendTab(oldReceiver, { type: "REMOTE_INTAB_STOP" });
-      sendTab(session.sourceTabId, { type: "RTC_STOP_SENDER" });
     }
     return;
   }
@@ -64,27 +65,56 @@ async function syncActiveTab(activeTabId) {
   session.connId = connId;
   await setInTab(session);
 
-  const offer = await sendTab(sourceTabId, { type: "RTC_CREATE_OFFER", connId });
-  if (!offer?.ok || inTabSession?.connId !== connId) return;
-
-  const answer = await sendTab(activeTabId, {
-    type: "REMOTE_INTAB_START",
-    connId,
-    sdp: offer.sdp,
-    ratio: offer.ratio,
-    sourceTabId,
-  });
-  if (!answer?.ok || inTabSession?.connId !== connId) {
-    if (inTabSession?.connId === connId) {
-      inTabSession.receiverTabId = null;
-      await setInTab(inTabSession);
-      sendTab(sourceTabId, { type: "RTC_STOP_SENDER" });
-    }
+  const info = await sendTab(sourceTabId, { type: "INTAB_QUERY_SOURCE" });
+  if (!info?.ok || inTabSession?.sourceTabId !== sourceTabId || inTabSession?.receiverTabId !== activeTabId) {
     return;
   }
 
-  await sendTab(sourceTabId, { type: "RTC_ACCEPT_ANSWER", connId, sdp: answer.sdp });
+  const started = await sendTab(activeTabId, {
+    type: "REMOTE_INTAB_START",
+    connId,
+    ratio: info.ratio,
+    sourceTabId,
+  });
+  if (!started?.ok && inTabSession?.connId === connId) {
+    inTabSession.receiverTabId = null;
+    await setInTab(inTabSession);
+  }
 }
+
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name === "ghostpip-sender") {
+    senderStreamPort = port;
+    port.onMessage.addListener((msg) => {
+      if (msg?.type === "FRAME" && receiverStreamPort) {
+        try {
+          receiverStreamPort.postMessage(msg);
+        } catch {}
+      }
+    });
+    port.onDisconnect.addListener(() => {
+      if (senderStreamPort === port) senderStreamPort = null;
+    });
+  } else if (port.name === "ghostpip-receiver") {
+    receiverStreamPort = port;
+    port.onMessage.addListener((msg) => {
+      if (msg?.type === "PULL_FRAME") {
+        if (senderStreamPort) {
+          try {
+            senderStreamPort.postMessage({ type: "PULL_FRAME" });
+          } catch {}
+        } else {
+          getInTab().then((s) => {
+            if (s?.sourceTabId) sendTab(s.sourceTabId, { type: "INTAB_RECONNECT_SENDER" });
+          });
+        }
+      }
+    });
+    port.onDisconnect.addListener(() => {
+      if (receiverStreamPort === port) receiverStreamPort = null;
+    });
+  }
+});
 
 function postToEngine(msg) {
   if (!nativePort) return false;
@@ -264,7 +294,6 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
     session.receiverTabId = null;
     session.connId = ++inTabSeq;
     await setInTab(session);
-    sendTab(session.sourceTabId, { type: "RTC_STOP_SENDER" });
   }
 });
 
@@ -353,7 +382,7 @@ const handlers = {
     await setInTab(next);
     const [activeTab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
     if (activeTab?.id != null && activeTab.id !== tabId) {
-      syncActiveTab(activeTab.id);
+      syncActiveTab(activeTab.id, true);
     }
     return { ok: true };
   },

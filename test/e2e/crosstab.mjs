@@ -96,13 +96,13 @@ try {
 
   const readFloat = (page) =>
     page.evaluate(() => {
-      const v = document.querySelector("video.ghostpip-inpage-target");
+      const v = document.querySelector(".ghostpip-inpage-target");
       if (!v) return null;
       const r = v.getBoundingClientRect();
       return {
         open: v.matches(":popover-open"),
-        videoWidth: v.videoWidth,
-        videoHeight: v.videoHeight,
+        videoWidth: v.videoWidth || Number(v.dataset.gpVw) || 0,
+        videoHeight: v.videoHeight || Number(v.dataset.gpVh) || 0,
         rect: { l: r.left, t: r.top, r: r.right, b: r.bottom },
         pe: getComputedStyle(v).pointerEvents,
         opacity: Number(getComputedStyle(v).opacity),
@@ -111,7 +111,7 @@ try {
           w: Math.round(r.width),
           h: Math.round(r.height),
         },
-        frames: v.getVideoPlaybackQuality?.().totalVideoFrames ?? 0,
+        frames: v.getVideoPlaybackQuality?.().totalVideoFrames ?? (Number(v.dataset.gpFrames) || 0),
       };
     });
 
@@ -124,8 +124,9 @@ try {
     if (!f0) return { f: null, framesDelta: 0, std: 0 };
     await sleep(450);
     const res = await page.evaluate(() => {
-      const v = document.querySelector("video.ghostpip-inpage-target");
-      if (!v || !v.videoWidth) return { frames: 0, std: 0 };
+      const v = document.querySelector(".ghostpip-inpage-target");
+      const vw = v?.videoWidth || Number(v?.dataset.gpVw) || 0;
+      if (!v || !vw) return { frames: 0, std: 0 };
       const c = document.createElement("canvas");
       c.width = 64;
       c.height = 36;
@@ -141,7 +142,7 @@ try {
       }
       const n = px.length / 4;
       return {
-        frames: v.getVideoPlaybackQuality?.().totalVideoFrames ?? 0,
+        frames: v.getVideoPlaybackQuality?.().totalVideoFrames ?? (Number(v.dataset.gpFrames) || 0),
         std: Math.round(Math.sqrt(sq / n - (sum / n) ** 2)),
       };
     });
@@ -295,6 +296,9 @@ try {
   });
 
   await step("4 navigate or open Tab C -> follows custom size/pos/opacity", async () => {
+    await tabB.goto("https://example.net", { waitUntil: "domcontentloaded", timeout: 30000 });
+    const navB = await measureRemoteLive(tabB);
+
     tabC = await browser.newPage();
     await tabC.goto("https://example.org", { waitUntil: "domcontentloaded", timeout: 30000 });
     await tabC.bringToFront();
@@ -304,7 +308,10 @@ try {
     const fsettled = await poll(() => readFloat(tabC), (v) => near(v?.rect, wantCustom, 4), 2000);
     await tabC.screenshot({ path: path.join(OUT, "crosstab_4_tabC_BL.png") }).catch(() => {});
     const ok = Boolean(
-      fsettled?.open &&
+      navB.f?.open &&
+        navB.framesDelta > 0 &&
+        navB.std > 5 &&
+        fsettled?.open &&
         fsettled.videoWidth > 0 &&
         near(fsettled.rect, wantCustom, 4) &&
         Math.abs(fsettled.opacity - 0.6) < 0.02 &&
@@ -313,7 +320,7 @@ try {
     );
     return {
       ok,
-      info: `open=${fsettled?.open} size=${fsettled?.size.w}x${fsettled?.size.h} rect=${fmt(fsettled?.rect)} want=${fmt(wantCustom)} opacity=${fsettled?.opacity} framesDelta=${framesDelta} std=${std}`,
+      info: `navB=(framesDelta=${navB.framesDelta},std=${navB.std}) tabC=(open=${fsettled?.open} size=${fsettled?.size.w}x${fsettled?.size.h} rect=${fmt(fsettled?.rect)} opacity=${fsettled?.opacity} framesDelta=${framesDelta} std=${std})`,
     };
   });
 

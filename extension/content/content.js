@@ -109,22 +109,6 @@
     return next;
   }
 
-  function waitIceComplete(pc, timeoutMs = 800) {
-    if (pc.iceGatheringState === "complete") return Promise.resolve();
-    return new Promise((resolve) => {
-      const done = () => {
-        pc.removeEventListener("icegatheringstatechange", check);
-        clearTimeout(timer);
-        resolve();
-      };
-      const check = () => {
-        if (pc.iceGatheringState === "complete") done();
-      };
-      const timer = setTimeout(done, timeoutMs);
-      pc.addEventListener("icegatheringstatechange", check);
-    });
-  }
-
   const BASE_CSS = `
     .bar { display: flex; gap: 6px; font: 600 13px/1 system-ui, "Malgun Gothic", sans-serif; color: #fff; }
     button { all: unset; cursor: pointer; padding: 7px 10px; border-radius: 6px; white-space: nowrap;
@@ -602,58 +586,121 @@
       style: video.hasAttribute("style"),
     };
     const floating = enterFloating({ video, isRemote: false }, leave);
-    let pc = null;
-    let activeConnId = 0;
-    let senderTracks = [];
+    const capCanvas = document.createElement("canvas");
+    const capCtx = capCanvas.getContext("2d", { alpha: false });
+    let alive = true;
+    let senderPort = null;
+    let keepAlivePc1 = null;
+    let keepAlivePc2 = null;
+    let keepAliveSink = null;
+    let keepAliveTracks = [];
 
-    function stopSender() {
-      activeConnId = 0;
-      if (pc) {
-        pc.close();
-        pc = null;
+    function stopKeepAlive() {
+      if (keepAlivePc1) {
+        keepAlivePc1.close();
+        keepAlivePc1 = null;
       }
-      for (const t of senderTracks) t.stop();
-      senderTracks = [];
+      if (keepAlivePc2) {
+        keepAlivePc2.close();
+        keepAlivePc2 = null;
+      }
+      if (keepAliveSink) {
+        keepAliveSink.srcObject = null;
+        keepAliveSink = null;
+      }
+      for (const t of keepAliveTracks) t.stop();
+      keepAliveTracks = [];
+    }
+
+    // Chromium's WebMediaPlayerImpl suspends the video decoder when a tab is hidden unless an active
+    // captureStream() WebRTC sink is attached while the tab is still visible.
+    async function startKeepAlive() {
+      stopKeepAlive();
+      if (!alive || video.mediaKeys) return;
+      try {
+        const stream = video.captureStream();
+        keepAliveTracks = stream.getVideoTracks();
+        if (!keepAliveTracks.length) return;
+        const pc1 = new RTCPeerConnection();
+        const pc2 = new RTCPeerConnection();
+        keepAlivePc1 = pc1;
+        keepAlivePc2 = pc2;
+        pc1.onicecandidate = (e) => e.candidate && pc2.addIceCandidate(e.candidate).catch(() => {});
+        pc2.onicecandidate = (e) => e.candidate && pc1.addIceCandidate(e.candidate).catch(() => {});
+        const sink = document.createElement("video");
+        sink.muted = true;
+        sink.playsInline = true;
+        keepAliveSink = sink;
+        pc2.ontrack = (e) => {
+          sink.srcObject = e.streams[0] ?? new MediaStream([e.track]);
+          sink.play().catch(() => {});
+        };
+        for (const t of keepAliveTracks) pc1.addTrack(t, stream);
+        const offer = await pc1.createOffer();
+        await pc1.setLocalDescription(offer);
+        await pc2.setRemoteDescription(offer);
+        const answer = await pc2.createAnswer();
+        await pc2.setLocalDescription(answer);
+        await pc1.setRemoteDescription(answer);
+      } catch {}
+    }
+
+    function captureFrame() {
+      if (!alive || !senderPort) return;
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      if (!vw || !vh) return;
+      const cw = Math.min(560, vw);
+      const ch = Math.max(1, Math.round((cw * vh) / vw));
+      if (capCanvas.width !== cw || capCanvas.height !== ch) {
+        capCanvas.width = cw;
+        capCanvas.height = ch;
+      }
+      try {
+        capCtx.drawImage(video, 0, 0, cw, ch);
+        const dataUrl = capCanvas.toDataURL("image/jpeg", 0.78);
+        senderPort.postMessage({ type: "FRAME", dataUrl, vw, vh });
+      } catch {}
+    }
+
+    function connectSender() {
+      if (!alive || senderPort) return;
+      try {
+        const port = chrome.runtime.connect({ name: "ghostpip-sender" });
+        senderPort = port;
+        port.onMessage.addListener((msg) => {
+          if (msg?.type === "PULL_FRAME") captureFrame();
+        });
+        port.onDisconnect.addListener(() => {
+          void chrome.runtime.lastError;
+          if (senderPort === port) senderPort = null;
+        });
+      } catch {}
     }
 
     const onLoadedData = () => {
-      if (!pc) return;
-      for (const t of senderTracks) t.stop();
-      try {
-        const stream = video.captureStream();
-        senderTracks = stream.getTracks();
-        const track = stream.getVideoTracks()[0];
-        const sender = pc.getSenders().find((s) => !s.track || s.track.kind === "video");
-        if (sender && track) sender.replaceTrack(track).catch(() => {});
-      } catch {}
+      if (alive) startKeepAlive();
     };
     video.addEventListener("loadeddata", onLoadedData);
+    startKeepAlive();
+    connectSender();
 
-    async function createOffer(connId) {
-      stopSender();
-      activeConnId = connId;
-      const nextPc = new RTCPeerConnection({ iceServers: [] });
-      pc = nextPc;
-      const stream = video.captureStream();
-      senderTracks = stream.getTracks();
-      for (const t of stream.getVideoTracks()) nextPc.addTrack(t, stream);
-      const offer = await nextPc.createOffer();
-      await nextPc.setLocalDescription(offer);
-      await waitIceComplete(nextPc);
-      if (pc !== nextPc || activeConnId !== connId) return { ok: false };
+    function querySource() {
+      connectSender();
       const ratio = video.videoWidth ? video.videoHeight / video.videoWidth : 9 / 16;
-      return { ok: true, sdp: nextPc.localDescription.sdp, ratio };
-    }
-
-    async function acceptAnswer(connId, sdp) {
-      if (!pc || activeConnId !== connId) return { ok: false };
-      await pc.setRemoteDescription({ type: "answer", sdp });
-      return { ok: true };
+      return { ok: true, ratio };
     }
 
     function exit() {
+      alive = false;
       video.removeEventListener("loadeddata", onLoadedData);
-      stopSender();
+      if (senderPort) {
+        try {
+          senderPort.disconnect();
+        } catch {}
+        senderPort = null;
+      }
+      stopKeepAlive();
       send({ type: "INTAB_CLOSED" });
       floating.exit();
       if (original.popover === null) video.removeAttribute("popover");
@@ -672,58 +719,131 @@
       exit,
       settingsChanged: floating.settingsChanged,
       layoutChanged: floating.layoutChanged,
-      createOffer,
-      acceptAnswer,
-      stopSender,
+      querySource,
+      connectSender,
     };
   }
 
-  function enterRemoteInTab({ sdp, ratio }, leave) {
-    const video = h("video", {
+  function enterRemoteInTab({ ratio }, leave) {
+    const initRatio = ratio || 9 / 16;
+    const canvas = h("canvas", {
       class: FLOAT_CLASS,
       "data-gp-remote": "",
       popover: "manual",
-      muted: "",
-      autoplay: "",
-      playsinline: "",
     });
-    video.muted = true;
-    video.autoplay = true;
-    video.playsInline = true;
-    document.documentElement.append(video);
+    canvas.width = DEFAULT_FLOAT_WIDTH;
+    canvas.height = Math.max(1, Math.round(DEFAULT_FLOAT_WIDTH * initRatio));
+    canvas.videoWidth = canvas.width;
+    canvas.videoHeight = canvas.height;
+    let framesRendered = 0;
+    canvas.getVideoPlaybackQuality = () => ({ totalVideoFrames: framesRendered });
+    const ctx2d = canvas.getContext("2d", { alpha: false });
+    document.documentElement.append(canvas);
 
-    const pc = new RTCPeerConnection({ iceServers: [] });
-    pc.ontrack = (e) => {
-      video.srcObject = e.streams[0] ?? new MediaStream([e.track]);
-      video.play().catch(() => {});
-    };
+    const floating = enterFloating({ video: canvas, ratioFallback: initRatio, isRemote: true }, leave);
 
-    const floating = enterFloating({ video, ratioFallback: ratio || 9 / 16, isRemote: true }, leave);
+    let alive = true;
+    let receiverPort = null;
+    let pulling = false;
+    let lastPullAt = 0;
+    let pullTimer = null;
 
-    const ready = (async () => {
-      await pc.setRemoteDescription({ type: "offer", sdp });
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      await waitIceComplete(pc);
-      return { ok: true, sdp: pc.localDescription.sdp };
-    })().catch((e) => {
-      leave();
-      return { ok: false, error: String(e) };
-    });
+    function requestFrame() {
+      if (!alive) return;
+      if (!receiverPort) connectReceiver();
+      if (!receiverPort) return;
+      const now = performance.now();
+      if (pulling && now - lastPullAt < 250) return;
+      pulling = true;
+      lastPullAt = now;
+      try {
+        receiverPort.postMessage({ type: "PULL_FRAME" });
+      } catch {
+        pulling = false;
+      }
+    }
+
+    async function handleFrame(msg) {
+      if (!alive || !msg?.dataUrl) return;
+      try {
+        const comma = msg.dataUrl.indexOf(",");
+        const b64 = comma >= 0 ? msg.dataUrl.slice(comma + 1) : msg.dataUrl;
+        const bin = atob(b64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const bmp = await createImageBitmap(new Blob([bytes], { type: "image/jpeg" }));
+        if (!alive) {
+          bmp.close();
+          return;
+        }
+        if (canvas.width !== bmp.width || canvas.height !== bmp.height) {
+          canvas.width = bmp.width;
+          canvas.height = bmp.height;
+        }
+        const aspectChanged =
+          msg.vw > 0 && msg.vh > 0 && (canvas.videoWidth !== msg.vw || canvas.videoHeight !== msg.vh);
+        if (msg.vw > 0 && msg.vh > 0) {
+          canvas.videoWidth = msg.vw;
+          canvas.videoHeight = msg.vh;
+          canvas.dataset.gpVw = String(msg.vw);
+          canvas.dataset.gpVh = String(msg.vh);
+        }
+        ctx2d.drawImage(bmp, 0, 0);
+        bmp.close();
+        framesRendered++;
+        canvas.dataset.gpFrames = String(framesRendered);
+        if (aspectChanged) canvas.dispatchEvent(new Event("resize"));
+      } catch {}
+      pulling = false;
+      if (alive) {
+        clearTimeout(pullTimer);
+        pullTimer = setTimeout(requestFrame, 33);
+      }
+    }
+
+    function connectReceiver() {
+      if (!alive || receiverPort) return;
+      try {
+        const port = chrome.runtime.connect({ name: "ghostpip-receiver" });
+        receiverPort = port;
+        port.onMessage.addListener((msg) => {
+          if (msg?.type === "FRAME") handleFrame(msg);
+        });
+        port.onDisconnect.addListener(() => {
+          void chrome.runtime.lastError;
+          if (receiverPort === port) {
+            receiverPort = null;
+            pulling = false;
+          }
+        });
+      } catch {}
+    }
+
+    connectReceiver();
+    requestFrame();
+    const watchdog = setInterval(requestFrame, 120);
 
     function exit() {
-      pc.close();
-      video.srcObject = null;
+      alive = false;
+      clearInterval(watchdog);
+      clearTimeout(pullTimer);
+      if (receiverPort) {
+        try {
+          receiverPort.disconnect();
+        } catch {}
+        receiverPort = null;
+      }
       floating.exit();
-      video.remove();
+      canvas.remove();
     }
 
     return {
-      video,
+      video: canvas,
       exit,
       settingsChanged: floating.settingsChanged,
       layoutChanged: floating.layoutChanged,
-      ready,
+      kick: requestFrame,
+      ready: Promise.resolve({ ok: true }),
     };
   }
 
@@ -930,8 +1050,13 @@
   function scan() {
     if (location.href !== ctx.url) {
       ctx.url = location.href;
-      ctx.video = null;
-      go("idle");
+      if (current.name === "idle") {
+        ctx.video = null;
+        go("idle");
+      } else if (current.video && !current.video.isConnected) {
+        ctx.video = null;
+        go("idle");
+      }
       loadSite();
       return;
     }
@@ -972,16 +1097,12 @@
   }
 
   const MSG_HANDLERS = {
-    async RTC_CREATE_OFFER({ connId }) {
-      if (current.name !== "inTab" || !current.createOffer) return { ok: false };
-      return current.createOffer(connId);
+    async INTAB_QUERY_SOURCE() {
+      if (current.name !== "inTab" || !current.querySource) return { ok: false };
+      return current.querySource();
     },
-    async RTC_ACCEPT_ANSWER({ connId, sdp }) {
-      if (current.name !== "inTab" || !current.acceptAnswer) return { ok: false };
-      return current.acceptAnswer(connId, sdp);
-    },
-    async RTC_STOP_SENDER() {
-      if (current.name === "inTab") current.stopSender?.();
+    async INTAB_RECONNECT_SENDER() {
+      if (current.name === "inTab") current.connectSender?.();
       return { ok: true };
     },
     async INTAB_FORCE_IDLE() {
@@ -990,7 +1111,11 @@
     },
     async REMOTE_INTAB_START(msg) {
       await settingsReady;
-      if (current.name !== "idle" && current.name !== "remoteInTab") return { ok: false };
+      if (current.name === "remoteInTab" && current.video?.isConnected) {
+        current.kick?.();
+        return { ok: true };
+      }
+      if (current.name !== "idle") return { ok: false };
       go("remoteInTab", msg);
       return current.name === "remoteInTab" && current.ready ? current.ready : { ok: false };
     },
