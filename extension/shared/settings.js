@@ -1,8 +1,8 @@
 (() => {
-  const CORNERS = ["TL", "TR", "BL", "BR"];
+  const CORNERS = Object.freeze(["TL", "TR", "BL", "BR"]);
 
   // Same rule as SPEC 3.3 / content/dodge.js isValidDodge. Duplicated so the service worker
-  // can validate stored settings without loading the content-side solver.
+  // and popup can validate settings without loading the content-side solver.
   const PAIRS = {
     free: [["TL", "TR"], ["TL", "BL"], ["TL", "BR"], ["TR", "BL"], ["TR", "BR"], ["BL", "BR"]],
     vertical: [["TL", "BL"], ["TR", "BR"]],
@@ -38,14 +38,18 @@
     return typeof val === "number" && !Number.isFinite(val) ? def : val;
   }
 
-  function validDodge(d) {
+  function isValidDodge(allowed, axis, home) {
     return (
-      Object.hasOwn(PAIRS, d.axis) &&
-      ["move", "fade"].includes(d.style) &&
-      d.allowed.every((c) => CORNERS.includes(c)) &&
-      d.allowed.includes(d.home) &&
-      PAIRS[d.axis].some(([a, b]) => d.allowed.includes(a) && d.allowed.includes(b))
+      Array.isArray(allowed) &&
+      Object.hasOwn(PAIRS, axis) &&
+      allowed.every((c) => CORNERS.includes(c)) &&
+      allowed.includes(home) &&
+      PAIRS[axis].some(([a, b]) => allowed.includes(a) && allowed.includes(b))
     );
+  }
+
+  function validDodge(d) {
+    return ["move", "fade"].includes(d.style) && isValidDodge(d.allowed, d.axis, d.home);
   }
 
   function merge(stored) {
@@ -56,5 +60,27 @@
     return s;
   }
 
-  globalThis.GhostPiPSettings = { DEFAULTS, merge };
+  function patch(current, partial) {
+    const base = merge(current);
+    if (!partial || typeof partial !== "object" || Array.isArray(partial)) {
+      return { ok: false, settings: base };
+    }
+    if (partial.dodge && "allowed" in partial.dodge && !Array.isArray(partial.dodge.allowed)) {
+      return { ok: false, settings: base };
+    }
+    const raw = {
+      ...base,
+      ...partial,
+      dodge: { ...base.dodge, ...(partial.dodge && typeof partial.dodge === "object" ? partial.dodge : {}) },
+      hotkeys: { ...base.hotkeys, ...(partial.hotkeys && typeof partial.hotkeys === "object" ? partial.hotkeys : {}) },
+    };
+    const next = shaped(base, raw);
+    next.opacity = Math.min(1, Math.max(0.1, next.opacity));
+    if (!validDodge(next.dodge) || !["Ctrl+Alt", "Ctrl+Shift"].includes(next.hotkeys.hold)) {
+      return { ok: false, settings: base };
+    }
+    return { ok: true, settings: next };
+  }
+
+  globalThis.GhostPiPSettings = { CORNERS, DEFAULTS, isValidDodge, merge, patch };
 })();

@@ -13,6 +13,25 @@
     "https://*.twitch.tv/*"
   ],
   "background": { "service_worker": "background.js" },
+  "action": {
+    "default_title": "GhostPiP",
+    "default_popup": "popup/popup.html"
+  },
+  "commands": {
+    "_execute_action": {},
+    "toggle-click-through": {
+      "suggested_key": { "default": "Alt+G" },
+      "description": "클릭 통과 (Ghost Mode) 토글"
+    },
+    "toggle-dodge": {
+      "suggested_key": { "default": "Alt+Shift+D" },
+      "description": "스마트 자동 회피 토글"
+    },
+    "toggle-mute": {
+      "suggested_key": { "default": "Alt+M" },
+      "description": "영상 탭 음소거 토글"
+    }
+  },
   "content_scripts": [
     {
       "matches": [

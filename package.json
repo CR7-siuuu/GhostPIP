@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "test:unit": "node --test \"test/unit/*.test.mjs\"",
-    "test:e2e": "node test/e2e/run.mjs"
+    "test:e2e": "node test/e2e/run.mjs",
+    "test:popup": "node test/e2e/popup.mjs"
   },
   "author": "",
   "license": "ISC",

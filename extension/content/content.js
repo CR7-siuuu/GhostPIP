@@ -139,8 +139,7 @@
   }
 
   function persistHome(corner) {
-    const s = ctx.settings;
-    chrome.storage.local.set({ settings: { ...s, dodge: { ...s.dodge, home: corner } } }).catch(() => {});
+    send({ type: "PATCH_SETTINGS", patch: { dodge: { home: corner } } });
   }
 
   function enterIdle() {

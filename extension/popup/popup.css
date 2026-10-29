@@ -1,0 +1,161 @@
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 12px;
+  width: 320px;
+  background: #141519;
+  color: #e9eaf0;
+  font: 13px/1.4 system-ui, "Malgun Gothic", sans-serif;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.badge {
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #2b2d36;
+  color: #b8bcc8;
+}
+
+.badge[data-active] {
+  background: #194d33;
+  color: #6ee7b7;
+}
+
+.card {
+  background: #1e2028;
+  border: 1px solid #2d303c;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 0;
+}
+
+kbd {
+  font-size: 11px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #2b2e3b;
+  color: #a9b0c2;
+}
+
+.slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#opacity {
+  width: 120px;
+}
+
+#opacityValue {
+  min-width: 36px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.btn {
+  width: 100%;
+  margin-top: 6px;
+  padding: 7px 10px;
+  border: 1px solid #353947;
+  border-radius: 6px;
+  background: #282c37;
+  color: #e9eaf0;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #323746;
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+  user-select: none;
+}
+
+.details-body {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #2d303c;
+}
+
+.field {
+  margin-bottom: 8px;
+}
+
+.corner-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.corner-grid label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #262934;
+}
+
+select {
+  padding: 4px 6px;
+  border-radius: 5px;
+  border: 1px solid #383c4a;
+  background: #262934;
+  color: #e9eaf0;
+  font: inherit;
+}
+
+.tip {
+  margin: 0 0 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #1a1c23;
+  color: #a5acbe;
+  font-size: 12px;
+}
+
+.banner {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #3b4b75;
+  background: #1b2438;
+  color: #93c5fd;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}

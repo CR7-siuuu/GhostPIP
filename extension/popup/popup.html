@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>GhostPiP</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="header">
+      <h1>GhostPiP</h1>
+      <span id="modeBadge" class="badge">In-Tab Mode</span>
+    </header>
+
+    <section class="card">
+      <label class="row">
+        <span>클릭 통과 (Ghost Mode) <kbd>Alt+G</kbd></span>
+        <input id="clickThrough" type="checkbox" />
+      </label>
+
+      <label class="row">
+        <span>스마트 자동 회피 <kbd>Alt+Shift+D</kbd></span>
+        <input id="dodgeEnabled" type="checkbox" />
+      </label>
+
+      <div class="row">
+        <label for="opacity">투명도</label>
+        <div class="slider-wrap">
+          <input id="opacity" type="range" min="10" max="100" step="5" value="70" />
+          <span id="opacityValue">70%</span>
+        </div>
+      </div>
+
+      <button id="toggleMute" type="button" class="btn">음소거 토글 (Alt+M)</button>
+    </section>
+
+    <details id="dodgeDetails" class="card">
+      <summary>회피 상세 설정</summary>
+      <div class="details-body">
+        <div class="field" title="미니맵 위치의 코너를 해제하면 해당 위치로 피하지 않습니다">
+          <span>허용 코너 (금지 코너 해제)</span>
+          <div class="corner-grid">
+            <label title="미니맵 위치의 코너를 해제하면 해당 위치로 피하지 않습니다">
+              <input type="checkbox" data-corner="TL" /> TL (좌상)
+            </label>
+            <label title="미니맵 위치의 코너를 해제하면 해당 위치로 피하지 않습니다">
+              <input type="checkbox" data-corner="TR" /> TR (우상)
+            </label>
+            <label title="미니맵 위치의 코너를 해제하면 해당 위치로 피하지 않습니다">
+              <input type="checkbox" data-corner="BL" /> BL (좌하)
+            </label>
+            <label title="미니맵 위치의 코너를 해제하면 해당 위치로 피하지 않습니다">
+              <input type="checkbox" data-corner="BR" /> BR (우하)
+            </label>
+          </div>
+        </div>
+
+        <label class="row">
+          <span>기본 코너 (Home)</span>
+          <select id="home">
+            <option value="TL">TL (좌상)</option>
+            <option value="TR">TR (우상)</option>
+            <option value="BL">BL (좌하)</option>
+            <option value="BR">BR (우하)</option>
+          </select>
+        </label>
+
+        <label class="row">
+          <span>회피 축</span>
+          <select id="axis">
+            <option value="free">자유 (4방향)</option>
+            <option value="vertical">수직 (상하)</option>
+            <option value="horizontal">수평 (좌우)</option>
+          </select>
+        </label>
+
+        <label class="row">
+          <span>회피 방식</span>
+          <select id="style">
+            <option value="move">코너 이동 (Move)</option>
+            <option value="fade">투명화 (Fade)</option>
+          </select>
+        </label>
+
+        <label class="row">
+          <span>자동 복귀 (Auto-Return)</span>
+          <input id="autoReturn" type="checkbox" />
+        </label>
+
+        <label class="row">
+          <span>조작 홀드 키</span>
+          <select id="hold">
+            <option value="Ctrl+Alt">Ctrl+Alt</option>
+            <option value="Ctrl+Shift">Ctrl+Shift</option>
+          </select>
+        </label>
+      </div>
+    </details>
+
+    <p class="tip">
+      클릭 통과 중 <strong>Ctrl + Alt</strong>를 누르고 있으면 창을 마우스로 잡고 이동할 수 있습니다.
+      관리자 권한 게임 위에서는 <strong>Alt+G</strong>로 조작 모드를 켜고 끄세요.
+    </p>
+
+    <div id="engineBanner" class="banner">
+      GhostPiP Engine 다운로드 (PC 게임 오버레이 활성화)
+    </div>
+
+    <script src="../shared/settings.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

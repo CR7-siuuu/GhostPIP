@@ -1,13 +1,27 @@
 importScripts("shared/settings.js");
 
 const GENERIC_SITE = { siteId: "generic", site: { video: null, chatPopoutUrl: null } };
+const DEFAULT_ENGINE = { connected: false, engineVersion: null, elevated: false, hotkeyErrors: [] };
 
-chrome.runtime.onInstalled.addListener(async () => {
-  const { settings } = await chrome.storage.local.get("settings");
-  if (!settings) await chrome.storage.local.set({ settings: GhostPiPSettings.DEFAULTS });
-});
-
+let settingsQueue = Promise.resolve();
+let pipQueue = Promise.resolve();
 let sitesPromise = null;
+
+function updateSettings(mutator) {
+  const run = settingsQueue.then(async () => {
+    const { settings } = await chrome.storage.local.get("settings");
+    const current = GhostPiPSettings.merge(settings);
+    const res = mutator(current);
+    if (res.ok) await chrome.storage.local.set({ settings: res.settings });
+    return res;
+  });
+  settingsQueue = run.catch(() => {});
+  return run;
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+  updateSettings((s) => ({ ok: true, settings: s }));
+});
 
 function loadSites() {
   sitesPromise ??= fetch(chrome.runtime.getURL("config/selectors.json"))
@@ -24,12 +38,74 @@ function loadSites() {
 }
 
 // Single place PiP lifecycle lands; Phase 4 also forwards these to the engine port from here.
-async function pipChanged(tabId, entry) {
-  const { pip = {} } = await chrome.storage.session.get("pip");
-  if (entry) pip[tabId] = entry;
-  else delete pip[tabId];
-  await chrome.storage.session.set({ pip });
+function pipChanged(tabId, entry) {
+  const run = pipQueue.then(async () => {
+    const { pip = {} } = await chrome.storage.session.get("pip");
+    if (entry) pip[tabId] = entry;
+    else delete pip[tabId];
+    await chrome.storage.session.set({ pip });
+  });
+  pipQueue = run.catch(() => {});
+  return run;
 }
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  pipChanged(tabId, null);
+});
+
+async function findMuteTargetTab() {
+  const { pip = {} } = await chrome.storage.session.get("pip");
+  const pipIds = Object.keys(pip).map(Number).filter(Number.isFinite);
+  for (let i = pipIds.length - 1; i >= 0; i--) {
+    try {
+      return await chrome.tabs.get(pipIds[i]);
+    } catch {}
+  }
+  const tabs = await chrome.tabs.query({});
+  const webTabs = tabs.filter((t) => t.id != null && (!t.url || /^https?:/i.test(t.url)));
+  const sites = await loadSites().catch(() => []);
+  const isSite = (t) => Boolean(t.url) && sites.some(({ re }) => re.test(t.url));
+  return (
+    webTabs.find((t) => t.active && isSite(t)) ||
+    webTabs.find((t) => t.audible && isSite(t)) ||
+    webTabs.find(isSite) ||
+    webTabs.find((t) => t.active) ||
+    webTabs.find((t) => t.audible) ||
+    webTabs[0] ||
+    null
+  );
+}
+
+const INTENTS = {
+  TOGGLE_CLICK_THROUGH: () =>
+    updateSettings((s) => GhostPiPSettings.patch(s, { clickThrough: !s.clickThrough })),
+  TOGGLE_DODGE: () =>
+    updateSettings((s) => GhostPiPSettings.patch(s, { dodge: { enabled: !s.dodge.enabled } })),
+  TOGGLE_MUTE: async () => {
+    const tab = await findMuteTargetTab();
+    if (!tab) return { ok: false };
+    const muted = !tab.mutedInfo?.muted;
+    const updated = await chrome.tabs.update(tab.id, { muted });
+    return { ok: true, tabId: tab.id, muted: updated?.mutedInfo?.muted ?? muted };
+  },
+};
+
+const COMMAND_TO_INTENT = {
+  "toggle-click-through": "TOGGLE_CLICK_THROUGH",
+  "toggle-dodge": "TOGGLE_DODGE",
+  "toggle-mute": "TOGGLE_MUTE",
+};
+
+function dispatchCommand(command) {
+  const intent = COMMAND_TO_INTENT[command];
+  return intent ? INTENTS[intent]() : Promise.resolve({ ok: false });
+}
+
+globalThis.GhostPiPBackground = { dispatchCommand };
+
+chrome.commands.onCommand.addListener((command) => {
+  dispatchCommand(command);
+});
 
 const handlers = {
   async GET_SITE_CONFIG({ url }) {
@@ -43,6 +119,24 @@ const handlers = {
   async PIP_CLOSED(_msg, sender) {
     await pipChanged(sender.tab.id, null);
     return { ok: true };
+  },
+  async GET_STATE() {
+    const [{ settings }, { pip = {}, engine }] = await Promise.all([
+      chrome.storage.local.get("settings"),
+      chrome.storage.session.get(["pip", "engine"]),
+    ]);
+    return {
+      settings: GhostPiPSettings.merge(settings),
+      pip,
+      engine: { ...DEFAULT_ENGINE, ...(engine && typeof engine === "object" ? engine : {}) },
+    };
+  },
+  async PATCH_SETTINGS({ patch }) {
+    return updateSettings((current) => GhostPiPSettings.patch(current, patch));
+  },
+  async INTENT({ intent }) {
+    const fn = INTENTS[intent];
+    return fn ? fn() : { ok: false };
   },
 };
 

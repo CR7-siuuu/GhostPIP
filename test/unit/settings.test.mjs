@@ -5,12 +5,13 @@ import vm from "node:vm";
 
 const sandbox = {};
 vm.runInNewContext(fs.readFileSync(new URL("../../extension/shared/settings.js", import.meta.url), "utf8"), sandbox);
-const { DEFAULTS, merge } = sandbox.GhostPiPSettings;
+const { CORNERS, DEFAULTS, isValidDodge, merge, patch } = sandbox.GhostPiPSettings;
 const plain = (v) => JSON.parse(JSON.stringify(v));
 
 test("missing or garbage storage yields defaults", () => {
   assert.deepEqual(plain(merge(undefined)), plain(DEFAULTS));
   assert.deepEqual(plain(merge("nope")), plain(DEFAULTS));
+  assert.deepEqual(plain(CORNERS), ["TL", "TR", "BL", "BR"]);
 });
 
 test("stored values override defaults field by field", () => {
@@ -46,4 +47,43 @@ test("dodge that breaks the corner invariant falls back to default dodge", () =>
 test("merge never aliases DEFAULTS", () => {
   merge(undefined).dodge.allowed.push("TL");
   assert.equal(DEFAULTS.dodge.allowed.length, 4);
+});
+
+test("isValidDodge enforces home in allowed and at least one axis-aligned pair", () => {
+  assert.equal(isValidDodge(["TL", "TR", "BL", "BR"], "free", "BR"), true);
+  assert.equal(isValidDodge(["TR", "BR"], "vertical", "BR"), true);
+  assert.equal(isValidDodge(["TL", "BR"], "vertical", "BR"), false);
+  assert.equal(isValidDodge(["TL", "BL"], "vertical", "BR"), false);
+  assert.equal(isValidDodge(["TL", "TR"], "horizontal", "TL"), true);
+  assert.equal(isValidDodge(["TL", "BL"], "horizontal", "TL"), false);
+  assert.equal(isValidDodge(["BR"], "free", "BR"), false);
+});
+
+test("patch merges valid partial fields and rejects invariant violations without clobbering existing settings", () => {
+  const initial = merge({
+    clickThrough: true,
+    opacity: 0.55,
+    dodge: { allowed: ["TR", "BR"], axis: "vertical", home: "BR", autoReturn: false },
+  });
+
+  const ok1 = patch(initial, { opacity: 0.85, dodge: { home: "TR" } });
+  assert.equal(ok1.ok, true);
+  assert.equal(ok1.settings.clickThrough, true);
+  assert.equal(ok1.settings.opacity, 0.85);
+  assert.equal(ok1.settings.dodge.home, "TR");
+  assert.equal(ok1.settings.dodge.axis, "vertical");
+  assert.deepEqual(plain(ok1.settings.dodge.allowed), ["TR", "BR"]);
+  assert.equal(ok1.settings.dodge.autoReturn, false);
+
+  const badCorner = patch(ok1.settings, { dodge: { allowed: ["TR"] } });
+  assert.equal(badCorner.ok, false);
+  assert.deepEqual(plain(badCorner.settings), plain(ok1.settings));
+
+  const badAxis = patch(ok1.settings, { dodge: { axis: "horizontal" } });
+  assert.equal(badAxis.ok, false);
+  assert.deepEqual(plain(badAxis.settings), plain(ok1.settings));
+
+  const badHome = patch(ok1.settings, { dodge: { home: "TL" } });
+  assert.equal(badHome.ok, false);
+  assert.deepEqual(plain(badHome.settings), plain(ok1.settings));
 });
