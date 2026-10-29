@@ -10,6 +10,7 @@ public sealed unsafe class PipTracker : IDisposable
     private const uint WINEVENT_OUTOFCONTEXT = 0x0000;
     private const uint WINEVENT_SKIPOWNPROCESS = 0x0002;
     private const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
+    private const nint WS_EX_TOOLWINDOW = 0x00000080;
     private const long OpenRetryTimeoutMs = 1000;
     private const long AutoDetectIntervalMs = 500;
 
@@ -51,6 +52,9 @@ public sealed unsafe class PipTracker : IDisposable
 
     [DllImport("user32.dll", EntryPoint = "GetClassNameW", CharSet = CharSet.Unicode)]
     private static extern int GetClassNameW(nint hWnd, char* lpClassName, int nMaxCount);
+
+    [DllImport("user32.dll", EntryPoint = "GetWindowTextLengthW", CharSet = CharSet.Unicode)]
+    private static extern int GetWindowTextLengthW(nint hWnd);
 
     [DllImport("user32.dll")]
     private static extern uint GetWindowThreadProcessId(nint hWnd, out uint lpdwProcessId);
@@ -226,18 +230,16 @@ public sealed unsafe class PipTracker : IDisposable
     private void TryAutoDetect()
     {
         string? testClass = Environment.GetEnvironmentVariable("GHOSTPIP_TEST_CLASS");
-        bool hasTestClass = !string.IsNullOrEmpty(testClass);
+        if (string.IsNullOrEmpty(testClass))
+            return;
 
         var candidates = CollectCandidates();
-        foreach (var (hwnd, rect) in candidates)
+        foreach (var (hwnd, _) in candidates)
         {
-            if (hasTestClass || (rect.W <= 1200 && rect.H <= 900))
-            {
-                BoundHwnd = hwnd;
-                BoundTabId = -1;
-                BoundKind = "native";
-                return;
-            }
+            BoundHwnd = hwnd;
+            BoundTabId = -1;
+            BoundKind = "native";
+            return;
         }
     }
 
@@ -354,6 +356,12 @@ public sealed unsafe class PipTracker : IDisposable
             return true;
 
         if (!string.Equals(className, "Chrome_WidgetWin_1", StringComparison.Ordinal))
+            return false;
+
+        if ((exStyle & WS_EX_TOOLWINDOW) != 0)
+            return false;
+
+        if (GetWindowTextLengthW(hwnd) <= 0)
             return false;
 
         string? exeName = GetProcessExeName(hwnd);
