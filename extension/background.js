@@ -86,7 +86,7 @@ chrome.runtime.onConnect.addListener((port) => {
   if (port.name === "ghostpip-sender") {
     senderStreamPort = port;
     port.onMessage.addListener((msg) => {
-      if (msg?.type === "FRAME" && receiverStreamPort) {
+      if (receiverStreamPort && msg) {
         try {
           receiverStreamPort.postMessage(msg);
         } catch {}
@@ -98,16 +98,15 @@ chrome.runtime.onConnect.addListener((port) => {
   } else if (port.name === "ghostpip-receiver") {
     receiverStreamPort = port;
     port.onMessage.addListener((msg) => {
-      if (msg?.type === "PULL_FRAME") {
-        if (senderStreamPort) {
-          try {
-            senderStreamPort.postMessage({ type: "PULL_FRAME" });
-          } catch {}
-        } else {
-          getInTab().then((s) => {
-            if (s?.sourceTabId) sendTab(s.sourceTabId, { type: "INTAB_RECONNECT_SENDER" });
-          });
-        }
+      if (!msg) return;
+      if (senderStreamPort) {
+        try {
+          senderStreamPort.postMessage(msg);
+        } catch {}
+      } else {
+        getInTab().then((s) => {
+          if (s?.sourceTabId) sendTab(s.sourceTabId, { type: "INTAB_RECONNECT_SENDER" });
+        });
       }
     });
     port.onDisconnect.addListener(() => {

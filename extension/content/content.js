@@ -12,7 +12,6 @@
   const DODGE_TICK_MS = 50;
   const SCAN_THROTTLE_MS = 250;
   const PIP_CHAT_HEIGHT = 420;
-  const PIP_TOGGLE_HEIGHT = 28;
   const GP_VARS = ["--gp-x", "--gp-y", "--gp-w", "--gp-h", "--gp-opacity"];
   const RESIZE_DIRS = ["nw", "ne", "sw", "se", "n", "s", "e", "w"];
   const HOLD = {
@@ -157,10 +156,14 @@
     .handle.ne::after { top: 4px; right: 4px; }
     .handle.sw::after { bottom: 4px; left: 4px; }
     .handle.se::after { bottom: 4px; right: 4px; }
-    .bar { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 3; }
+    .bar { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 3;
+      opacity: 0; transition: opacity 0.15s ease; }
     .hud { position: absolute; bottom: 8px; left: 8px; z-index: 3; pointer-events: none;
       padding: 4px 8px; border-radius: 5px; background: rgba(18, 18, 22, 0.85); color: #fff;
-      font: 600 12px/1 system-ui, "Malgun Gothic", sans-serif; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45); }
+      font: 600 12px/1 system-ui, "Malgun Gothic", sans-serif; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+      opacity: 0; transition: opacity 0.15s ease; }
+    :host(:hover) .bar, :host([data-hovered]) .bar,
+    :host(:hover) .hud, :host([data-hovered]) .hud { opacity: 1; }
     :host([data-remote]) button[data-mode="local"],
     :host(:not([data-remote])) button[data-mode="remote"] { display: none; }`;
 
@@ -266,33 +269,63 @@
 
   function enterIdle() {
     const ac = new AbortController();
+    const on = { signal: ac.signal };
     let pointerOver = false;
+    let launcherOver = false;
+    let idleTimer = null;
 
     function update() {
       const r = ctx.video?.getBoundingClientRect();
       if (!r || r.width === 0) return launcher.hide();
       const anchor = { x: r.left + r.width / 2, y: Math.max(r.top, 0) + 6 };
-      // Pointer events over an iframe (e.g. Twitch's extension overlay covering the player) never reach
-      // this document, so a launcher spot covered by an iframe keeps the launcher pinned.
-      const below = document.elementsFromPoint(anchor.x, anchor.y + 10).find((el) => el !== launcher.host);
-      const pinned = below?.tagName === "IFRAME";
-      launcher.host.toggleAttribute("data-pinned", pinned && !pointerOver);
-      if (pointerOver || pinned) launcher.show({ x: px(anchor.x), y: px(anchor.y) });
+      if (pointerOver || launcherOver) launcher.show({ x: px(anchor.x), y: px(anchor.y) });
       else launcher.hide();
     }
+
+    function armIdleHide() {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        if (!launcherOver) {
+          pointerOver = false;
+          update();
+        }
+      }, 2000);
+    }
+
+    launcher.host.addEventListener("pointerenter", () => {
+      launcherOver = true;
+      clearTimeout(idleTimer);
+      update();
+    }, on);
+    launcher.host.addEventListener("pointerleave", () => {
+      launcherOver = false;
+      armIdleHide();
+      update();
+    }, on);
 
     window.addEventListener("pointermove", (e) => {
       if (!e.isTrusted) return;
       const r = ctx.video?.getBoundingClientRect();
       pointerOver = !!r && inside(r, e.clientX, e.clientY);
+      if (pointerOver) armIdleHide();
+      else clearTimeout(idleTimer);
       update();
-    }, { capture: true, signal: ac.signal });
+    }, { capture: true, ...on });
+
+    document.documentElement.addEventListener("mouseleave", () => {
+      pointerOver = false;
+      launcherOver = false;
+      clearTimeout(idleTimer);
+      update();
+    }, on);
+
     const timer = setInterval(update, 500);
 
     return {
       exit() {
         ac.abort();
         clearInterval(timer);
+        clearTimeout(idleTimer);
         launcher.hide();
       },
     };
@@ -358,6 +391,10 @@
       video.toggleAttribute("data-gp-pass", !interactive && ctx.settings.clickThrough);
       video.toggleAttribute("data-gp-drag", drag !== null);
       hudEl.textContent = `투명도 ${Math.round(ctx.settings.opacity * 100)}% (휠 조절) · ${w}×${h}`;
+      const hovered =
+        drag !== null ||
+        (cursor !== null && cursor.x >= r.l && cursor.x <= r.r && cursor.y >= r.t && cursor.y <= r.b);
+      controller.host.toggleAttribute("data-hovered", hovered);
       if (interactive) controller.show(geometry);
       else controller.hide();
     }
@@ -445,9 +482,13 @@
     window.addEventListener("pointermove", (e) => {
       if (!e.isTrusted) return;
       const prevInteractive = isInteractive();
+      const prevHovered = controller.host.hasAttribute("data-hovered");
       cursor = { x: e.clientX, y: e.clientY };
       holdFrom(e);
-      if (prevInteractive !== isInteractive()) render();
+      const r = rect();
+      const nowHovered =
+        drag !== null || (cursor.x >= r.l && cursor.x <= r.r && cursor.y >= r.t && cursor.y <= r.b);
+      if (prevInteractive !== isInteractive() || prevHovered !== nowHovered) render();
       tick();
     }, { capture: true, ...on });
 
@@ -605,6 +646,17 @@
     return { exit, settingsChanged, layoutChanged };
   }
 
+  function boostVideoSdp(sdp) {
+    if (typeof sdp !== "string") return sdp;
+    let out = sdp.replace(/(m=video .*\r\n)/, "$1b=AS:12000\r\n");
+    out = out.replace(
+      /(a=fmtp:\d+ )([^\r\n]*)/g,
+      (_m, p1, p2) =>
+        `${p1}${p2};x-google-min-bitrate=4000;x-google-start-bitrate=8000;x-google-max-bitrate=12000`,
+    );
+    return out;
+  }
+
   function enterInTab(_arg, leave) {
     const video = ctx.video;
     const original = {
@@ -621,8 +673,22 @@
     let keepAlivePc2 = null;
     let keepAliveSink = null;
     let keepAliveTracks = [];
+    let rtcPeer = null;
+    let rtcTrack = null;
+
+    function stopRtcPeer() {
+      if (rtcPeer) {
+        rtcPeer.close();
+        rtcPeer = null;
+      }
+      if (rtcTrack) {
+        rtcTrack.stop();
+        rtcTrack = null;
+      }
+    }
 
     function stopKeepAlive() {
+      stopRtcPeer();
       if (keepAlivePc1) {
         keepAlivePc1.close();
         keepAlivePc1 = null;
@@ -648,6 +714,7 @@
         const stream = video.captureStream();
         keepAliveTracks = stream.getVideoTracks();
         if (!keepAliveTracks.length) return;
+        for (const t of keepAliveTracks) t.contentHint = "detail";
         const pc1 = new RTCPeerConnection();
         const pc2 = new RTCPeerConnection();
         keepAlivePc1 = pc1;
@@ -672,12 +739,50 @@
       } catch {}
     }
 
-    function captureFrame() {
+    async function startRtcSender() {
+      stopRtcPeer();
+      if (!alive || !senderPort || video.mediaKeys) return;
+      try {
+        const baseTrack = keepAliveTracks[0] ?? video.captureStream().getVideoTracks()[0];
+        if (!baseTrack) return;
+        const track = baseTrack.clone();
+        track.contentHint = "detail";
+        rtcTrack = track;
+        const pc = new RTCPeerConnection();
+        rtcPeer = pc;
+        pc.onicecandidate = (e) => {
+          if (e.candidate && senderPort) {
+            try {
+              senderPort.postMessage({ type: "RTC_CANDIDATE", candidate: e.candidate.toJSON() });
+            } catch {}
+          }
+        };
+        const stream = new MediaStream([track]);
+        const sender = pc.addTrack(track, stream);
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        try {
+          const params = sender.getParameters();
+          params.degradationPreference = "maintain-resolution";
+          if (!params.encodings?.length) params.encodings = [{}];
+          params.encodings[0].maxBitrate = 12_000_000;
+          params.encodings[0].maxFramerate = 60;
+          params.encodings[0].scaleResolutionDownBy = 1;
+          await sender.setParameters(params);
+        } catch {}
+        if (rtcPeer === pc && senderPort) {
+          senderPort.postMessage({ type: "RTC_OFFER", sdp: boostVideoSdp(pc.localDescription.sdp) });
+        }
+      } catch {}
+    }
+
+    function captureFrame(targetW) {
       if (!alive || !senderPort) return;
       const vw = video.videoWidth;
       const vh = video.videoHeight;
       if (!vw || !vh) return;
-      const cw = Math.min(560, vw);
+      const desiredW = Math.max(960, Math.min(1280, Number(targetW) || 960));
+      const cw = Math.min(desiredW, vw);
       const ch = Math.max(1, Math.round((cw * vh) / vw));
       if (capCanvas.width !== cw || capCanvas.height !== ch) {
         capCanvas.width = cw;
@@ -685,7 +790,7 @@
       }
       try {
         capCtx.drawImage(video, 0, 0, cw, ch);
-        const dataUrl = capCanvas.toDataURL("image/jpeg", 0.78);
+        const dataUrl = capCanvas.toDataURL("image/jpeg", 0.9);
         senderPort.postMessage({ type: "FRAME", dataUrl, vw, vh });
       } catch {}
     }
@@ -696,7 +801,15 @@
         const port = chrome.runtime.connect({ name: "ghostpip-sender" });
         senderPort = port;
         port.onMessage.addListener((msg) => {
-          if (msg?.type === "PULL_FRAME") captureFrame();
+          if (msg?.type === "PULL_FRAME") {
+            captureFrame(msg.targetW);
+          } else if (msg?.type === "RTC_INIT") {
+            startRtcSender();
+          } else if (msg?.type === "RTC_ANSWER" && rtcPeer && msg.sdp) {
+            rtcPeer.setRemoteDescription({ type: "answer", sdp: boostVideoSdp(msg.sdp) }).catch(() => {});
+          } else if (msg?.type === "RTC_CANDIDATE" && rtcPeer && msg.candidate) {
+            rtcPeer.addIceCandidate(msg.candidate).catch(() => {});
+          }
         });
         port.onDisconnect.addListener(() => {
           void chrome.runtime.lastError;
@@ -706,7 +819,10 @@
     }
 
     const onLoadedData = () => {
-      if (alive) startKeepAlive();
+      if (!alive) return;
+      startKeepAlive().then(() => {
+        if (senderPort) startRtcSender();
+      });
     };
     video.addEventListener("loadeddata", onLoadedData);
     startKeepAlive();
@@ -774,24 +890,103 @@
     let pulling = false;
     let lastPullAt = 0;
     let pullTimer = null;
+    let rtcPeer = null;
+    let rtcVideo = null;
+    let rtcActive = false;
+
+    function drawRtcFrame() {
+      if (!alive || !rtcVideo || rtcVideo.readyState < 2 || !rtcVideo.videoWidth || !rtcVideo.videoHeight) {
+        return false;
+      }
+      const vw = rtcVideo.videoWidth;
+      const vh = rtcVideo.videoHeight;
+      if (canvas.width !== vw || canvas.height !== vh) {
+        canvas.width = vw;
+        canvas.height = vh;
+      }
+      const aspectChanged = canvas.videoWidth !== vw || canvas.videoHeight !== vh;
+      canvas.videoWidth = vw;
+      canvas.videoHeight = vh;
+      canvas.dataset.gpVw = String(vw);
+      canvas.dataset.gpVh = String(vh);
+      try {
+        ctx2d.drawImage(rtcVideo, 0, 0, vw, vh);
+        framesRendered++;
+        canvas.dataset.gpFrames = String(framesRendered);
+        rtcActive = true;
+        if (aspectChanged) canvas.dispatchEvent(new Event("resize"));
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function stopRtcReceiver() {
+      rtcActive = false;
+      if (rtcPeer) {
+        rtcPeer.close();
+        rtcPeer = null;
+      }
+      if (rtcVideo) {
+        rtcVideo.srcObject = null;
+        rtcVideo = null;
+      }
+    }
+
+    async function handleRtcOffer(sdp) {
+      stopRtcReceiver();
+      if (!alive || !receiverPort) return;
+      try {
+        const pc = new RTCPeerConnection();
+        rtcPeer = pc;
+        pc.onicecandidate = (e) => {
+          if (e.candidate && receiverPort) {
+            try {
+              receiverPort.postMessage({ type: "RTC_CANDIDATE", candidate: e.candidate.toJSON() });
+            } catch {}
+          }
+        };
+        const vid = document.createElement("video");
+        vid.muted = true;
+        vid.autoplay = true;
+        vid.playsInline = true;
+        rtcVideo = vid;
+        pc.ontrack = (e) => {
+          vid.srcObject = e.streams[0] ?? new MediaStream([e.track]);
+          vid.play().catch(() => {});
+        };
+        await pc.setRemoteDescription({ type: "offer", sdp: boostVideoSdp(sdp) });
+        const answer = await pc.createAnswer();
+        const boostedAnswer = boostVideoSdp(answer.sdp);
+        await pc.setLocalDescription({ type: "answer", sdp: boostedAnswer });
+        if (rtcPeer === pc && receiverPort) {
+          receiverPort.postMessage({ type: "RTC_ANSWER", sdp: boostedAnswer });
+        }
+      } catch {}
+    }
 
     function requestFrame() {
       if (!alive) return;
+      if (drawRtcFrame()) return;
       if (!receiverPort) connectReceiver();
       if (!receiverPort) return;
       const now = performance.now();
       if (pulling && now - lastPullAt < 250) return;
       pulling = true;
       lastPullAt = now;
+      const targetW = Math.round((ctx.layout.width || DEFAULT_FLOAT_WIDTH) * (window.devicePixelRatio || 1) * 1.5);
       try {
-        receiverPort.postMessage({ type: "PULL_FRAME" });
+        receiverPort.postMessage({ type: "PULL_FRAME", targetW });
       } catch {
         pulling = false;
       }
     }
 
     async function handleFrame(msg) {
-      if (!alive || !msg?.dataUrl) return;
+      if (!alive || !msg?.dataUrl || rtcActive) {
+        pulling = false;
+        return;
+      }
       try {
         const comma = msg.dataUrl.indexOf(",");
         const b64 = comma >= 0 ? msg.dataUrl.slice(comma + 1) : msg.dataUrl;
@@ -799,8 +994,9 @@
         const bytes = new Uint8Array(bin.length);
         for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
         const bmp = await createImageBitmap(new Blob([bytes], { type: "image/jpeg" }));
-        if (!alive) {
+        if (!alive || rtcActive) {
           bmp.close();
+          pulling = false;
           return;
         }
         if (canvas.width !== bmp.width || canvas.height !== bmp.height) {
@@ -822,7 +1018,7 @@
         if (aspectChanged) canvas.dispatchEvent(new Event("resize"));
       } catch {}
       pulling = false;
-      if (alive) {
+      if (alive && !rtcActive) {
         clearTimeout(pullTimer);
         pullTimer = setTimeout(requestFrame, 33);
       }
@@ -834,7 +1030,13 @@
         const port = chrome.runtime.connect({ name: "ghostpip-receiver" });
         receiverPort = port;
         port.onMessage.addListener((msg) => {
-          if (msg?.type === "FRAME") handleFrame(msg);
+          if (msg?.type === "FRAME") {
+            handleFrame(msg);
+          } else if (msg?.type === "RTC_OFFER" && msg.sdp) {
+            handleRtcOffer(msg.sdp);
+          } else if (msg?.type === "RTC_CANDIDATE" && rtcPeer && msg.candidate) {
+            rtcPeer.addIceCandidate(msg.candidate).catch(() => {});
+          }
         });
         port.onDisconnect.addListener(() => {
           void chrome.runtime.lastError;
@@ -843,17 +1045,21 @@
             pulling = false;
           }
         });
+        port.postMessage({ type: "RTC_INIT" });
       } catch {}
     }
 
     connectReceiver();
     requestFrame();
-    const watchdog = setInterval(requestFrame, 120);
+    const renderTick = setInterval(() => {
+      if (!drawRtcFrame()) requestFrame();
+    }, 16);
 
     function exit() {
       alive = false;
-      clearInterval(watchdog);
+      clearInterval(renderTick);
       clearTimeout(pullTimer);
+      stopRtcReceiver();
       if (receiverPort) {
         try {
           receiverPort.disconnect();
@@ -869,7 +1075,14 @@
       exit,
       settingsChanged: floating.settingsChanged,
       layoutChanged: floating.layoutChanged,
-      kick: requestFrame,
+      kick: () => {
+        if (!rtcActive && receiverPort) {
+          try {
+            receiverPort.postMessage({ type: "RTC_INIT" });
+          } catch {}
+        }
+        requestFrame();
+      },
       ready: Promise.resolve({ ok: true }),
     };
   }
@@ -878,9 +1091,7 @@
     html, body { margin: 0; height: 100%; background: #000; color: #fff; font: 13px system-ui, "Malgun Gothic", sans-serif; }
     body { display: flex; flex-direction: column; position: relative; }
     video { flex: 1 1 auto; min-height: 0; width: 100%; object-fit: contain; background: #000; }
-    button { flex: none; height: ${PIP_TOGGLE_HEIGHT}px; border: 0; background: #222; color: #fff; font: inherit; cursor: pointer; }
     iframe { flex: 0 0 ${PIP_CHAT_HEIGHT}px; width: 100%; border: 0; background: #fff; }
-    iframe[hidden] { display: none; }
     .pip-hud { position: fixed; top: 8px; left: 8px; padding: 4px 8px; border-radius: 5px; pointer-events: none;
       background: rgba(18, 18, 22, 0.85); color: #fff; font: 600 12px/1 system-ui, "Malgun Gothic", sans-serif;
       opacity: 0; transition: opacity 0.15s ease-out; }
@@ -900,7 +1111,6 @@
     pipHud.className = "pip-hud";
     doc.body.append(mirror, pipHud);
     let frame = null;
-    let toggle = null;
 
     function syncChat(enabled) {
       if (!chatUrl) return;
@@ -908,16 +1118,9 @@
         if (!frame) {
           frame = doc.createElement("iframe");
           frame.src = chatUrl;
-          toggle = doc.createElement("button");
-          toggle.textContent = "채팅 숨기기";
-          toggle.addEventListener("click", () => {
-            frame.hidden = !frame.hidden;
-            toggle.textContent = frame.hidden ? "채팅 보기" : "채팅 숨기기";
-          });
         }
-        if (!toggle.isConnected) doc.body.append(toggle, frame);
+        if (!frame.isConnected) doc.body.append(frame);
       } else if (frame) {
-        toggle?.remove();
         frame.remove();
       }
     }
@@ -1051,7 +1254,7 @@
     const chatUrl = chatUrlFor(ctx.site);
     const showChat = Boolean(ctx.settings.showChat && chatUrl);
     const size = floatSize(video, DEFAULT_FLOAT_WIDTH, DEFAULT_FLOAT_WIDTH);
-    const height = size.h + (showChat ? PIP_TOGGLE_HEIGHT + PIP_CHAT_HEIGHT : 0);
+    const height = size.h + (showChat ? PIP_CHAT_HEIGHT : 0);
     go("docPip", { stream, chatUrl, win: documentPictureInPicture.requestWindow({ width: size.w, height }) });
   }
 
