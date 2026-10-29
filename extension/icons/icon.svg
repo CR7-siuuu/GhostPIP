@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#181d33"/>
+      <stop offset="55%" stop-color="#0f1323"/>
+      <stop offset="100%" stop-color="#080b14"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.75"/>
+      <stop offset="50%" stop-color="#818cf8" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#c084fc" stop-opacity="0.65"/>
+    </linearGradient>
+    <linearGradient id="pipGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="ghostGrad" x1="15%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="65%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#a5b4fc"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#020617" flood-opacity="0.65"/>
+    </filter>
+  </defs>
+
+  <!-- App Squircle Background -->
+  <rect x="10" y="10" width="236" height="236" rx="56" fill="url(#bg)"/>
+  <rect x="12" y="12" width="232" height="232" rx="54" fill="none" stroke="url(#rim)" stroke-width="5"/>
+
+  <!-- Ambient Neon Glow -->
+  <circle cx="152" cy="148" r="68" fill="#38bdf8" opacity="0.2" filter="url(#glow)"/>
+  <circle cx="102" cy="104" r="64" fill="#818cf8" opacity="0.18" filter="url(#glow)"/>
+
+  <!-- Background Dashed Screen Frame (Click-Through motif) -->
+  <rect x="36" y="44" width="146" height="102" rx="18"
+        fill="#1e293b" fill-opacity="0.4"
+        stroke="#64748b" stroke-opacity="0.55" stroke-width="4.5" stroke-dasharray="12 8"/>
+
+  <!-- Floating Glowing PiP Window (Bottom-Right) -->
+  <g filter="url(#softShadow)">
+    <rect x="96" y="106" width="124" height="90" rx="20"
+          fill="url(#pipGrad)" fill-opacity="0.32"
+          stroke="url(#pipGrad)" stroke-width="6"/>
+    <rect x="105" y="115" width="106" height="72" rx="13"
+          fill="#090d1a" fill-opacity="0.55"/>
+    <!-- Play icon inside PiP -->
+    <path d="M150 137 L175 151 L150 165 Z" fill="#38bdf8" fill-opacity="0.75"/>
+  </g>
+
+  <!-- Sleek Ghost Floating Out of PiP -->
+  <g filter="url(#softShadow)">
+    <path d="M106 48
+             C71 48, 48 73, 48 107
+             L48 172
+             C48 179, 56 182, 61 177
+             L73 165
+             C77 161, 83 161, 87 165
+             L98 177
+             C102 181, 110 181, 114 177
+             L125 165
+             C129 161, 135 161, 139 165
+             L151 177
+             C156 182, 164 179, 164 172
+             L164 107
+             C164 73, 141 48, 106 48 Z"
+          fill="url(#ghostGrad)" fill-opacity="0.96"
+          stroke="#bae6fd" stroke-width="3"/>
+
+    <!-- Ghost Eyes -->
+    <ellipse cx="88" cy="104" rx="9" ry="12" fill="#0f172a"/>
+    <ellipse cx="124" cy="104" rx="9" ry="12" fill="#0f172a"/>
+    <circle cx="91" cy="99" r="3.5" fill="#38bdf8"/>
+    <circle cx="127" cy="99" r="3.5" fill="#38bdf8"/>
+
+    <!-- Cyan Glow Cheeks -->
+    <ellipse cx="73" cy="118" rx="6.5" ry="3.8" fill="#38bdf8" opacity="0.5"/>
+    <ellipse cx="139" cy="118" rx="6.5" ry="3.8" fill="#38bdf8" opacity="0.5"/>
+  </g>
+
+  <!-- Sparkle / Auto-Dodge Star Accent (Top-Right) -->
+  <path d="M198 48 L203 62 L217 67 L203 72 L198 86 L193 72 L179 67 L193 62 Z"
+        fill="#7dd3fc" opacity="0.95"/>
+</svg>

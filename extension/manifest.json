@@ -4,6 +4,12 @@
   "version": "0.1.0",
   "description": "화면을 안 가리는 투명/클릭통과/자동회피 PIP",
   "minimum_chrome_version": "116",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": [
     "storage",
     "scripting",
@@ -23,7 +29,13 @@
   },
   "action": {
     "default_title": "GhostPiP",
-    "default_popup": "popup/popup.html"
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
   "commands": {
     "_execute_action": {},

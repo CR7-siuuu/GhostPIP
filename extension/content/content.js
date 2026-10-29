@@ -136,20 +136,26 @@
     "M2.5 3A1.5 1.5 0 0 0 1 4.5v7A1.5 1.5 0 0 0 2.5 13h5a.6.6 0 0 0 0-1.2h-5a.3.3 0 0 1-.3-.3v-7a.3.3 0 0 1 .3-.3h7a.3.3 0 0 1 .3.3v2a.6.6 0 1 0 1.2 0v-2A1.5 1.5 0 0 0 9.5 3h-7Zm6.5 5.5A1.5 1.5 0 0 1 10.5 7h3A1.5 1.5 0 0 1 15 8.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 11.5v-3Z";
 
   const BASE_CSS = `
-    .bar { display: inline-flex; align-items: center; gap: 3px; padding: 3px; border-radius: 999px;
-      background: rgba(14, 15, 20, 0.82); border: 1px solid rgba(255, 255, 255, 0.14);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45); backdrop-filter: blur(6px);
-      font: 600 11px/1 system-ui, "Malgun Gothic", sans-serif; color: #fff; }
-    button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
-      padding: 4px 8px; border-radius: 999px; white-space: nowrap; color: rgba(255, 255, 255, 0.92);
-      transition: background 0.12s ease, color 0.12s ease; }
-    button svg { width: 12px; height: 12px; fill: currentColor; flex: none; }
-    button:hover { background: rgba(110, 170, 255, 0.28); color: #fff; }
-    :host([data-pinned]) .bar:not(:hover) { opacity: 0.55; }`;
+    .bar { display: inline-flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px;
+      background: linear-gradient(180deg, rgba(22, 27, 42, 0.9) 0%, rgba(13, 16, 26, 0.94) 100%);
+      border: 1px solid rgba(125, 211, 252, 0.28);
+      box-shadow: 0 6px 18px rgba(2, 6, 23, 0.6), 0 0 12px rgba(56, 189, 248, 0.14);
+      backdrop-filter: blur(10px) saturate(150%);
+      font: 600 11.5px/1 "Pretendard", system-ui, "Malgun Gothic", sans-serif; color: #f8fafc; }
+    button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 10px; border-radius: 999px; white-space: nowrap; color: rgba(241, 245, 249, 0.94);
+      transition: background 0.14s ease, color 0.14s ease, box-shadow 0.14s ease; }
+    button svg { width: 12px; height: 12px; fill: #7dd3fc; flex: none; transition: fill 0.14s ease; }
+    button:hover { background: linear-gradient(135deg, rgba(56, 189, 248, 0.28) 0%, rgba(99, 102, 241, 0.32) 100%);
+      color: #fff; box-shadow: inset 0 0 0 1px rgba(125, 211, 252, 0.35); }
+    button:hover svg { fill: #fff; }
+    :host([data-pinned]) .bar:not(:hover) { opacity: 0.65; }`;
 
   const CONTROLLER_CSS = `
-    .surface { position: absolute; inset: 0; box-sizing: border-box; cursor: move; border-radius: 3px;
-      border: 2px solid rgba(110, 170, 255, 0.95); background: rgba(110, 170, 255, 0.08); }
+    .surface { position: absolute; inset: 0; box-sizing: border-box; cursor: move; border-radius: 6px;
+      border: 2px solid rgba(56, 189, 248, 0.92);
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%);
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.22), inset 0 0 12px rgba(56, 189, 248, 0.12); }
     .handle { position: absolute; z-index: 2; }
     .handle.n { top: -4px; left: 14px; right: 14px; height: 10px; cursor: ns-resize; }
     .handle.s { bottom: -4px; left: 14px; right: 14px; height: 10px; cursor: ns-resize; }
@@ -160,18 +166,22 @@
     .handle.sw { bottom: -5px; left: -5px; width: 18px; height: 18px; cursor: nesw-resize; }
     .handle.se { bottom: -5px; right: -5px; width: 18px; height: 18px; cursor: nwse-resize; }
     .handle.nw::after, .handle.ne::after, .handle.sw::after, .handle.se::after {
-      content: ""; position: absolute; width: 8px; height: 8px; border-radius: 2px;
-      background: rgba(110, 170, 255, 0.98); box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+      content: ""; position: absolute; width: 9px; height: 9px; border-radius: 3px;
+      background: linear-gradient(135deg, #bae6fd 0%, #38bdf8 100%);
+      border: 1.5px solid #0f172a;
+      box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
     }
     .handle.nw::after { top: 4px; left: 4px; }
     .handle.ne::after { top: 4px; right: 4px; }
     .handle.sw::after { bottom: 4px; left: 4px; }
     .handle.se::after { bottom: 4px; right: 4px; }
-    .bar { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 3;
+    .bar { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 3;
       pointer-events: auto; }
-    .hud { position: absolute; bottom: 8px; left: 8px; z-index: 3; pointer-events: none;
-      padding: 4px 8px; border-radius: 5px; background: rgba(18, 18, 22, 0.85); color: #fff;
-      font: 600 12px/1 system-ui, "Malgun Gothic", sans-serif; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45); }
+    .hud { position: absolute; bottom: 10px; left: 10px; z-index: 3; pointer-events: none;
+      padding: 5px 10px; border-radius: 999px;
+      background: rgba(15, 23, 42, 0.88); border: 1px solid rgba(125, 211, 252, 0.35); color: #e0f2fe;
+      font: 700 11.5px/1 "Pretendard", system-ui, "Malgun Gothic", sans-serif;
+      box-shadow: 0 4px 12px rgba(2, 6, 23, 0.55); backdrop-filter: blur(8px); }
     :host([data-bar-only]) .surface,
     :host([data-bar-only]) .handle,
     :host([data-bar-only]) .hud { display: none; }

@@ -62,6 +62,9 @@ public sealed unsafe class TrayIcon : IDisposable
     [DllImport("user32.dll", EntryPoint = "LoadIconW", SetLastError = true)]
     private static extern nint LoadIconW(nint hInstance, nint lpIconName);
 
+    [DllImport("kernel32.dll", EntryPoint = "GetModuleHandleW", CharSet = CharSet.Unicode)]
+    private static extern nint GetModuleHandleW(string? lpModuleName);
+
     [DllImport("user32.dll", SetLastError = true)]
     private static extern nint CreatePopupMenu();
 
@@ -95,6 +98,11 @@ public sealed unsafe class TrayIcon : IDisposable
 
     private NOTIFYICONDATAW CreateData()
     {
+        nint hInst = GetModuleHandleW(null);
+        nint hIcon = LoadIconW(hInst, (nint)32512);
+        if (hIcon == IntPtr.Zero)
+            hIcon = LoadIconW(IntPtr.Zero, (nint)32512);
+
         var nid = new NOTIFYICONDATAW
         {
             cbSize = (uint)sizeof(NOTIFYICONDATAW),
@@ -102,7 +110,7 @@ public sealed unsafe class TrayIcon : IDisposable
             uID = 1,
             uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP,
             uCallbackMessage = WM_APP_TRAY,
-            hIcon = LoadIconW(IntPtr.Zero, (nint)32512)
+            hIcon = hIcon
         };
 
         const string tip = "GhostPiP Engine";
