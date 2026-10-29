@@ -1248,9 +1248,9 @@
     const video = ctx.video;
     const ac = new AbortController();
     let opened = false;
-    video.addEventListener("enterpictureinpicture", (e) => {
+    function reportOpened(pw) {
+      if (opened || !pw) return;
       opened = true;
-      const pw = e.pictureInPictureWindow;
       // The native PiP window's screen position is not exposed to pages; the opener's position is a
       // placeholder and the engine matches on size.
       send({
@@ -1259,9 +1259,10 @@
         rect: { x: window.screenX, y: window.screenY, w: pw.width, h: pw.height },
         dpr: devicePixelRatio,
       });
-    }, { signal: ac.signal });
+    }
+    video.addEventListener("enterpictureinpicture", (e) => reportOpened(e.pictureInPictureWindow), { signal: ac.signal });
     video.addEventListener("leavepictureinpicture", leave, { signal: ac.signal });
-    request.catch(leave);
+    Promise.resolve(request).then(reportOpened, leave);
     return {
       exit() {
         ac.abort();
@@ -1270,6 +1271,12 @@
       },
     };
   }
+
+  document.addEventListener("enterpictureinpicture", (e) => {
+    if (current.name !== "idle" || !(e.target instanceof HTMLVideoElement)) return;
+    ctx.video = e.target;
+    go("nativePip", Promise.resolve(e.pictureInPictureWindow));
+  }, true);
 
   // DRM or an uncapturable element falls back to native PiP. Both checks are synchronous so the
   // click's user activation is still unspent when requestWindow/requestPictureInPicture runs.
