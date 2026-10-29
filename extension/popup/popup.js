@@ -18,6 +18,12 @@
     opacityValue: document.getElementById("opacityValue"),
     wheelSubHint: document.getElementById("wheelSubHint"),
     toggleMute: document.getElementById("toggleMute"),
+    kbdClickThrough: document.getElementById("kbdClickThrough"),
+    kbdDodge: document.getElementById("kbdDodge"),
+    kbdMute: document.getElementById("kbdMute"),
+    tipHoldKey: document.getElementById("tipHoldKey"),
+    hotkeyBtns: [...document.querySelectorAll("button[data-hotkey]")],
+    resetHotkeys: document.getElementById("resetHotkeys"),
     corners: [...document.querySelectorAll("input[data-corner]")],
     home: document.getElementById("home"),
     axis: document.getElementById("axis"),
@@ -26,6 +32,8 @@
     hold: document.getElementById("hold"),
     engineBanner: document.getElementById("engineBanner"),
   };
+
+  let recordingTarget = null;
 
   let state = {
     settings: Settings.merge(undefined),
@@ -86,6 +94,18 @@
     if (els.wheelSubHint) {
       els.wheelSubHint.textContent = `클릭 통과 시 ${hotkeys.hold} + 휠`;
     }
+    if (els.tipHoldKey) {
+      els.tipHoldKey.textContent = hotkeys.hold;
+    }
+    if (els.kbdClickThrough) els.kbdClickThrough.textContent = hotkeys.clickThrough;
+    if (els.kbdDodge) els.kbdDodge.textContent = hotkeys.dodge;
+    if (els.kbdMute) els.kbdMute.textContent = hotkeys.mute;
+    for (const btn of els.hotkeyBtns) {
+      const key = btn.dataset.hotkey;
+      const isRec = recordingTarget === key;
+      btn.toggleAttribute("data-recording", isRec);
+      btn.textContent = isRec ? "키 입력 대기... (Esc 취소)" : hotkeys[key];
+    }
   }
 
   async function applyPatch(partial) {
@@ -137,6 +157,35 @@
   els.style.addEventListener("change", () => applyPatch({ dodge: { style: els.style.value } }));
   els.autoReturn.addEventListener("change", () => applyPatch({ dodge: { autoReturn: els.autoReturn.checked } }));
   els.hold.addEventListener("change", () => applyPatch({ hotkeys: { hold: els.hold.value } }));
+
+  for (const btn of els.hotkeyBtns) {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.hotkey;
+      recordingTarget = recordingTarget === key ? null : key;
+      render();
+    });
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (!recordingTarget) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.key === "Escape") {
+      recordingTarget = null;
+      render();
+      return;
+    }
+    const combo = Settings.formatKeyEvent(e);
+    if (!combo) return;
+    const target = recordingTarget;
+    recordingTarget = null;
+    applyPatch({ hotkeys: { [target]: combo } });
+  }, true);
+
+  els.resetHotkeys?.addEventListener("click", () => {
+    recordingTarget = null;
+    applyPatch({ hotkeys: { ...Settings.DEFAULTS.hotkeys } });
+  });
 
   els.engineBanner.addEventListener("click", async () => {
     const res = await send({ type: "RECONNECT_ENGINE" });

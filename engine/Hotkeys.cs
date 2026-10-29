@@ -85,7 +85,7 @@ public sealed class Hotkeys : IDisposable
             return false;
 
         string[] parts = spec.Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        if (parts.Length < 2)
+        if (parts.Length < 1)
             return false;
 
         for (int i = 0; i < parts.Length; i++)
@@ -118,7 +118,8 @@ public sealed class Hotkeys : IDisposable
             }
         }
 
-        return modifiers != 0 && vk != 0;
+        bool isFunctionKey = vk is >= 0x70 and <= 0x7B;
+        return vk != 0 && (modifiers != 0 || isFunctionKey);
     }
 
     private static bool TryParseKeyToken(string token, out uint vk)
@@ -137,7 +138,22 @@ public sealed class Hotkeys : IDisposable
                 vk = c;
                 return true;
             }
-            return false;
+            vk = token[0] switch
+            {
+                '`' => 0xC0,
+                '-' => 0xBD,
+                '=' => 0xBB,
+                '[' => 0xDB,
+                ']' => 0xDD,
+                '\\' => 0xDC,
+                ';' => 0xBA,
+                '\'' => 0xDE,
+                ',' => 0xBC,
+                '.' => 0xBE,
+                '/' => 0xBF,
+                _ => 0
+            };
+            return vk != 0;
         }
 
         if ((token[0] == 'F' || token[0] == 'f') &&
@@ -157,6 +173,12 @@ public sealed class Hotkeys : IDisposable
             "UP" => 0x26,
             "RIGHT" => 0x27,
             "DOWN" => 0x28,
+            "HOME" => 0x24,
+            "END" => 0x23,
+            "PAGEUP" => 0x21,
+            "PAGEDOWN" => 0x22,
+            "INSERT" => 0x2D,
+            "DELETE" => 0x2E,
             _ => 0
         };
         return vk != 0;

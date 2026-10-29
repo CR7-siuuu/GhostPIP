@@ -349,6 +349,12 @@ public static class SelfTest
         Assert(Hotkeys.TryParseHotkey("Ctrl+Shift+F1", out uint m4, out uint vk4) &&
                m4 == (Hotkeys.MOD_CONTROL | Hotkeys.MOD_SHIFT) && vk4 == 0x70, "Ctrl+Shift+F1 parsed");
 
+        Assert(Hotkeys.TryParseHotkey("F8", out uint m5, out uint vk5) &&
+               m5 == 0 && vk5 == 0x77, "Standalone F8 parsed");
+
+        Assert(Hotkeys.TryParseHotkey("Alt+`", out uint m6, out uint vk6) &&
+               m6 == Hotkeys.MOD_ALT && vk6 == 0xC0, "Alt+` parsed");
+
         Assert(!Hotkeys.TryParseHotkey("G", out _, out _), "Modifier-less key rejected");
         Assert(!Hotkeys.TryParseHotkey("", out _, out _), "Empty key rejected");
     }

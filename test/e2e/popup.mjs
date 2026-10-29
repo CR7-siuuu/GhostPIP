@@ -317,10 +317,36 @@ try {
     const afterCt = await poll(readPopupState, (s) => s.clickThrough === !before.clickThrough, 2000);
     await sw.evaluate(() => GhostPiPBackground.dispatchCommand("toggle-dodge"));
     const afterDodge = await poll(readPopupState, (s) => s.dodgeEnabled === !before.dodgeEnabled, 2000);
-    const ok = afterCt.clickThrough === !before.clickThrough && afterDodge.dodgeEnabled === !before.dodgeEnabled;
+
+    await popupPage.evaluate(() => {
+      document.getElementById("hotkeyDetails").open = true;
+    });
+    await popupPage.select("#hold", "Alt");
+    await popupPage.click("#hkClickThrough");
+    await popupPage.evaluate(() => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { code: "F8", key: "F8", bubbles: true, cancelable: true }));
+    });
+    const hkUpdated = await poll(
+      () =>
+        popupPage.evaluate(() => ({
+          hold: document.getElementById("hold").value,
+          btn: document.getElementById("hkClickThrough").textContent,
+          kbd: document.getElementById("kbdClickThrough").textContent,
+          tip: document.getElementById("tipHoldKey").textContent,
+        })),
+      (h) => h.hold === "Alt" && h.btn === "F8" && h.kbd === "F8" && h.tip === "Alt",
+      2000,
+    );
+
+    const ok =
+      afterCt.clickThrough === !before.clickThrough &&
+      afterDodge.dodgeEnabled === !before.dodgeEnabled &&
+      hkUpdated.hold === "Alt" &&
+      hkUpdated.btn === "F8" &&
+      hkUpdated.kbd === "F8";
     return {
       ok,
-      info: `clickThrough: ${before.clickThrough}->${afterCt.clickThrough}, dodgeEnabled: ${before.dodgeEnabled}->${afterDodge.dodgeEnabled}`,
+      info: `clickThrough: ${before.clickThrough}->${afterCt.clickThrough}, dodgeEnabled: ${before.dodgeEnabled}->${afterDodge.dodgeEnabled}, hotkey=${hkUpdated.btn}, hold=${hkUpdated.hold}`,
     };
   });
 } finally {

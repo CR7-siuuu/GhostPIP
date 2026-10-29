@@ -383,7 +383,15 @@ public static unsafe class Program
         bool ctrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
         bool alt = (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
         bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
-        return _settings.Hotkeys.Hold == "Ctrl+Shift" ? (ctrl && shift) : (ctrl && alt);
+        return _settings.Hotkeys.Hold switch
+        {
+            "Ctrl+Shift" => ctrl && shift,
+            "Alt+Shift" => alt && shift,
+            "Ctrl" => ctrl,
+            "Alt" => alt,
+            "Shift" => shift,
+            _ => ctrl && alt
+        };
     }
 
     private static nint OnLowLevelMouse(int nCode, nint wParam, nint lParam)
@@ -457,7 +465,10 @@ public static unsafe class Program
         _settings = next;
 
         if (hotkeysChanged && _hotkeys is not null)
-            _hotkeys.Apply(_settings.Hotkeys);
+        {
+            string[] hotkeyErrors = _hotkeys.Apply(_settings.Hotkeys);
+            _nativeHost?.Send(new HelloMessage(Protocol.EngineVersion, IsElevated(), hotkeyErrors));
+        }
 
         if (homeChanged || Array.IndexOf(DodgeSolver.CORNERS, _dodgeState.Corner) < 0)
         {

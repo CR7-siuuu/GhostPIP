@@ -5,7 +5,7 @@ import vm from "node:vm";
 
 const sandbox = {};
 vm.runInNewContext(fs.readFileSync(new URL("../../extension/shared/settings.js", import.meta.url), "utf8"), sandbox);
-const { CORNERS, DEFAULTS, isValidDodge, merge, patch } = sandbox.GhostPiPSettings;
+const { CORNERS, DEFAULTS, HOLD_KEYS, isValidDodge, isValidHotkey, formatKeyEvent, merge, patch } = sandbox.GhostPiPSettings;
 const plain = (v) => JSON.parse(JSON.stringify(v));
 
 test("missing or garbage storage yields defaults", () => {
@@ -86,4 +86,26 @@ test("patch merges valid partial fields and rejects invariant violations without
   const badHome = patch(ok1.settings, { dodge: { home: "TL" } });
   assert.equal(badHome.ok, false);
   assert.deepEqual(plain(badHome.settings), plain(ok1.settings));
+});
+
+test("custom hotkeys and hold key validation and formatting", () => {
+  assert.equal(HOLD_KEYS.includes("Alt"), true);
+  assert.equal(HOLD_KEYS.includes("Ctrl+Alt"), true);
+  assert.equal(isValidHotkey("Alt+G"), true);
+  assert.equal(isValidHotkey("Ctrl+Shift+F1"), true);
+  assert.equal(isValidHotkey("F8"), true);
+  assert.equal(isValidHotkey("G"), false);
+  assert.equal(isValidHotkey(""), false);
+
+  assert.equal(formatKeyEvent({ ctrlKey: true, altKey: false, shiftKey: true, code: "KeyX", key: "X" }), "Ctrl+Shift+X");
+  assert.equal(formatKeyEvent({ ctrlKey: false, altKey: false, shiftKey: false, code: "F9", key: "F9" }), "F9");
+  assert.equal(formatKeyEvent({ ctrlKey: false, altKey: false, shiftKey: false, code: "KeyG", key: "g" }), null);
+
+  const custom = merge({
+    hotkeys: { clickThrough: "Ctrl+Shift+X", dodge: "F8", mute: "Alt+`", hold: "Alt" },
+  });
+  assert.equal(custom.hotkeys.clickThrough, "Ctrl+Shift+X");
+  assert.equal(custom.hotkeys.dodge, "F8");
+  assert.equal(custom.hotkeys.mute, "Alt+`");
+  assert.equal(custom.hotkeys.hold, "Alt");
 });

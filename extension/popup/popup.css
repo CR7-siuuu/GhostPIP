@@ -111,6 +111,37 @@ kbd {
   background: #323746;
 }
 
+.btn-sub {
+  margin-top: 8px;
+  padding: 5px 8px;
+  font-size: 11.5px;
+  color: #b8c0d4;
+}
+
+.hotkey-btn {
+  min-width: 102px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: 1px solid #3c4254;
+  background: #262934;
+  color: #e9eaf0;
+  font: 600 12px/1.3 system-ui, "Malgun Gothic", sans-serif;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+
+.hotkey-btn:hover {
+  border-color: #6eaaff;
+  background: #2c3140;
+}
+
+.hotkey-btn[data-recording] {
+  border-color: #6eaaff;
+  background: #1c2c4c;
+  color: #93c5fd;
+}
+
 details summary {
   cursor: pointer;
   font-weight: 600;

@@ -20,6 +20,10 @@
   const HOLD = {
     "Ctrl+Alt": (e) => e.ctrlKey && e.altKey,
     "Ctrl+Shift": (e) => e.ctrlKey && e.shiftKey,
+    "Alt+Shift": (e) => e.altKey && e.shiftKey,
+    Ctrl: (e) => e.ctrlKey,
+    Alt: (e) => e.altKey,
+    Shift: (e) => e.shiftKey,
   };
 
   const ctx = {
@@ -1422,6 +1426,30 @@
   document.addEventListener("fullscreenchange", () => {
     if (document.fullscreenElement && (current.name === "inTab" || current.name === "remoteInTab")) go("idle");
   });
+
+  window.addEventListener("keydown", (e) => {
+    if (!e.isTrusted || e.repeat) return;
+    const t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) {
+      return;
+    }
+    const combo = Settings.formatKeyEvent?.(e);
+    if (!combo) return;
+    const upper = combo.toUpperCase();
+    const hk = ctx.settings.hotkeys;
+    let intent = null;
+    if (hk.clickThrough && hk.clickThrough.toUpperCase() === upper && upper !== "ALT+G") {
+      intent = "TOGGLE_CLICK_THROUGH";
+    } else if (hk.dodge && hk.dodge.toUpperCase() === upper && upper !== "ALT+SHIFT+D") {
+      intent = "TOGGLE_DODGE";
+    } else if (hk.mute && hk.mute.toUpperCase() === upper && upper !== "ALT+M") {
+      intent = "TOGGLE_MUTE";
+    }
+    if (intent) {
+      e.preventDefault();
+      send({ type: "INTENT", intent });
+    }
+  }, true);
 
   let scanQueued = false;
   new MutationObserver(() => {

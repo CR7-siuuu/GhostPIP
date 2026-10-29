@@ -172,7 +172,7 @@ public static class Protocol
             string hkDodge = GetStringOrDefault(hkEl, "dodge", def.Hotkeys.Dodge);
             string hkMute = GetStringOrDefault(hkEl, "mute", def.Hotkeys.Mute);
             string hkHold = GetStringOrDefault(hkEl, "hold", def.Hotkeys.Hold);
-            if (hkHold is not ("Ctrl+Alt" or "Ctrl+Shift"))
+            if (hkHold is not ("Ctrl+Alt" or "Ctrl+Shift" or "Alt+Shift" or "Ctrl" or "Alt" or "Shift"))
                 return false;
             hotkeys = new HotkeyConfig(hkClick, hkDodge, hkMute, hkHold);
         }
