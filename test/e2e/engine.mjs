@@ -82,12 +82,18 @@ def cb(hwnd, _):
             d3d_rel_t = ct - t
         return True
     win32gui.EnumChildWindows(hwnd, child_cb, None)
+    cx = (l + r) // 2
+    cy = (t + b) // 2
+    hit_c = u32.WindowFromPoint(wt.POINT(cx, cy))
+    hit_t = u32.WindowFromPoint(wt.POINT(cx, t + 20))
+    passes = (hit_c != hwnd and not u32.IsChild(hwnd, hit_c)) and (hit_t != hwnd and not u32.IsChild(hwnd, hit_t))
     cands.append({
         "hwnd": hwnd,
         "rect": {"l": l, "t": t, "r": r, "b": b, "w": r - l, "h": b - t},
         "work": {"l": mi.rcWork.left, "t": mi.rcWork.top, "r": mi.rcWork.right, "b": mi.rcWork.bottom},
         "layered": bool(ex & WS_EX_LAYERED),
         "transparent": bool(ex & WS_EX_TRANSPARENT),
+        "hitPassesThrough": bool(passes),
         "alpha": alpha.value & 0xff,
         "rgnTop": -d3d_rel_t if d3d_rel_t < 0 else (rgn_rc.top if rgn_type == 2 else 0),
         "score": abs((r - l) - ${expectedW}) + abs((b - t) - ${expectedH})
@@ -393,6 +399,59 @@ try {
 
     const cx = Math.round((win.rect.l + win.rect.r) / 2);
     const cy = Math.round((win.rect.t + win.rect.b) / 2);
+    const topBarY = Math.round(win.rect.t + 20);
+
+    await sw.evaluate(
+      (x, y) => {
+        GhostPiPBackground.postToEngine({ v: 1, type: "TEST_HOLD", hold: false });
+        GhostPiPBackground.postToEngine({ v: 1, type: "TEST_CURSOR", x, y });
+      },
+      cx,
+      topBarY,
+    );
+    await sleep(160);
+    const winOnBarHover = inspectWin32Pip(pipSize.w, pipSize.h);
+    const barWhileClickThrough = await videoPage.evaluate(() => {
+      const d = documentPictureInPicture.window.document;
+      const bar = d.querySelector(".pip-bar");
+      return {
+        hoveredAttr: d.body.hasAttribute("data-hovered"),
+        barOpacity: getComputedStyle(bar).opacity,
+      };
+    });
+
+    await sw.evaluate(() => {
+      GhostPiPBackground.postToEngine({ v: 1, type: "TEST_HOLD", hold: true });
+    });
+    const barWhileHeld = await poll(
+      () =>
+        videoPage.evaluate(() => {
+          const d = documentPictureInPicture.window.document;
+          const bar = d.querySelector(".pip-bar");
+          return {
+            hoveredAttr: d.body.hasAttribute("data-hovered"),
+            barOpacity: getComputedStyle(bar).opacity,
+          };
+        }),
+      (s) => s.hoveredAttr === true && s.barOpacity === "1",
+      2000,
+    );
+    const winWhileHeld = inspectWin32Pip(pipSize.w, pipSize.h);
+
+    await sw.evaluate(() => {
+      GhostPiPBackground.postToEngine({ v: 1, type: "TEST_HOLD", hold: false });
+      GhostPiPBackground.postToEngine({ v: 1, type: "TEST_CURSOR", x: 100, y: 100 });
+    });
+    const barAfterHoldRelease = await poll(
+      () =>
+        videoPage.evaluate(() => {
+          const d = documentPictureInPicture.window.document;
+          return d.body.hasAttribute("data-hovered");
+        }),
+      (hovered) => hovered === false,
+      2000,
+    );
+
     await sw.evaluate(
       (x, y) => {
         GhostPiPBackground.postToEngine({ v: 1, type: "TEST_WHEEL", x, y, delta: 120, hold: true });
@@ -415,12 +474,21 @@ try {
     const ok =
       win?.layered === true &&
       win?.transparent === true &&
+      win?.hitPassesThrough === true &&
       win?.alpha === 102 &&
+      winOnBarHover?.transparent === true &&
+      winOnBarHover?.hitPassesThrough === true &&
+      barWhileClickThrough.hoveredAttr === false &&
+      barWhileClickThrough.barOpacity === "0" &&
+      barWhileHeld.hoveredAttr === true &&
+      barWhileHeld.barOpacity === "1" &&
+      winWhileHeld?.transparent === false &&
+      barAfterHoldRelease === false &&
       afterWheel?.alpha === 128 &&
       Math.abs((syncedOpacity ?? 0) - 0.5) < 0.02;
     return {
       ok,
-      info: `layered=${win?.layered} transparent=${win?.transparent} alpha=${win?.alpha}->wheel:${afterWheel?.alpha}(want 128, settings.opacity=${syncedOpacity})`,
+      info: `layered=${win?.layered} transparent=${win?.transparent}(onBar:${winOnBarHover?.transparent},pass:${winOnBarHover?.hitPassesThrough}) barNoHold=${barWhileClickThrough.barOpacity} barHeld=${barWhileHeld.barOpacity} alpha=${win?.alpha}->wheel:${afterWheel?.alpha}`,
     };
   });
 

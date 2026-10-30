@@ -501,7 +501,7 @@
       const hovered =
         drag !== null ||
         (cursor !== null && cursor.x >= b.l && cursor.x <= b.r && cursor.y >= b.t && cursor.y <= b.b);
-      const showBarOnly = !interactive && hovered;
+      const showBarOnly = !interactive && !ctx.settings.clickThrough && hovered;
       const videoGeo = { x: px(r.l), y: px(b.videoT), w: px(w), h: px(h) };
       const ctrlGeo = { x: px(r.l), y: px(b.t), w: px(w), h: px(b.b - b.t) };
       const opacity = interactive && !wheelPreview ? 1 : faded ? FADED_OPACITY : ctx.settings.opacity;
@@ -1314,7 +1314,7 @@
     iframe { flex: 0 0 ${PIP_CHAT_HEIGHT}px; width: 100%; border: 0; background: #fff; }
     .pip-bar { position: fixed; top: 8px; left: 50%; z-index: 10; opacity: 0; pointer-events: none;
       transform: translateX(-50%) translateY(-4px); transition: opacity 0.16s ease, transform 0.16s ease; }
-    body:hover .pip-bar,
+    body:not([data-click-through]):hover .pip-bar,
     body[data-hovered] .pip-bar { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
     .pip-hud { position: fixed; top: 8px; left: 8px; z-index: 10; padding: 4px 8px; border-radius: 5px; pointer-events: none;
       background: rgba(18, 18, 22, 0.85); color: #fff; font: 600 12px/1 system-ui, "Malgun Gothic", sans-serif;
@@ -1341,7 +1341,7 @@
     } catch {}
   }
 
-  function buildPipDocument(win, stream, chatUrl, showChat, { onToggleChat, onResizeChat } = {}) {
+  function buildPipDocument(win, stream, chatUrl, showChat, { onToggleChat, onResizeChat, isClickThrough, isHoldEvent } = {}) {
     const doc = win.document;
     const style = doc.createElement("style");
     style.textContent = PIP_CSS;
@@ -1353,6 +1353,7 @@
     mirror.srcObject = stream;
     const pipHud = doc.createElement("div");
     pipHud.className = "pip-hud";
+    doc.body.toggleAttribute("data-click-through", Boolean(isClickThrough?.()));
     doc.body.append(mirror, pipHud);
 
     let pipBar = null;
@@ -1375,8 +1376,12 @@
       doc.body.append(pipBar);
     }
 
-    doc.documentElement.addEventListener("pointerenter", () => doc.body.setAttribute("data-hovered", ""));
-    doc.documentElement.addEventListener("pointermove", () => doc.body.setAttribute("data-hovered", ""));
+    const onPointerHover = (e) => {
+      if (!isClickThrough?.() || isHoldEvent?.(e)) doc.body.setAttribute("data-hovered", "");
+      else doc.body.removeAttribute("data-hovered");
+    };
+    doc.documentElement.addEventListener("pointerenter", onPointerHover);
+    doc.documentElement.addEventListener("pointermove", onPointerHover);
     doc.documentElement.addEventListener("mouseleave", () => doc.body.removeAttribute("data-hovered"));
 
     let frame = null;
@@ -1417,9 +1422,14 @@
       doc.body.toggleAttribute("data-hovered", Boolean(hovered));
     }
 
+    function setClickThrough(enabled) {
+      doc.body.toggleAttribute("data-click-through", Boolean(enabled));
+      if (enabled) doc.body.removeAttribute("data-hovered");
+    }
+
     syncChat(showChat, false);
     mirror.play().catch(() => {});
-    return { mirror, pipHud, syncChat, setFeatureEnabled, toggleChatOpen, setHovered };
+    return { mirror, pipHud, syncChat, setFeatureEnabled, toggleChatOpen, setHovered, setClickThrough };
   }
 
   function enterDocPip({ stream: firstStream, chatUrl, win: winPromise }, leave) {
@@ -1434,7 +1444,9 @@
     let setFeatureEnabled = null;
     let toggleChatOpen = null;
     let setHovered = null;
+    let setClickThrough = null;
     let hudTimer = null;
+    let rectSyncTimer = null;
     let engineConnected = true;
 
     function syncPipOpacity(showToast = false) {
@@ -1473,13 +1485,25 @@
       const built = buildPipDocument(w, stream, chatUrl, Boolean(ctx.settings.showChat), {
         onToggleChat: handleToggleChat,
         onResizeChat: handleResizeChat,
+        isClickThrough: () => Boolean(ctx.settings.clickThrough),
+        isHoldEvent: (e) => Boolean(HOLD[ctx.settings.hotkeys.hold]?.(e)),
       });
       mirror = built.mirror;
       pipHud = built.pipHud;
       setFeatureEnabled = built.setFeatureEnabled;
       toggleChatOpen = built.toggleChatOpen;
       setHovered = built.setHovered;
+      setClickThrough = built.setClickThrough;
       w.addEventListener("pagehide", leave, { signal: ac.signal });
+      w.addEventListener("keydown", (e) => {
+        if (HOLD[ctx.settings.hotkeys.hold]?.(e)) setHovered?.(true);
+      }, { capture: true, signal: ac.signal });
+      w.addEventListener("keyup", (e) => {
+        if (ctx.settings.clickThrough && !HOLD[ctx.settings.hotkeys.hold]?.(e)) setHovered?.(false);
+      }, { capture: true, signal: ac.signal });
+      w.addEventListener("blur", () => {
+        if (ctx.settings.clickThrough) setHovered?.(false);
+      }, { signal: ac.signal });
       w.addEventListener("wheel", (e) => {
         if (e.target !== mirror && !HOLD[ctx.settings.hotkeys.hold](e)) return;
         e.preventDefault();
@@ -1510,6 +1534,11 @@
             if (!ac.signal.aborted) send({ type: "PIP_RECT_UPDATED", rect: readRect() });
           }, delay);
         }
+        rectSyncTimer = setInterval(() => {
+          if (!ac.signal.aborted && !w.closed) {
+            send({ type: "PIP_RECT_UPDATED", rect: readRect() });
+          }
+        }, 2000);
       });
     }, leave);
 
@@ -1523,6 +1552,7 @@
       settingsChanged: () => {
         syncPipOpacity(false);
         setFeatureEnabled?.(Boolean(ctx.settings.showChat));
+        setClickThrough?.(Boolean(ctx.settings.clickThrough));
       },
       toggleChat: () => {
         toggleChatOpen?.();
@@ -1533,6 +1563,7 @@
       exit() {
         ac.abort();
         clearTimeout(hudTimer);
+        clearInterval(rectSyncTimer);
         video.classList.remove(DOCPIP_SOURCE_CLASS);
         if (!originalHasClass && !video.getAttribute("class")) video.removeAttribute("class");
         for (const t of stream.getTracks()) t.stop();

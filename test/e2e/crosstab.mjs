@@ -213,18 +213,39 @@ try {
   });
 
   await step("3 ghost, wheel opacity, resize & free move in Tab B", async () => {
-    await patchSettings({ clickThrough: true, opacity: 0.5 });
+    await patchSettings({ clickThrough: true, opacity: 0.5, dodge: { enabled: false } });
     const ghost = await poll(
       () => readFloat(tabB),
       (f) => f?.pe === "none" && Math.abs(f.opacity - 0.5) < 0.05,
       2000,
     );
+    const ghostCenter = center(ghost.rect);
+    await tabB.mouse.move(ghostCenter.x, ghostCenter.y, { steps: 4 });
+    const ctrlHiddenInClickThrough = await tabB.evaluate(() => {
+      const host = document.getElementById("ghostpip-controller");
+      return !host?.matches(":popover-open");
+    });
     await tabB.keyboard.down("Control");
     await tabB.keyboard.down("Alt");
-    const held = await poll(() => readFloat(tabB), (f) => f?.pe === "auto" && Math.abs(f.opacity - 1) < 0.05, 1500);
+    const held = await poll(
+      () =>
+        tabB.evaluate(() => {
+          const v = document.querySelector(".ghostpip-inpage-target");
+          const host = document.getElementById("ghostpip-controller");
+          if (!v) return null;
+          return {
+            pe: getComputedStyle(v).pointerEvents,
+            opacity: Number(getComputedStyle(v).opacity),
+            ctrlOpen: Boolean(host?.matches(":popover-open")),
+          };
+        }),
+      (f) => f?.pe === "auto" && Math.abs(f.opacity - 1) < 0.05 && f.ctrlOpen === true,
+      1500,
+    );
+    await tabB.mouse.move(10, 10);
     await tabB.keyboard.up("Alt");
     await tabB.keyboard.up("Control");
-    await patchSettings({ clickThrough: false, opacity: DEFAULTS.opacity });
+    await patchSettings({ clickThrough: false, opacity: DEFAULTS.opacity, dodge: { enabled: true } });
     await poll(() => readFloat(tabB), (f) => f?.pe === "auto", 1500);
 
     const f0 = await readFloat(tabB);
@@ -305,7 +326,9 @@ try {
     const ok =
       ghost?.pe === "none" &&
       Math.abs(ghost.opacity - 0.5) < 0.05 &&
+      ctrlHiddenInClickThrough === true &&
       held?.pe === "auto" &&
+      held?.ctrlOpen === true &&
       near(dodged?.rect, wantTl) &&
       Math.abs(resized.size.w - 360) <= 4 &&
       near(finalB?.rect, wantCustom, 4) &&

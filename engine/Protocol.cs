@@ -58,6 +58,7 @@ public sealed record PipResizeMessage(int DeltaH, double Dpr) : IncomingMessage(
 public sealed record PingMessage() : IncomingMessage("PING");
 public sealed record TestCursorMessage(DodgePoint? Cursor) : IncomingMessage("TEST_CURSOR");
 public sealed record TestWheelMessage(int X, int Y, int Delta, bool Hold = true) : IncomingMessage("TEST_WHEEL");
+public sealed record TestHoldMessage(bool? Hold) : IncomingMessage("TEST_HOLD");
 
 public abstract record OutgoingMessage(string Type);
 public sealed record HelloMessage(string EngineVersion, bool Elevated, string[] HotkeyErrors) : OutgoingMessage("HELLO");
@@ -106,6 +107,8 @@ public static class Protocol
                     TryParseTestCursor(root, out message),
                 "TEST_WHEEL" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
                     TryParseTestWheel(root, out message),
+                "TEST_HOLD" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
+                    TryParseTestHold(root, out message),
                 _ => false
             };
         }
@@ -284,6 +287,17 @@ public static class Protocol
         }
         bool hold = GetBoolOrDefault(root, "hold", true);
         message = new TestWheelMessage(x, y, delta, hold);
+        return true;
+    }
+
+    private static bool TryParseTestHold(JsonElement root, out IncomingMessage? message)
+    {
+        if (root.TryGetProperty("hold", out var hEl) && hEl.ValueKind is JsonValueKind.True or JsonValueKind.False)
+        {
+            message = new TestHoldMessage(hEl.GetBoolean());
+            return true;
+        }
+        message = new TestHoldMessage(null);
         return true;
     }
 

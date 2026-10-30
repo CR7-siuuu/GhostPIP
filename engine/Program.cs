@@ -210,6 +210,7 @@ public static unsafe class Program
     private static bool _wheelPreview;
     private static bool _hasTestCursor;
     private static DodgePoint? _testCursor;
+    private static bool? _testHold;
     private static bool _swallowNextLButtonUp;
     private static bool _cleanedUp;
 
@@ -382,12 +383,19 @@ public static unsafe class Program
                 case TestWheelMessage wheelMsg:
                     HandleMouseWheel(wheelMsg.X, wheelMsg.Y, wheelMsg.Delta, wheelMsg.Hold);
                     break;
+
+                case TestHoldMessage holdMsg:
+                    _testHold = holdMsg.Hold;
+                    break;
             }
         }
     }
 
     private static bool IsHoldDown()
     {
+        if (_testHold is bool th)
+            return th;
+
         bool ctrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
         bool alt = (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
         bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
@@ -435,7 +443,10 @@ public static unsafe class Program
 
     private static bool HandlePipBarClick(int x, int y)
     {
-        if (!_settings.Enabled || !_settings.ShowChat || IsHoldDown())
+        if (!_settings.Enabled || !_settings.ShowChat)
+            return false;
+
+        if (_settings.ClickThrough && !IsHoldDown())
             return false;
 
         nint pipHwnd = _pipTracker?.BoundHwnd ?? IntPtr.Zero;
@@ -475,7 +486,7 @@ public static unsafe class Program
         _dodgeState = _dodgeState with { HoverSince = null };
 
         bool effectiveClickThrough = _settings.ClickThrough && !holdDown;
-        _ghostStyle.Apply(pipHwnd, next, effectiveClickThrough, hideHeader: !holdDown);
+        _ghostStyle.Apply(pipHwnd, next, effectiveClickThrough, hideHeader: true);
         _nativeHost?.Send(new IntentMessage("SET_OPACITY", Opacity: next));
         return true;
     }
@@ -583,7 +594,8 @@ public static unsafe class Program
             return;
         }
 
-        if (pipHwnd != _lastBoundHwnd)
+        bool justBound = pipHwnd != _lastBoundHwnd;
+        if (justBound)
         {
             _lastBoundHwnd = pipHwnd;
             _lastPipHovered = false;
@@ -702,12 +714,10 @@ public static unsafe class Program
         bool cursorInWindow = curPt is DodgePoint wp &&
             wp.X >= winRect.L && wp.X <= winRect.R &&
             wp.Y >= winRect.T && wp.Y <= winRect.B;
-        bool cursorInPipBar = cursorInWindow && curPt is DodgePoint hp &&
-            hp.Y >= winRect.T && hp.Y < winRect.T + 48;
 
-        bool hideHeader = !holdRes.IsInteractive;
-        bool pipHovered = holdRes.IsInteractive || cursorInWindow;
-        if (pipHovered != _lastPipHovered)
+        bool hideHeader = true;
+        bool pipHovered = holdRes.IsInteractive || (!_settings.ClickThrough && cursorInWindow);
+        if (justBound || pipHovered != _lastPipHovered)
         {
             _lastPipHovered = pipHovered;
             _nativeHost?.Send(new PipHoverMessage(_pipTracker?.BoundTabId ?? -1, pipHovered));
@@ -718,9 +728,7 @@ public static unsafe class Program
             : _dodgeState.Faded
                 ? 0.1
                 : _settings.Opacity;
-        bool effectiveClickThrough = _settings.ClickThrough &&
-            !holdRes.IsInteractive &&
-            !(cursorInPipBar && (!_settings.Dodge.Enabled || _waitCursorLeave));
+        bool effectiveClickThrough = _settings.ClickThrough && !holdRes.IsInteractive;
 
         _ghostStyle.Apply(pipHwnd, effectiveOpacity, effectiveClickThrough, hideHeader);
     }

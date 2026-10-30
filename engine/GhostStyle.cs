@@ -15,6 +15,7 @@ public sealed unsafe class GhostStyle
     private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOZORDER = 0x0004;
     private const uint SWP_NOACTIVATE = 0x0010;
+    private const uint SWP_FRAMECHANGED = 0x0020;
 
     private delegate bool EnumChildProc(nint hWnd, nint lParam);
 
@@ -206,7 +207,7 @@ public sealed unsafe class GhostStyle
 
         bool hadPrev = _applied.TryGetValue(hwnd, out var prev);
         bool layeredWasMissing = (curEx & WS_EX_LAYERED) == 0;
-        if (!hadPrev || layeredWasMissing || prev.Alpha != alpha)
+        if (!hadPrev || layeredWasMissing || exChanged || prev.Alpha != alpha)
             SetLayeredWindowAttributes(hwnd, 0, alpha, LWA_ALPHA);
 
         bool wantClip = false;
@@ -241,7 +242,10 @@ public sealed unsafe class GhostStyle
 
         int nextTick = hadPrev ? prev.TickCount + 1 : 0;
         if ((curEx & WS_EX_TOPMOST) == 0 || exChanged || (clickThrough && nextTick % 10 == 0))
-            SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        {
+            uint flags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | (exChanged ? SWP_FRAMECHANGED : 0u);
+            SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, flags);
+        }
 
         _applied[hwnd] = new AppliedState(alpha, clickThrough, nextTick, wantClip, clipL, clipT, clipR, clipB, d3dChild);
         return true;

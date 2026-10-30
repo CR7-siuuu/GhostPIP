@@ -203,6 +203,7 @@ function updateSettings(mutator) {
     const res = mutator(current);
     if (res.ok) {
       await chrome.storage.local.set({ settings: res.settings });
+      if (res.settings.enabled && !nativePort) connectEngine();
       postToEngine({ v: 1, type: "STATE", settings: res.settings });
     }
     return res;
@@ -333,8 +334,24 @@ function onEngineMessage(msg) {
 }
 
 let reconnectTimer = null;
+let pingTimer = null;
+
+function stopPing() {
+  if (pingTimer) {
+    clearInterval(pingTimer);
+    pingTimer = null;
+  }
+}
+
+function startPing() {
+  stopPing();
+  pingTimer = setInterval(() => {
+    if (!postToEngine({ v: 1, type: "PING" })) stopPing();
+  }, 20000);
+}
 
 function disconnectEngine() {
+  stopPing();
   clearTimeout(reconnectTimer);
   reconnectTimer = null;
   const port = nativePort;
@@ -349,8 +366,22 @@ function disconnectEngine() {
 
 function onEngineDisconnect(port) {
   void chrome.runtime.lastError;
+  stopPing();
   if (nativePort === port) nativePort = null;
   chrome.storage.session.set({ engine: { ...DEFAULT_ENGINE } });
+  chrome.storage.session
+    .get("pip")
+    .then(({ pip = {} }) => {
+      let changed = false;
+      for (const k of Object.keys(pip)) {
+        if (pip[k]?.bound) {
+          pip[k] = { ...pip[k], bound: false };
+          changed = true;
+        }
+      }
+      if (changed) chrome.storage.session.set({ pip });
+    })
+    .catch(() => {});
   clearTimeout(reconnectTimer);
   if (!engineAllowed) return;
   reconnectTimer = setTimeout(() => {
@@ -374,6 +405,7 @@ function connectEngine() {
   nativePort = port;
   port.onMessage.addListener(onEngineMessage);
   port.onDisconnect.addListener(() => onEngineDisconnect(port));
+  startPing();
 
   Promise.all([chrome.storage.local.get("settings"), chrome.storage.session.get("pip")])
     .then(([{ settings }, { pip = {} }]) => {
@@ -616,6 +648,7 @@ const handlers = {
   },
   async PIP_RECT_UPDATED({ rect }, sender) {
     if (sender?.tab?.id != null && rect) {
+      if (!nativePort && engineAllowed) connectEngine();
       const saved = await updatePipEntry(sender.tab.id, (prev) => (prev ? { ...prev, rect } : null));
       if (saved && !saved.bound) {
         postToEngine({
@@ -644,8 +677,10 @@ const handlers = {
       chrome.storage.local.get("settings"),
       chrome.storage.session.get(["pip", "engine"]),
     ]);
+    const merged = GhostPiPSettings.merge(settings);
+    if (merged.enabled && !nativePort) connectEngine();
     return {
-      settings: GhostPiPSettings.merge(settings),
+      settings: merged,
       pip,
       engine: { ...DEFAULT_ENGINE, ...(engine && typeof engine === "object" ? engine : {}) },
     };
