@@ -338,15 +338,55 @@ try {
       2000,
     );
 
+    await popupPage.click("#enabled");
+    const disabledPopup = await poll(
+      () =>
+        popupPage.evaluate(() => ({
+          enabled: document.getElementById("enabled").checked,
+          badge: document.getElementById("modeBadge").textContent,
+          bodyDisabled: document.body.hasAttribute("data-disabled"),
+        })),
+      (d) => d.enabled === false && d.badge === "Disabled" && d.bodyDisabled === true,
+      2000,
+    );
+    await videoPage.bringToFront();
+    const disabledVideo = await poll(
+      () =>
+        videoPage.evaluate(() => ({
+          inTabOpen: window.__gpVideo.matches(":popover-open"),
+          launcherOpen: Boolean(document.getElementById("ghostpip-launcher")?.matches(":popover-open")),
+        })),
+      (v) => v.inTabOpen === false && v.launcherOpen === false,
+      2000,
+    );
+    await videoPage.mouse.move(vRect.x, vRect.y, { steps: 4 });
+    await sleep(300);
+    const launcherStillClosed = await videoPage.evaluate(
+      () => !document.getElementById("ghostpip-launcher")?.matches(":popover-open"),
+    );
+
+    await popupPage.bringToFront();
+    await popupPage.click("#enabled");
+    const reenabledPopup = await poll(
+      () => popupPage.evaluate(() => document.getElementById("enabled").checked),
+      (c) => c === true,
+      2000,
+    );
+
     const ok =
       afterCt.clickThrough === !before.clickThrough &&
       afterDodge.dodgeEnabled === !before.dodgeEnabled &&
       hkUpdated.hold === "Alt" &&
       hkUpdated.btn === "F8" &&
-      hkUpdated.kbd === "F8";
+      hkUpdated.kbd === "F8" &&
+      disabledPopup.enabled === false &&
+      disabledPopup.badge === "Disabled" &&
+      disabledVideo.inTabOpen === false &&
+      launcherStillClosed === true &&
+      reenabledPopup === true;
     return {
       ok,
-      info: `clickThrough: ${before.clickThrough}->${afterCt.clickThrough}, dodgeEnabled: ${before.dodgeEnabled}->${afterDodge.dodgeEnabled}, hotkey=${hkUpdated.btn}, hold=${hkUpdated.hold}`,
+      info: `clickThrough: ${before.clickThrough}->${afterCt.clickThrough}, dodgeEnabled: ${before.dodgeEnabled}->${afterDodge.dodgeEnabled}, hotkey=${hkUpdated.btn}, hold=${hkUpdated.hold}, masterToggle=${disabledPopup.badge}->restored=${reenabledPopup}`,
     };
   });
 } finally {

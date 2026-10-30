@@ -16,6 +16,7 @@
   };
 
   const DEFAULTS = {
+    enabled: true,
     clickThrough: false,
     opacity: 0.7,
     showChat: true,

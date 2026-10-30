@@ -310,6 +310,7 @@
     let idleTimer = null;
 
     function update() {
+      if (!ctx.settings.enabled) return launcher.hide();
       const r = ctx.video?.getBoundingClientRect();
       if (!r || r.width === 0) return launcher.hide();
       const anchor = { x: r.left + r.width / 2, y: Math.max(r.top, 0) + 6 };
@@ -357,6 +358,7 @@
     const timer = setInterval(update, 500);
 
     return {
+      settingsChanged: update,
       exit() {
         ac.abort();
         clearInterval(timer);
@@ -1380,7 +1382,7 @@
   }
 
   document.addEventListener("enterpictureinpicture", (e) => {
-    if (current.name !== "idle" || !(e.target instanceof HTMLVideoElement)) return;
+    if (!ctx.settings.enabled || current.name !== "idle" || !(e.target instanceof HTMLVideoElement)) return;
     ctx.video = e.target;
     go("nativePip", Promise.resolve(e.pictureInPictureWindow));
   }, true);
@@ -1460,6 +1462,10 @@
 
   function applySettings(stored) {
     ctx.settings = Settings.merge(stored);
+    if (!ctx.settings.enabled && current.name !== "idle") {
+      go("idle");
+      return;
+    }
     current.settingsChanged();
   }
 
@@ -1505,6 +1511,7 @@
     },
     async REMOTE_INTAB_START(msg) {
       await settingsReady;
+      if (!ctx.settings.enabled) return { ok: false };
       if (current.name === "remoteInTab" && current.video?.isConnected) {
         current.kick?.();
         return { ok: true };
@@ -1535,7 +1542,7 @@
   });
 
   window.addEventListener("keydown", (e) => {
-    if (!e.isTrusted || e.repeat) return;
+    if (!ctx.settings.enabled || !e.isTrusted || e.repeat) return;
     const t = e.target;
     if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) {
       return;

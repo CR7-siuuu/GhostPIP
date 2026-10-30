@@ -414,7 +414,7 @@ public static unsafe class Program
 
     private static bool HandleMouseWheel(int x, int y, int delta, bool holdDown)
     {
-        if (delta == 0)
+        if (delta == 0 || !_settings.Enabled)
             return false;
 
         nint pipHwnd = _pipTracker?.BoundHwnd ?? IntPtr.Zero;
@@ -477,11 +477,20 @@ public static unsafe class Program
 
     private static void ApplyStateMessage(Settings next)
     {
+        bool enabledChanged = _settings.Enabled != next.Enabled;
         bool hotkeysChanged = _settings.Hotkeys != next.Hotkeys;
         bool homeChanged = _settings.Dodge.Home != next.Dodge.Home;
         _settings = next;
 
-        if (hotkeysChanged && _hotkeys is not null)
+        if (!_settings.Enabled)
+        {
+            _hotkeys?.UnregisterAll();
+            _pipTracker?.ClearAll();
+            _ghostStyle.RestoreAll();
+            return;
+        }
+
+        if ((hotkeysChanged || enabledChanged) && _hotkeys is not null)
         {
             string[] hotkeyErrors = _hotkeys.Apply(_settings.Hotkeys);
             _nativeHost?.Send(new HelloMessage(Protocol.EngineVersion, IsElevated(), hotkeyErrors));
@@ -521,6 +530,9 @@ public static unsafe class Program
 
     private static void OnTick()
     {
+        if (!_settings.Enabled)
+            return;
+
         long nowMs = _clock.ElapsedMilliseconds;
         _pipTracker?.Tick(nowMs);
 

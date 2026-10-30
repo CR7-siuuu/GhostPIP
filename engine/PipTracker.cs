@@ -141,6 +141,17 @@ public sealed unsafe class PipTracker : IDisposable
         }
     }
 
+    public void ClearAll()
+    {
+        _pending = null;
+        if (BoundHwnd != IntPtr.Zero)
+        {
+            _ghostStyle.Restore(BoundHwnd);
+            BoundHwnd = IntPtr.Zero;
+            BoundTabId = -1;
+        }
+    }
+
     public void Tick(long nowMs)
     {
         if (BoundHwnd != IntPtr.Zero)

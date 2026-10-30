@@ -458,6 +458,9 @@ const handlers = {
   },
   async PATCH_SETTINGS({ patch, keepLayoutPos }) {
     const res = await updateSettings((current) => GhostPiPSettings.patch(current, patch));
+    if (res.ok && patch?.enabled === false) {
+      await handlers.INTAB_STOP_ALL();
+    }
     if (res.ok && patch?.dodge?.home && !keepLayoutPos) {
       const { floatLayout } = await chrome.storage.local.get("floatLayout");
       if (floatLayout?.pos) {

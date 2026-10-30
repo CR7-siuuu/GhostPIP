@@ -15,7 +15,8 @@ public sealed record Settings(
     bool ClickThrough,
     double Opacity,
     DodgeConfig Dodge,
-    HotkeyConfig Hotkeys
+    HotkeyConfig Hotkeys,
+    bool Enabled = true
 )
 {
     public static readonly Settings Defaults = new(
@@ -40,7 +41,8 @@ public sealed record Settings(
             Dodge: "Alt+Shift+D",
             Mute: "Alt+M",
             Hold: "Ctrl+Alt"
-        )
+        ),
+        Enabled: true
     );
 }
 
@@ -125,6 +127,7 @@ public static class Protocol
             return false;
 
         var def = Settings.Defaults;
+        bool enabled = GetBoolOrDefault(settingsEl, "enabled", def.Enabled);
         bool clickThrough = GetBoolOrDefault(settingsEl, "clickThrough", def.ClickThrough);
         double rawOpacity = GetDoubleOrDefault(settingsEl, "opacity", def.Opacity);
         if (!double.IsFinite(rawOpacity))
@@ -195,7 +198,7 @@ public static class Protocol
             IgnoreScreenEdgePx: ignoreScreenEdgePx
         );
 
-        message = new StateMessage(new Settings(clickThrough, opacity, dodge, hotkeys));
+        message = new StateMessage(new Settings(clickThrough, opacity, dodge, hotkeys, enabled));
         return true;
     }
 

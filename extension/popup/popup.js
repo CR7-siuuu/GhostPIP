@@ -11,6 +11,7 @@
   const els = {
     modeBadge: document.getElementById("modeBadge"),
     engineWarning: document.getElementById("engineWarning"),
+    enabled: document.getElementById("enabled"),
     clickThrough: document.getElementById("clickThrough"),
     dodgeEnabled: document.getElementById("dodgeEnabled"),
     showChat: document.getElementById("showChat"),
@@ -47,9 +48,12 @@
   function render() {
     const { settings, engine } = state;
     const { dodge, hotkeys } = settings;
+    const isEnabled = Boolean(settings.enabled);
 
-    els.modeBadge.textContent = engine.connected ? "Engine Active" : "In-Tab Mode";
-    els.modeBadge.toggleAttribute("data-active", Boolean(engine.connected));
+    document.body.toggleAttribute("data-disabled", !isEnabled);
+    els.modeBadge.textContent = !isEnabled ? "Disabled" : engine.connected ? "Engine Active" : "In-Tab Mode";
+    els.modeBadge.toggleAttribute("data-active", isEnabled && Boolean(engine.connected));
+    els.modeBadge.toggleAttribute("data-disabled", !isEnabled);
     els.engineBanner.hidden = Boolean(engine.connected);
 
     const warnings = [];
@@ -62,6 +66,7 @@
     els.engineWarning.hidden = warnings.length === 0;
     els.engineWarning.textContent = warnings.join(" · ");
 
+    if (els.enabled) els.enabled.checked = isEnabled;
     els.clickThrough.checked = settings.clickThrough;
     els.dodgeEnabled.checked = dodge.enabled;
     if (els.showChat) els.showChat.checked = Boolean(settings.showChat);
@@ -129,6 +134,7 @@
     }
   }
 
+  els.enabled?.addEventListener("change", () => applyPatch({ enabled: els.enabled.checked }));
   els.clickThrough.addEventListener("change", () => applyIntent("TOGGLE_CLICK_THROUGH"));
   els.dodgeEnabled.addEventListener("change", () => applyIntent("TOGGLE_DODGE"));
   els.showChat?.addEventListener("change", () => applyPatch({ showChat: els.showChat.checked }));

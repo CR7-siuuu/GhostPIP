@@ -109,6 +109,28 @@ body {
   box-shadow: 0 0 8px #34d399;
 }
 
+.badge[data-disabled] {
+  background: rgba(51, 65, 85, 0.45);
+  border-color: rgba(148, 163, 184, 0.25);
+  color: #94a3b8;
+}
+
+.badge[data-disabled]::before {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.7);
+}
+
+.row-master span {
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+body[data-disabled] .card > :not(.row-master),
+body[data-disabled] details.card {
+  opacity: 0.42;
+  pointer-events: none;
+}
+
 /* Cards */
 .card {
   background: linear-gradient(180deg, var(--card-top) 0%, var(--card-bot) 100%);
