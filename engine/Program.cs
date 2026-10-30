@@ -201,6 +201,7 @@ public static unsafe class Program
     private static NativeMessagingHost? _nativeHost;
     private static PipTracker? _pipTracker;
     private static nint _lastBoundHwnd;
+    private static bool _lastPipHovered;
     private static bool _wasInteractive;
     private static bool _waitCursorLeave;
     private static bool _customPos;
@@ -362,6 +363,10 @@ public static unsafe class Program
                     _pipTracker?.OnPipClosed(closedMsg.TabId);
                     break;
 
+                case PipResizeMessage resizeMsg:
+                    HandlePipResize(resizeMsg.DeltaH, resizeMsg.Dpr);
+                    break;
+
                 case PingMessage:
                     _nativeHost.Send(new PongMessage());
                     break;
@@ -451,6 +456,25 @@ public static unsafe class Program
         _ghostStyle.MoveLogicalWindow(hwnd, targetRect.L, targetRect.T);
     }
 
+    private static void HandlePipResize(int deltaH, double dpr)
+    {
+        nint pipHwnd = _pipTracker?.BoundHwnd ?? IntPtr.Zero;
+        if (pipHwnd == IntPtr.Zero || !_ghostStyle.TryGetLogicalWindowRect(pipHwnd, out var rc))
+            return;
+
+        int curW = rc.Right - rc.Left;
+        int curH = rc.Bottom - rc.Top;
+        int physDelta = (int)Math.Round(deltaH * dpr, MidpointRounding.AwayFromZero);
+        if (Math.Abs(physDelta) > 4)
+        {
+            int nextH = Math.Max(150, curH + physDelta);
+            _ghostStyle.ResizeLogicalWindow(pipHwnd, curW, nextH);
+        }
+
+        if (!_customPos)
+            SnapWindowToCorner(pipHwnd, _dodgeState.Corner);
+    }
+
     private static void ApplyStateMessage(Settings next)
     {
         bool hotkeysChanged = _settings.Hotkeys != next.Hotkeys;
@@ -504,6 +528,7 @@ public static unsafe class Program
         if (pipHwnd == IntPtr.Zero)
         {
             _lastBoundHwnd = IntPtr.Zero;
+            _lastPipHovered = false;
             _wasInteractive = false;
             _waitCursorLeave = false;
             _customPos = false;
@@ -515,6 +540,7 @@ public static unsafe class Program
         if (pipHwnd != _lastBoundHwnd)
         {
             _lastBoundHwnd = pipHwnd;
+            _lastPipHovered = false;
             _wasInteractive = false;
             _waitCursorLeave = false;
             _customPos = false;
@@ -633,10 +659,18 @@ public static unsafe class Program
         bool cursorInHeader = false;
         if (cursorInWindow && curPt is DodgePoint hp && _ghostStyle.TryGetContentRelRect(pipHwnd, out var contentRel))
         {
-            cursorInHeader = hp.Y >= winRect.T && hp.Y < winRect.T + contentRel.Top;
+            cursorInHeader = hp.Y >= winRect.T && hp.Y < winRect.T + contentRel.Top + 44;
         }
 
         bool hideHeader = !holdRes.IsInteractive && !cursorInWindow;
+        bool pipHovered = !hideHeader;
+        if (pipHovered != _lastPipHovered)
+        {
+            _lastPipHovered = pipHovered;
+            if (_pipTracker is { BoundTabId: >= 0 } tracker)
+                _nativeHost?.Send(new PipHoverMessage(tracker.BoundTabId, pipHovered));
+        }
+
         double effectiveOpacity = (holdRes.IsInteractive && !_wheelPreview)
             ? 1.0
             : _dodgeState.Faded

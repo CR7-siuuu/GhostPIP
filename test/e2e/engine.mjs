@@ -254,16 +254,61 @@ try {
       3000,
     );
     const wantBr = Dodge.cornerRect("BR", { w: win.rect.w, h: win.rect.h }, win.work, DEFAULTS.dodge.edgeInsetPx);
+
+    const chatBefore = await videoPage.evaluate(() => {
+      const d = documentPictureInPicture.window.document;
+      const bar = d.querySelector(".pip-bar");
+      const btn = d.querySelector('[data-action="toggleChat"]');
+      return {
+        hiddenWhenIdle: getComputedStyle(bar).opacity === "0",
+        label: btn?.textContent ?? "",
+        hasIframe: Boolean(d.querySelector("iframe")),
+      };
+    });
+
+    await videoPage.evaluate(() => {
+      documentPictureInPicture.window.document.querySelector('[data-action="toggleChat"]').click();
+    });
+    const chatHiddenWin = await poll(
+      () => inspectWin32Pip(pipSize.w, pipSize.h - 420),
+      (w) => w && Math.abs(w.rect.h - (win.rect.h - 420)) <= 40,
+      2500,
+    );
+    const chatAfterHide = await videoPage.evaluate(() => {
+      const d = documentPictureInPicture.window.document;
+      const btn = d.querySelector('[data-action="toggleChat"]');
+      return {
+        label: btn?.textContent ?? "",
+        hasIframe: Boolean(d.querySelector("iframe")),
+      };
+    });
+
+    await videoPage.evaluate(() => {
+      documentPictureInPicture.window.document.querySelector('[data-action="toggleChat"]').click();
+    });
+    const chatRestoredWin = await poll(
+      () => inspectWin32Pip(pipSize.w, pipSize.h),
+      (w) => w && Math.abs(w.rect.h - win.rect.h) <= 20,
+      2500,
+    );
+
     const ok =
       Boolean(boundEntry?.bound) &&
       win.layered === true &&
       win.transparent === false &&
       win.alpha === 179 &&
       win.rgnTop > 0 &&
-      near(win.rect, wantBr);
+      near(win.rect, wantBr) &&
+      chatBefore.hiddenWhenIdle === true &&
+      chatBefore.label === "채팅창 숨기기" &&
+      chatBefore.hasIframe === true &&
+      chatAfterHide.label === "채팅창 보기" &&
+      chatAfterHide.hasIframe === false &&
+      Boolean(chatHiddenWin) &&
+      Boolean(chatRestoredWin);
     return {
       ok,
-      info: `bound=${boundEntry?.bound} layered=${win.layered} transparent=${win.transparent} alpha=${win.alpha} rgnTop=${win.rgnTop} rect=${fmt(win.rect)} want=${fmt(wantBr)}`,
+      info: `bound=${boundEntry?.bound} layered=${win.layered} alpha=${win.alpha} rgnTop=${win.rgnTop} chatBtn="${chatBefore.label}"->"${chatAfterHide.label}" h=${win.rect.h}->${chatHiddenWin?.rect?.h}->${chatRestoredWin?.rect?.h} rect=${fmt(win.rect)}`,
     };
   });
 

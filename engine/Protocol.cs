@@ -50,6 +50,7 @@ public abstract record IncomingMessage(string Type);
 public sealed record StateMessage(Settings Settings) : IncomingMessage("STATE");
 public sealed record PipOpenedMessage(int TabId, string Kind, PipRect Rect, double Dpr) : IncomingMessage("PIP_OPENED");
 public sealed record PipClosedMessage(int TabId) : IncomingMessage("PIP_CLOSED");
+public sealed record PipResizeMessage(int DeltaH, double Dpr) : IncomingMessage("PIP_RESIZE");
 public sealed record PingMessage() : IncomingMessage("PING");
 public sealed record TestCursorMessage(DodgePoint? Cursor) : IncomingMessage("TEST_CURSOR");
 public sealed record TestWheelMessage(int X, int Y, int Delta, bool Hold = true) : IncomingMessage("TEST_WHEEL");
@@ -59,6 +60,7 @@ public sealed record HelloMessage(string EngineVersion, bool Elevated, string[] 
 public sealed record IntentMessage(string Intent, string? Corner = null, double? Opacity = null) : OutgoingMessage("INTENT");
 public sealed record PipBoundMessage(int TabId) : OutgoingMessage("PIP_BOUND");
 public sealed record PipLostMessage(int TabId, string Reason) : OutgoingMessage("PIP_LOST");
+public sealed record PipHoverMessage(int TabId, bool Hovered) : OutgoingMessage("PIP_HOVER");
 public sealed record PongMessage() : OutgoingMessage("PONG");
 
 public static class Protocol
@@ -94,6 +96,7 @@ public static class Protocol
                 "STATE" => TryParseState(root, out message),
                 "PIP_OPENED" => TryParsePipOpened(root, out message),
                 "PIP_CLOSED" => TryParsePipClosed(root, out message),
+                "PIP_RESIZE" => TryParsePipResize(root, out message),
                 "PING" => SetResult(new PingMessage(), out message),
                 "TEST_CURSOR" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
                     TryParseTestCursor(root, out message),
@@ -234,6 +237,17 @@ public static class Protocol
         return true;
     }
 
+    private static bool TryParsePipResize(JsonElement root, out IncomingMessage? message)
+    {
+        int deltaH = GetIntOrDefault(root, "deltaH", 0);
+        double dpr = GetDoubleOrDefault(root, "dpr", 1.0);
+        if (!double.IsFinite(dpr) || dpr <= 0)
+            dpr = 1.0;
+
+        message = new PipResizeMessage(deltaH, dpr);
+        return true;
+    }
+
     private static bool TryParseTestCursor(JsonElement root, out IncomingMessage? message)
     {
         if (root.TryGetProperty("x", out var xEl) && xEl.ValueKind == JsonValueKind.Number && xEl.TryGetInt32(out int x) &&
@@ -316,6 +330,11 @@ public static class Protocol
                 case PipLostMessage lost:
                     writer.WriteNumber("tabId", lost.TabId);
                     writer.WriteString("reason", lost.Reason);
+                    break;
+
+                case PipHoverMessage hover:
+                    writer.WriteNumber("tabId", hover.TabId);
+                    writer.WriteBoolean("hovered", hover.Hovered);
                     break;
 
                 case PongMessage:

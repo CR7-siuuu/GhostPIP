@@ -134,6 +134,8 @@
     "M2 3.5A1.5 1.5 0 0 1 3.5 2h9A1.5 1.5 0 0 1 14 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.5v-9ZM3.5 3.2a.3.3 0 0 0-.3.3v9a.3.3 0 0 0 .3.3h9a.3.3 0 0 0 .3-.3v-9a.3.3 0 0 0-.3-.3h-9ZM8 8.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v2.5a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5V8.5Z";
   const ICON_FULL_MODE =
     "M2.5 3A1.5 1.5 0 0 0 1 4.5v7A1.5 1.5 0 0 0 2.5 13h5a.6.6 0 0 0 0-1.2h-5a.3.3 0 0 1-.3-.3v-7a.3.3 0 0 1 .3-.3h7a.3.3 0 0 1 .3.3v2a.6.6 0 1 0 1.2 0v-2A1.5 1.5 0 0 0 9.5 3h-7Zm6.5 5.5A1.5 1.5 0 0 1 10.5 7h3A1.5 1.5 0 0 1 15 8.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 11.5v-3Z";
+  const ICON_CHAT =
+    "M2.5 2A1.5 1.5 0 0 0 1 3.5v7A1.5 1.5 0 0 0 2.5 12h2.2v2.1a.5.5 0 0 0 .82.38L8.4 12h5.1A1.5 1.5 0 0 0 15 10.5v-7A1.5 1.5 0 0 0 13.5 2h-11Zm2 3.2h7a.6.6 0 1 1 0 1.2h-7a.6.6 0 0 1 0-1.2Zm0 2.6h4.5a.6.6 0 1 1 0 1.2H4.5a.6.6 0 0 1 0-1.2Z";
 
   const BASE_CSS = `
     .bar { display: inline-flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px;
@@ -1129,16 +1131,41 @@
   }
 
   const PIP_CSS = `
+    ${BASE_CSS}
     html, body { margin: 0; height: 100%; background: #000; color: #fff; font: 13px system-ui, "Malgun Gothic", sans-serif; overflow: hidden; }
     body { display: flex; flex-direction: column; position: relative; }
     video { flex: 1 1 auto; min-height: 0; width: 100%; height: 100%; object-fit: fill; background: #000; }
     iframe { flex: 0 0 ${PIP_CHAT_HEIGHT}px; width: 100%; border: 0; background: #fff; }
-    .pip-hud { position: fixed; top: 8px; left: 8px; padding: 4px 8px; border-radius: 5px; pointer-events: none;
+    .pip-bar { position: fixed; top: 8px; left: 50%; z-index: 10; opacity: 0; pointer-events: none;
+      transform: translateX(-50%) translateY(-4px); transition: opacity 0.16s ease, transform 0.16s ease; }
+    body:hover .pip-bar,
+    body[data-hovered] .pip-bar { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+    .pip-hud { position: fixed; top: 8px; left: 8px; z-index: 10; padding: 4px 8px; border-radius: 5px; pointer-events: none;
       background: rgba(18, 18, 22, 0.85); color: #fff; font: 600 12px/1 system-ui, "Malgun Gothic", sans-serif;
       opacity: 0; transition: opacity 0.15s ease-out; }
     .pip-hud[data-show] { opacity: 1; }`;
 
-  function buildPipDocument(win, stream, chatUrl, showChat) {
+  function resizeDocPipWindow(w, deltaH) {
+    if (!w || w.closed) return;
+    try {
+      const prevH = w.outerHeight;
+      const nextH = Math.max(180, prevH + deltaH);
+      const availTop = w.screen?.availTop ?? 0;
+      const availH = w.screen?.availHeight ?? 1080;
+      const inBottomHalf = w.screenY + prevH / 2 > availTop + availH / 2;
+      if (inBottomHalf && deltaH > 0) {
+        w.moveTo(w.screenX, Math.max(availTop, w.screenY - deltaH));
+        w.resizeTo(w.outerWidth, nextH);
+      } else if (inBottomHalf && deltaH < 0) {
+        w.resizeTo(w.outerWidth, nextH);
+        w.moveTo(w.screenX, w.screenY - deltaH);
+      } else {
+        w.resizeTo(w.outerWidth, nextH);
+      }
+    } catch {}
+  }
+
+  function buildPipDocument(win, stream, chatUrl, showChat, { onToggleChat, onResizeChat } = {}) {
     const doc = win.document;
     const style = doc.createElement("style");
     style.textContent = PIP_CSS;
@@ -1151,11 +1178,40 @@
     const pipHud = doc.createElement("div");
     pipHud.className = "pip-hud";
     doc.body.append(mirror, pipHud);
-    let frame = null;
 
-    function syncChat(enabled) {
+    let chatBtn = null;
+    let chatLabel = null;
+    if (chatUrl) {
+      chatLabel = doc.createElement("span");
+      chatBtn = doc.createElement("button");
+      chatBtn.type = "button";
+      chatBtn.dataset.action = "toggleChat";
+      chatBtn.append(svgIcon(ICON_CHAT), chatLabel);
+      chatBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        onToggleChat?.();
+      });
+      const pipBar = doc.createElement("div");
+      pipBar.className = "bar pip-bar";
+      pipBar.append(chatBtn);
+      doc.body.append(pipBar);
+    }
+
+    doc.documentElement.addEventListener("pointerenter", () => doc.body.setAttribute("data-hovered", ""));
+    doc.documentElement.addEventListener("pointermove", () => doc.body.setAttribute("data-hovered", ""));
+    doc.documentElement.addEventListener("mouseleave", () => doc.body.removeAttribute("data-hovered"));
+
+    let frame = null;
+    let chatShown = Boolean(showChat && chatUrl);
+
+    function syncChat(enabled, resizeWin = false) {
       if (!chatUrl) return;
-      if (enabled) {
+      const nextShown = Boolean(enabled);
+      const changed = nextShown !== chatShown;
+      chatShown = nextShown;
+      if (chatLabel) chatLabel.textContent = nextShown ? "채팅창 숨기기" : "채팅창 보기";
+      if (chatBtn) chatBtn.toggleAttribute("data-active", nextShown);
+      if (nextShown) {
         if (!frame) {
           frame = doc.createElement("iframe");
           frame.src = chatUrl;
@@ -1164,11 +1220,18 @@
       } else if (frame) {
         frame.remove();
       }
+      if (resizeWin && changed) {
+        onResizeChat?.(nextShown ? PIP_CHAT_HEIGHT : -PIP_CHAT_HEIGHT);
+      }
     }
 
-    syncChat(showChat);
+    function setHovered(hovered) {
+      doc.body.toggleAttribute("data-hovered", Boolean(hovered));
+    }
+
+    syncChat(showChat, false);
     mirror.play().catch(() => {});
-    return { mirror, pipHud, syncChat };
+    return { mirror, pipHud, syncChat, setHovered };
   }
 
   function enterDocPip({ stream: firstStream, chatUrl, win: winPromise }, leave) {
@@ -1181,6 +1244,7 @@
     let mirror = null;
     let pipHud = null;
     let syncChat = null;
+    let setHovered = null;
     let hudTimer = null;
     let engineConnected = true;
 
@@ -1195,13 +1259,39 @@
       }
     }
 
+    function handleResizeChat(deltaH) {
+      if (!win || win.closed) return;
+      if (!engineConnected) {
+        resizeDocPipWindow(win, deltaH);
+        return;
+      }
+      send({
+        type: "PIP_RESIZE",
+        deltaH,
+        dpr: win.devicePixelRatio || 1,
+      }).then((res) => {
+        if (!res?.handledByEngine) resizeDocPipWindow(win, deltaH);
+      });
+    }
+
+    function handleToggleChat() {
+      const next = !ctx.settings.showChat;
+      ctx.settings = { ...ctx.settings, showChat: next };
+      syncChat?.(next, true);
+      send({ type: "PATCH_SETTINGS", patch: { showChat: next } });
+    }
+
     winPromise.then((w) => {
       if (ac.signal.aborted) return w.close();
       win = w;
-      const built = buildPipDocument(w, stream, chatUrl, Boolean(ctx.settings.showChat));
+      const built = buildPipDocument(w, stream, chatUrl, Boolean(ctx.settings.showChat), {
+        onToggleChat: handleToggleChat,
+        onResizeChat: handleResizeChat,
+      });
       mirror = built.mirror;
       pipHud = built.pipHud;
       syncChat = built.syncChat;
+      setHovered = built.setHovered;
       w.addEventListener("pagehide", leave, { signal: ac.signal });
       w.addEventListener("wheel", (e) => {
         if (e.target !== mirror && !HOLD[ctx.settings.hotkeys.hold](e)) return;
@@ -1243,7 +1333,10 @@
     return {
       settingsChanged: () => {
         syncPipOpacity(false);
-        syncChat?.(Boolean(ctx.settings.showChat));
+        syncChat?.(Boolean(ctx.settings.showChat), true);
+      },
+      setHovered: (hovered) => {
+        setHovered?.(hovered);
       },
       exit() {
         ac.abort();
@@ -1422,6 +1515,10 @@
     },
     async REMOTE_INTAB_STOP() {
       if (current.name === "remoteInTab") go("idle");
+      return { ok: true };
+    },
+    async PIP_HOVER(msg) {
+      if (current.name === "docPip") current.setHovered?.(Boolean(msg?.hovered));
       return { ok: true };
     },
   };

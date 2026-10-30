@@ -163,6 +163,21 @@ public sealed unsafe class GhostStyle
             SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
     }
 
+    public void ResizeLogicalWindow(nint hwnd, int logicalW, int logicalH)
+    {
+        if (hwnd == IntPtr.Zero || !IsWindow(hwnd))
+            return;
+
+        SetWindowPos(
+            hwnd,
+            IntPtr.Zero,
+            0,
+            0,
+            Math.Max(140, logicalW),
+            Math.Max(90, logicalH),
+            SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
+    }
+
     public static byte ComputeAlpha(double opacity) =>
         (byte)Math.Clamp((int)Math.Round(opacity * 255.0, MidpointRounding.AwayFromZero), 26, 255);
 

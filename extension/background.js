@@ -209,6 +209,12 @@ function onEngineMessage(msg) {
       }
       break;
     }
+    case "PIP_HOVER": {
+      if (Number.isFinite(msg.tabId)) {
+        sendTab(msg.tabId, { type: "PIP_HOVER", hovered: Boolean(msg.hovered) });
+      }
+      break;
+    }
   }
 }
 
@@ -434,6 +440,10 @@ const handlers = {
   async PIP_CLOSED(_msg, sender) {
     await pipChanged(sender.tab.id, null);
     return { ok: true };
+  },
+  async PIP_RESIZE({ deltaH, dpr }) {
+    const handledByEngine = postToEngine({ v: 1, type: "PIP_RESIZE", deltaH, dpr });
+    return { ok: true, handledByEngine };
   },
   async GET_STATE() {
     const [{ settings }, { pip = {}, engine }] = await Promise.all([
