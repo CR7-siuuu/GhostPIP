@@ -74,14 +74,23 @@ def cb(hwnd, _):
     u32.GetMonitorInfoW(hmon, ctypes.byref(mi))
     rgn_rc = wt.RECT()
     rgn_type = u32.GetWindowRgnBox(hwnd, ctypes.byref(rgn_rc))
+    d3d_rel_t = 0
+    def child_cb(ch, __):
+        nonlocal d3d_rel_t
+        if win32gui.GetClassName(ch) == "Intermediate D3D Window":
+            cl, ct, cr2, cb2 = win32gui.GetWindowRect(ch)
+            d3d_rel_t = ct - t
+        return True
+    win32gui.EnumChildWindows(hwnd, child_cb, None)
+    shift = -d3d_rel_t if d3d_rel_t < 0 else 0
     cands.append({
         "hwnd": hwnd,
-        "rect": {"l": l, "t": t, "r": r, "b": b, "w": r - l, "h": b - t},
+        "rect": {"l": l, "t": t - shift, "r": r, "b": b - shift, "w": r - l, "h": b - t},
         "work": {"l": mi.rcWork.left, "t": mi.rcWork.top, "r": mi.rcWork.right, "b": mi.rcWork.bottom},
         "layered": bool(ex & WS_EX_LAYERED),
         "transparent": bool(ex & WS_EX_TRANSPARENT),
         "alpha": alpha.value & 0xff,
-        "rgnTop": rgn_rc.top if rgn_type == 2 else 0,
+        "rgnTop": -d3d_rel_t if d3d_rel_t < 0 else (rgn_rc.top if rgn_type == 2 else 0),
         "score": abs((r - l) - ${expectedW}) + abs((b - t) - ${expectedH})
     })
     return True

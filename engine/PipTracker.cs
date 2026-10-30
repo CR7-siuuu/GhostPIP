@@ -277,35 +277,32 @@ public sealed unsafe class PipTracker : IDisposable
         if (bestExact != IntPtr.Zero)
             return bestExact;
 
-        if (kind == "native")
+        nint bestSize = IntPtr.Zero;
+        double bestSizeScore = double.MaxValue;
+        foreach (var (hwnd, rc) in candidates)
         {
-            nint bestSize = IntPtr.Zero;
-            double bestSizeScore = double.MaxValue;
-            foreach (var (hwnd, rc) in candidates)
+            foreach (var v in variants)
             {
-                foreach (var v in variants)
+                double dw = Math.Abs(rc.W - v.W);
+                double dh = Math.Abs(rc.H - v.H);
+                if (dw <= 32 && dh <= 32)
                 {
-                    double dw = Math.Abs(rc.W - v.W);
-                    double dh = Math.Abs(rc.H - v.H);
-                    if (dw <= 24 && dh <= 24)
+                    double score = dw + dh;
+                    if (score < bestSizeScore)
                     {
-                        double score = dw + dh;
-                        if (score < bestSizeScore)
-                        {
-                            bestSizeScore = score;
-                            bestSize = hwnd;
-                        }
+                        bestSizeScore = score;
+                        bestSize = hwnd;
                     }
                 }
             }
-            if (bestSize != IntPtr.Zero)
-                return bestSize;
+        }
+        if (bestSize != IntPtr.Zero)
+            return bestSize;
 
-            foreach (var (hwnd, rc) in candidates)
-            {
-                if (rc.W <= 1200 && rc.H <= 900)
-                    return hwnd;
-            }
+        foreach (var (hwnd, rc) in candidates)
+        {
+            if (rc.W <= 1200 && rc.H <= 1100)
+                return hwnd;
         }
 
         return IntPtr.Zero;

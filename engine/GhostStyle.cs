@@ -13,6 +13,7 @@ public sealed unsafe class GhostStyle
     private static readonly nint HWND_TOPMOST = -1;
     private const uint SWP_NOSIZE = 0x0001;
     private const uint SWP_NOMOVE = 0x0002;
+    private const uint SWP_NOZORDER = 0x0004;
     private const uint SWP_NOACTIVATE = 0x0010;
 
     private delegate bool EnumChildProc(nint hWnd, nint lParam);
@@ -60,6 +61,7 @@ public sealed unsafe class GhostStyle
     private readonly Dictionary<nint, AppliedState> _applied = new();
     private readonly EnumChildProc _enumChildDelegate;
     private nint _foundRenderChild;
+    private nint _foundD3dChild;
 
     public GhostStyle()
     {
@@ -70,21 +72,44 @@ public sealed unsafe class GhostStyle
     {
         char* buf = stackalloc char[64];
         int len = GetClassNameW(child, buf, 64);
-        if (len > 0 && new ReadOnlySpan<char>(buf, len).SequenceEqual("Chrome_RenderWidgetHostHWND".AsSpan()))
+        if (len <= 0)
+            return true;
+
+        var span = new ReadOnlySpan<char>(buf, len);
+        if (_foundRenderChild == IntPtr.Zero && span.SequenceEqual("Chrome_RenderWidgetHostHWND".AsSpan()))
         {
             _foundRenderChild = child;
-            return false;
         }
-        return true;
+        else if (_foundD3dChild == IntPtr.Zero && span.SequenceEqual("Intermediate D3D Window".AsSpan()))
+        {
+            _foundD3dChild = child;
+        }
+
+        return _foundRenderChild == IntPtr.Zero || _foundD3dChild == IntPtr.Zero;
     }
 
-    public bool TryGetContentRelRect(nint hwnd, out PipTracker.RECT relRect)
+    public bool TryGetContentRelRect(nint hwnd, out PipTracker.RECT relRect) =>
+        TryGetContentRelRect(hwnd, out relRect, out _, out _, out _, out _);
+
+    private bool TryGetContentRelRect(
+        nint hwnd,
+        out PipTracker.RECT relRect,
+        out nint d3dChild,
+        out int d3dW,
+        out int d3dH,
+        out int d3dRelT)
     {
         relRect = default;
+        d3dChild = IntPtr.Zero;
+        d3dW = 0;
+        d3dH = 0;
+        d3dRelT = 0;
+
         if (hwnd == IntPtr.Zero || !PipTracker.GetWindowRect(hwnd, out var winRc))
             return false;
 
         _foundRenderChild = IntPtr.Zero;
+        _foundD3dChild = IntPtr.Zero;
         EnumChildWindows(hwnd, _enumChildDelegate, IntPtr.Zero);
         if (_foundRenderChild == IntPtr.Zero || !PipTracker.GetWindowRect(_foundRenderChild, out var childRc))
             return false;
@@ -96,8 +121,46 @@ public sealed unsafe class GhostStyle
         if (t <= 0 || r <= l || b <= t)
             return false;
 
+        if (_foundD3dChild != IntPtr.Zero && PipTracker.GetWindowRect(_foundD3dChild, out var d3dRc))
+        {
+            d3dChild = _foundD3dChild;
+            d3dW = Math.Max(1, d3dRc.Right - d3dRc.Left);
+            d3dH = Math.Max(1, d3dRc.Bottom - d3dRc.Top);
+            d3dRelT = d3dRc.Top - winRc.Top;
+        }
+
         relRect = new PipTracker.RECT { Left = l, Top = t, Right = r, Bottom = b };
         return true;
+    }
+
+    public int GetHeaderShift(nint hwnd) =>
+        _applied.TryGetValue(hwnd, out var state) && state.Clipped ? state.ClipT : 0;
+
+    public bool TryGetLogicalWindowRect(nint hwnd, out PipTracker.RECT rc)
+    {
+        if (!PipTracker.GetWindowRect(hwnd, out rc))
+            return false;
+
+        int shift = GetHeaderShift(hwnd);
+        if (shift != 0)
+        {
+            rc.Top -= shift;
+            rc.Bottom -= shift;
+        }
+        return true;
+    }
+
+    public void MoveLogicalWindow(nint hwnd, int logicalX, int logicalY)
+    {
+        int shift = GetHeaderShift(hwnd);
+        SetWindowPos(
+            hwnd,
+            IntPtr.Zero,
+            logicalX,
+            logicalY + shift,
+            0,
+            0,
+            SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
     }
 
     public static byte ComputeAlpha(double opacity) =>
@@ -130,7 +193,9 @@ public sealed unsafe class GhostStyle
 
         bool wantClip = false;
         int clipL = 0, clipT = 0, clipR = 0, clipB = 0;
-        if (hideHeader && TryGetContentRelRect(hwnd, out var rel))
+        nint d3dChild = IntPtr.Zero;
+        int d3dW = 0, d3dH = 0, d3dRelT = 0;
+        if (hideHeader && TryGetContentRelRect(hwnd, out var rel, out d3dChild, out d3dW, out d3dH, out d3dRelT))
         {
             wantClip = true;
             clipL = rel.Left;
@@ -139,18 +204,57 @@ public sealed unsafe class GhostStyle
             clipB = rel.Bottom;
         }
 
+        int prevShift = (hadPrev && prev.Clipped) ? prev.ClipT : 0;
+        int nextShift = wantClip ? clipT : 0;
+        int deltaY = nextShift - prevShift;
+
         if (wantClip)
         {
-            if (!hadPrev || !prev.Clipped || prev.ClipL != clipL || prev.ClipT != clipT || prev.ClipR != clipR || prev.ClipB != clipB)
+            int contentH = Math.Max(1, clipB - clipT);
+            bool clipChanged = !hadPrev || !prev.Clipped || prev.ClipL != clipL || prev.ClipT != clipT || prev.ClipR != clipR || prev.ClipB != clipB;
+            if (d3dChild != IntPtr.Zero && (clipChanged || d3dRelT != -clipT))
             {
-                nint rgn = CreateRectRgn(clipL, clipT, clipR, clipB);
+                SetWindowPos(d3dChild, IntPtr.Zero, clipL, -clipT, d3dW, d3dH, SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+            if (clipChanged)
+            {
+                nint rgn = CreateRectRgn(clipL, 0, clipR, contentH);
                 if (rgn != IntPtr.Zero && SetWindowRgn(hwnd, rgn, true) == 0)
                     DeleteObject(rgn);
             }
         }
         else if (!hadPrev || prev.Clipped)
         {
+            if (hadPrev && prev.Clipped)
+            {
+                _foundRenderChild = IntPtr.Zero;
+                _foundD3dChild = IntPtr.Zero;
+                EnumChildWindows(hwnd, _enumChildDelegate, IntPtr.Zero);
+                if (_foundD3dChild != IntPtr.Zero && PipTracker.GetWindowRect(_foundD3dChild, out var d3dRc))
+                {
+                    SetWindowPos(
+                        _foundD3dChild,
+                        IntPtr.Zero,
+                        prev.ClipL,
+                        0,
+                        Math.Max(1, d3dRc.Right - d3dRc.Left),
+                        Math.Max(1, d3dRc.Bottom - d3dRc.Top),
+                        SWP_NOZORDER | SWP_NOACTIVATE);
+                }
+            }
             SetWindowRgn(hwnd, IntPtr.Zero, true);
+        }
+
+        if (deltaY != 0 && PipTracker.GetWindowRect(hwnd, out var curWinRc))
+        {
+            SetWindowPos(
+                hwnd,
+                IntPtr.Zero,
+                curWinRc.Left,
+                curWinRc.Top + deltaY,
+                0,
+                0,
+                SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
         }
 
         int nextTick = hadPrev ? prev.TickCount + 1 : 0;
@@ -163,9 +267,39 @@ public sealed unsafe class GhostStyle
 
     public void Restore(nint hwnd)
     {
+        bool hadPrev = _applied.TryGetValue(hwnd, out var prev);
         _applied.Remove(hwnd);
         if (hwnd == IntPtr.Zero || !IsWindow(hwnd))
             return;
+
+        if (hadPrev && prev.Clipped)
+        {
+            _foundRenderChild = IntPtr.Zero;
+            _foundD3dChild = IntPtr.Zero;
+            EnumChildWindows(hwnd, _enumChildDelegate, IntPtr.Zero);
+            if (_foundD3dChild != IntPtr.Zero && PipTracker.GetWindowRect(_foundD3dChild, out var d3dRc))
+            {
+                SetWindowPos(
+                    _foundD3dChild,
+                    IntPtr.Zero,
+                    prev.ClipL,
+                    0,
+                    Math.Max(1, d3dRc.Right - d3dRc.Left),
+                    Math.Max(1, d3dRc.Bottom - d3dRc.Top),
+                    SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+            if (PipTracker.GetWindowRect(hwnd, out var curWinRc))
+            {
+                SetWindowPos(
+                    hwnd,
+                    IntPtr.Zero,
+                    curWinRc.Left,
+                    curWinRc.Top - prev.ClipT,
+                    0,
+                    0,
+                    SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+        }
 
         SetWindowRgn(hwnd, IntPtr.Zero, true);
         nint curEx = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);

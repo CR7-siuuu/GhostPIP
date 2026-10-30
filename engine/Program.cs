@@ -413,7 +413,7 @@ public static unsafe class Program
             return false;
 
         nint pipHwnd = _pipTracker?.BoundHwnd ?? IntPtr.Zero;
-        if (pipHwnd == IntPtr.Zero || !PipTracker.GetWindowRect(pipHwnd, out var rc))
+        if (pipHwnd == IntPtr.Zero || !_ghostStyle.TryGetLogicalWindowRect(pipHwnd, out var rc))
             return false;
 
         if (x < rc.Left || x > rc.Right || y < rc.Top || y > rc.Bottom)
@@ -442,20 +442,13 @@ public static unsafe class Program
 
     private static void SnapWindowToCorner(nint hwnd, string corner)
     {
-        if (hwnd == IntPtr.Zero || !PipTracker.GetWindowRect(hwnd, out var rc))
+        if (hwnd == IntPtr.Zero || !_ghostStyle.TryGetLogicalWindowRect(hwnd, out var rc))
             return;
 
         var winSize = new DodgeSize(rc.Right - rc.Left, rc.Bottom - rc.Top);
         var area = GetWorkArea(hwnd);
         var targetRect = DodgeSolver.CornerRect(corner, winSize, area, _settings.Dodge.EdgeInsetPx);
-        GhostStyle.SetWindowPos(
-            hwnd,
-            IntPtr.Zero,
-            targetRect.L,
-            targetRect.T,
-            0,
-            0,
-            SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+        _ghostStyle.MoveLogicalWindow(hwnd, targetRect.L, targetRect.T);
     }
 
     private static void ApplyStateMessage(Settings next)
@@ -544,7 +537,7 @@ public static unsafe class Program
             _wheelPreview = false;
         _wasInteractive = holdRes.IsInteractive;
 
-        if (!PipTracker.GetWindowRect(pipHwnd, out var rc))
+        if (!_ghostStyle.TryGetLogicalWindowRect(pipHwnd, out var rc))
             return;
 
         var winRect = new DodgeRect(rc.Left, rc.Top, rc.Right, rc.Bottom);
@@ -563,14 +556,7 @@ public static unsafe class Program
             if (dist <= CORNER_SNAP_PX)
             {
                 _customPos = false;
-                GhostStyle.SetWindowPos(
-                    pipHwnd,
-                    IntPtr.Zero,
-                    targetRect.L,
-                    targetRect.T,
-                    0,
-                    0,
-                    SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+                _ghostStyle.MoveLogicalWindow(pipHwnd, targetRect.L, targetRect.T);
             }
             else
             {
@@ -635,14 +621,7 @@ public static unsafe class Program
                     _customPos = false;
                     var targetRect = DodgeSolver.CornerRect(targetCorner, winSize, area, _settings.Dodge.EdgeInsetPx);
                     winRect = targetRect;
-                    GhostStyle.SetWindowPos(
-                        pipHwnd,
-                        IntPtr.Zero,
-                        targetRect.L,
-                        targetRect.T,
-                        0,
-                        0,
-                        SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+                    _ghostStyle.MoveLogicalWindow(pipHwnd, targetRect.L, targetRect.T);
                 }
             }
         }
