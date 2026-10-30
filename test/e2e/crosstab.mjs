@@ -279,12 +279,21 @@ try {
       const host = document.getElementById("ghostpip-controller");
       const bar = host?.shadowRoot?.querySelector(".bar");
       const chatBtn = host?.shadowRoot?.querySelector('[data-action="toggleWebChat"]');
+      const beforeText = chatBtn?.textContent?.trim() ?? "";
+      chatBtn?.click();
+      const chatHost = document.getElementById("ghostpip-chat");
+      const chatFrame = chatHost?.shadowRoot?.querySelector("iframe");
+      const chatOpened = Boolean(chatHost?.matches(":popover-open") && chatFrame?.getAttribute("src"));
+      const openedText = chatBtn?.textContent?.trim() ?? "";
+      chatBtn?.click();
       return {
         open: !!host?.matches(":popover-open"),
         barOnly: !!host?.hasAttribute("data-bar-only"),
         barOpacity: bar ? getComputedStyle(bar).opacity : "0",
         chatBtnVisible: Boolean(chatBtn && getComputedStyle(chatBtn).display !== "none"),
-        chatBtnText: chatBtn?.textContent?.trim() ?? "",
+        chatBtnText: beforeText,
+        chatOpened,
+        openedText,
       };
     });
 
@@ -306,10 +315,12 @@ try {
       hoverBar.barOnly &&
       hoverBar.barOpacity === "1" &&
       hoverBar.chatBtnVisible === true &&
-      hoverBar.chatBtnText === "채팅창 보기";
+      hoverBar.chatBtnText === "채팅창 보기" &&
+      hoverBar.chatOpened === true &&
+      hoverBar.openedText === "채팅창 숨기기";
     return {
       ok,
-      info: `ghost=(${ghost?.pe},${ghost?.opacity}) dodged=${fmt(dodged?.rect)} resized=${resized?.size.w}x${resized?.size.h} customRect=${fmt(finalB?.rect)}(want ${fmt(wantCustom)}) opacity=${finalB?.opacity} home=${stored?.dodge?.home} hoverBar=(open=${hoverBar.open},barOnly=${hoverBar.barOnly},op=${hoverBar.barOpacity},chat="${hoverBar.chatBtnText}")`,
+      info: `ghost=(${ghost?.pe},${ghost?.opacity}) dodged=${fmt(dodged?.rect)} resized=${resized?.size.w}x${resized?.size.h} customRect=${fmt(finalB?.rect)}(want ${fmt(wantCustom)}) opacity=${finalB?.opacity} home=${stored?.dodge?.home} hoverBar=(open=${hoverBar.open},barOnly=${hoverBar.barOnly},op=${hoverBar.barOpacity},chat="${hoverBar.chatBtnText}"->"${hoverBar.openedText}",chatOpen=${hoverBar.chatOpened})`,
     };
   });
 

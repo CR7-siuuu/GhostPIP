@@ -13,8 +13,18 @@
   "permissions": [
     "storage",
     "scripting",
-    "nativeMessaging"
+    "nativeMessaging",
+    "declarativeNetRequest"
   ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "chat_framing",
+        "enabled": true,
+        "path": "config/dnr_rules.json"
+      }
+    ]
+  },
   "host_permissions": [
     "http://*/*",
     "https://*/*",

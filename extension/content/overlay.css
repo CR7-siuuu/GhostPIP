@@ -28,6 +28,10 @@
     filter: none !important;
     opacity: var(--gp-opacity) !important;
     pointer-events: auto !important;
+    transition: none !important;
+  }
+
+  .ghostpip-inpage-target:popover-open[data-gp-anim]:not([data-gp-drag]) {
     transition: left 0.15s ease-out, top 0.15s ease-out, opacity 0.15s ease-out !important;
   }
 
@@ -69,6 +73,10 @@
     opacity: var(--gp-opacity, 1) !important;
     overflow: hidden !important;
     border-radius: 0 0 8px 8px !important;
+    transition: none !important;
+  }
+
+  #ghostpip-chat:popover-open[data-gp-anim]:not([data-gp-drag]) {
     transition: left 0.15s ease-out, top 0.15s ease-out, opacity 0.15s ease-out !important;
   }
 

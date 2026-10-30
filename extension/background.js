@@ -19,8 +19,8 @@ let inTabSession = null;
 let inTabSeq = 0;
 let lastInTabFrame = null;
 let senderStreamPort = null;
-let activeReceiverPort = null;
-const receiverStreamPorts = new Set();
+let receiverPortSeq = 0;
+const receiverStreamPorts = new Map();
 
 async function getInTab() {
   if (inTabSession) return inTabSession;
@@ -49,11 +49,27 @@ async function broadcastRemoteStop(excludeTabId = null) {
   try {
     const tabs = await chrome.tabs.query({});
     for (const t of tabs) {
-      if (t.id != null && t.id !== excludeTabId && (!t.url || /^https?:/i.test(t.url))) {
+      if (t.id != null && t.id !== excludeTabId) {
         sendTab(t.id, { type: "REMOTE_INTAB_STOP" });
       }
     }
   } catch {}
+}
+
+function prewarmTab(tabId, session) {
+  if (!Number.isFinite(tabId) || !session?.sourceTabId || tabId === session.sourceTabId) {
+    return Promise.resolve(null);
+  }
+  return sendTab(tabId, {
+    type: "REMOTE_INTAB_START",
+    connId: session.connId,
+    ratio: session.ratio || 9 / 16,
+    vw: session.vw || 0,
+    vh: session.vh || 0,
+    chatUrl: session.chatUrl || null,
+    initialFrame: lastInTabFrame,
+    sourceTabId: session.sourceTabId,
+  });
 }
 
 async function prewarmRemoteTabs(session) {
@@ -61,15 +77,8 @@ async function prewarmRemoteTabs(session) {
   try {
     const tabs = await chrome.tabs.query({});
     for (const t of tabs) {
-      if (t.id != null && t.id !== session.sourceTabId && t.url && /^https?:/i.test(t.url)) {
-        sendTab(t.id, {
-          type: "REMOTE_INTAB_START",
-          connId: session.connId,
-          ratio: session.ratio || 9 / 16,
-          chatUrl: session.chatUrl || null,
-          initialFrame: lastInTabFrame,
-          sourceTabId: session.sourceTabId,
-        });
+      if (t.id != null && t.id !== session.sourceTabId) {
+        prewarmTab(t.id, session);
       }
     }
   } catch {}
@@ -95,14 +104,7 @@ async function syncActiveTab(activeTabId) {
   session.connId = connId;
   setInTab(session);
 
-  const immediateStart = sendTab(activeTabId, {
-    type: "REMOTE_INTAB_START",
-    connId,
-    ratio: session.ratio || 9 / 16,
-    chatUrl: session.chatUrl || null,
-    initialFrame: lastInTabFrame,
-    sourceTabId,
-  });
+  const immediateStart = prewarmTab(activeTabId, session);
 
   const info = await sendTab(sourceTabId, { type: "INTAB_QUERY_SOURCE" });
   if (!info?.ok || inTabSession?.sourceTabId !== sourceTabId || inTabSession?.receiverTabId !== activeTabId) {
@@ -110,19 +112,14 @@ async function syncActiveTab(activeTabId) {
   }
 
   if (info.ratio) session.ratio = info.ratio;
+  if (info.vw > 0 && info.vh > 0) {
+    session.vw = info.vw;
+    session.vh = info.vh;
+  }
   if (info.chatUrl !== undefined) session.chatUrl = info.chatUrl;
   if (info.frame?.dataUrl) lastInTabFrame = info.frame;
 
-  const started =
-    (await immediateStart) ||
-    (await sendTab(activeTabId, {
-      type: "REMOTE_INTAB_START",
-      connId,
-      ratio: session.ratio || 9 / 16,
-      chatUrl: session.chatUrl || null,
-      initialFrame: lastInTabFrame,
-      sourceTabId,
-    }));
+  const started = (await immediateStart) || (await prewarmTab(activeTabId, session));
   if (!started?.ok && inTabSession?.connId === connId) {
     inTabSession.receiverTabId = null;
     await setInTab(inTabSession);
@@ -137,11 +134,18 @@ chrome.runtime.onConnect.addListener((port) => {
       if (msg.type === "FRAME" && msg.dataUrl) {
         lastInTabFrame = msg;
         if (inTabSession && msg.vw > 0 && msg.vh > 0) {
+          inTabSession.vw = msg.vw;
+          inTabSession.vh = msg.vh;
           inTabSession.ratio = msg.vh / msg.vw;
         }
       }
-      const targets = activeReceiverPort ? [activeReceiverPort] : [...receiverStreamPorts];
-      for (const rp of targets) {
+      if (msg.portId && receiverStreamPorts.has(msg.portId)) {
+        try {
+          receiverStreamPorts.get(msg.portId).postMessage(msg);
+        } catch {}
+        return;
+      }
+      for (const rp of receiverStreamPorts.values()) {
         try {
           rp.postMessage(msg);
         } catch {}
@@ -151,8 +155,8 @@ chrome.runtime.onConnect.addListener((port) => {
       if (senderStreamPort === port) senderStreamPort = null;
     });
   } else if (port.name === "ghostpip-receiver") {
-    receiverStreamPorts.add(port);
-    activeReceiverPort = port;
+    const portId = ++receiverPortSeq;
+    receiverStreamPorts.set(portId, port);
     if (lastInTabFrame) {
       try {
         port.postMessage(lastInTabFrame);
@@ -160,10 +164,10 @@ chrome.runtime.onConnect.addListener((port) => {
     }
     port.onMessage.addListener((msg) => {
       if (!msg) return;
-      activeReceiverPort = port;
+      const tagged = { ...msg, portId };
       if (senderStreamPort) {
         try {
-          senderStreamPort.postMessage(msg);
+          senderStreamPort.postMessage(tagged);
         } catch {}
       } else {
         getInTab().then((s) => {
@@ -172,9 +176,11 @@ chrome.runtime.onConnect.addListener((port) => {
       }
     });
     port.onDisconnect.addListener(() => {
-      receiverStreamPorts.delete(port);
-      if (activeReceiverPort === port) {
-        activeReceiverPort = [...receiverStreamPorts].pop() || null;
+      receiverStreamPorts.delete(portId);
+      if (senderStreamPort) {
+        try {
+          senderStreamPort.postMessage({ type: "RTC_CLOSE", portId });
+        } catch {}
       }
     });
   }
@@ -449,6 +455,14 @@ chrome.tabs.onActivated.addListener(({ tabId }) => {
   syncActiveTab(tabId);
 });
 
+chrome.tabs.onUpdated?.addListener(async (tabId, changeInfo) => {
+  if (changeInfo.status !== "complete") return;
+  const session = inTabSession || (await getInTab());
+  if (session?.sourceTabId && tabId !== session.sourceTabId) {
+    prewarmTab(tabId, session);
+  }
+});
+
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   pipChanged(tabId, null);
   const session = await getInTab();
@@ -531,12 +545,19 @@ chrome.commands.onCommand.addListener((command) => {
 const handlers = {
   async GET_SITE_CONFIG({ url }, sender) {
     const found = (await loadSites()).find(({ re }) => re.test(url));
-    if (sender?.tab?.active && sender.tab.id != null) {
-      syncActiveTab(sender.tab.id);
+    if (sender?.tab?.id != null) {
+      if (sender.tab.active) {
+        syncActiveTab(sender.tab.id);
+      } else {
+        const session = inTabSession || (await getInTab());
+        if (session?.sourceTabId && sender.tab.id !== session.sourceTabId) {
+          prewarmTab(sender.tab.id, session);
+        }
+      }
     }
     return found ? { siteId: found.siteId, site: found.site } : GENERIC_SITE;
   },
-  async INTAB_OPENED({ ratio, chatUrl, frame } = {}, sender) {
+  async INTAB_OPENED({ ratio, vw, vh, chatUrl, frame } = {}, sender) {
     const tabId = sender?.tab?.id;
     if (!Number.isFinite(tabId)) return { ok: false };
     const prev = await getInTab();
@@ -550,6 +571,8 @@ const handlers = {
       receiverTabId: null,
       connId: ++inTabSeq,
       ratio: Number.isFinite(ratio) && ratio > 0 ? ratio : 9 / 16,
+      vw: Number.isFinite(vw) && vw > 0 ? vw : frame?.vw || 0,
+      vh: Number.isFinite(vh) && vh > 0 ? vh : frame?.vh || 0,
       chatUrl: chatUrl || null,
     };
     await setInTab(next);
