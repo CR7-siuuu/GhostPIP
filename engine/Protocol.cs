@@ -16,7 +16,8 @@ public sealed record Settings(
     double Opacity,
     DodgeConfig Dodge,
     HotkeyConfig Hotkeys,
-    bool Enabled = true
+    bool Enabled = true,
+    bool ShowChat = true
 )
 {
     public static readonly Settings Defaults = new(
@@ -42,7 +43,8 @@ public sealed record Settings(
             Mute: "Alt+M",
             Hold: "Ctrl+Alt"
         ),
-        Enabled: true
+        Enabled: true,
+        ShowChat: true
     );
 }
 
@@ -128,6 +130,7 @@ public static class Protocol
 
         var def = Settings.Defaults;
         bool enabled = GetBoolOrDefault(settingsEl, "enabled", def.Enabled);
+        bool showChat = GetBoolOrDefault(settingsEl, "showChat", def.ShowChat);
         bool clickThrough = GetBoolOrDefault(settingsEl, "clickThrough", def.ClickThrough);
         double rawOpacity = GetDoubleOrDefault(settingsEl, "opacity", def.Opacity);
         if (!double.IsFinite(rawOpacity))
@@ -198,7 +201,7 @@ public static class Protocol
             IgnoreScreenEdgePx: ignoreScreenEdgePx
         );
 
-        message = new StateMessage(new Settings(clickThrough, opacity, dodge, hotkeys, enabled));
+        message = new StateMessage(new Settings(clickThrough, opacity, dodge, hotkeys, enabled, showChat));
         return true;
     }
 

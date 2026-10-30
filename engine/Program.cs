@@ -9,6 +9,8 @@ public static unsafe class Program
     private const uint WM_CLOSE = 0x0010;
     private const uint WM_QUIT = 0x0012;
     private const uint WM_TIMER = 0x0113;
+    private const uint WM_LBUTTONDOWN = 0x0201;
+    private const uint WM_LBUTTONUP = 0x0202;
     private const uint WM_MOUSEWHEEL = 0x020A;
     private const uint WM_HOTKEY = 0x0312;
 
@@ -208,6 +210,7 @@ public static unsafe class Program
     private static bool _wheelPreview;
     private static bool _hasTestCursor;
     private static DodgePoint? _testCursor;
+    private static bool _swallowNextLButtonUp;
     private static bool _cleanedUp;
 
     [STAThread]
@@ -401,15 +404,51 @@ public static unsafe class Program
 
     private static nint OnLowLevelMouse(int nCode, nint wParam, nint lParam)
     {
-        if (nCode >= 0 && (uint)wParam == WM_MOUSEWHEEL && lParam != IntPtr.Zero)
+        if (nCode >= 0 && lParam != IntPtr.Zero)
         {
-            var info = *(MSLLHOOKSTRUCT*)lParam;
-            int delta = (short)(info.mouseData >> 16);
-            bool holdDown = IsHoldDown();
-            if (delta != 0 && HandleMouseWheel(info.pt.X, info.pt.Y, delta, holdDown) && holdDown)
+            uint msg = (uint)wParam;
+            if (msg == WM_MOUSEWHEEL)
+            {
+                var info = *(MSLLHOOKSTRUCT*)lParam;
+                int delta = (short)(info.mouseData >> 16);
+                bool holdDown = IsHoldDown();
+                if (delta != 0 && HandleMouseWheel(info.pt.X, info.pt.Y, delta, holdDown) && holdDown)
+                    return (nint)1;
+            }
+            else if (msg == WM_LBUTTONDOWN)
+            {
+                var info = *(MSLLHOOKSTRUCT*)lParam;
+                if (HandlePipBarClick(info.pt.X, info.pt.Y))
+                {
+                    _swallowNextLButtonUp = true;
+                    return (nint)1;
+                }
+            }
+            else if (msg == WM_LBUTTONUP && _swallowNextLButtonUp)
+            {
+                _swallowNextLButtonUp = false;
                 return (nint)1;
+            }
         }
         return CallNextHookEx(_mouseHook, nCode, wParam, lParam);
+    }
+
+    private static bool HandlePipBarClick(int x, int y)
+    {
+        if (!_settings.Enabled || !_settings.ShowChat || IsHoldDown())
+            return false;
+
+        nint pipHwnd = _pipTracker?.BoundHwnd ?? IntPtr.Zero;
+        if (pipHwnd == IntPtr.Zero || _pipTracker?.BoundKind != "document" || !_ghostStyle.TryGetLogicalWindowRect(pipHwnd, out var rc))
+            return false;
+
+        int centerX = (rc.Left + rc.Right) / 2;
+        if (Math.Abs(x - centerX) <= 75 && y >= rc.Top + 4 && y <= rc.Top + 42)
+        {
+            _nativeHost?.Send(new IntentMessage("TOGGLE_PIP_CHAT"));
+            return true;
+        }
+        return false;
     }
 
     private static bool HandleMouseWheel(int x, int y, int delta, bool holdDown)
@@ -480,9 +519,8 @@ public static unsafe class Program
 
         if (!_settings.Enabled)
         {
-            _hotkeys?.UnregisterAll();
-            _pipTracker?.ClearAll();
-            _ghostStyle.RestoreAll();
+            Cleanup();
+            PostQuitMessage(0);
             return;
         }
 
@@ -661,13 +699,11 @@ public static unsafe class Program
         }
 
         DodgePoint? curPt = GetVisibleCursor();
-        _ghostStyle.TryGetContentRelRect(pipHwnd, out var contentRel);
-        int contentTop = winRect.T + contentRel.Top;
         bool cursorInWindow = curPt is DodgePoint wp &&
             wp.X >= winRect.L && wp.X <= winRect.R &&
-            wp.Y >= contentTop && wp.Y <= winRect.B;
+            wp.Y >= winRect.T && wp.Y <= winRect.B;
         bool cursorInPipBar = cursorInWindow && curPt is DodgePoint hp &&
-            hp.Y >= contentTop && hp.Y < contentTop + 48;
+            hp.Y >= winRect.T && hp.Y < winRect.T + 48;
 
         bool hideHeader = !holdRes.IsInteractive;
         bool pipHovered = holdRes.IsInteractive || cursorInWindow;

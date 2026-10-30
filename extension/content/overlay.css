@@ -45,7 +45,8 @@
   }
 
   #ghostpip-launcher:popover-open,
-  #ghostpip-controller:popover-open {
+  #ghostpip-controller:popover-open,
+  #ghostpip-chat:popover-open {
     position: fixed !important;
     inset: auto !important;
     left: var(--gp-x) !important;
@@ -60,6 +61,23 @@
     opacity: 1 !important;
     filter: none !important;
     pointer-events: auto !important;
+  }
+
+  #ghostpip-chat:popover-open {
+    width: var(--gp-w) !important;
+    height: var(--gp-h) !important;
+    opacity: var(--gp-opacity, 1) !important;
+    overflow: hidden !important;
+    border-radius: 0 0 8px 8px !important;
+    transition: left 0.15s ease-out, top 0.15s ease-out, opacity 0.15s ease-out !important;
+  }
+
+  #ghostpip-chat:popover-open[data-gp-pass] {
+    pointer-events: none !important;
+  }
+
+  #ghostpip-chat:popover-open[data-gp-drag] {
+    transition: none !important;
   }
 
   #ghostpip-launcher:popover-open {

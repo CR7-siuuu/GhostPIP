@@ -278,10 +278,13 @@ try {
     const hoverBar = await tabB.evaluate(() => {
       const host = document.getElementById("ghostpip-controller");
       const bar = host?.shadowRoot?.querySelector(".bar");
+      const chatBtn = host?.shadowRoot?.querySelector('[data-action="toggleWebChat"]');
       return {
         open: !!host?.matches(":popover-open"),
         barOnly: !!host?.hasAttribute("data-bar-only"),
         barOpacity: bar ? getComputedStyle(bar).opacity : "0",
+        chatBtnVisible: Boolean(chatBtn && getComputedStyle(chatBtn).display !== "none"),
+        chatBtnText: chatBtn?.textContent?.trim() ?? "",
       };
     });
 
@@ -301,10 +304,12 @@ try {
       stored?.dodge?.home === "BL" &&
       hoverBar.open &&
       hoverBar.barOnly &&
-      hoverBar.barOpacity === "1";
+      hoverBar.barOpacity === "1" &&
+      hoverBar.chatBtnVisible === true &&
+      hoverBar.chatBtnText === "채팅창 보기";
     return {
       ok,
-      info: `ghost=(${ghost?.pe},${ghost?.opacity}) dodged=${fmt(dodged?.rect)} resized=${resized?.size.w}x${resized?.size.h} customRect=${fmt(finalB?.rect)}(want ${fmt(wantCustom)}) opacity=${finalB?.opacity} home=${stored?.dodge?.home} hoverBar=(open=${hoverBar.open},barOnly=${hoverBar.barOnly},op=${hoverBar.barOpacity})`,
+      info: `ghost=(${ghost?.pe},${ghost?.opacity}) dodged=${fmt(dodged?.rect)} resized=${resized?.size.w}x${resized?.size.h} customRect=${fmt(finalB?.rect)}(want ${fmt(wantCustom)}) opacity=${finalB?.opacity} home=${stored?.dodge?.home} hoverBar=(open=${hoverBar.open},barOnly=${hoverBar.barOnly},op=${hoverBar.barOpacity},chat="${hoverBar.chatBtnText}")`,
     };
   });
 

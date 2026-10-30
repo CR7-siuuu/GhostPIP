@@ -14,10 +14,13 @@ let settingsQueue = Promise.resolve();
 let pipQueue = Promise.resolve();
 let sitesPromise = null;
 let nativePort = null;
+let engineAllowed = true;
 let inTabSession = null;
 let inTabSeq = 0;
+let lastInTabFrame = null;
 let senderStreamPort = null;
-let receiverStreamPort = null;
+let activeReceiverPort = null;
+const receiverStreamPorts = new Set();
 
 async function getInTab() {
   if (inTabSession) return inTabSession;
@@ -31,6 +34,7 @@ async function getInTab() {
 
 async function setInTab(next) {
   inTabSession = next;
+  if (!next) lastInTabFrame = null;
   if (next) await chrome.storage.session.set({ inTab: next });
   else await chrome.storage.session.remove("inTab");
 }
@@ -40,42 +44,85 @@ function sendTab(tabId, msg) {
   return chrome.tabs.sendMessage(tabId, { v: 1, ...msg }).catch(() => null);
 }
 
+async function broadcastRemoteStop(excludeTabId = null) {
+  if (!chrome.tabs?.query) return;
+  try {
+    const tabs = await chrome.tabs.query({});
+    for (const t of tabs) {
+      if (t.id != null && t.id !== excludeTabId && (!t.url || /^https?:/i.test(t.url))) {
+        sendTab(t.id, { type: "REMOTE_INTAB_STOP" });
+      }
+    }
+  } catch {}
+}
+
+async function prewarmRemoteTabs(session) {
+  if (!session?.sourceTabId || !chrome.tabs?.query) return;
+  try {
+    const tabs = await chrome.tabs.query({});
+    for (const t of tabs) {
+      if (t.id != null && t.id !== session.sourceTabId && t.url && /^https?:/i.test(t.url)) {
+        sendTab(t.id, {
+          type: "REMOTE_INTAB_START",
+          connId: session.connId,
+          ratio: session.ratio || 9 / 16,
+          chatUrl: session.chatUrl || null,
+          initialFrame: lastInTabFrame,
+          sourceTabId: session.sourceTabId,
+        });
+      }
+    }
+  } catch {}
+}
+
 async function syncActiveTab(activeTabId) {
   if (!Number.isFinite(activeTabId)) return;
-  const session = await getInTab();
+  const session = inTabSession || (await getInTab());
   if (!session?.sourceTabId) return;
 
   if (activeTabId === session.sourceTabId) {
     if (session.receiverTabId) {
-      const oldReceiver = session.receiverTabId;
       session.receiverTabId = null;
       session.connId = ++inTabSeq;
-      await setInTab(session);
-      sendTab(oldReceiver, { type: "REMOTE_INTAB_STOP" });
+      setInTab(session);
     }
     return;
   }
 
-  if (session.receiverTabId && session.receiverTabId !== activeTabId) {
-    sendTab(session.receiverTabId, { type: "REMOTE_INTAB_STOP" });
-  }
   const connId = ++inTabSeq;
   const sourceTabId = session.sourceTabId;
   session.receiverTabId = activeTabId;
   session.connId = connId;
-  await setInTab(session);
+  setInTab(session);
+
+  const immediateStart = sendTab(activeTabId, {
+    type: "REMOTE_INTAB_START",
+    connId,
+    ratio: session.ratio || 9 / 16,
+    chatUrl: session.chatUrl || null,
+    initialFrame: lastInTabFrame,
+    sourceTabId,
+  });
 
   const info = await sendTab(sourceTabId, { type: "INTAB_QUERY_SOURCE" });
   if (!info?.ok || inTabSession?.sourceTabId !== sourceTabId || inTabSession?.receiverTabId !== activeTabId) {
     return;
   }
 
-  const started = await sendTab(activeTabId, {
-    type: "REMOTE_INTAB_START",
-    connId,
-    ratio: info.ratio,
-    sourceTabId,
-  });
+  if (info.ratio) session.ratio = info.ratio;
+  if (info.chatUrl !== undefined) session.chatUrl = info.chatUrl;
+  if (info.frame?.dataUrl) lastInTabFrame = info.frame;
+
+  const started =
+    (await immediateStart) ||
+    (await sendTab(activeTabId, {
+      type: "REMOTE_INTAB_START",
+      connId,
+      ratio: session.ratio || 9 / 16,
+      chatUrl: session.chatUrl || null,
+      initialFrame: lastInTabFrame,
+      sourceTabId,
+    }));
   if (!started?.ok && inTabSession?.connId === connId) {
     inTabSession.receiverTabId = null;
     await setInTab(inTabSession);
@@ -86,9 +133,17 @@ chrome.runtime.onConnect.addListener((port) => {
   if (port.name === "ghostpip-sender") {
     senderStreamPort = port;
     port.onMessage.addListener((msg) => {
-      if (receiverStreamPort && msg) {
+      if (!msg) return;
+      if (msg.type === "FRAME" && msg.dataUrl) {
+        lastInTabFrame = msg;
+        if (inTabSession && msg.vw > 0 && msg.vh > 0) {
+          inTabSession.ratio = msg.vh / msg.vw;
+        }
+      }
+      const targets = activeReceiverPort ? [activeReceiverPort] : [...receiverStreamPorts];
+      for (const rp of targets) {
         try {
-          receiverStreamPort.postMessage(msg);
+          rp.postMessage(msg);
         } catch {}
       }
     });
@@ -96,9 +151,16 @@ chrome.runtime.onConnect.addListener((port) => {
       if (senderStreamPort === port) senderStreamPort = null;
     });
   } else if (port.name === "ghostpip-receiver") {
-    receiverStreamPort = port;
+    receiverStreamPorts.add(port);
+    activeReceiverPort = port;
+    if (lastInTabFrame) {
+      try {
+        port.postMessage(lastInTabFrame);
+      } catch {}
+    }
     port.onMessage.addListener((msg) => {
       if (!msg) return;
+      activeReceiverPort = port;
       if (senderStreamPort) {
         try {
           senderStreamPort.postMessage(msg);
@@ -110,7 +172,10 @@ chrome.runtime.onConnect.addListener((port) => {
       }
     });
     port.onDisconnect.addListener(() => {
-      if (receiverStreamPort === port) receiverStreamPort = null;
+      receiverStreamPorts.delete(port);
+      if (activeReceiverPort === port) {
+        activeReceiverPort = [...receiverStreamPorts].pop() || null;
+      }
     });
   }
 });
@@ -191,6 +256,27 @@ function onEngineMessage(msg) {
         updateSettings((s) => GhostPiPSettings.patch(s, { dodge: { home: msg.corner } }));
       } else if (msg.intent === "SET_OPACITY" && Number.isFinite(msg.opacity)) {
         updateSettings((s) => GhostPiPSettings.patch(s, { opacity: msg.opacity }));
+      } else if (msg.intent === "TOGGLE_PIP_CHAT") {
+        chrome.storage.session
+          .get("pip")
+          .then(({ pip = {} }) => {
+            const ids = Object.keys(pip).map(Number).filter(Number.isFinite);
+            if (ids.length) {
+              for (const id of ids) sendTab(id, { type: "PIP_TOGGLE_CHAT" });
+            } else if (chrome.tabs?.query) {
+              chrome.tabs
+                .query({})
+                .then((tabs) => {
+                  for (const t of tabs) {
+                    if (t.id != null && (!t.url || /^https?:/i.test(t.url))) {
+                      sendTab(t.id, { type: "PIP_TOGGLE_CHAT" });
+                    }
+                  }
+                })
+                .catch(() => {});
+            }
+          })
+          .catch(() => {});
       } else if (INTENTS[msg.intent]) {
         INTENTS[msg.intent]();
       }
@@ -242,18 +328,33 @@ function onEngineMessage(msg) {
 
 let reconnectTimer = null;
 
+function disconnectEngine() {
+  clearTimeout(reconnectTimer);
+  reconnectTimer = null;
+  const port = nativePort;
+  nativePort = null;
+  if (port) {
+    try {
+      port.disconnect();
+    } catch {}
+  }
+  chrome.storage.session.set({ engine: { ...DEFAULT_ENGINE } });
+}
+
 function onEngineDisconnect(port) {
   void chrome.runtime.lastError;
   if (nativePort === port) nativePort = null;
   chrome.storage.session.set({ engine: { ...DEFAULT_ENGINE } });
   clearTimeout(reconnectTimer);
+  if (!engineAllowed) return;
   reconnectTimer = setTimeout(() => {
     reconnectTimer = null;
-    connectEngine();
+    if (engineAllowed) connectEngine();
   }, 1000);
 }
 
 function connectEngine() {
+  if (!engineAllowed) return null;
   if (nativePort) return nativePort;
   if (typeof chrome.runtime?.connectNative !== "function") return null;
   let port;
@@ -270,8 +371,14 @@ function connectEngine() {
 
   Promise.all([chrome.storage.local.get("settings"), chrome.storage.session.get("pip")])
     .then(([{ settings }, { pip = {} }]) => {
+      const merged = GhostPiPSettings.merge(settings);
+      engineAllowed = Boolean(merged.enabled);
       if (nativePort !== port) return;
-      postToEngine({ v: 1, type: "STATE", settings: GhostPiPSettings.merge(settings) });
+      postToEngine({ v: 1, type: "STATE", settings: merged });
+      if (!engineAllowed) {
+        disconnectEngine();
+        return;
+      }
       for (const entry of Object.values(pip)) {
         if (entry && Number.isFinite(entry.tabId) && entry.rect) {
           postToEngine({
@@ -347,8 +454,8 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   const session = await getInTab();
   if (!session) return;
   if (session.sourceTabId === tabId) {
-    if (session.receiverTabId) sendTab(session.receiverTabId, { type: "REMOTE_INTAB_STOP" });
     await setInTab(null);
+    await broadcastRemoteStop(tabId);
   } else if (session.receiverTabId === tabId) {
     session.receiverTabId = null;
     session.connId = ++inTabSeq;
@@ -429,19 +536,27 @@ const handlers = {
     }
     return found ? { siteId: found.siteId, site: found.site } : GENERIC_SITE;
   },
-  async INTAB_OPENED(_msg, sender) {
+  async INTAB_OPENED({ ratio, chatUrl, frame } = {}, sender) {
     const tabId = sender?.tab?.id;
     if (!Number.isFinite(tabId)) return { ok: false };
     const prev = await getInTab();
     if (prev?.sourceTabId && prev.sourceTabId !== tabId) {
       sendTab(prev.sourceTabId, { type: "INTAB_FORCE_IDLE" });
-      if (prev.receiverTabId) sendTab(prev.receiverTabId, { type: "REMOTE_INTAB_STOP" });
+      await broadcastRemoteStop(tabId);
     }
-    const next = { sourceTabId: tabId, receiverTabId: null, connId: ++inTabSeq };
+    if (frame?.dataUrl) lastInTabFrame = frame;
+    const next = {
+      sourceTabId: tabId,
+      receiverTabId: null,
+      connId: ++inTabSeq,
+      ratio: Number.isFinite(ratio) && ratio > 0 ? ratio : 9 / 16,
+      chatUrl: chatUrl || null,
+    };
     await setInTab(next);
+    prewarmRemoteTabs(next);
     const [activeTab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
     if (activeTab?.id != null && activeTab.id !== tabId) {
-      syncActiveTab(activeTab.id, true);
+      syncActiveTab(activeTab.id);
     }
     return { ok: true };
   },
@@ -449,17 +564,18 @@ const handlers = {
     const tabId = sender?.tab?.id;
     const session = await getInTab();
     if (session?.sourceTabId === tabId) {
-      if (session.receiverTabId) sendTab(session.receiverTabId, { type: "REMOTE_INTAB_STOP" });
       await setInTab(null);
+      await broadcastRemoteStop(tabId);
     }
     return { ok: true };
   },
   async INTAB_STOP_ALL() {
     const session = await getInTab();
     if (session) {
+      const srcId = session.sourceTabId;
       await setInTab(null);
-      if (session.sourceTabId) sendTab(session.sourceTabId, { type: "INTAB_FORCE_IDLE" });
-      if (session.receiverTabId) sendTab(session.receiverTabId, { type: "REMOTE_INTAB_STOP" });
+      if (srcId) sendTab(srcId, { type: "INTAB_FORCE_IDLE" });
+      await broadcastRemoteStop();
     }
     return { ok: true };
   },
@@ -514,7 +630,15 @@ const handlers = {
   async PATCH_SETTINGS({ patch, keepLayoutPos }) {
     const res = await updateSettings((current) => GhostPiPSettings.patch(current, patch));
     if (res.ok && patch?.enabled === false) {
+      engineAllowed = false;
       await handlers.INTAB_STOP_ALL();
+      await chrome.storage.session.set({ pip: {} });
+      setTimeout(() => {
+        if (!engineAllowed) disconnectEngine();
+      }, 60);
+    } else if (res.ok && patch?.enabled === true) {
+      engineAllowed = true;
+      connectEngine();
     }
     if (res.ok && patch?.dodge?.home && !keepLayoutPos) {
       const { floatLayout } = await chrome.storage.local.get("floatLayout");

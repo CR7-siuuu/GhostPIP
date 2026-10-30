@@ -232,6 +232,19 @@
   );
 
   const hudEl = h("div", { class: "hud" }, "");
+  const webChatLabel = h("span", {}, "채팅창 보기");
+  const webChatBtn = h(
+    "button",
+    { "data-action": "toggleWebChat" },
+    svgIcon(ICON_CHAT),
+    webChatLabel,
+  );
+  const WEB_CHAT_CSS = `
+    :host { box-sizing: border-box; background: #0f172a; box-shadow: 0 8px 24px rgba(2, 6, 23, 0.55); }
+    iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }`;
+  const webChatFrame = h("iframe", {});
+  const webChat = overlayHost("ghostpip-chat", WEB_CHAT_CSS, webChatFrame);
+
   const controller = overlayHost(
     "ghostpip-controller",
     BASE_CSS + CONTROLLER_CSS,
@@ -243,10 +256,12 @@
       h("button", { "data-action": "docPip", "data-mode": "local" },
         svgIcon(ICON_FULL_MODE),
         "전체 모드"),
-      h("button", { "data-action": "focusSource", "data-mode": "remote" }, "원본 탭")),
+      h("button", { "data-action": "focusSource", "data-mode": "remote" }, "원본 탭"),
+      webChatBtn),
   );
 
   let dragSink = null;
+  let toggleWebChatSink = null;
   controller.root.addEventListener("pointerdown", (e) => {
     if (!dragSink || e.button !== 0 || e.target.closest?.(".bar")) return;
     const target = e.target;
@@ -385,7 +400,7 @@
     };
   }
 
-  function enterFloating({ video, ratioFallback = 9 / 16, isRemote = false }, leave) {
+  function enterFloating({ video, ratioFallback = 9 / 16, isRemote = false, chatUrl = null }, leave) {
     const ac = new AbortController();
     const on = { signal: ac.signal };
     const viewport = () => ({
@@ -408,6 +423,17 @@
     let waitCursorLeave = false;
     let drag = null;
     let cursor = null;
+    let remoteChatUrl = chatUrl;
+    let webChatOpen = false;
+
+    const resolveChatUrl = () =>
+      ctx.settings.showChat ? (remoteChatUrl || (!isRemote ? chatUrlFor(ctx.site) : null)) : null;
+
+    toggleWebChatSink = () => {
+      if (!resolveChatUrl()) return;
+      webChatOpen = !webChatOpen;
+      render();
+    };
 
     controller.host.toggleAttribute("data-remote", Boolean(isRemote));
 
@@ -433,33 +459,70 @@
       return Dodge.cornerRect(corner, s, vp, cfg().edgeInsetPx);
     }
 
+    function boundsWithChat(r) {
+      const curChatUrl = resolveChatUrl();
+      if (!webChatOpen || !curChatUrl) {
+        return { l: r.l, t: r.t, r: r.r, b: r.b, videoT: r.t, chatT: r.b, chatH: 0, chatUrl: curChatUrl };
+      }
+      const vp = viewport();
+      const h = Math.round(r.b - r.t);
+      const chatH = Math.min(320, Math.max(160, Math.round(vp.b * 0.36)));
+      const videoT = r.b + chatH <= vp.b - 8 ? r.t : Math.max(8, r.b - h - chatH);
+      const chatT = videoT + h;
+      return { l: r.l, t: videoT, r: r.r, b: chatT + chatH, videoT, chatT, chatH, chatUrl: curChatUrl };
+    }
+
     function isInteractive() {
       if (held || drag !== null) return true;
       if (!ctx.settings.clickThrough && !cfg().enabled && cursor) {
-        const r = rect();
-        return cursor.x >= r.l && cursor.x <= r.r && cursor.y >= r.t && cursor.y <= r.b;
+        const b = boundsWithChat(rect());
+        return cursor.x >= b.l && cursor.x <= b.r && cursor.y >= b.t && cursor.y <= b.b;
       }
       return false;
     }
 
     function render() {
       const r = rect();
+      const b = boundsWithChat(r);
       const w = Math.round(r.r - r.l);
       const h = Math.round(r.b - r.t);
+      if (!b.chatUrl) webChatOpen = false;
+      webChatBtn.style.display = b.chatUrl ? "inline-flex" : "none";
+      webChatLabel.textContent = webChatOpen ? "채팅창 숨기기" : "채팅창 보기";
+
       const interactive = isInteractive();
       const hovered =
         drag !== null ||
-        (cursor !== null && cursor.x >= r.l && cursor.x <= r.r && cursor.y >= r.t && cursor.y <= r.b);
+        (cursor !== null && cursor.x >= b.l && cursor.x <= b.r && cursor.y >= b.t && cursor.y <= b.b);
       const showBarOnly = !interactive && hovered;
-      const geometry = { x: px(r.l), y: px(r.t), w: px(w), h: px(h) };
+      const videoGeo = { x: px(r.l), y: px(b.videoT), w: px(w), h: px(h) };
+      const ctrlGeo = { x: px(r.l), y: px(b.t), w: px(w), h: px(b.b - b.t) };
       const opacity = interactive && !wheelPreview ? 1 : faded ? FADED_OPACITY : ctx.settings.opacity;
-      setVars(video, { ...geometry, opacity: String(opacity) });
+      setVars(video, { ...videoGeo, opacity: String(opacity) });
       video.toggleAttribute("data-gp-pass", !interactive && ctx.settings.clickThrough);
       video.toggleAttribute("data-gp-drag", drag !== null);
+
+      if (webChatOpen && b.chatUrl && b.chatH > 0) {
+        if (webChatFrame.getAttribute("src") !== b.chatUrl) {
+          webChatFrame.setAttribute("src", b.chatUrl);
+        }
+        webChat.host.toggleAttribute("data-gp-pass", !interactive && ctx.settings.clickThrough);
+        webChat.host.toggleAttribute("data-gp-drag", drag !== null);
+        webChat.show({
+          x: px(r.l),
+          y: px(b.chatT),
+          w: px(w),
+          h: px(b.chatH),
+          opacity: String(opacity),
+        });
+      } else {
+        webChat.hide();
+      }
+
       hudEl.textContent = `투명도 ${Math.round(ctx.settings.opacity * 100)}% (휠 조절) · ${w}×${h}`;
       controller.host.toggleAttribute("data-hovered", hovered);
       controller.host.toggleAttribute("data-bar-only", showBarOnly);
-      if (interactive || showBarOnly) controller.show(geometry);
+      if (interactive || showBarOnly) controller.show(ctrlGeo);
       else controller.hide();
     }
 
@@ -550,9 +613,9 @@
       const prevHovered = controller.host.hasAttribute("data-hovered");
       cursor = { x: e.clientX, y: e.clientY };
       holdFrom(e);
-      const r = rect();
+      const b = boundsWithChat(rect());
       const nowHovered =
-        drag !== null || (cursor.x >= r.l && cursor.x <= r.r && cursor.y >= r.t && cursor.y <= r.b);
+        drag !== null || (cursor.x >= b.l && cursor.x <= b.r && cursor.y >= b.t && cursor.y <= b.b);
       if (prevInteractive !== isInteractive() || prevHovered !== nowHovered) render();
       tick();
     }, { capture: true, ...on });
@@ -692,8 +755,18 @@
       ac.abort();
       clearInterval(timer);
       dragSink = null;
+      toggleWebChatSink = null;
+      webChat.hide();
+      webChatFrame.removeAttribute("src");
       controller.hide();
       if (video.matches(":popover-open")) video.hidePopover();
+    }
+
+    function setChatUrl(nextUrl) {
+      if (nextUrl && nextUrl !== remoteChatUrl) {
+        remoteChatUrl = nextUrl;
+        render();
+      }
     }
 
     video.setAttribute("popover", "manual");
@@ -705,7 +778,7 @@
       queueMicrotask(leave);
     }
 
-    return { exit, settingsChanged, layoutChanged };
+    return { exit, settingsChanged, layoutChanged, setChatUrl };
   }
 
   function boostVideoSdp(sdp) {
@@ -838,12 +911,11 @@
       } catch {}
     }
 
-    function captureFrame(targetW) {
-      if (!alive || !senderPort) return;
+    function snapshotFrame(targetW = 640) {
       const vw = video.videoWidth;
       const vh = video.videoHeight;
-      if (!vw || !vh) return;
-      const desiredW = Math.max(960, Math.min(1280, Number(targetW) || 960));
+      if (!vw || !vh) return null;
+      const desiredW = Math.max(480, Math.min(1280, Number(targetW) || 640));
       const cw = Math.min(desiredW, vw);
       const ch = Math.max(1, Math.round((cw * vh) / vw));
       if (capCanvas.width !== cw || capCanvas.height !== ch) {
@@ -852,9 +924,21 @@
       }
       try {
         capCtx.drawImage(video, 0, 0, cw, ch);
-        const dataUrl = capCanvas.toDataURL("image/jpeg", 0.9);
-        senderPort.postMessage({ type: "FRAME", dataUrl, vw, vh });
-      } catch {}
+        const dataUrl = capCanvas.toDataURL("image/jpeg", 0.88);
+        return { type: "FRAME", dataUrl, vw, vh };
+      } catch {
+        return null;
+      }
+    }
+
+    function captureFrame(targetW) {
+      if (!alive || !senderPort) return;
+      const frame = snapshotFrame(targetW);
+      if (frame) {
+        try {
+          senderPort.postMessage(frame);
+        } catch {}
+      }
     }
 
     function connectSender() {
@@ -893,11 +977,16 @@
     function querySource() {
       connectSender();
       const ratio = video.videoWidth ? video.videoHeight / video.videoWidth : 9 / 16;
-      return { ok: true, ratio };
+      return { ok: true, ratio, chatUrl: chatUrlFor(ctx.site), frame: snapshotFrame(640) };
     }
+
+    const frameWarmTimer = setInterval(() => {
+      if (alive && senderPort && !rtcPeer) captureFrame(640);
+    }, 500);
 
     function exit() {
       alive = false;
+      clearInterval(frameWarmTimer);
       video.removeEventListener("loadeddata", onLoadedData);
       if (senderPort) {
         try {
@@ -919,7 +1008,13 @@
       }
     }
 
-    send({ type: "INTAB_OPENED" });
+    const initRatio = video.videoWidth ? video.videoHeight / video.videoWidth : 9 / 16;
+    send({
+      type: "INTAB_OPENED",
+      ratio: initRatio,
+      chatUrl: chatUrlFor(ctx.site),
+      frame: snapshotFrame(640),
+    });
     return {
       exit,
       settingsChanged: floating.settingsChanged,
@@ -929,7 +1024,7 @@
     };
   }
 
-  function enterRemoteInTab({ ratio }, leave) {
+  function enterRemoteInTab({ ratio, chatUrl, initialFrame } = {}, leave) {
     const initRatio = ratio || 9 / 16;
     const canvas = h("canvas", {
       class: FLOAT_CLASS,
@@ -945,7 +1040,7 @@
     const ctx2d = canvas.getContext("2d", { alpha: false });
     document.documentElement.append(canvas);
 
-    const floating = enterFloating({ video: canvas, ratioFallback: initRatio, isRemote: true }, leave);
+    const floating = enterFloating({ video: canvas, ratioFallback: initRatio, isRemote: true, chatUrl }, leave);
 
     let alive = true;
     let receiverPort = null;
@@ -1111,14 +1206,26 @@
       } catch {}
     }
 
+    if (initialFrame?.dataUrl) {
+      handleFrame(initialFrame);
+    }
     connectReceiver();
     requestFrame();
+    const onVisChange = () => {
+      if (!document.hidden && alive) {
+        if (!receiverPort) connectReceiver();
+        requestFrame();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisChange);
     const renderTick = setInterval(() => {
+      if (document.hidden && framesRendered > 0) return;
       if (!drawRtcFrame()) requestFrame();
     }, 16);
 
     function exit() {
       alive = false;
+      document.removeEventListener("visibilitychange", onVisChange);
       clearInterval(renderTick);
       clearTimeout(pullTimer);
       stopRtcReceiver();
@@ -1137,7 +1244,11 @@
       exit,
       settingsChanged: floating.settingsChanged,
       layoutChanged: floating.layoutChanged,
-      kick: () => {
+      kick: (msg) => {
+        if (msg?.chatUrl) floating.setChatUrl?.(msg.chatUrl);
+        if (msg?.initialFrame?.dataUrl && framesRendered === 0) {
+          handleFrame(msg.initialFrame);
+        }
         if (!rtcActive && receiverPort) {
           try {
             receiverPort.postMessage({ type: "RTC_INIT" });
@@ -1198,6 +1309,7 @@
     pipHud.className = "pip-hud";
     doc.body.append(mirror, pipHud);
 
+    let pipBar = null;
     let chatBtn = null;
     let chatLabel = null;
     if (chatUrl) {
@@ -1210,8 +1322,9 @@
         e.stopPropagation();
         onToggleChat?.();
       });
-      const pipBar = doc.createElement("div");
+      pipBar = doc.createElement("div");
       pipBar.className = "bar pip-bar";
+      pipBar.hidden = !showChat;
       pipBar.append(chatBtn);
       doc.body.append(pipBar);
     }
@@ -1244,13 +1357,23 @@
       }
     }
 
+    function setFeatureEnabled(enabled) {
+      if (pipBar) pipBar.hidden = !Boolean(enabled && chatUrl);
+      syncChat(Boolean(enabled && chatUrl), true);
+    }
+
+    function toggleChatOpen() {
+      if (!chatUrl || (pipBar && pipBar.hidden)) return;
+      syncChat(!chatShown, true);
+    }
+
     function setHovered(hovered) {
       doc.body.toggleAttribute("data-hovered", Boolean(hovered));
     }
 
     syncChat(showChat, false);
     mirror.play().catch(() => {});
-    return { mirror, pipHud, syncChat, setHovered };
+    return { mirror, pipHud, syncChat, setFeatureEnabled, toggleChatOpen, setHovered };
   }
 
   function enterDocPip({ stream: firstStream, chatUrl, win: winPromise }, leave) {
@@ -1262,7 +1385,8 @@
     let win = null;
     let mirror = null;
     let pipHud = null;
-    let syncChat = null;
+    let setFeatureEnabled = null;
+    let toggleChatOpen = null;
     let setHovered = null;
     let hudTimer = null;
     let engineConnected = true;
@@ -1294,10 +1418,7 @@
     }
 
     function handleToggleChat() {
-      const next = !ctx.settings.showChat;
-      ctx.settings = { ...ctx.settings, showChat: next };
-      syncChat?.(next, true);
-      send({ type: "PATCH_SETTINGS", patch: { showChat: next } });
+      toggleChatOpen?.();
     }
 
     winPromise.then((w) => {
@@ -1309,7 +1430,8 @@
       });
       mirror = built.mirror;
       pipHud = built.pipHud;
-      syncChat = built.syncChat;
+      setFeatureEnabled = built.setFeatureEnabled;
+      toggleChatOpen = built.toggleChatOpen;
       setHovered = built.setHovered;
       w.addEventListener("pagehide", leave, { signal: ac.signal });
       w.addEventListener("wheel", (e) => {
@@ -1354,7 +1476,10 @@
     return {
       settingsChanged: () => {
         syncPipOpacity(false);
-        syncChat?.(Boolean(ctx.settings.showChat), true);
+        setFeatureEnabled?.(Boolean(ctx.settings.showChat));
+      },
+      toggleChat: () => {
+        toggleChatOpen?.();
       },
       setHovered: (hovered) => {
         setHovered?.(hovered);
@@ -1433,6 +1558,9 @@
     },
     focusSource: () => {
       send({ type: "FOCUS_SOURCE_TAB" });
+    },
+    toggleWebChat: () => {
+      toggleWebChatSink?.();
     },
   };
 
@@ -1532,7 +1660,7 @@
       await settingsReady;
       if (!ctx.settings.enabled) return { ok: false };
       if (current.name === "remoteInTab" && current.video?.isConnected) {
-        current.kick?.();
+        current.kick?.(msg);
         return { ok: true };
       }
       if (current.name !== "idle") return { ok: false };
@@ -1545,6 +1673,10 @@
     },
     async PIP_HOVER(msg) {
       if (current.name === "docPip") current.setHovered?.(Boolean(msg?.hovered));
+      return { ok: true };
+    },
+    async PIP_TOGGLE_CHAT() {
+      if (current.name === "docPip") current.toggleChat?.();
       return { ok: true };
     },
   };

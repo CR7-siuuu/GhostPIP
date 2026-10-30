@@ -74,6 +74,14 @@ def cb(hwnd, _):
     u32.GetMonitorInfoW(hmon, ctypes.byref(mi))
     rgn_rc = wt.RECT()
     rgn_type = u32.GetWindowRgnBox(hwnd, ctypes.byref(rgn_rc))
+    d3d_rel_t = 0
+    def child_cb(ch, __):
+        nonlocal d3d_rel_t
+        if win32gui.GetClassName(ch) == "Intermediate D3D Window":
+            cl, ct, cr2, cb2 = win32gui.GetWindowRect(ch)
+            d3d_rel_t = ct - t
+        return True
+    win32gui.EnumChildWindows(hwnd, child_cb, None)
     cands.append({
         "hwnd": hwnd,
         "rect": {"l": l, "t": t, "r": r, "b": b, "w": r - l, "h": b - t},
@@ -81,7 +89,7 @@ def cb(hwnd, _):
         "layered": bool(ex & WS_EX_LAYERED),
         "transparent": bool(ex & WS_EX_TRANSPARENT),
         "alpha": alpha.value & 0xff,
-        "rgnTop": rgn_rc.top if rgn_type == 2 else 0,
+        "rgnTop": -d3d_rel_t if d3d_rel_t < 0 else (rgn_rc.top if rgn_type == 2 else 0),
         "score": abs((r - l) - ${expectedW}) + abs((b - t) - ${expectedH})
     })
     return True
@@ -107,6 +115,7 @@ execFileSync(
   ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(ROOT, "engine/installer/install.ps1")],
   { stdio: "inherit" },
 );
+await sleep(1600);
 
 const row = Object.fromEntries(STEPS.map((s) => [s, { status: "FAIL", info: "not reached" }]));
 async function step(name, fn) {
@@ -311,6 +320,38 @@ try {
       GhostPiPBackground.postToEngine({ v: 1, type: "TEST_CURSOR", x: 100, y: 100 });
     });
 
+    await popupPage.evaluate(() =>
+      chrome.runtime.sendMessage({ v: 1, type: "PATCH_SETTINGS", patch: { showChat: false } }),
+    );
+    const barHiddenWhenShowChatOff = await poll(
+      () =>
+        videoPage.evaluate(() => {
+          const d = documentPictureInPicture.window.document;
+          const bar = d.querySelector(".pip-bar");
+          return Boolean(bar?.hidden) && !d.querySelector("iframe");
+        }),
+      Boolean,
+      2000,
+    );
+    await popupPage.evaluate(() =>
+      chrome.runtime.sendMessage({ v: 1, type: "PATCH_SETTINGS", patch: { showChat: true } }),
+    );
+    await poll(
+      () =>
+        videoPage.evaluate(() => {
+          const d = documentPictureInPicture.window.document;
+          const bar = d.querySelector(".pip-bar");
+          return Boolean(bar && !bar.hidden && d.querySelector("iframe"));
+        }),
+      Boolean,
+      2000,
+    );
+    await poll(
+      () => inspectWin32Pip(pipSize.w, pipSize.h),
+      (w) => w && Math.abs(w.rect.h - win.rect.h) <= 20,
+      2500,
+    );
+
     const ok =
       Boolean(boundEntry?.bound) &&
       win.layered === true &&
@@ -326,11 +367,12 @@ try {
       chatBefore.hasIframe === true &&
       chatAfterHide.label === "채팅창 보기" &&
       chatAfterHide.hasIframe === false &&
+      barHiddenWhenShowChatOff === true &&
       Boolean(chatHiddenWin) &&
       Boolean(chatRestoredWin);
     return {
       ok,
-      info: `bound=${boundEntry?.bound} layered=${win.layered} alpha=${win.alpha} rgnTop=${win.rgnTop}(hover:${winWhileHovered?.rgnTop}) hoverBar=${hoveredState.barOpacity} chatBtn="${chatBefore.label}"->"${chatAfterHide.label}" h=${win.rect.h}->${chatHiddenWin?.rect?.h}->${chatRestoredWin?.rect?.h} rect=${fmt(win.rect)}`,
+      info: `bound=${boundEntry?.bound} layered=${win.layered} alpha=${win.alpha} rgnTop=${win.rgnTop}(hover:${winWhileHovered?.rgnTop}) hoverBar=${hoveredState.barOpacity} showChatOffHidden=${barHiddenWhenShowChatOff} chatBtn="${chatBefore.label}"->"${chatAfterHide.label}" h=${win.rect.h}->${chatHiddenWin?.rect?.h}->${chatRestoredWin?.rect?.h} rect=${fmt(win.rect)}`,
     };
   });
 
@@ -437,8 +479,14 @@ try {
   });
 
   await step("5 close & engine exit", async () => {
-    await videoPage.bringToFront();
-    await videoPage.evaluate(() => documentPictureInPicture.window?.close());
+    await popupPage.evaluate(() =>
+      chrome.runtime.sendMessage({ v: 1, type: "PATCH_SETTINGS", patch: { enabled: false } }),
+    );
+    const remainingAfterDisable = await poll(
+      () => getEnginePids().filter((pid) => spawnedPids.includes(pid)),
+      (pids) => pids.length === 0,
+      4000,
+    );
     const cleared = await poll(
       () =>
         sw.evaluate(async () => {
@@ -449,13 +497,8 @@ try {
       2500,
     );
     await browser.close();
-    const remainingSpawned = await poll(
-      () => getEnginePids().filter((pid) => spawnedPids.includes(pid)),
-      (pids) => pids.length === 0,
-      4000,
-    );
-    const ok = cleared && remainingSpawned.length === 0;
-    return { ok, info: `pipCleared=${cleared} remainingSpawnedPids=${remainingSpawned.length}` };
+    const ok = cleared && remainingAfterDisable.length === 0;
+    return { ok, info: `pipCleared=${cleared} exitedOnDisable=${remainingAfterDisable.length === 0}` };
   });
 } finally {
   await browser.close().catch(() => {});
