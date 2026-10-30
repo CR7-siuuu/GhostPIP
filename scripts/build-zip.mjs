@@ -35,6 +35,12 @@ if (!fs.existsSync(exePath)) {
   throw new Error(`Published executable not found at ${exePath}`);
 }
 
+const defaultPublishDir = path.join(ROOT, "engine/bin/Release/net8.0-windows/win-x64/publish");
+fs.mkdirSync(defaultPublishDir, { recursive: true });
+try {
+  fs.copyFileSync(exePath, path.join(defaultPublishDir, "GhostPiP.Engine.exe"));
+} catch {}
+
 function walkFiles(dir, baseDir = dir, out = []) {
   for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, ent.name);

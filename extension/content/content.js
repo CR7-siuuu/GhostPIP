@@ -192,6 +192,7 @@
 
   // Open shadow root so tests can pierce it; popover so it renders in the top layer above site overlays.
   function overlayHost(id, css, ...content) {
+    document.getElementById(id)?.remove();
     const host = h("div", { id, popover: "manual" });
     const root = host.attachShadow({ mode: "open" });
     const style = document.createElement("style");
@@ -291,11 +292,27 @@
   }
 
   function chatUrlFor(site) {
-    if (!site.chatPopoutUrl || !site.idFrom) return null;
-    const id = "param" in site.idFrom
-      ? new URLSearchParams(location.search).get(site.idFrom.param)
-      : location.pathname.split("/")[site.idFrom.pathIndex];
-    return id ? site.chatPopoutUrl.replace(/\{(?:videoId|channelId|channel)\}/g, encodeURIComponent(id)) : null;
+    if (site?.chatPopoutUrl && site?.idFrom) {
+      const id = "param" in site.idFrom
+        ? new URLSearchParams(location.search).get(site.idFrom.param)
+        : location.pathname.split("/")[site.idFrom.pathIndex];
+      if (id) {
+        return site.chatPopoutUrl.replace(/\{(?:videoId|channelId|channel)\}/g, encodeURIComponent(id));
+      }
+    }
+    if (location.hostname === "chzzk.naver.com" && location.pathname.startsWith("/live/")) {
+      const id = location.pathname.split("/")[2];
+      if (id) return `https://chzzk.naver.com/live/${encodeURIComponent(id)}/chat`;
+    }
+    if (location.hostname === "www.youtube.com" && location.pathname === "/watch") {
+      const id = new URLSearchParams(location.search).get("v");
+      if (id) return `https://www.youtube.com/live_chat?is_popout=1&v=${encodeURIComponent(id)}`;
+    }
+    if (location.hostname === "www.twitch.tv") {
+      const id = location.pathname.split("/")[1];
+      if (id) return `https://www.twitch.tv/popout/${encodeURIComponent(id)}/chat`;
+    }
+    return null;
   }
 
   function persistHome(corner, keepLayoutPos = false) {
@@ -1307,7 +1324,7 @@
       // rect handshake waits for it, with a timeout in case the platform never resizes.
       new Promise((placed) => {
         w.addEventListener("resize", placed, { once: true, signal: ac.signal });
-        setTimeout(placed, 1000);
+        setTimeout(placed, 150);
       }).then(() => {
         if (ac.signal.aborted) return;
         const readRect = () => ({ x: w.screenX, y: w.screenY, w: w.outerWidth, h: w.outerHeight });
@@ -1320,9 +1337,11 @@
           engineConnected = Boolean(res?.engineConnected);
           syncPipOpacity(false);
         });
-        setTimeout(() => {
-          if (!ac.signal.aborted) send({ type: "PIP_RECT_UPDATED", rect: readRect() });
-        }, 600);
+        for (const delay of [400, 900]) {
+          setTimeout(() => {
+            if (!ac.signal.aborted) send({ type: "PIP_RECT_UPDATED", rect: readRect() });
+          }, delay);
+        }
       });
     }, leave);
 

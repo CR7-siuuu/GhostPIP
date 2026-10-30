@@ -259,6 +259,13 @@ public static class Protocol
             message = new TestCursorMessage(new DodgePoint(x, y));
             return true;
         }
+        if (root.TryGetProperty("cursor", out var curEl) && curEl.ValueKind == JsonValueKind.Object &&
+            curEl.TryGetProperty("x", out var cxEl) && cxEl.ValueKind == JsonValueKind.Number && cxEl.TryGetInt32(out int cx) &&
+            curEl.TryGetProperty("y", out var cyEl) && cyEl.ValueKind == JsonValueKind.Number && cyEl.TryGetInt32(out int cy))
+        {
+            message = new TestCursorMessage(new DodgePoint(cx, cy));
+            return true;
+        }
         message = new TestCursorMessage(null);
         return true;
     }

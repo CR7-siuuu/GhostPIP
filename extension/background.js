@@ -210,18 +210,47 @@ function onEngineMessage(msg) {
       break;
     }
     case "PIP_HOVER": {
-      if (Number.isFinite(msg.tabId)) {
-        sendTab(msg.tabId, { type: "PIP_HOVER", hovered: Boolean(msg.hovered) });
+      const hovered = Boolean(msg.hovered);
+      if (Number.isFinite(msg.tabId) && msg.tabId >= 0) {
+        sendTab(msg.tabId, { type: "PIP_HOVER", hovered });
+      } else {
+        chrome.storage.session
+          .get("pip")
+          .then(({ pip = {} }) => {
+            const ids = Object.keys(pip).map(Number).filter(Number.isFinite);
+            if (ids.length) {
+              for (const id of ids) sendTab(id, { type: "PIP_HOVER", hovered });
+            } else if (chrome.tabs?.query) {
+              chrome.tabs
+                .query({})
+                .then((tabs) => {
+                  for (const t of tabs) {
+                    if (t.id != null && (!t.url || /^https?:/i.test(t.url))) {
+                      sendTab(t.id, { type: "PIP_HOVER", hovered });
+                    }
+                  }
+                })
+                .catch(() => {});
+            }
+          })
+          .catch(() => {});
       }
       break;
     }
   }
 }
 
+let reconnectTimer = null;
+
 function onEngineDisconnect(port) {
   void chrome.runtime.lastError;
   if (nativePort === port) nativePort = null;
   chrome.storage.session.set({ engine: { ...DEFAULT_ENGINE } });
+  clearTimeout(reconnectTimer);
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    connectEngine();
+  }, 1000);
 }
 
 function connectEngine() {
@@ -233,6 +262,8 @@ function connectEngine() {
   } catch {
     return null;
   }
+  clearTimeout(reconnectTimer);
+  reconnectTimer = null;
   nativePort = port;
   port.onMessage.addListener(onEngineMessage);
   port.onDisconnect.addListener(() => onEngineDisconnect(port));
@@ -262,6 +293,29 @@ function connectEngine() {
 chrome.runtime.onInstalled.addListener(() => {
   updateSettings((s) => ({ ok: true, settings: s }));
   connectEngine();
+  if (chrome.tabs?.query && chrome.scripting?.executeScript) {
+    chrome.tabs
+      .query({})
+      .then((tabs) => {
+        for (const t of tabs) {
+          if (t.id != null && t.url && /^https?:/i.test(t.url)) {
+            chrome.scripting
+              .insertCSS({
+                target: { tabId: t.id },
+                files: ["content/overlay.css"],
+              })
+              .catch(() => {});
+            chrome.scripting
+              .executeScript({
+                target: { tabId: t.id },
+                files: ["shared/settings.js", "content/dodge.js", "content/content.js"],
+              })
+              .catch(() => {});
+          }
+        }
+      })
+      .catch(() => {});
+  }
 });
 
 chrome.runtime.onStartup?.addListener(() => {
@@ -442,6 +496,7 @@ const handlers = {
     return { ok: true };
   },
   async PIP_RESIZE({ deltaH, dpr }) {
+    if (!nativePort) connectEngine();
     const handledByEngine = postToEngine({ v: 1, type: "PIP_RESIZE", deltaH, dpr });
     return { ok: true, handledByEngine };
   },

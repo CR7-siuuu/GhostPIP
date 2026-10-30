@@ -61,4 +61,8 @@ foreach ($RegKey in $RegistryKeys) {
     Set-Item -LiteralPath $RegKey -Value $ManifestPath
 }
 
+if ($env:GHOSTPIP_KEEP_RUNNING -ne "1") {
+    Get-Process GhostPiP.Engine -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+}
+
 Write-Output "Registered $HostName -> $ManifestPath (exe: $ResolvedExePath)"

@@ -11,7 +11,7 @@ public sealed unsafe class PipTracker : IDisposable
     private const uint WINEVENT_SKIPOWNPROCESS = 0x0002;
     private const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
     private const nint WS_EX_TOOLWINDOW = 0x00000080;
-    private const long OpenRetryTimeoutMs = 1000;
+    private const long OpenRetryTimeoutMs = 3000;
     private const long AutoDetectIntervalMs = 500;
 
     private static readonly string[] BrowserExes =
@@ -117,6 +117,14 @@ public sealed unsafe class PipTracker : IDisposable
 
     public void OnPipOpened(PipOpenedMessage msg, long nowMs)
     {
+        if (BoundHwnd != IntPtr.Zero && BoundTabId < 0 && GhostStyle.IsWindow(BoundHwnd) && IsWindowVisible(BoundHwnd))
+        {
+            BoundTabId = msg.TabId;
+            BoundKind = msg.Kind;
+            _send(new PipBoundMessage(msg.TabId));
+            return;
+        }
+
         if (BoundHwnd != IntPtr.Zero && BoundTabId != msg.TabId)
         {
             _ghostStyle.Restore(BoundHwnd);
@@ -241,15 +249,15 @@ public sealed unsafe class PipTracker : IDisposable
     private void TryAutoDetect()
     {
         string? testClass = Environment.GetEnvironmentVariable("GHOSTPIP_TEST_CLASS");
-        if (string.IsNullOrEmpty(testClass))
-            return;
-
         var candidates = CollectCandidates();
-        foreach (var (hwnd, _) in candidates)
+        foreach (var (hwnd, rc) in candidates)
         {
+            if (string.IsNullOrEmpty(testClass) && (rc.W > 1200 || rc.H > 1100))
+                continue;
+
             BoundHwnd = hwnd;
             BoundTabId = -1;
-            BoundKind = "native";
+            BoundKind = string.IsNullOrEmpty(testClass) ? "document" : "native";
             return;
         }
     }

@@ -74,23 +74,14 @@ def cb(hwnd, _):
     u32.GetMonitorInfoW(hmon, ctypes.byref(mi))
     rgn_rc = wt.RECT()
     rgn_type = u32.GetWindowRgnBox(hwnd, ctypes.byref(rgn_rc))
-    d3d_rel_t = 0
-    def child_cb(ch, __):
-        nonlocal d3d_rel_t
-        if win32gui.GetClassName(ch) == "Intermediate D3D Window":
-            cl, ct, cr2, cb2 = win32gui.GetWindowRect(ch)
-            d3d_rel_t = ct - t
-        return True
-    win32gui.EnumChildWindows(hwnd, child_cb, None)
-    shift = -d3d_rel_t if d3d_rel_t < 0 else 0
     cands.append({
         "hwnd": hwnd,
-        "rect": {"l": l, "t": t - shift, "r": r, "b": b - shift, "w": r - l, "h": b - t},
+        "rect": {"l": l, "t": t, "r": r, "b": b, "w": r - l, "h": b - t},
         "work": {"l": mi.rcWork.left, "t": mi.rcWork.top, "r": mi.rcWork.right, "b": mi.rcWork.bottom},
         "layered": bool(ex & WS_EX_LAYERED),
         "transparent": bool(ex & WS_EX_TRANSPARENT),
         "alpha": alpha.value & 0xff,
-        "rgnTop": -d3d_rel_t if d3d_rel_t < 0 else (rgn_rc.top if rgn_type == 2 else 0),
+        "rgnTop": rgn_rc.top if rgn_type == 2 else 0,
         "score": abs((r - l) - ${expectedW}) + abs((b - t) - ${expectedH})
     })
     return True
@@ -206,10 +197,11 @@ try {
   await step("2 docPip bind & ghost style", async () => {
     await sw.evaluate(async (defaults) => {
       const s = structuredClone(defaults);
+      s.dodge.enabled = false;
       s.dodge.autoReturn = false;
       await chrome.storage.local.set({ settings: s });
       GhostPiPBackground.postToEngine({ v: 1, type: "STATE", settings: s });
-      GhostPiPBackground.postToEngine({ v: 1, type: "TEST_CURSOR", cursor: { x: 100, y: 100 } });
+      GhostPiPBackground.postToEngine({ v: 1, type: "TEST_CURSOR", x: 100, y: 100 });
     }, DEFAULTS);
 
     const vCenter = await videoPage.evaluate(() => {
@@ -266,6 +258,29 @@ try {
       };
     });
 
+    const hoverPt = {
+      x: Math.round((win.rect.l + win.rect.r) / 2),
+      y: Math.round(win.rect.t + win.rgnTop + 16),
+    };
+    await sw.evaluate((pt) => {
+      GhostPiPBackground.postToEngine({ v: 1, type: "TEST_CURSOR", x: pt.x, y: pt.y });
+    }, hoverPt);
+
+    const hoveredState = await poll(
+      () =>
+        videoPage.evaluate(() => {
+          const d = documentPictureInPicture.window.document;
+          const bar = d.querySelector(".pip-bar");
+          return {
+            hoveredAttr: d.body.hasAttribute("data-hovered"),
+            barOpacity: getComputedStyle(bar).opacity,
+          };
+        }),
+      (s) => s.hoveredAttr && s.barOpacity === "1",
+      2000,
+    );
+    const winWhileHovered = inspectWin32Pip(pipSize.w, pipSize.h);
+
     await videoPage.evaluate(() => {
       documentPictureInPicture.window.document.querySelector('[data-action="toggleChat"]').click();
     });
@@ -292,12 +307,19 @@ try {
       2500,
     );
 
+    await sw.evaluate(() => {
+      GhostPiPBackground.postToEngine({ v: 1, type: "TEST_CURSOR", x: 100, y: 100 });
+    });
+
     const ok =
       Boolean(boundEntry?.bound) &&
       win.layered === true &&
       win.transparent === false &&
       win.alpha === 179 &&
       win.rgnTop > 0 &&
+      winWhileHovered?.rgnTop > 0 &&
+      hoveredState.hoveredAttr === true &&
+      hoveredState.barOpacity === "1" &&
       near(win.rect, wantBr) &&
       chatBefore.hiddenWhenIdle === true &&
       chatBefore.label === "채팅창 숨기기" &&
@@ -308,7 +330,7 @@ try {
       Boolean(chatRestoredWin);
     return {
       ok,
-      info: `bound=${boundEntry?.bound} layered=${win.layered} alpha=${win.alpha} rgnTop=${win.rgnTop} chatBtn="${chatBefore.label}"->"${chatAfterHide.label}" h=${win.rect.h}->${chatHiddenWin?.rect?.h}->${chatRestoredWin?.rect?.h} rect=${fmt(win.rect)}`,
+      info: `bound=${boundEntry?.bound} layered=${win.layered} alpha=${win.alpha} rgnTop=${win.rgnTop}(hover:${winWhileHovered?.rgnTop}) hoverBar=${hoveredState.barOpacity} chatBtn="${chatBefore.label}"->"${chatAfterHide.label}" h=${win.rect.h}->${chatHiddenWin?.rect?.h}->${chatRestoredWin?.rect?.h} rect=${fmt(win.rect)}`,
     };
   });
 

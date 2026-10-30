@@ -435,12 +435,8 @@ public static unsafe class Program
         _wheelPreview = true;
         _dodgeState = _dodgeState with { HoverSince = null };
 
-        DodgePoint? cursor = GetVisibleCursor();
-        bool cursorInWindow = cursor is DodgePoint wp &&
-            wp.X >= rc.Left && wp.X <= rc.Right &&
-            wp.Y >= rc.Top && wp.Y <= rc.Bottom;
         bool effectiveClickThrough = _settings.ClickThrough && !holdDown;
-        _ghostStyle.Apply(pipHwnd, next, effectiveClickThrough, hideHeader: !holdDown && !cursorInWindow);
+        _ghostStyle.Apply(pipHwnd, next, effectiveClickThrough, hideHeader: !holdDown);
         _nativeHost?.Send(new IntentMessage("SET_OPACITY", Opacity: next));
         return true;
     }
@@ -665,22 +661,20 @@ public static unsafe class Program
         }
 
         DodgePoint? curPt = GetVisibleCursor();
+        _ghostStyle.TryGetContentRelRect(pipHwnd, out var contentRel);
+        int contentTop = winRect.T + contentRel.Top;
         bool cursorInWindow = curPt is DodgePoint wp &&
             wp.X >= winRect.L && wp.X <= winRect.R &&
-            wp.Y >= winRect.T && wp.Y <= winRect.B;
-        bool cursorInHeader = false;
-        if (cursorInWindow && curPt is DodgePoint hp && _ghostStyle.TryGetContentRelRect(pipHwnd, out var contentRel))
-        {
-            cursorInHeader = hp.Y >= winRect.T && hp.Y < winRect.T + contentRel.Top + 44;
-        }
+            wp.Y >= contentTop && wp.Y <= winRect.B;
+        bool cursorInPipBar = cursorInWindow && curPt is DodgePoint hp &&
+            hp.Y >= contentTop && hp.Y < contentTop + 48;
 
-        bool hideHeader = !holdRes.IsInteractive && !cursorInWindow;
-        bool pipHovered = !hideHeader;
+        bool hideHeader = !holdRes.IsInteractive;
+        bool pipHovered = holdRes.IsInteractive || cursorInWindow;
         if (pipHovered != _lastPipHovered)
         {
             _lastPipHovered = pipHovered;
-            if (_pipTracker is { BoundTabId: >= 0 } tracker)
-                _nativeHost?.Send(new PipHoverMessage(tracker.BoundTabId, pipHovered));
+            _nativeHost?.Send(new PipHoverMessage(_pipTracker?.BoundTabId ?? -1, pipHovered));
         }
 
         double effectiveOpacity = (holdRes.IsInteractive && !_wheelPreview)
@@ -690,7 +684,7 @@ public static unsafe class Program
                 : _settings.Opacity;
         bool effectiveClickThrough = _settings.ClickThrough &&
             !holdRes.IsInteractive &&
-            !(cursorInHeader && (!_settings.Dodge.Enabled || _waitCursorLeave));
+            !(cursorInPipBar && (!_settings.Dodge.Enabled || _waitCursorLeave));
 
         _ghostStyle.Apply(pipHwnd, effectiveOpacity, effectiveClickThrough, hideHeader);
     }
