@@ -98,6 +98,7 @@
     width: var(--gp-w) !important;
     height: var(--gp-h) !important;
     transform: none !important;
+    pointer-events: none !important;
   }
 
   #ghostpip-controller:popover-open[data-bar-only] {

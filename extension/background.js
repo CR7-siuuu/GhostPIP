@@ -655,6 +655,13 @@ const handlers = {
     }
     return { ok: true };
   },
+  async SKIP_AD() {
+    const session = await getInTab();
+    if (session?.sourceTabId) {
+      await sendTab(session.sourceTabId, { type: "INTAB_SKIP_AD" });
+    }
+    return { ok: true };
+  },
   async PIP_OPENED({ kind, rect, dpr }, sender) {
     await pipChanged(sender.tab.id, { v: 1, type: "PIP_OPENED", tabId: sender.tab.id, kind, rect, dpr });
     const { engine } = await chrome.storage.session.get("engine");

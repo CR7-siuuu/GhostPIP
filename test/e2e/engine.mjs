@@ -358,6 +358,31 @@ try {
       2500,
     );
 
+    await videoPage.evaluate(() => {
+      window.__pipAdSkipped = 0;
+      const btn = document.createElement("button");
+      btn.className = "ytp-skip-ad-button";
+      btn.style.cssText = "position:fixed;left:20px;top:20px;width:100px;height:36px;z-index:99999;";
+      btn.textContent = "광고 건너뛰기";
+      btn.onclick = () => {
+        window.__pipAdSkipped++;
+        btn.remove();
+      };
+      document.body.appendChild(btn);
+    });
+    const pipSkipAdWorked = await poll(
+      () =>
+        videoPage.evaluate(() => {
+          const d = documentPictureInPicture.window.document;
+          const sb = d.querySelector('[data-action="skipAd"]');
+          if (!sb || sb.hidden) return false;
+          sb.click();
+          return window.__pipAdSkipped === 1 && sb.hidden;
+        }),
+      Boolean,
+      2000,
+    );
+
     const ok =
       Boolean(boundEntry?.bound) &&
       win.layered === true &&
@@ -374,6 +399,7 @@ try {
       chatAfterHide.label === "채팅창 보기" &&
       chatAfterHide.hasIframe === false &&
       barHiddenWhenShowChatOff === true &&
+      pipSkipAdWorked === true &&
       Boolean(chatHiddenWin) &&
       Boolean(chatRestoredWin);
     return {

@@ -131,6 +131,9 @@ public sealed unsafe class GhostStyle
         return true;
     }
 
+    public int GetHeaderShift(nint hwnd) =>
+        _applied.TryGetValue(hwnd, out var state) && state.Clipped ? state.ClipT : 0;
+
     public bool TryGetLogicalWindowRect(nint hwnd, out PipTracker.RECT rc) =>
         PipTracker.GetWindowRect(hwnd, out rc);
 

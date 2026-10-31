@@ -305,6 +305,11 @@ try {
       const chatHost = document.getElementById("ghostpip-chat");
       const chatFrame = chatHost?.shadowRoot?.querySelector("iframe");
       const chatOpened = Boolean(chatHost?.matches(":popover-open") && chatFrame?.getAttribute("src"));
+      const chatRect = chatHost?.getBoundingClientRect();
+      const chatHit =
+        chatRect && chatRect.width > 0
+          ? document.elementFromPoint(chatRect.left + chatRect.width / 2, chatRect.top + chatRect.height / 2) === chatHost
+          : false;
       const openedText = chatBtn?.textContent?.trim() ?? "";
       chatBtn?.click();
       return {
@@ -314,9 +319,36 @@ try {
         chatBtnVisible: Boolean(chatBtn && getComputedStyle(chatBtn).display !== "none"),
         chatBtnText: beforeText,
         chatOpened,
+        chatHit,
         openedText,
       };
     });
+
+    await tabA.evaluate(() => {
+      window.__adSkipped = 0;
+      const btn = document.createElement("button");
+      btn.className = "ytp-skip-ad-button";
+      btn.style.cssText = "position:fixed;left:20px;top:20px;width:100px;height:36px;z-index:99999;";
+      btn.textContent = "광고 건너뛰기";
+      btn.onclick = () => {
+        window.__adSkipped++;
+        btn.remove();
+      };
+      document.body.appendChild(btn);
+    });
+    const skipBtnVisibleOnB = await poll(
+      () =>
+        tabB.evaluate(() => {
+          const host = document.getElementById("ghostpip-controller");
+          const sb = host?.shadowRoot?.querySelector('[data-action="skipAd"]');
+          if (!sb || sb.hidden) return false;
+          sb.click();
+          return true;
+        }),
+      Boolean,
+      2000,
+    );
+    const adSkippedOnA = await poll(() => tabA.evaluate(() => window.__adSkipped === 1), Boolean, 1500);
 
     const finalB = await readFloat(tabB);
     const wantCustom = { l: targetL, t: targetT, r: targetL + 360, b: targetT + 270 };
@@ -340,7 +372,10 @@ try {
       hoverBar.chatBtnVisible === true &&
       hoverBar.chatBtnText === "채팅창 보기" &&
       hoverBar.chatOpened === true &&
-      hoverBar.openedText === "채팅창 숨기기";
+      hoverBar.chatHit === true &&
+      hoverBar.openedText === "채팅창 숨기기" &&
+      skipBtnVisibleOnB === true &&
+      adSkippedOnA === true;
     return {
       ok,
       info: `ghost=(${ghost?.pe},${ghost?.opacity}) dodged=${fmt(dodged?.rect)} resized=${resized?.size.w}x${resized?.size.h} customRect=${fmt(finalB?.rect)}(want ${fmt(wantCustom)}) opacity=${finalB?.opacity} home=${stored?.dodge?.home} hoverBar=(open=${hoverBar.open},barOnly=${hoverBar.barOnly},op=${hoverBar.barOpacity},chat="${hoverBar.chatBtnText}"->"${hoverBar.openedText}",chatOpen=${hoverBar.chatOpened})`,

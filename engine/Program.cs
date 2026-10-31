@@ -9,10 +9,17 @@ public static unsafe class Program
     private const uint WM_CLOSE = 0x0010;
     private const uint WM_QUIT = 0x0012;
     private const uint WM_TIMER = 0x0113;
+    private const uint WM_MOUSEMOVE = 0x0200;
     private const uint WM_LBUTTONDOWN = 0x0201;
     private const uint WM_LBUTTONUP = 0x0202;
+    private const uint WM_RBUTTONDOWN = 0x0204;
+    private const uint WM_RBUTTONUP = 0x0205;
     private const uint WM_MOUSEWHEEL = 0x020A;
     private const uint WM_HOTKEY = 0x0312;
+    private const uint WM_APP_PIP_MOUSEMOVE = 0x8010;
+
+    private const nint MK_LBUTTON = 0x0001;
+    private const nint MK_RBUTTON = 0x0002;
 
     private const int WH_MOUSE_LL = 14;
     private const int CORNER_SNAP_PX = 24;
@@ -162,6 +169,12 @@ public static unsafe class Program
     [DllImport("user32.dll")]
     private static extern nint GetForegroundWindow();
 
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(nint hWnd);
+
+    [DllImport("user32.dll", EntryPoint = "PostMessageW", SetLastError = true)]
+    private static extern bool PostMessageW(nint hWnd, uint Msg, nint wParam, nint lParam);
+
     [DllImport("kernel32.dll")]
     private static extern nint GetCurrentProcess();
 
@@ -212,6 +225,16 @@ public static unsafe class Program
     private static DodgePoint? _testCursor;
     private static bool? _testHold;
     private static bool _swallowNextLButtonUp;
+    private static bool _swallowNextRButtonUp;
+    private static bool _hookLButtonDown;
+    private static bool _pipMouseDown;
+    private static bool _pipDragActive;
+    private static POINT _pipDownPt;
+    private static int _pipDownWinL;
+    private static int _pipDownWinT;
+    private static bool _pipDownHold;
+    private static nint _pipDownHwnd;
+    private static int _pipDownClipT;
     private static bool _cleanedUp;
 
     [STAThread]
@@ -306,6 +329,11 @@ public static unsafe class Program
 
             case NativeMessagingHost.WM_APP_MESSAGE:
                 DrainIncomingMessages();
+                return IntPtr.Zero;
+
+            case WM_APP_PIP_MOUSEMOVE:
+                if (_pipTracker?.BoundHwnd is nint hoverHwnd && hoverHwnd != IntPtr.Zero && GhostStyle.IsWindow(hoverHwnd))
+                    PostMessageW(hoverHwnd, WM_MOUSEMOVE, wParam, lParam);
                 return IntPtr.Zero;
 
             case NativeMessagingHost.WM_APP_EOF:
@@ -410,31 +438,168 @@ public static unsafe class Program
         };
     }
 
+    private static nint MakeLParam(int lo, int hi) =>
+        (nint)(((hi & 0xFFFF) << 16) | (lo & 0xFFFF));
+
+    private static bool TryGetInteractiveDocPipTarget(
+        int x,
+        int y,
+        out nint pipHwnd,
+        out PipTracker.RECT rc,
+        out int clipT,
+        out nint translatedLParam)
+    {
+        pipHwnd = IntPtr.Zero;
+        rc = default;
+        clipT = 0;
+        translatedLParam = IntPtr.Zero;
+
+        if (!_settings.Enabled)
+            return false;
+
+        if (_settings.ClickThrough && !IsHoldDown())
+            return false;
+
+        pipHwnd = _pipTracker?.BoundHwnd ?? IntPtr.Zero;
+        if (pipHwnd == IntPtr.Zero || _pipTracker?.BoundKind != "document" || !_ghostStyle.TryGetLogicalWindowRect(pipHwnd, out rc))
+            return false;
+
+        if (x < rc.Left || x >= rc.Right || y < rc.Top || y >= rc.Bottom)
+            return false;
+
+        clipT = _ghostStyle.GetHeaderShift(pipHwnd);
+        int relX = x - rc.Left;
+        int relY = y - rc.Top;
+        translatedLParam = MakeLParam(relX, relY + clipT);
+        return true;
+    }
+
     private static nint OnLowLevelMouse(int nCode, nint wParam, nint lParam)
     {
         if (nCode >= 0 && lParam != IntPtr.Zero)
         {
             uint msg = (uint)wParam;
+            var info = *(MSLLHOOKSTRUCT*)lParam;
+            if (msg == WM_LBUTTONDOWN)
+                _hookLButtonDown = true;
+            else if (msg == WM_LBUTTONUP)
+                _hookLButtonDown = false;
+
             if (msg == WM_MOUSEWHEEL)
             {
-                var info = *(MSLLHOOKSTRUCT*)lParam;
                 int delta = (short)(info.mouseData >> 16);
                 bool holdDown = IsHoldDown();
                 if (delta != 0 && HandleMouseWheel(info.pt.X, info.pt.Y, delta, holdDown) && holdDown)
                     return (nint)1;
             }
+            else if (msg == WM_LBUTTONUP)
+            {
+                if (_swallowNextLButtonUp)
+                {
+                    _swallowNextLButtonUp = false;
+                    return (nint)1;
+                }
+                if (_pipMouseDown)
+                {
+                    bool wasHold = _pipDownHold;
+                    bool wasDrag = _pipDragActive;
+                    nint downHwnd = _pipDownHwnd;
+                    int downClipT = _pipDownClipT;
+                    _pipMouseDown = false;
+                    _pipDragActive = false;
+                    if (downHwnd != IntPtr.Zero && GhostStyle.IsWindow(downHwnd) && _ghostStyle.TryGetLogicalWindowRect(downHwnd, out var upRc))
+                    {
+                        int relX = info.pt.X - upRc.Left;
+                        int relY = info.pt.Y - upRc.Top;
+                        nint translated = MakeLParam(relX, relY + downClipT);
+                        if (wasHold && !wasDrag)
+                        {
+                            SetForegroundWindow(downHwnd);
+                            PostMessageW(downHwnd, WM_MOUSEMOVE, IntPtr.Zero, translated);
+                            PostMessageW(downHwnd, WM_LBUTTONDOWN, MK_LBUTTON, translated);
+                            PostMessageW(downHwnd, WM_LBUTTONUP, IntPtr.Zero, translated);
+                        }
+                        else if (!wasHold && downClipT > 0)
+                        {
+                            PostMessageW(downHwnd, WM_LBUTTONUP, IntPtr.Zero, translated);
+                        }
+                    }
+                    return (nint)1;
+                }
+            }
+            else if (msg == WM_MOUSEMOVE)
+            {
+                if (_pipMouseDown)
+                {
+                    if (_pipDownHold)
+                    {
+                        if (!_pipDragActive && (Math.Abs(info.pt.X - _pipDownPt.X) >= 5 || Math.Abs(info.pt.Y - _pipDownPt.Y) >= 5))
+                            _pipDragActive = true;
+                        if (_pipDragActive && _pipDownHwnd != IntPtr.Zero && GhostStyle.IsWindow(_pipDownHwnd))
+                        {
+                            int nextL = _pipDownWinL + (info.pt.X - _pipDownPt.X);
+                            int nextT = _pipDownWinT + (info.pt.Y - _pipDownPt.Y);
+                            _ghostStyle.MoveLogicalWindow(_pipDownHwnd, nextL, nextT);
+                        }
+                    }
+                    else if (_pipDownClipT > 0 && _pipDownHwnd != IntPtr.Zero && _ghostStyle.TryGetLogicalWindowRect(_pipDownHwnd, out var moveRc))
+                    {
+                        int relX = info.pt.X - moveRc.Left;
+                        int relY = info.pt.Y - moveRc.Top;
+                        PostMessageW(_hwnd, WM_APP_PIP_MOUSEMOVE, MK_LBUTTON, MakeLParam(relX, relY + _pipDownClipT));
+                    }
+                }
+                else if (TryGetInteractiveDocPipTarget(info.pt.X, info.pt.Y, out _, out _, out int clipT, out nint translated) && clipT > 0)
+                {
+                    PostMessageW(_hwnd, WM_APP_PIP_MOUSEMOVE, IntPtr.Zero, translated);
+                }
+            }
             else if (msg == WM_LBUTTONDOWN)
             {
-                var info = *(MSLLHOOKSTRUCT*)lParam;
                 if (HandlePipBarClick(info.pt.X, info.pt.Y))
                 {
                     _swallowNextLButtonUp = true;
                     return (nint)1;
                 }
+                if (TryGetInteractiveDocPipTarget(info.pt.X, info.pt.Y, out nint pipHwnd, out var rc, out int clipT, out nint translated))
+                {
+                    bool holdDown = IsHoldDown();
+                    if (holdDown || clipT > 0)
+                    {
+                        _pipMouseDown = true;
+                        _pipDragActive = false;
+                        _pipDownPt = info.pt;
+                        _pipDownWinL = rc.Left;
+                        _pipDownWinT = rc.Top;
+                        _pipDownHold = holdDown;
+                        _pipDownHwnd = pipHwnd;
+                        _pipDownClipT = clipT;
+                        if (!holdDown && clipT > 0)
+                        {
+                            SetForegroundWindow(pipHwnd);
+                            PostMessageW(pipHwnd, WM_MOUSEMOVE, IntPtr.Zero, translated);
+                            PostMessageW(pipHwnd, WM_LBUTTONDOWN, MK_LBUTTON, translated);
+                        }
+                        return (nint)1;
+                    }
+                }
             }
-            else if (msg == WM_LBUTTONUP && _swallowNextLButtonUp)
+            else if (msg == WM_RBUTTONDOWN)
             {
-                _swallowNextLButtonUp = false;
+                if (TryGetInteractiveDocPipTarget(info.pt.X, info.pt.Y, out nint pipHwnd, out _, out int clipT, out nint translated) && clipT > 0)
+                {
+                    SetForegroundWindow(pipHwnd);
+                    PostMessageW(pipHwnd, WM_MOUSEMOVE, IntPtr.Zero, translated);
+                    PostMessageW(pipHwnd, WM_RBUTTONDOWN, MK_RBUTTON, translated);
+                    _swallowNextRButtonUp = true;
+                    return (nint)1;
+                }
+            }
+            else if (msg == WM_RBUTTONUP && _swallowNextRButtonUp)
+            {
+                _swallowNextRButtonUp = false;
+                if (TryGetInteractiveDocPipTarget(info.pt.X, info.pt.Y, out nint pipHwnd, out _, out int clipT, out nint translated) && clipT > 0)
+                    PostMessageW(pipHwnd, WM_RBUTTONUP, IntPtr.Zero, translated);
                 return (nint)1;
             }
         }
@@ -608,7 +773,7 @@ public static unsafe class Program
         }
 
         bool holdDown = IsHoldDown();
-        bool lButton = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
+        bool lButton = _hookLButtonDown || (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
 
         var holdRes = _holdMachine.Step(holdDown, lButton);
         if (_wasInteractive && !holdRes.IsInteractive)
@@ -658,7 +823,7 @@ public static unsafe class Program
                 _nativeHost?.Send(new IntentMessage("SET_HOME", nearest));
             }
         }
-        else if (!holdRes.IsInteractive)
+        else if (!holdRes.IsInteractive && _settings.ClickThrough)
         {
             DodgePoint? cursor = GetVisibleCursor();
             int m = _settings.Dodge.MarginPx;

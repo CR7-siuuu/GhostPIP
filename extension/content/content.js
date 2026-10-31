@@ -159,11 +159,11 @@
     :host([data-pinned]) .bar:not(:hover) { opacity: 0.65; }`;
 
   const CONTROLLER_CSS = `
-    .surface { position: absolute; inset: 0; box-sizing: border-box; cursor: move; border-radius: 6px;
+    .surface { position: absolute; inset: 0; box-sizing: border-box; pointer-events: none; border-radius: 6px;
       border: 2px solid rgba(56, 189, 248, 0.92);
       background: linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%);
       box-shadow: 0 0 18px rgba(56, 189, 248, 0.22), inset 0 0 12px rgba(56, 189, 248, 0.12); }
-    .handle { position: absolute; z-index: 2; }
+    .handle { position: absolute; z-index: 2; pointer-events: auto; }
     .handle.n { top: -4px; left: 14px; right: 14px; height: 10px; cursor: ns-resize; }
     .handle.s { bottom: -4px; left: 14px; right: 14px; height: 10px; cursor: ns-resize; }
     .handle.w { left: -4px; top: 14px; bottom: 14px; width: 10px; cursor: ew-resize; }
@@ -184,6 +184,14 @@
     .handle.se::after { bottom: 4px; right: 4px; }
     .bar { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 3;
       pointer-events: auto; }
+    .skip-ad { position: absolute; bottom: 12px; right: 12px; z-index: 4; pointer-events: auto;
+      display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 999px;
+      background: rgba(15, 23, 42, 0.92); border: 1.5px solid rgba(56, 189, 248, 0.78);
+      color: #f8fafc; font: 700 11.5px/1 "Pretendard", system-ui, "Malgun Gothic", sans-serif;
+      box-shadow: 0 6px 18px rgba(2, 6, 23, 0.65); cursor: pointer; backdrop-filter: blur(8px); }
+    .skip-ad:hover { background: linear-gradient(135deg, rgba(56, 189, 248, 0.35) 0%, rgba(99, 102, 241, 0.4) 100%);
+      border-color: #7dd3fc; color: #fff; }
+    .skip-ad[hidden] { display: none !important; }
     .hud { position: absolute; bottom: 10px; left: 10px; z-index: 3; pointer-events: none;
       padding: 5px 10px; border-radius: 999px;
       background: rgba(15, 23, 42, 0.88); border: 1px solid rgba(125, 211, 252, 0.35); color: #e0f2fe;
@@ -244,6 +252,11 @@
     svgIcon(ICON_CHAT),
     webChatLabel,
   );
+  const skipAdBtn = h(
+    "button",
+    { class: "skip-ad", "data-action": "skipAd", hidden: "" },
+    "광고 건너뛰기 ⏭",
+  );
   const WEB_CHAT_CSS = `
     :host { box-sizing: border-box; background: #0f172a; box-shadow: 0 8px 24px rgba(2, 6, 23, 0.55); }
     iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }`;
@@ -256,6 +269,7 @@
     h("div", { class: "surface" }),
     ...RESIZE_DIRS.map((dir) => h("div", { class: `handle ${dir}`, "data-resize": dir })),
     hudEl,
+    skipAdBtn,
     h("div", { class: "bar" },
       h("button", { "data-action": "idle" }, "복귀"),
       h("button", { "data-action": "docPip", "data-mode": "local" },
@@ -267,16 +281,19 @@
 
   let dragSink = null;
   let toggleWebChatSink = null;
+  let skipAdSink = null;
   controller.root.addEventListener("pointerdown", (e) => {
-    if (!dragSink || e.button !== 0 || e.target.closest?.(".bar")) return;
+    if (!dragSink || e.button !== 0 || e.target.closest?.(".bar") || e.target.closest?.(".skip-ad")) return;
     const target = e.target;
     const resizeDir = target.dataset?.resize || null;
+    if (!resizeDir) return;
     try {
       target.setPointerCapture?.(e.pointerId);
     } catch {}
     dragSink.start(e, resizeDir);
   });
   window.addEventListener("pointermove", (e) => {
+    dragSink?.pointerMove?.(e);
     if (!dragSink?.active()) return;
     if (e.isTrusted && (e.buttons & 1) === 0) {
       dragSink.end();
@@ -285,11 +302,96 @@
     dragSink.move(e);
   }, true);
   window.addEventListener("pointerup", () => {
+    dragSink?.pointerUp?.();
     if (dragSink?.active()) dragSink.end();
   }, true);
   window.addEventListener("pointercancel", () => {
+    dragSink?.pointerUp?.();
     if (dragSink?.active()) dragSink.end();
   }, true);
+
+  const AD_SKIP_SELECTORS = [
+    ".ytp-skip-ad-button",
+    ".ytp-ad-skip-button",
+    ".ytp-ad-skip-button-modern",
+    ".ytp-ad-skip-button-container button",
+    ".ytp-ad-skip-button-slot button",
+    ".ytp-ad-overlay-close-button",
+    ".pzp-ad-skip-button",
+    "[class*='pzp-ad'] button[class*='skip' i]",
+    "[class*='ad_skip' i]",
+    "#skip_btn",
+    "#da_btn_skip",
+    ".da_skip",
+    ".btn_skip",
+    "button[data-role='skip']",
+    "[aria-label*='광고 건너뛰기']",
+    "[aria-label*='Skip Ad' i]",
+    "[aria-label*='Skip Ads' i]",
+  ].join(",");
+
+  function isVisibleElement(el) {
+    if (!el || !el.isConnected || el.disabled) return false;
+    const cs = getComputedStyle(el);
+    if (cs.display === "none" || cs.visibility === "hidden" || Number(cs.opacity) <= 0.05) return false;
+    const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0;
+  }
+
+  function findSkipAdElement(video) {
+    for (const el of document.querySelectorAll(AD_SKIP_SELECTORS)) {
+      if (isVisibleElement(el)) return el;
+    }
+    const container =
+      video?.closest?.(
+        "#movie_player, .html5-video-player, .pzp, [class*='live_player'], #livePlayer, .video_box, [class*='video-player']",
+      ) || video?.parentElement?.parentElement;
+    if (container) {
+      for (const btn of container.querySelectorAll("button, [role='button']")) {
+        if (!isVisibleElement(btn)) continue;
+        const text = `${btn.textContent || ""} ${btn.getAttribute("aria-label") || ""}`.trim();
+        if (/광고\s*건너뛰기|건너뛰기|광고\s*스킵|skip\s*ads?|^skip$/i.test(text)) return btn;
+      }
+    }
+    return null;
+  }
+
+  function canSkipAd(video) {
+    if (findSkipAdElement(video)) return true;
+    return Boolean(
+      document.querySelector(
+        "#movie_player.ad-showing, #movie_player.ad-interrupting, .html5-video-player.ad-showing, .ytp-ad-player-overlay, .ytp-ad-player-overlay-layout",
+      ),
+    );
+  }
+
+  function triggerSkipAd(video) {
+    const btn = findSkipAdElement(video);
+    if (btn) {
+      for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup"]) {
+        btn.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
+      }
+      btn.click?.();
+    }
+    for (const closeBtn of document.querySelectorAll(".ytp-ad-overlay-close-button")) {
+      if (isVisibleElement(closeBtn)) closeBtn.click?.();
+    }
+    const v = video || ctx.video || findVideo();
+    if (
+      v &&
+      (btn ||
+        document.querySelector(
+          "#movie_player.ad-showing, #movie_player.ad-interrupting, .html5-video-player.ad-showing",
+        )) &&
+      Number.isFinite(v.duration) &&
+      v.duration > 0 &&
+      v.duration < 600
+    ) {
+      try {
+        v.currentTime = v.duration;
+      } catch {}
+    }
+  }
 
   function findVideo() {
     const area = (v) => {
@@ -427,8 +529,10 @@
     let wheelPreview = false;
     let waitCursorLeave = false;
     let drag = null;
+    let pendingMove = null;
     let cursor = null;
     let remoteChatUrl = chatUrl;
+    let remoteHasAd = false;
     let webChatOpen = Boolean(ctx.layout.chatOpen);
 
     const resolveChatUrl = () =>
@@ -439,6 +543,17 @@
       webChatOpen = !webChatOpen;
       persistLayout({ width: floatWidth, height: floatHeight, pos: customPos, chatOpen: webChatOpen });
       render();
+    };
+
+    skipAdSink = () => {
+      if (isRemote) {
+        send({ type: "SKIP_AD" });
+        remoteHasAd = false;
+        render();
+      } else {
+        triggerSkipAd(video);
+        render();
+      }
     };
 
     controller.host.toggleAttribute("data-remote", Boolean(isRemote));
@@ -501,9 +616,11 @@
       const hovered =
         drag !== null ||
         (cursor !== null && cursor.x >= b.l && cursor.x <= b.r && cursor.y >= b.t && cursor.y <= b.b);
-      const showBarOnly = !interactive && !ctx.settings.clickThrough && hovered;
+      const hasSkipAd = isRemote ? Boolean(remoteHasAd) : canSkipAd(video);
+      skipAdBtn.hidden = !hasSkipAd;
+      const showBarOnly = !interactive && !ctx.settings.clickThrough && (hovered || hasSkipAd);
       const videoGeo = { x: px(r.l), y: px(b.videoT), w: px(w), h: px(h) };
-      const ctrlGeo = { x: px(r.l), y: px(b.t), w: px(w), h: px(b.b - b.t) };
+      const ctrlGeo = videoGeo;
       const opacity = interactive && !wheelPreview ? 1 : faded ? FADED_OPACITY : ctx.settings.opacity;
       const shouldAnim = Boolean(anim && !document.hidden && drag === null);
       video.toggleAttribute("data-gp-anim", shouldAnim);
@@ -560,10 +677,20 @@
     }
 
     function tick() {
+      if (!isRemote) {
+        const nowHasAd = canSkipAd(video);
+        if (nowHasAd !== !skipAdBtn.hidden) render();
+      }
       if (isInteractive()) return;
       const vp = viewport();
       const s = size();
       const r = rect();
+      if (!ctx.settings.clickThrough && cursor !== null) {
+        const b = boundsWithChat(r);
+        if (webChatOpen && b.chatH > 0 && cursor.x >= r.l && cursor.x <= r.r && cursor.y >= b.chatT && cursor.y <= b.chatT + b.chatH) {
+          return;
+        }
+      }
       const m = cfg().marginPx;
       const cursorInCurrent =
         cursor !== null &&
@@ -621,6 +748,20 @@
     }
     const holdFrom = (e) => e.isTrusted && setHeld(HOLD[ctx.settings.hotkeys.hold](e));
 
+    window.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0 || drag !== null) return;
+      if (e.target === controller.host || controller.host.contains(e.target)) return;
+      if (webChat.open && (e.target === webChat.host || webChat.host.contains(e.target))) return;
+      const modHeld = held || HOLD[ctx.settings.hotkeys.hold](e);
+      if (!modHeld && ctx.settings.clickThrough) return;
+      const r = rect();
+      const b = boundsWithChat(r);
+      const h = Math.round(r.b - r.t);
+      if (e.clientX >= r.l && e.clientX <= r.r && e.clientY >= b.videoT && e.clientY <= b.videoT + h) {
+        pendingMove = { startX: e.clientX, startY: e.clientY };
+      }
+    }, { capture: true, ...on });
+
     window.addEventListener("pointermove", (e) => {
       if (!e.isTrusted) return;
       const prevInteractive = isInteractive();
@@ -666,7 +807,23 @@
       active() {
         return drag !== null;
       },
+      pointerMove(e) {
+        if (!pendingMove || drag !== null) return;
+        if (e.isTrusted && (e.buttons & 1) === 0) {
+          pendingMove = null;
+          return;
+        }
+        if (Math.hypot(e.clientX - pendingMove.startX, e.clientY - pendingMove.startY) >= 4) {
+          const start = pendingMove;
+          pendingMove = null;
+          this.start({ clientX: start.startX, clientY: start.startY }, null);
+        }
+      },
+      pointerUp() {
+        pendingMove = null;
+      },
       start(e, resizeDir) {
+        pendingMove = null;
         wheelPreview = false;
         const r = rect();
         if (resizeDir) {
@@ -770,6 +927,8 @@
       clearInterval(timer);
       dragSink = null;
       toggleWebChatSink = null;
+      skipAdSink = null;
+      pendingMove = null;
       webChat.hide();
       webChatFrame.removeAttribute("src");
       controller.hide();
@@ -784,6 +943,14 @@
       }
     }
 
+    function setHasAd(nextHasAd) {
+      const b = Boolean(nextHasAd);
+      if (b !== remoteHasAd) {
+        remoteHasAd = b;
+        render();
+      }
+    }
+
     video.setAttribute("popover", "manual");
     video.classList.add(FLOAT_CLASS);
     render();
@@ -793,7 +960,7 @@
       queueMicrotask(leave);
     }
 
-    return { exit, settingsChanged, layoutChanged, setChatUrl };
+    return { exit, settingsChanged, layoutChanged, setChatUrl, setHasAd };
   }
 
   function boostVideoSdp(sdp) {
@@ -943,7 +1110,7 @@
       try {
         capCtx.drawImage(video, 0, 0, cw, ch);
         const dataUrl = capCanvas.toDataURL("image/jpeg", 0.88);
-        return { type: "FRAME", dataUrl, vw, vh };
+        return { type: "FRAME", dataUrl, vw, vh, hasAd: canSkipAd(video) };
       } catch {
         return null;
       }
@@ -977,6 +1144,8 @@
             rtcPeers.get(portId)?.pc.addIceCandidate(msg.candidate).catch(() => {});
           } else if (msg?.type === "RTC_CLOSE") {
             stopRtcPeer(portId);
+          } else if (msg?.type === "SKIP_AD") {
+            triggerSkipAd(video);
           }
         });
         port.onDisconnect.addListener(() => {
@@ -1189,6 +1358,7 @@
     }
 
     async function handleFrame(msg) {
+      if (msg && typeof msg.hasAd === "boolean") floating.setHasAd?.(msg.hasAd);
       const rtcFresh = !document.hidden && rtcActive && performance.now() - lastRtcDrawAt < 140;
       if (!alive || !msg?.dataUrl || rtcFresh) {
         pulling = false;
@@ -1316,6 +1486,15 @@
       transform: translateX(-50%) translateY(-4px); transition: opacity 0.16s ease, transform 0.16s ease; }
     body:not([data-click-through]):hover .pip-bar,
     body[data-hovered] .pip-bar { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+    .pip-skip-ad { position: fixed; right: 12px; bottom: 12px; z-index: 12; opacity: 0; pointer-events: none;
+      display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 999px;
+      background: rgba(15, 23, 42, 0.92); border: 1.5px solid rgba(56, 189, 248, 0.78);
+      color: #f8fafc; font: 700 11.5px/1 "Pretendard", system-ui, "Malgun Gothic", sans-serif;
+      box-shadow: 0 6px 18px rgba(2, 6, 23, 0.65); cursor: pointer; transition: opacity 0.16s ease; }
+    .pip-skip-ad[hidden] { display: none !important; }
+    body[data-chat-open] .pip-skip-ad { bottom: ${PIP_CHAT_HEIGHT + 12}px; }
+    body:not([data-click-through]) .pip-skip-ad,
+    body[data-hovered] .pip-skip-ad { opacity: 1; pointer-events: auto; }
     .pip-hud { position: fixed; top: 8px; left: 8px; z-index: 10; padding: 4px 8px; border-radius: 5px; pointer-events: none;
       background: rgba(18, 18, 22, 0.85); color: #fff; font: 600 12px/1 system-ui, "Malgun Gothic", sans-serif;
       opacity: 0; transition: opacity 0.15s ease-out; }
@@ -1341,7 +1520,7 @@
     } catch {}
   }
 
-  function buildPipDocument(win, stream, chatUrl, showChat, { onToggleChat, onResizeChat, isClickThrough, isHoldEvent } = {}) {
+  function buildPipDocument(win, stream, chatUrl, showChat, { onToggleChat, onResizeChat, onSkipAd, isClickThrough, isHoldEvent } = {}) {
     const doc = win.document;
     const style = doc.createElement("style");
     style.textContent = PIP_CSS;
@@ -1353,8 +1532,18 @@
     mirror.srcObject = stream;
     const pipHud = doc.createElement("div");
     pipHud.className = "pip-hud";
+    const pipSkipAd = doc.createElement("button");
+    pipSkipAd.type = "button";
+    pipSkipAd.className = "pip-skip-ad";
+    pipSkipAd.dataset.action = "skipAd";
+    pipSkipAd.hidden = true;
+    pipSkipAd.textContent = "광고 건너뛰기 ⏭";
+    pipSkipAd.addEventListener("click", (e) => {
+      e.stopPropagation();
+      onSkipAd?.();
+    });
     doc.body.toggleAttribute("data-click-through", Boolean(isClickThrough?.()));
-    doc.body.append(mirror, pipHud);
+    doc.body.append(mirror, pipHud, pipSkipAd);
 
     let pipBar = null;
     let chatBtn = null;
@@ -1392,6 +1581,7 @@
       const nextShown = Boolean(enabled);
       const changed = nextShown !== chatShown;
       chatShown = nextShown;
+      doc.body.toggleAttribute("data-chat-open", nextShown);
       if (chatLabel) chatLabel.textContent = nextShown ? "채팅창 숨기기" : "채팅창 보기";
       if (chatBtn) chatBtn.toggleAttribute("data-active", nextShown);
       if (nextShown) {
@@ -1427,9 +1617,13 @@
       if (enabled) doc.body.removeAttribute("data-hovered");
     }
 
+    function setSkipAdVisible(visible) {
+      pipSkipAd.hidden = !Boolean(visible);
+    }
+
     syncChat(showChat, false);
     mirror.play().catch(() => {});
-    return { mirror, pipHud, syncChat, setFeatureEnabled, toggleChatOpen, setHovered, setClickThrough };
+    return { mirror, pipHud, syncChat, setFeatureEnabled, toggleChatOpen, setHovered, setClickThrough, setSkipAdVisible };
   }
 
   function enterDocPip({ stream: firstStream, chatUrl, win: winPromise }, leave) {
@@ -1445,8 +1639,10 @@
     let toggleChatOpen = null;
     let setHovered = null;
     let setClickThrough = null;
+    let setSkipAdVisible = null;
     let hudTimer = null;
     let rectSyncTimer = null;
+    let adPollTimer = null;
     let engineConnected = true;
 
     function syncPipOpacity(showToast = false) {
@@ -1485,6 +1681,10 @@
       const built = buildPipDocument(w, stream, chatUrl, Boolean(ctx.settings.showChat), {
         onToggleChat: handleToggleChat,
         onResizeChat: handleResizeChat,
+        onSkipAd: () => {
+          triggerSkipAd(video);
+          setSkipAdVisible?.(canSkipAd(video));
+        },
         isClickThrough: () => Boolean(ctx.settings.clickThrough),
         isHoldEvent: (e) => Boolean(HOLD[ctx.settings.hotkeys.hold]?.(e)),
       });
@@ -1494,6 +1694,11 @@
       toggleChatOpen = built.toggleChatOpen;
       setHovered = built.setHovered;
       setClickThrough = built.setClickThrough;
+      setSkipAdVisible = built.setSkipAdVisible;
+      setSkipAdVisible(canSkipAd(video));
+      adPollTimer = setInterval(() => {
+        if (!ac.signal.aborted && !w.closed) setSkipAdVisible?.(canSkipAd(video));
+      }, 400);
       w.addEventListener("pagehide", leave, { signal: ac.signal });
       w.addEventListener("keydown", (e) => {
         if (HOLD[ctx.settings.hotkeys.hold]?.(e)) setHovered?.(true);
@@ -1564,6 +1769,7 @@
         ac.abort();
         clearTimeout(hudTimer);
         clearInterval(rectSyncTimer);
+        clearInterval(adPollTimer);
         video.classList.remove(DOCPIP_SOURCE_CLASS);
         if (!originalHasClass && !video.getAttribute("class")) video.removeAttribute("class");
         for (const t of stream.getTracks()) t.stop();
@@ -1638,6 +1844,9 @@
     },
     toggleWebChat: () => {
       toggleWebChatSink?.();
+    },
+    skipAd: () => {
+      skipAdSink?.();
     },
   };
 
@@ -1731,6 +1940,10 @@
     },
     async INTAB_FORCE_IDLE() {
       if (current.name === "inTab" || current.name === "remoteInTab") go("idle");
+      return { ok: true };
+    },
+    async INTAB_SKIP_AD() {
+      triggerSkipAd(ctx.video);
       return { ok: true };
     },
     async REMOTE_INTAB_START(msg) {
