@@ -345,8 +345,9 @@ try {
           enabled: document.getElementById("enabled").checked,
           badge: document.getElementById("modeBadge").textContent,
           bodyDisabled: document.body.hasAttribute("data-disabled"),
+          bannerHidden: document.getElementById("engineBanner").hidden,
         })),
-      (d) => d.enabled === false && d.badge === "Disabled" && d.bodyDisabled === true,
+      (d) => d.enabled === false && d.badge === "Disabled" && d.bodyDisabled === true && d.bannerHidden === true,
       2000,
     );
     await videoPage.bringToFront();
@@ -381,6 +382,7 @@ try {
       hkUpdated.kbd === "F8" &&
       disabledPopup.enabled === false &&
       disabledPopup.badge === "Disabled" &&
+      disabledPopup.bannerHidden === true &&
       disabledVideo.inTabOpen === false &&
       launcherStillClosed === true &&
       reenabledPopup === true;

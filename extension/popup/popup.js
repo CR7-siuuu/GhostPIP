@@ -2,6 +2,7 @@
   const Settings = globalThis.GhostPiPSettings;
   const DEFAULT_ENGINE = {
     connected: false,
+    installed: false,
     engineVersion: null,
     elevated: false,
     hotkeyErrors: [],
@@ -54,7 +55,7 @@
     els.modeBadge.textContent = !isEnabled ? "Disabled" : engine.connected ? "Engine Active" : "In-Tab Mode";
     els.modeBadge.toggleAttribute("data-active", isEnabled && Boolean(engine.connected));
     els.modeBadge.toggleAttribute("data-disabled", !isEnabled);
-    els.engineBanner.hidden = Boolean(engine.connected);
+    els.engineBanner.hidden = Boolean(engine.connected || engine.installed);
 
     const warnings = [];
     if (engine.protocolMismatch) {
@@ -206,7 +207,12 @@
       state.settings = Settings.merge(changes.settings.newValue);
       render();
     } else if (area === "session" && changes.engine) {
-      state.engine = { ...DEFAULT_ENGINE, ...(changes.engine.newValue ?? {}) };
+      const nextEngine = changes.engine.newValue ?? {};
+      state.engine = {
+        ...DEFAULT_ENGINE,
+        ...nextEngine,
+        installed: Boolean(nextEngine.connected || nextEngine.installed),
+      };
       render();
     }
   });
@@ -214,7 +220,12 @@
   send({ type: "GET_STATE" }).then((res) => {
     if (!res) return;
     state.settings = Settings.merge(res.settings);
-    state.engine = { ...DEFAULT_ENGINE, ...(res.engine ?? {}) };
+    const nextEngine = res.engine ?? {};
+    state.engine = {
+      ...DEFAULT_ENGINE,
+      ...nextEngine,
+      installed: Boolean(nextEngine.connected || nextEngine.installed),
+    };
     render();
   });
 })();

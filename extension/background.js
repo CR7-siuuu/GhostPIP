@@ -4,6 +4,7 @@ const HOST_NAME = "app.ghostpip.engine";
 const GENERIC_SITE = { siteId: "generic", site: { video: null, chatPopoutUrl: null } };
 const DEFAULT_ENGINE = {
   connected: false,
+  installed: false,
   engineVersion: null,
   elevated: false,
   hotkeyErrors: [],
@@ -15,6 +16,7 @@ let pipQueue = Promise.resolve();
 let sitesPromise = null;
 let nativePort = null;
 let engineAllowed = true;
+let engineInstalled = false;
 let inTabSession = null;
 let inTabSeq = 0;
 let lastInTabFrame = null;
@@ -248,8 +250,12 @@ function onEngineMessage(msg) {
   if (!msg || typeof msg !== "object") return;
   switch (msg.type) {
     case "HELLO": {
+      if (nativePort) nativePort.__gotHello = true;
+      engineInstalled = true;
+      chrome.storage.local.set({ engineInstalled: true }).catch(() => {});
       const engine = {
         connected: true,
+        installed: true,
         engineVersion: typeof msg.engineVersion === "string" ? msg.engineVersion : "0.1.0",
         elevated: Boolean(msg.elevated),
         hotkeyErrors: Array.isArray(msg.hotkeyErrors) ? msg.hotkeyErrors.map(String) : [],
@@ -357,18 +363,23 @@ function disconnectEngine() {
   const port = nativePort;
   nativePort = null;
   if (port) {
+    port.__intentionalDisconnect = true;
     try {
       port.disconnect();
     } catch {}
   }
-  chrome.storage.session.set({ engine: { ...DEFAULT_ENGINE } });
+  chrome.storage.session.set({ engine: { ...DEFAULT_ENGINE, installed: engineInstalled } });
 }
 
 function onEngineDisconnect(port) {
   void chrome.runtime.lastError;
   stopPing();
   if (nativePort === port) nativePort = null;
-  chrome.storage.session.set({ engine: { ...DEFAULT_ENGINE } });
+  if (!port?.__gotHello && !port?.__intentionalDisconnect && engineAllowed) {
+    engineInstalled = false;
+    chrome.storage.local.set({ engineInstalled: false }).catch(() => {});
+  }
+  chrome.storage.session.set({ engine: { ...DEFAULT_ENGINE, installed: engineInstalled } });
   chrome.storage.session
     .get("pip")
     .then(({ pip = {} }) => {
@@ -407,8 +418,11 @@ function connectEngine() {
   port.onDisconnect.addListener(() => onEngineDisconnect(port));
   startPing();
 
-  Promise.all([chrome.storage.local.get("settings"), chrome.storage.session.get("pip")])
-    .then(([{ settings }, { pip = {} }]) => {
+  Promise.all([chrome.storage.local.get(["settings", "engineInstalled"]), chrome.storage.session.get("pip")])
+    .then(([{ settings, engineInstalled: storedInstalled }, { pip = {} }]) => {
+      if (typeof storedInstalled === "boolean" && !engineInstalled) {
+        engineInstalled = storedInstalled;
+      }
       const merged = GhostPiPSettings.merge(settings);
       engineAllowed = Boolean(merged.enabled);
       if (nativePort !== port) return;
@@ -673,16 +687,21 @@ const handlers = {
     return { ok: true, handledByEngine };
   },
   async GET_STATE() {
-    const [{ settings }, { pip = {}, engine }] = await Promise.all([
-      chrome.storage.local.get("settings"),
+    const [{ settings, engineInstalled: storedInstalled }, { pip = {}, engine }] = await Promise.all([
+      chrome.storage.local.get(["settings", "engineInstalled"]),
       chrome.storage.session.get(["pip", "engine"]),
     ]);
+    if (typeof storedInstalled === "boolean") engineInstalled = storedInstalled;
     const merged = GhostPiPSettings.merge(settings);
     if (merged.enabled && !nativePort) connectEngine();
+    const baseEngine =
+      engine && typeof engine === "object"
+        ? { ...DEFAULT_ENGINE, ...engine, installed: Boolean(engine.connected || engine.installed) }
+        : { ...DEFAULT_ENGINE, installed: !merged.enabled && Boolean(engineInstalled) };
     return {
       settings: merged,
       pip,
-      engine: { ...DEFAULT_ENGINE, ...(engine && typeof engine === "object" ? engine : {}) },
+      engine: baseEngine,
     };
   },
   async PATCH_SETTINGS({ patch, keepLayoutPos }) {
