@@ -229,6 +229,9 @@ public static unsafe class Program
     private static bool _hookLButtonDown;
     private static bool _pipMouseDown;
     private static bool _pipDragActive;
+    private static string? _pipResizeDir;
+    private static bool _justResized;
+    private static PipTracker.RECT _pipDownRect;
     private static POINT _pipDownPt;
     private static int _pipDownWinL;
     private static int _pipDownWinT;
@@ -441,6 +444,42 @@ public static unsafe class Program
     private static nint MakeLParam(int lo, int hi) =>
         (nint)(((hi & 0xFFFF) << 16) | (lo & 0xFFFF));
 
+    private static string? GetResizeBorderDir(int x, int y, PipTracker.RECT rc, int clipT)
+    {
+        int visL = rc.Left + 8;
+        int visT = rc.Top;
+        int visR = Math.Max(visL + 40, rc.Right - 8);
+        int visB = clipT > 0 ? Math.Max(visT + 40, rc.Bottom - 8 - clipT) : Math.Max(visT + 40, rc.Bottom - 8);
+
+        if (x < rc.Left - 6 || x > rc.Right + 6 || y < visT - 6 || y > rc.Bottom + 6)
+            return null;
+
+        bool cornerW = x >= rc.Left - 6 && x <= visL + 18;
+        bool cornerE = x >= visR - 18 && x <= rc.Right + 6;
+        bool cornerN = y >= visT - 6 && y <= visT + 18;
+        bool cornerS = (y >= visB - 18 && y <= visB + 12) || (y >= rc.Bottom - 18 && y <= rc.Bottom + 6);
+
+        if (cornerN && cornerW) return "nw";
+        if (cornerN && cornerE) return "ne";
+        if (cornerS && cornerW) return "sw";
+        if (cornerS && cornerE) return "se";
+
+        if (y > visB + 12 && y < rc.Bottom - 12)
+            return null;
+
+        bool nearW = x >= rc.Left - 6 && x <= visL + 12;
+        bool nearE = x >= visR - 12 && x <= rc.Right + 6;
+        bool nearN = y >= visT - 6 && y <= visT + 10;
+        bool nearS = (y >= visB - 12 && y <= visB + 12) || (y >= rc.Bottom - 12 && y <= rc.Bottom + 6);
+
+        if (nearW) return "w";
+        if (nearE) return "e";
+        if (nearS) return "s";
+        int centerX = (rc.Left + rc.Right) / 2;
+        if (nearN && Math.Abs(x - centerX) > 95) return "n";
+        return null;
+    }
+
     private static bool TryGetInteractiveDocPipTarget(
         int x,
         int y,
@@ -464,10 +503,14 @@ public static unsafe class Program
         if (pipHwnd == IntPtr.Zero || _pipTracker?.BoundKind != "document" || !_ghostStyle.TryGetLogicalWindowRect(pipHwnd, out rc))
             return false;
 
-        if (x < rc.Left || x >= rc.Right || y < rc.Top || y >= rc.Bottom)
+        if (x < rc.Left - 6 || x > rc.Right + 6 || y < rc.Top - 6 || y > rc.Bottom + 6)
             return false;
 
         clipT = _ghostStyle.GetHeaderShift(pipHwnd);
+        int visB = clipT > 0 ? Math.Max(rc.Top + 40, rc.Bottom - 8 - clipT) : rc.Bottom;
+        if (clipT > 0 && y > visB + 12 && GetResizeBorderDir(x, y, rc, clipT) is null)
+            return false;
+
         int relX = x - rc.Left;
         int relY = y - rc.Top;
         translatedLParam = MakeLParam(relX, relY + clipT);
@@ -501,6 +544,16 @@ public static unsafe class Program
                 }
                 if (_pipMouseDown)
                 {
+                    if (_pipResizeDir is not null)
+                    {
+                        _pipResizeDir = null;
+                        _pipMouseDown = false;
+                        _pipDragActive = false;
+                        _customPos = true;
+                        _justResized = true;
+                        _waitCursorLeave = true;
+                        return (nint)1;
+                    }
                     bool wasHold = _pipDownHold;
                     bool wasDrag = _pipDragActive;
                     nint downHwnd = _pipDownHwnd;
@@ -531,7 +584,30 @@ public static unsafe class Program
             {
                 if (_pipMouseDown)
                 {
-                    if (_pipDownHold)
+                    if (_pipResizeDir is string resizeDir)
+                    {
+                        if (!_pipDragActive && (Math.Abs(info.pt.X - _pipDownPt.X) >= 2 || Math.Abs(info.pt.Y - _pipDownPt.Y) >= 2))
+                            _pipDragActive = true;
+                        if (_pipDragActive && _pipDownHwnd != IntPtr.Zero && GhostStyle.IsWindow(_pipDownHwnd))
+                        {
+                            int dx = info.pt.X - _pipDownPt.X;
+                            int dy = info.pt.Y - _pipDownPt.Y;
+                            int startW = _pipDownRect.Right - _pipDownRect.Left;
+                            int startH = _pipDownRect.Bottom - _pipDownRect.Top;
+                            int minW = 200;
+                            int minH = 130 + _pipDownClipT;
+                            int nextW = resizeDir.Contains('e') ? Math.Max(minW, startW + dx) : resizeDir.Contains('w') ? Math.Max(minW, startW - dx) : startW;
+                            int nextH = resizeDir.Contains('s') ? Math.Max(minH, startH + dy) : resizeDir.Contains('n') ? Math.Max(minH, startH - dy) : startH;
+                            int nextL = resizeDir.Contains('w') ? _pipDownRect.Right - nextW : _pipDownRect.Left;
+                            int nextT = resizeDir.Contains('n') ? _pipDownRect.Bottom - nextH : _pipDownRect.Top;
+                            _customPos = true;
+                            _justResized = true;
+                            _waitCursorLeave = true;
+                            GhostStyle.SetWindowPos(_pipDownHwnd, IntPtr.Zero, nextL, nextT, nextW, nextH, SWP_NOZORDER | SWP_NOACTIVATE);
+                            _ghostStyle.Apply(_pipDownHwnd, 1.0, clickThrough: false, hideHeader: true);
+                        }
+                    }
+                    else if (_pipDownHold)
                     {
                         if (!_pipDragActive && (Math.Abs(info.pt.X - _pipDownPt.X) >= 5 || Math.Abs(info.pt.Y - _pipDownPt.Y) >= 5))
                             _pipDragActive = true;
@@ -556,19 +632,31 @@ public static unsafe class Program
             }
             else if (msg == WM_LBUTTONDOWN)
             {
-                if (HandlePipBarClick(info.pt.X, info.pt.Y))
-                {
-                    _swallowNextLButtonUp = true;
-                    return (nint)1;
-                }
                 if (TryGetInteractiveDocPipTarget(info.pt.X, info.pt.Y, out nint pipHwnd, out var rc, out int clipT, out nint translated))
                 {
                     bool holdDown = IsHoldDown();
+                    string? resizeDir = GetResizeBorderDir(info.pt.X, info.pt.Y, rc, clipT);
+                    if (resizeDir is not null)
+                    {
+                        _pipMouseDown = true;
+                        _pipDragActive = false;
+                        _pipResizeDir = resizeDir;
+                        _pipDownPt = info.pt;
+                        _pipDownRect = rc;
+                        _pipDownWinL = rc.Left;
+                        _pipDownWinT = rc.Top;
+                        _pipDownHold = holdDown;
+                        _pipDownHwnd = pipHwnd;
+                        _pipDownClipT = clipT;
+                        return (nint)1;
+                    }
                     if (holdDown || clipT > 0)
                     {
                         _pipMouseDown = true;
                         _pipDragActive = false;
+                        _pipResizeDir = null;
                         _pipDownPt = info.pt;
+                        _pipDownRect = rc;
                         _pipDownWinL = rc.Left;
                         _pipDownWinT = rc.Top;
                         _pipDownHold = holdDown;
@@ -604,27 +692,6 @@ public static unsafe class Program
             }
         }
         return CallNextHookEx(_mouseHook, nCode, wParam, lParam);
-    }
-
-    private static bool HandlePipBarClick(int x, int y)
-    {
-        if (!_settings.Enabled || !_settings.ShowChat)
-            return false;
-
-        if (_settings.ClickThrough && !IsHoldDown())
-            return false;
-
-        nint pipHwnd = _pipTracker?.BoundHwnd ?? IntPtr.Zero;
-        if (pipHwnd == IntPtr.Zero || _pipTracker?.BoundKind != "document" || !_ghostStyle.TryGetLogicalWindowRect(pipHwnd, out var rc))
-            return false;
-
-        int centerX = (rc.Left + rc.Right) / 2;
-        if (Math.Abs(x - centerX) <= 75 && y >= rc.Top + 4 && y <= rc.Top + 42)
-        {
-            _nativeHost?.Send(new IntentMessage("TOGGLE_PIP_CHAT"));
-            return true;
-        }
-        return false;
     }
 
     private static bool HandleMouseWheel(int x, int y, int delta, bool holdDown)
@@ -802,7 +869,7 @@ public static unsafe class Program
                 (double)(winRect.L - targetRect.L) * (winRect.L - targetRect.L) +
                 (double)(winRect.T - targetRect.T) * (winRect.T - targetRect.T));
 
-            if (dist <= CORNER_SNAP_PX)
+            if (!_justResized && dist <= CORNER_SNAP_PX)
             {
                 _customPos = false;
                 _ghostStyle.MoveLogicalWindow(pipHwnd, targetRect.L, targetRect.T);
@@ -811,6 +878,7 @@ public static unsafe class Program
             {
                 _customPos = true;
             }
+            _justResized = false;
 
             _dodgeState = DodgeSolver.InitialState(nearest);
 

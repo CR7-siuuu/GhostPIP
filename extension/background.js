@@ -648,10 +648,14 @@ const handlers = {
     }
     return { ok: true };
   },
-  async FOCUS_SOURCE_TAB() {
+  async FOCUS_SOURCE_TAB(_msg, sender) {
     const session = await getInTab();
-    if (session?.sourceTabId) {
-      await chrome.tabs.update(session.sourceTabId, { active: true }).catch(() => {});
+    const targetTabId = session?.sourceTabId ?? sender?.tab?.id;
+    if (Number.isFinite(targetTabId)) {
+      const tab = await chrome.tabs.update(targetTabId, { active: true }).catch(() => null);
+      if (tab?.windowId != null) {
+        await chrome.windows?.update?.(tab.windowId, { focused: true }).catch(() => {});
+      }
     }
     return { ok: true };
   },

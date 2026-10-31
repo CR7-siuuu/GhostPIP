@@ -220,6 +220,7 @@ try {
     }, DEFAULTS);
 
     const vCenter = await videoPage.evaluate(() => {
+      document.documentElement.setAttribute("data-gp-force-chat", "");
       const v = document.querySelector("video.html5-main-video") || document.querySelector("video");
       v.loop = true;
       window.__gpVideo = v;
@@ -333,8 +334,9 @@ try {
       () =>
         videoPage.evaluate(() => {
           const d = documentPictureInPicture.window.document;
-          const bar = d.querySelector(".pip-bar");
-          return Boolean(bar?.hidden) && !d.querySelector("iframe");
+          const chatBtn = d.querySelector('[data-action="toggleChat"]');
+          const closeBtn = d.querySelector('[data-action="closePip"]');
+          return Boolean(chatBtn?.hidden) && Boolean(closeBtn && !closeBtn.hidden) && !d.querySelector("iframe");
         }),
       Boolean,
       2000,
@@ -346,8 +348,8 @@ try {
       () =>
         videoPage.evaluate(() => {
           const d = documentPictureInPicture.window.document;
-          const bar = d.querySelector(".pip-bar");
-          return Boolean(bar && !bar.hidden && d.querySelector("iframe"));
+          const chatBtn = d.querySelector('[data-action="toggleChat"]');
+          return Boolean(chatBtn && !chatBtn.hidden && d.querySelector("iframe"));
         }),
       Boolean,
       2000,

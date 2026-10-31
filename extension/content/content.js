@@ -413,7 +413,18 @@
     return pick(document.querySelectorAll("video"), 200, 120);
   }
 
+  function hasYouTubeLiveChat() {
+    if (document.documentElement.hasAttribute("data-gp-force-chat")) return true;
+    const chatEl = document.querySelector("ytd-live-chat-frame:not([hidden]), #chat:not([hidden]) iframe#chatframe");
+    if (chatEl && !chatEl.closest("[hidden]")) return true;
+    const liveBadge = document.querySelector(".ytp-live-badge:not([disabled])");
+    return isVisibleElement(liveBadge);
+  }
+
   function chatUrlFor(site) {
+    if (location.hostname === "www.youtube.com" && location.pathname === "/watch" && !hasYouTubeLiveChat()) {
+      return null;
+    }
     if (site?.chatPopoutUrl && site?.idFrom) {
       const id = "param" in site.idFrom
         ? new URLSearchParams(location.search).get(site.idFrom.param)
@@ -1484,8 +1495,29 @@
     iframe { flex: 0 0 ${PIP_CHAT_HEIGHT}px; width: 100%; border: 0; background: #fff; }
     .pip-bar { position: fixed; top: 8px; left: 50%; z-index: 10; opacity: 0; pointer-events: none;
       transform: translateX(-50%) translateY(-4px); transition: opacity 0.16s ease, transform 0.16s ease; }
+    .pip-bar button[hidden] { display: none !important; }
     body:not([data-click-through]):hover .pip-bar,
     body[data-hovered] .pip-bar { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+    .pip-handle { position: fixed; z-index: 11; pointer-events: none; opacity: 0; transition: opacity 0.16s ease; }
+    body:not([data-click-through]):hover .pip-handle,
+    body[data-hovered] .pip-handle { pointer-events: auto; opacity: 1; }
+    .pip-handle.n { top: 0; left: 16px; right: 16px; height: 8px; cursor: ns-resize; }
+    .pip-handle.s { bottom: 0; left: 16px; right: 16px; height: 8px; cursor: ns-resize; }
+    .pip-handle.w { left: 0; top: 16px; bottom: 16px; width: 8px; cursor: ew-resize; }
+    .pip-handle.e { right: 0; top: 16px; bottom: 16px; width: 8px; cursor: ew-resize; }
+    .pip-handle.nw { top: 0; left: 0; width: 16px; height: 16px; cursor: nwse-resize; }
+    .pip-handle.ne { top: 0; right: 0; width: 16px; height: 16px; cursor: nesw-resize; }
+    .pip-handle.sw { bottom: 0; left: 0; width: 16px; height: 16px; cursor: nesw-resize; }
+    .pip-handle.se { bottom: 0; right: 0; width: 16px; height: 16px; cursor: nwse-resize; }
+    .pip-handle.nw::after, .pip-handle.ne::after, .pip-handle.sw::after, .pip-handle.se::after {
+      content: ""; position: absolute; width: 8px; height: 8px; border-radius: 2.5px;
+      background: linear-gradient(135deg, #bae6fd 0%, #38bdf8 100%);
+      border: 1.5px solid #0f172a; box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
+    }
+    .pip-handle.nw::after { top: 3px; left: 3px; }
+    .pip-handle.ne::after { top: 3px; right: 3px; }
+    .pip-handle.sw::after { bottom: 3px; left: 3px; }
+    .pip-handle.se::after { bottom: 3px; right: 3px; }
     .pip-skip-ad { position: fixed; right: 12px; bottom: 12px; z-index: 12; opacity: 0; pointer-events: none;
       display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 999px;
       background: rgba(15, 23, 42, 0.92); border: 1.5px solid rgba(56, 189, 248, 0.78);
@@ -1520,7 +1552,7 @@
     } catch {}
   }
 
-  function buildPipDocument(win, stream, chatUrl, showChat, { onToggleChat, onResizeChat, onSkipAd, isClickThrough, isHoldEvent } = {}) {
+  function buildPipDocument(win, stream, chatUrl, showChat, { onClosePip, onToggleChat, onResizeChat, onSkipAd, isClickThrough, isHoldEvent } = {}) {
     const doc = win.document;
     const style = doc.createElement("style");
     style.textContent = PIP_CSS;
@@ -1542,10 +1574,27 @@
       e.stopPropagation();
       onSkipAd?.();
     });
+    const handles = RESIZE_DIRS.map((dir) => {
+      const el = doc.createElement("div");
+      el.className = `pip-handle ${dir}`;
+      el.dataset.resize = dir;
+      return el;
+    });
     doc.body.toggleAttribute("data-click-through", Boolean(isClickThrough?.()));
-    doc.body.append(mirror, pipHud, pipSkipAd);
+    doc.body.append(mirror, ...handles, pipHud, pipSkipAd);
 
-    let pipBar = null;
+    const pipBar = doc.createElement("div");
+    pipBar.className = "bar pip-bar";
+    const closeBtn = doc.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.dataset.action = "closePip";
+    closeBtn.textContent = "복귀";
+    closeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      onClosePip?.();
+    });
+    pipBar.append(closeBtn);
+
     let chatBtn = null;
     let chatLabel = null;
     if (chatUrl) {
@@ -1553,17 +1602,15 @@
       chatBtn = doc.createElement("button");
       chatBtn.type = "button";
       chatBtn.dataset.action = "toggleChat";
+      chatBtn.hidden = !Boolean(showChat && chatUrl);
       chatBtn.append(svgIcon(ICON_CHAT), chatLabel);
       chatBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         onToggleChat?.();
       });
-      pipBar = doc.createElement("div");
-      pipBar.className = "bar pip-bar";
-      pipBar.hidden = !showChat;
       pipBar.append(chatBtn);
-      doc.body.append(pipBar);
     }
+    doc.body.append(pipBar);
 
     const onPointerHover = (e) => {
       if (!isClickThrough?.() || isHoldEvent?.(e)) doc.body.setAttribute("data-hovered", "");
@@ -1588,6 +1635,17 @@
         if (!frame) {
           frame = doc.createElement("iframe");
           frame.src = chatUrl;
+          frame.addEventListener("load", () => {
+            try {
+              if (
+                !document.documentElement.hasAttribute("data-gp-force-chat") &&
+                frame?.contentDocument?.querySelector("yt-live-chat-unavailable-message-renderer")
+              ) {
+                if (chatBtn) chatBtn.hidden = true;
+                syncChat(false, true);
+              }
+            } catch {}
+          });
         }
         if (!frame.isConnected) doc.body.append(frame);
       } else if (frame) {
@@ -1599,12 +1657,12 @@
     }
 
     function setFeatureEnabled(enabled) {
-      if (pipBar) pipBar.hidden = !Boolean(enabled && chatUrl);
+      if (chatBtn) chatBtn.hidden = !Boolean(enabled && chatUrl);
       syncChat(Boolean(enabled && chatUrl), true);
     }
 
     function toggleChatOpen() {
-      if (!chatUrl || (pipBar && pipBar.hidden)) return;
+      if (!chatUrl || (chatBtn && chatBtn.hidden)) return;
       syncChat(!chatShown, true);
     }
 
@@ -1679,6 +1737,10 @@
       if (ac.signal.aborted) return w.close();
       win = w;
       const built = buildPipDocument(w, stream, chatUrl, Boolean(ctx.settings.showChat), {
+        onClosePip: () => {
+          send({ type: "FOCUS_SOURCE_TAB" });
+          leave();
+        },
         onToggleChat: handleToggleChat,
         onResizeChat: handleResizeChat,
         onSkipAd: () => {

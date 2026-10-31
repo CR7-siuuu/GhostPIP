@@ -43,6 +43,9 @@ public sealed unsafe class GhostStyle
     [DllImport("user32.dll")]
     private static extern int SetWindowRgn(nint hWnd, nint hRgn, bool bRedraw);
 
+    [DllImport("gdi32.dll")]
+    private static extern nint CreateRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect);
+
     private readonly record struct AppliedState(
         byte Alpha,
         bool ClickThrough,
@@ -121,9 +124,8 @@ public sealed unsafe class GhostStyle
         {
             d3dChild = _foundD3dChild;
             int winW = Math.Max(1, winRc.Right - winRc.Left);
-            int winH = Math.Max(1, winRc.Bottom - winRc.Top);
-            d3dW = Math.Max(winW, d3dRc.Right - d3dRc.Left);
-            d3dH = Math.Max(winH, d3dRc.Bottom - d3dRc.Top);
+            d3dW = winW;
+            d3dH = b;
             d3dRelT = d3dRc.Top - winRc.Top;
         }
 
@@ -232,6 +234,12 @@ public sealed unsafe class GhostStyle
             if (d3dChild != IntPtr.Zero && (clipChanged || d3dRelT != -clipT))
             {
                 SetWindowPos(d3dChild, IntPtr.Zero, 0, -clipT, Math.Max(1, d3dW), Math.Max(1, d3dH), SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+            if (clipChanged)
+            {
+                nint rgn = CreateRectRgn(clipL, 0, clipR, Math.Max(1, clipB - clipT));
+                if (rgn != IntPtr.Zero)
+                    SetWindowRgn(hwnd, rgn, true);
             }
         }
         else if (!hadPrev || prev.Clipped)

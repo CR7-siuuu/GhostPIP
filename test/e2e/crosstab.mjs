@@ -180,6 +180,7 @@ try {
     await sleep(1500);
 
     const vCenter = await tabA.evaluate(() => {
+      document.documentElement.setAttribute("data-gp-force-chat", "");
       const v = document.querySelector("video.html5-main-video") || document.querySelector("video");
       v.loop = true;
       window.__gpSourceVideo = v;
