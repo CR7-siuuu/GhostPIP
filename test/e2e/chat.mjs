@@ -258,11 +258,11 @@ try {
     `atBottom=${split.atBottom} chat=${split.before}->${split.shrunk}->${split.after} video=${split.videoBefore}->${split.videoAfter} stored=${pipStored}`,
   );
 
-  // Verify corner/top window resize freely enlarges the video stage while keeping chat height fixed.
-  const beforeTop = await page.evaluate(() => {
+  // Verify corner/edge window resize (including alternating diagonal and vertical steps) freely enlarges the video stage without inflating chat.
+  const beforeResize = await page.evaluate(() => {
     const w = documentPictureInPicture.window;
     const d = w.document;
-    d.documentElement.dispatchEvent(new w.PointerEvent("pointermove", { bubbles: true, clientX: 20, clientY: 6 }));
+    d.documentElement.dispatchEvent(new w.PointerEvent("pointermove", { bubbles: true, clientX: w.innerWidth - 6, clientY: w.innerHeight - 6 }));
     return {
       chat0: Math.round(d.querySelector("iframe").getBoundingClientRect().height),
       vid0: Math.round(d.querySelector("video").getBoundingClientRect().height),
@@ -270,19 +270,22 @@ try {
     };
   });
   await sleep(700);
-  await sw.evaluate((dpr) => GhostPiPBackground.postToEngine({ v: 1, type: "PIP_RESIZE", deltaH: 240, dpr }), beforeTop.dpr);
-  await sleep(500);
-  const afterTop = await page.evaluate(() => {
+  for (let i = 0; i < 6; i++) {
+    await sw.evaluate((dpr) => GhostPiPBackground.postToEngine({ v: 1, type: "PIP_RESIZE", deltaH: 45, dpr }), beforeResize.dpr);
+    await sleep(60);
+  }
+  await sleep(400);
+  const afterResize = await page.evaluate(() => {
     const d = documentPictureInPicture.window.document;
     return {
-      chatAfterTop: Math.round(d.querySelector("iframe").getBoundingClientRect().height),
-      vidAfterTop: Math.round(d.querySelector("video").getBoundingClientRect().height),
+      chatAfter: Math.round(d.querySelector("iframe").getBoundingClientRect().height),
+      vidAfter: Math.round(d.querySelector("video").getBoundingClientRect().height),
     };
   });
   record(
-    "7 PiP top/corner resize enlarges video without inflating chat",
-    afterTop.vidAfterTop - beforeTop.vid0 >= 200 && afterTop.chatAfterTop === beforeTop.chat0,
-    `video=${beforeTop.vid0}->${afterTop.vidAfterTop} chat=${beforeTop.chat0}->${afterTop.chatAfterTop}`,
+    "7 PiP corner/edge resize enlarges video without inflating chat",
+    afterResize.vidAfter - beforeResize.vid0 >= 220 && afterResize.chatAfter <= beforeResize.chat0,
+    `video=${beforeResize.vid0}->${afterResize.vidAfter} chat=${beforeResize.chat0}->${afterResize.chatAfter}`,
   );
 } catch (e) {
   record("fatal", false, String(e?.message ?? e).slice(0, 200));
