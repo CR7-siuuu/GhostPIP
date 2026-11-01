@@ -36,7 +36,7 @@ public sealed unsafe class TrayIcon : IDisposable
         public int Y;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     private struct NOTIFYICONDATAW
     {
         public uint cbSize;
@@ -61,6 +61,18 @@ public sealed unsafe class TrayIcon : IDisposable
 
     [DllImport("user32.dll", EntryPoint = "LoadIconW", SetLastError = true)]
     private static extern nint LoadIconW(nint hInstance, nint lpIconName);
+
+    [DllImport("user32.dll", EntryPoint = "LoadImageW", SetLastError = true)]
+    private static extern nint LoadImageW(nint hInst, nint name, uint type, int cx, int cy, uint fuLoad);
+
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetrics(int nIndex);
+
+    private const uint IMAGE_ICON = 1;
+    private const int SM_CXSMICON = 49;
+    private const int SM_CYSMICON = 50;
+    // Matches "1 ICON" in GhostPiP.Engine.rc.
+    private const int APP_ICON_ID = 1;
 
     [DllImport("kernel32.dll", EntryPoint = "GetModuleHandleW", CharSet = CharSet.Unicode)]
     private static extern nint GetModuleHandleW(string? lpModuleName);
@@ -99,7 +111,7 @@ public sealed unsafe class TrayIcon : IDisposable
     private NOTIFYICONDATAW CreateData()
     {
         nint hInst = GetModuleHandleW(null);
-        nint hIcon = LoadIconW(hInst, (nint)32512);
+        nint hIcon = LoadImageW(hInst, APP_ICON_ID, IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 0);
         if (hIcon == IntPtr.Zero)
             hIcon = LoadIconW(IntPtr.Zero, (nint)32512);
 

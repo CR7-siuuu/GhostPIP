@@ -67,4 +67,15 @@ foreach ($RegKey in $RegistryKeys) {
     Set-Item -LiteralPath $RegKey -Value $ManifestPath
 }
 
+# Windows 11 hides new tray icons in the overflow menu; pin the engine icon if Windows already knows it.
+$TrayRoot = "HKCU:\Control Panel\NotifyIconSettings"
+if (Test-Path -LiteralPath $TrayRoot) {
+    Get-ChildItem -LiteralPath $TrayRoot | ForEach-Object {
+        $Entry = Get-ItemProperty -LiteralPath $_.PSPath
+        if ($Entry.ExecutablePath -and $Entry.ExecutablePath -like "*\GhostPiP.Engine.exe") {
+            Set-ItemProperty -LiteralPath $_.PSPath -Name IsPromoted -Value 1 -Type DWord
+        }
+    }
+}
+
 Write-Output "Installed $HostName -> $InstalledExe"
