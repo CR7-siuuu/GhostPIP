@@ -423,7 +423,9 @@
         pick(document.querySelectorAll("video"), (v) => isRenderedVideo(v, 1, 1))
       );
     }
-    if (!ctx.settings.allSites) return null;
+    // Listed sites without a dedicated selector (OTT services) stay on even when allSites is off,
+    // but still go through the generic filter so browse-page preview clips are skipped.
+    if (ctx.siteId === "generic" && !ctx.settings.allSites) return null;
     return pick(document.querySelectorAll("video"), (v) => isRenderedVideo(v, 280, 158) && !isGifLike(v));
   }
 
@@ -465,6 +467,7 @@
         return site.chatPopoutUrl.replace(/\{(?:videoId|channelId|channel)\}/g, encodeURIComponent(id));
       }
     }
+    if (ctx.siteId !== "generic" && !site?.chatPopoutUrl) return null;
     if (location.hostname === "chzzk.naver.com" && location.pathname.startsWith("/live/")) {
       const id = location.pathname.split("/")[2];
       if (id) return `https://chzzk.naver.com/live/${encodeURIComponent(id)}/chat`;
@@ -1936,7 +1939,12 @@
         stream = video.captureStream();
       } catch {}
     }
-    if (!stream) return go("nativePip", video.requestPictureInPicture());
+    if (!stream) {
+      // DRM players (Netflix and friends) often set disablePictureInPicture; the user asked for PiP
+      // explicitly, so lift it for this request.
+      video.disablePictureInPicture = false;
+      return go("nativePip", video.requestPictureInPicture());
+    }
     const chatUrl = chatUrlFor(ctx.site);
     const showChat = Boolean(ctx.settings.showChat && chatUrl);
     const size = floatSize(video, DEFAULT_FLOAT_WIDTH, DEFAULT_FLOAT_WIDTH);

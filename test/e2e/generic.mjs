@@ -56,8 +56,23 @@ try {
   const launcherOpen = () =>
     page.evaluate(() => Boolean(document.getElementById("ghostpip-launcher")?.matches(":popover-open")));
 
-  async function hoverAt(kind, x, y) {
-    await page.goto(`${base}?kind=${kind}`, { waitUntil: "load" });
+  // OTT origins are served the same canvas test page via interception, so the content script sees
+  // a real netflix.com / coupangplay.com URL without needing an account or DRM.
+  const OTT_HOSTS = ["www.netflix.com", "www.coupangplay.com"];
+  await page.setRequestInterception(true);
+  page.on("request", (req) => {
+    const u = new URL(req.url());
+    if (OTT_HOSTS.includes(u.hostname) && req.resourceType() === "document") {
+      req.respond({ status: 200, contentType: "text/html; charset=utf-8", body: PAGE(u.searchParams.get("kind") || "real") });
+    } else if (OTT_HOSTS.includes(u.hostname)) {
+      req.respond({ status: 404, body: "" });
+    } else {
+      req.continue();
+    }
+  });
+
+  async function hoverAt(kind, x, y, origin = base) {
+    await page.goto(`${origin}?kind=${kind}`, { waitUntil: "load" });
     await page.waitForFunction(() => [...document.querySelectorAll("video")].every((v) => v.videoWidth > 0));
     await sleep(2200);
     await page.mouse.move(5, 5);
@@ -79,6 +94,9 @@ try {
   await check("4 player beside image still shows", true, () => hoverAt("cover", 150, 120));
   await setAllSites(false);
   await check("5 allSites off hides on generic", false, () => hoverAt("real", 200, 150));
+  await check("6 allSites off, netflix player shows", true, () => hoverAt("real", 200, 150, "https://www.netflix.com/watch/1"));
+  await check("7 allSites off, coupangplay shows", true, () => hoverAt("real", 200, 150, "https://www.coupangplay.com/play/1"));
+  await check("8 OTT preview clip shows nothing", false, () => hoverAt("gif", 200, 150, "https://www.netflix.com/browse"));
   await setAllSites(true);
 } finally {
   await browser.close().catch(() => {});
@@ -87,4 +105,4 @@ try {
 
 console.log("\n[generic e2e]");
 for (const r of results) console.log(`  ${r.ok ? "PASS" : "FAIL"} ${r.name.padEnd(36)} ${r.info}`);
-process.exit(results.length === 5 && results.every((r) => r.ok) ? 0 : 1);
+process.exit(results.length === 8 && results.every((r) => r.ok) ? 0 : 1);
