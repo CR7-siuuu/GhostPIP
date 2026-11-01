@@ -362,9 +362,22 @@ try {
     );
     await videoPage.mouse.move(vRect.x, vRect.y, { steps: 4 });
     await sleep(300);
-    const launcherStillClosed = await videoPage.evaluate(
-      () => !document.getElementById("ghostpip-launcher")?.matches(":popover-open"),
-    );
+    const launcherStillClosed = await videoPage.evaluate(() => {
+      const stray = document.createElement("div");
+      stray.id = "ghostpip-launcher";
+      stray.setAttribute("popover", "manual");
+      document.documentElement.append(stray);
+      try {
+        stray.showPopover();
+      } catch {}
+      const strayHiddenByCss = getComputedStyle(stray).display === "none";
+      stray.remove();
+      return (
+        document.documentElement.hasAttribute("data-gp-disabled") &&
+        strayHiddenByCss &&
+        !document.getElementById("ghostpip-launcher")?.matches(":popover-open")
+      );
+    });
 
     await popupPage.bringToFront();
     await popupPage.click("#enabled");

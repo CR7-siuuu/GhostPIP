@@ -197,6 +197,18 @@ function postToEngine(msg) {
   }
 }
 
+async function broadcastSettings(settings) {
+  if (!chrome.tabs?.query) return;
+  try {
+    const tabs = await chrome.tabs.query({});
+    for (const t of tabs) {
+      if (t.id != null) {
+        sendTab(t.id, { type: "SETTINGS_CHANGED", settings });
+      }
+    }
+  } catch {}
+}
+
 function updateSettings(mutator) {
   const run = settingsQueue.then(async () => {
     const { settings } = await chrome.storage.local.get("settings");
@@ -206,6 +218,7 @@ function updateSettings(mutator) {
       await chrome.storage.local.set({ settings: res.settings });
       if (res.settings.enabled && !nativePort) connectEngine();
       postToEngine({ v: 1, type: "STATE", settings: res.settings });
+      broadcastSettings(res.settings);
     }
     return res;
   });

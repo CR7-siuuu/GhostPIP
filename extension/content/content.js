@@ -2,6 +2,24 @@
   try {
     globalThis.__ghostpipCleanup?.();
   } catch {}
+  try {
+    document.documentElement?.dispatchEvent(new CustomEvent("ghostpip:cleanup"));
+  } catch {}
+
+  let cleanedUp = false;
+  function isContextAlive() {
+    if (cleanedUp) return false;
+    try {
+      return Boolean(chrome.runtime?.id);
+    } catch {
+      return false;
+    }
+  }
+  function ensureAlive() {
+    if (isContextAlive()) return true;
+    globalThis.__ghostpipCleanup?.();
+    return false;
+  }
 
   const Dodge = globalThis.GhostPiPDodge;
   const t = (key, subs) => {
@@ -40,13 +58,14 @@
   };
 
   const ctx = {
-    settings: Settings.merge(undefined),
+    settings: { ...Settings.merge(undefined), enabled: false },
     layout: { width: DEFAULT_FLOAT_WIDTH, height: null, pos: null, chatOpen: false },
     siteId: "generic",
     site: { video: null, chatPopoutUrl: null },
     video: null,
     url: location.href,
   };
+  document.documentElement?.setAttribute("data-gp-disabled", "");
 
   async function send(msg) {
     try {
@@ -232,12 +251,17 @@
         return host.matches(":popover-open");
       },
       show(vars) {
+        if (!ensureAlive() || !ctx.settings.enabled) return;
         setVars(host, vars);
         if (!host.isConnected) document.documentElement.append(host);
         if (!this.open) host.showPopover();
       },
       hide() {
-        if (this.open) host.hidePopover();
+        if (this.open) {
+          try {
+            host.hidePopover();
+          } catch {}
+        }
       },
     };
   }
@@ -512,7 +536,13 @@
     let idleTimer = null;
 
     function update() {
-      if (!ctx.settings.enabled) return launcher.hide();
+      if (!ensureAlive()) return;
+      if (!ctx.settings.enabled) {
+        pointerOver = false;
+        launcherOver = false;
+        clearTimeout(idleTimer);
+        return launcher.hide();
+      }
       const r = ctx.video?.getBoundingClientRect();
       if (!r || r.width === 0) return launcher.hide();
       const anchor = { x: r.left + r.width / 2, y: Math.max(r.top, 0) + 6 };
@@ -531,6 +561,7 @@
     }
 
     launcher.host.addEventListener("pointerenter", () => {
+      if (!ensureAlive() || !ctx.settings.enabled) return;
       launcherOver = true;
       clearTimeout(idleTimer);
       update();
@@ -542,7 +573,11 @@
     }, on);
 
     window.addEventListener("pointermove", (e) => {
-      if (!e.isTrusted) return;
+      if (!e.isTrusted || !ensureAlive()) return;
+      if (!ctx.settings.enabled) {
+        if (pointerOver || launcherOver || launcher.open) update();
+        return;
+      }
       pointerOver = Boolean(ctx.video) && isPointerOnPlayer(ctx.video, e);
       if (pointerOver) armIdleHide();
       else clearTimeout(idleTimer);
@@ -2212,6 +2247,7 @@
 
   function go(next, arg) {
     if (!TRANSITIONS[current.name].includes(next)) return;
+    if (next !== "idle" && !ctx.settings.enabled) return;
     if (next !== "idle" && next !== "remoteInTab" && !ctx.video) return;
     current.exit();
     const inst = { name: next, video: ctx.video, exit: noop, settingsChanged: noop, layoutChanged: noop };
@@ -2219,7 +2255,21 @@
     Object.assign(inst, ENTER[next](arg, () => current === inst && go("idle")));
   }
 
+  function removeStrayOverlays() {
+    for (const [id, activeHost] of [
+      ["ghostpip-launcher", launcher.host],
+      ["ghostpip-controller", controller.host],
+      ["ghostpip-chat", webChat.host],
+    ]) {
+      for (const el of document.querySelectorAll(`#${id}`)) {
+        if (el !== activeHost) el.remove();
+      }
+    }
+  }
+
   function scan() {
+    if (!ensureAlive()) return;
+    removeStrayOverlays();
     if (location.href !== ctx.url) {
       ctx.url = location.href;
       if (current.name === "idle") {
@@ -2232,15 +2282,30 @@
       loadSite();
       return;
     }
+    if (!ctx.settings.enabled) {
+      ctx.video = null;
+      if (current.name !== "idle") go("idle");
+      launcher.hide();
+      return;
+    }
     if (current.name === "idle") ctx.video = findVideo();
     else if (current.video && !current.video.isConnected) go("idle");
   }
 
   function applySettings(stored) {
     ctx.settings = Settings.merge(stored);
-    if (!ctx.settings.enabled && current.name !== "idle") {
-      go("idle");
-      return;
+    document.documentElement?.toggleAttribute("data-gp-disabled", !ctx.settings.enabled);
+    if (!ctx.settings.enabled) {
+      ctx.video = null;
+      if (current.name !== "idle") {
+        go("idle");
+        return;
+      }
+      launcher.hide();
+      controller.hide();
+      webChat.hide();
+    } else if (current.name === "idle") {
+      ctx.video = findVideo();
     }
     current.settingsChanged();
   }
@@ -2312,6 +2377,10 @@
       if (current.name === "docPip") current.toggleChat?.();
       return { ok: true };
     },
+    async SETTINGS_CHANGED(msg) {
+      if (msg?.settings) applySettings(msg.settings);
+      return { ok: true };
+    },
   };
 
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
@@ -2322,6 +2391,14 @@
   });
 
   const globalAc = new AbortController();
+
+  document.documentElement?.addEventListener(
+    "ghostpip:cleanup",
+    () => {
+      globalThis.__ghostpipCleanup?.();
+    },
+    { signal: globalAc.signal },
+  );
 
   document.addEventListener("fullscreenchange", () => {
     if (document.fullscreenElement && (current.name === "inTab" || current.name === "remoteInTab")) go("idle");
@@ -2353,6 +2430,8 @@
 
   let scanQueued = false;
   const mutObs = new MutationObserver(() => {
+    if (!ensureAlive()) return;
+    removeStrayOverlays();
     if (scanQueued) return;
     scanQueued = true;
     setTimeout(() => {
@@ -2364,6 +2443,8 @@
   const scanTimer = setInterval(scan, 1000);
 
   globalThis.__ghostpipCleanup = () => {
+    if (cleanedUp) return;
+    cleanedUp = true;
     try {
       globalAc.abort();
       mutObs.disconnect();
@@ -2375,7 +2456,7 @@
       launcher.host.remove();
       controller.host.remove();
       webChat.host.remove();
-      document.querySelectorAll("canvas[data-gp-remote]").forEach((el) => el.remove());
+      document.querySelectorAll("#ghostpip-launcher, #ghostpip-controller, #ghostpip-chat, canvas[data-gp-remote]").forEach((el) => el.remove());
     } catch {}
   };
 

@@ -104,4 +104,12 @@
   #ghostpip-controller:popover-open[data-bar-only] {
     pointer-events: none !important;
   }
+
+  html[data-gp-disabled] #ghostpip-launcher:popover-open,
+  html[data-gp-disabled] #ghostpip-controller:popover-open,
+  html[data-gp-disabled] #ghostpip-chat:popover-open {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
 }
