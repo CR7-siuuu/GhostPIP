@@ -393,24 +393,56 @@
     }
   }
 
+  // GIF-style clips (X/Reddit/Imgur "gifv", hero backgrounds) are silent and loop or end quickly;
+  // real playback either decodes audio, is live, or runs long enough to be worth floating.
+  function isGifLike(v) {
+    if (v.webkitAudioDecodedByteCount > 0 || v.audioTracks?.length > 0) return false;
+    if (v.loop) return true;
+    const d = v.duration;
+    if (Number.isFinite(d) && d > 0 && d < 30) return true;
+    return v.muted && !v.controls && !v.paused && v.currentTime > 1.5;
+  }
+
+  function isRenderedVideo(v, minW, minH) {
+    if (v.videoWidth <= 0 || v.hasAttribute("data-gp-remote") || !v.isConnected) return false;
+    const r = v.getBoundingClientRect();
+    if (r.width < minW || r.height < minH) return false;
+    const cs = getComputedStyle(v);
+    return cs.visibility !== "hidden" && cs.display !== "none" && Number(cs.opacity) > 0.05;
+  }
+
   function findVideo() {
     const area = (v) => {
       const r = v.getBoundingClientRect();
       return r.width * r.height;
     };
-    const pick = (list, minW = 0, minH = 0) =>
-      [...list]
-        .filter((v) => {
-          if (v.videoWidth <= 0 || v.hasAttribute("data-gp-remote")) return false;
-          if (!minW && !minH) return true;
-          const r = v.getBoundingClientRect();
-          return r.width >= minW && r.height >= minH;
-        })
-        .sort((a, b) => area(b) - area(a))[0] ?? null;
+    const pick = (list, ok) => [...list].filter(ok).sort((a, b) => area(b) - area(a))[0] ?? null;
     if (ctx.site.video) {
-      return pick(document.querySelectorAll(ctx.site.video)) || pick(document.querySelectorAll("video"));
+      return (
+        pick(document.querySelectorAll(ctx.site.video), (v) => isRenderedVideo(v, 1, 1)) ||
+        pick(document.querySelectorAll("video"), (v) => isRenderedVideo(v, 1, 1))
+      );
     }
-    return pick(document.querySelectorAll("video"), 200, 120);
+    if (!ctx.settings.allSites) return null;
+    return pick(document.querySelectorAll("video"), (v) => isRenderedVideo(v, 280, 158) && !isGifLike(v));
+  }
+
+  // The pointer must be on the player itself, not on an image or card that merely overlaps the
+  // video's rect: some element on the composed path has to be the video or a tight wrapper of it.
+  function isPointerOnPlayer(video, e) {
+    const vr = video.getBoundingClientRect();
+    if (!inside(vr, e.clientX, e.clientY)) return false;
+    const maxArea = vr.width * vr.height * 1.6;
+    for (const el of e.composedPath()) {
+      if (el === video) return true;
+      if (el === document.body || el === document.documentElement || el === document || el === window) break;
+      if (!(el instanceof Element)) continue;
+      if (el.contains(video) || el.shadowRoot?.contains(video)) {
+        const r = el.getBoundingClientRect();
+        return r.width * r.height <= maxArea;
+      }
+    }
+    return false;
   }
 
   function hasYouTubeLiveChat() {
@@ -491,8 +523,7 @@
 
     window.addEventListener("pointermove", (e) => {
       if (!e.isTrusted) return;
-      const r = ctx.video?.getBoundingClientRect();
-      pointerOver = !!r && inside(r, e.clientX, e.clientY);
+      pointerOver = Boolean(ctx.video) && isPointerOnPlayer(ctx.video, e);
       if (pointerOver) armIdleHide();
       else clearTimeout(idleTimer);
       update();
@@ -1828,10 +1859,16 @@
       if (mirror) mirror.srcObject = stream;
     }, { signal: ac.signal });
 
+    let lastShowChat = Boolean(ctx.settings.showChat);
+
     return {
       settingsChanged: () => {
         syncPipOpacity(false);
-        setFeatureEnabled?.(Boolean(ctx.settings.showChat));
+        const showChat = Boolean(ctx.settings.showChat);
+        if (showChat !== lastShowChat) {
+          lastShowChat = showChat;
+          setFeatureEnabled?.(showChat);
+        }
         setClickThrough?.(Boolean(ctx.settings.clickThrough));
       },
       toggleChat: () => {

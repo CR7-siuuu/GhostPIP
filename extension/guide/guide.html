@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GhostPiP 시작하기</title>
+  <link rel="icon" href="../icons/icon32.png" />
+  <link rel="stylesheet" href="guide.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <img src="../icons/icon128.png" alt="" width="56" height="56" />
+      <div>
+        <h1>GhostPiP 시작하기</h1>
+        <p class="sub">화면을 가리지 않는 투명 · 클릭 통과 · 자동 회피 PiP</p>
+      </div>
+      <span id="status" class="status">엔진 확인 중…</span>
+    </header>
+
+    <section class="card">
+      <h2>1. 영상 위에 마우스를 올리세요</h2>
+      <p>유튜브 · 치지직 · SOOP · 트위치 영상 위 상단에 두 버튼이 나타납니다.</p>
+      <div class="modes">
+        <div class="mode">
+          <h3>웹 모드</h3>
+          <p>브라우저 탭 안에서 떠 있는 창. 다른 탭으로 옮겨도 따라옵니다. 설치 필요 없음.</p>
+        </div>
+        <div class="mode">
+          <h3>전체 모드</h3>
+          <p>게임 · 다른 프로그램 위에도 떠 있는 창. 투명도 · 클릭 통과 · 자동 회피는 <b>GhostPiP Engine</b>이 필요합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="engineCard">
+      <h2>2. GhostPiP Engine 설치 (전체 모드용, Windows)</h2>
+      <ol>
+        <li>배포 파일 <code>GhostPiP-Full-Package.zip</code>(또는 <code>GhostPiP-Engine-win-x64.zip</code>)의 압축을 풉니다.</li>
+        <li><code>engine\install.bat</code>을 더블클릭합니다. 관리자 권한은 필요 없습니다.</li>
+        <li>이 페이지 오른쪽 위 상태가 <b>엔진 연결됨</b>으로 바뀌면 끝입니다.</li>
+      </ol>
+      <button id="retry" type="button">연결 다시 확인</button>
+      <p class="note">엔진은 <code>%LOCALAPPDATA%\Programs\GhostPiP</code>에 설치되며 크롬이 전체 모드를 열 때만 실행되고, 확장에서 GhostPiP를 끄면 함께 종료됩니다. 제거는 <code>uninstall.bat</code>.</p>
+    </section>
+
+    <section class="card warn">
+      <h2>백신이 엔진을 막을 때</h2>
+      <p>엔진은 다른 창 위에 투명 창을 띄우고 마우스 입력을 전달하는 프로그램이라, 코드 서명이 없는 빌드는 일부 백신(예: Avast <code>Win64:Evo-gen</code>)이 오탐할 수 있습니다. 네트워크 통신이나 파일 수집은 하지 않습니다.</p>
+      <ol>
+        <li>백신의 격리함(검역소)에서 <code>GhostPiP.Engine.exe</code>를 복원합니다.</li>
+        <li><code>%LOCALAPPDATA%\Programs\GhostPiP</code> 폴더를 백신 예외에 추가합니다.</li>
+        <li><code>install.bat</code>을 다시 실행합니다.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>조작법</h2>
+      <table>
+        <tr><th>이동 · 크기 조절</th><td><kbd id="holdKey">Ctrl+Alt</kbd>를 누른 채 드래그 / 가장자리 드래그</td></tr>
+        <tr><th>투명도</th><td><kbd class="hold">Ctrl+Alt</kbd> + 마우스 휠</td></tr>
+        <tr><th>클릭 통과 켜기/끄기</th><td><kbd id="hkClick">Alt+G</kbd></td></tr>
+        <tr><th>자동 회피 켜기/끄기</th><td><kbd id="hkDodge">Alt+Shift+D</kbd></td></tr>
+        <tr><th>음소거</th><td><kbd id="hkMute">Alt+M</kbd></td></tr>
+      </table>
+      <p class="note">단축키와 보조 키는 툴바의 GhostPiP 아이콘 → 단축키 및 조작에서 바꿀 수 있습니다.</p>
+    </section>
+  </main>
+  <script src="../shared/settings.js"></script>
+  <script src="guide.js"></script>
+</body>
+</html>

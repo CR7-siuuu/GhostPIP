@@ -7,153 +7,167 @@
   </head>
   <body>
     <header class="header">
-      <div class="brand">
-        <img class="brand-logo" src="../icons/icon48.png" width="30" height="30" alt="" />
-        <div class="brand-text">
-          <h1>GhostPiP</h1>
-          <span class="brand-sub">Ghost Overlay &amp; Auto-Dodge</span>
-        </div>
+      <img class="brand-logo" src="../icons/icon48.png" width="32" height="32" alt="" />
+      <div class="brand-text">
+        <h1>GhostPiP</h1>
+        <span class="brand-sub">투명 PiP 오버레이</span>
       </div>
-      <span id="modeBadge" class="badge">In-Tab Mode</span>
+      <span id="modeBadge" class="badge" role="status">웹 모드</span>
     </header>
 
-    <div id="engineWarning" class="warning" hidden></div>
+    <div id="engineWarning" class="warning" role="alert" hidden></div>
 
-    <section class="card">
-      <label class="row row-master">
-        <div class="label-stack">
-          <span>GhostPiP 기능 활성화</span>
-          <small>끄면 모든 오버레이와 외부 엔진 프로그램이 종료됩니다</small>
-        </div>
-        <input id="enabled" type="checkbox" />
-      </label>
+    <label class="master">
+      <span class="label-stack">
+        <span class="master-title">GhostPiP 사용</span>
+        <small>끄면 오버레이와 엔진이 모두 종료됩니다</small>
+      </span>
+      <input id="enabled" class="switch" type="checkbox" role="switch" />
+    </label>
 
-      <label class="row">
-        <span>클릭 통과 (Ghost Mode) <kbd id="kbdClickThrough">Alt+G</kbd></span>
-        <input id="clickThrough" type="checkbox" />
-      </label>
-
-      <label class="row">
-        <span>스마트 자동 회피 <kbd id="kbdDodge">Alt+Shift+D</kbd></span>
-        <input id="dodgeEnabled" type="checkbox" />
-      </label>
-
-      <label class="row">
-        <span>전체 모드 채팅창 표시</span>
-        <input id="showChat" type="checkbox" />
-      </label>
-
-      <div class="row">
-        <label for="opacity" class="label-stack">
-          <span>투명도 <kbd>마우스 휠</kbd></span>
-          <small id="wheelSubHint">클릭 통과 시 Ctrl+Alt + 휠</small>
-        </label>
-        <div class="slider-wrap">
-          <input id="opacity" type="range" min="10" max="100" step="5" value="70" />
-          <span id="opacityValue">70%</span>
-        </div>
-      </div>
-
-      <button id="toggleMute" type="button" class="btn">음소거 토글 (<span id="kbdMute">Alt+M</span>)</button>
-    </section>
-
-    <details id="hotkeyDetails" class="card">
-      <summary>조작키 / 단축키 설정</summary>
-      <div class="details-body">
+    <main class="settings">
+      <section class="card" aria-label="기본 설정">
         <label class="row">
-          <span>창 조작·휠 홀드 키</span>
-          <select id="hold">
-            <option value="Ctrl+Alt">Ctrl + Alt</option>
-            <option value="Ctrl+Shift">Ctrl + Shift</option>
-            <option value="Alt+Shift">Alt + Shift</option>
-            <option value="Ctrl">Ctrl 단독</option>
-            <option value="Alt">Alt 단독</option>
-            <option value="Shift">Shift 단독</option>
-          </select>
+          <span class="row-title">클릭 통과 <kbd id="kbdClickThrough">Alt+G</kbd></span>
+          <input id="clickThrough" class="switch" type="checkbox" role="switch" />
         </label>
 
-        <div class="row">
-          <span>클릭 통과 토글</span>
-          <button type="button" class="hotkey-btn" data-hotkey="clickThrough" id="hkClickThrough" title="클릭 후 원하는 단축키를 누르세요">Alt+G</button>
+        <label class="row">
+          <span class="row-title">자동 회피 <kbd id="kbdDodge">Alt+Shift+D</kbd></span>
+          <input id="dodgeEnabled" class="switch" type="checkbox" role="switch" />
+        </label>
+
+        <label class="row">
+          <span class="row-title">전체 모드 채팅 표시</span>
+          <input id="showChat" class="switch" type="checkbox" role="switch" />
+        </label>
+
+        <label class="row">
+          <span class="label-stack">
+            <span class="row-title">모든 사이트에서 사용</span>
+            <small>끄면 유튜브·치지직·SOOP·트위치에서만 표시</small>
+          </span>
+          <input id="allSites" class="switch" type="checkbox" role="switch" />
+        </label>
+
+        <div class="opacity-block">
+          <div class="opacity-head">
+            <label for="opacity" class="row-title">투명도</label>
+            <output id="opacityValue" for="opacity">70%</output>
+          </div>
+          <input id="opacity" type="range" min="10" max="100" step="5" value="70" aria-describedby="wheelSubHint" />
+          <small id="wheelSubHint" class="hint">영상 위 휠로도 조절 · 클릭 통과 중엔 Ctrl+Alt + 휠</small>
         </div>
 
-        <div class="row">
-          <span>자동 회피 토글</span>
-          <button type="button" class="hotkey-btn" data-hotkey="dodge" id="hkDodge" title="클릭 후 원하는 단축키를 누르세요">Alt+Shift+D</button>
-        </div>
+        <button id="toggleMute" type="button" class="btn">
+          <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9v6h4l5 4V5L8 9H4z" />
+            <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" />
+          </svg>
+          음소거 전환 <kbd id="kbdMute">Alt+M</kbd>
+        </button>
+      </section>
 
-        <div class="row">
-          <span>음소거 토글</span>
-          <button type="button" class="hotkey-btn" data-hotkey="mute" id="hkMute" title="클릭 후 원하는 단축키를 누르세요">Alt+M</button>
-        </div>
+      <div class="card card-list">
+        <details id="dodgeDetails">
+          <summary>회피 설정</summary>
+          <div class="details-body">
+            <fieldset class="field">
+              <legend>피할 수 있는 코너</legend>
+              <div class="corner-grid">
+                <label><input type="checkbox" data-corner="TL" /> 좌상단</label>
+                <label><input type="checkbox" data-corner="TR" /> 우상단</label>
+                <label><input type="checkbox" data-corner="BL" /> 좌하단</label>
+                <label><input type="checkbox" data-corner="BR" /> 우하단</label>
+              </div>
+              <small class="hint">미니맵처럼 가리면 안 되는 코너는 끄세요. 잠긴 코너는 기본 위치·회피 방향에 필요합니다.</small>
+            </fieldset>
 
-        <button id="resetHotkeys" type="button" class="btn btn-sub">단축키 기본값 복원</button>
-      </div>
-    </details>
+            <div class="row">
+              <label for="home" class="row-title">기본 위치</label>
+              <select id="home">
+                <option value="TL">좌상단</option>
+                <option value="TR">우상단</option>
+                <option value="BL">좌하단</option>
+                <option value="BR">우하단</option>
+              </select>
+            </div>
 
-    <details id="dodgeDetails" class="card">
-      <summary>회피 상세 설정</summary>
-      <div class="details-body">
-        <div class="field" title="미니맵 위치의 코너를 해제하면 해당 위치로 피하지 않습니다">
-          <span>허용 코너 (금지 코너 해제)</span>
-          <div class="corner-grid">
-            <label title="미니맵 위치의 코너를 해제하면 해당 위치로 피하지 않습니다">
-              <input type="checkbox" data-corner="TL" /> TL (좌상)
-            </label>
-            <label title="미니맵 위치의 코너를 해제하면 해당 위치로 피하지 않습니다">
-              <input type="checkbox" data-corner="TR" /> TR (우상)
-            </label>
-            <label title="미니맵 위치의 코너를 해제하면 해당 위치로 피하지 않습니다">
-              <input type="checkbox" data-corner="BL" /> BL (좌하)
-            </label>
-            <label title="미니맵 위치의 코너를 해제하면 해당 위치로 피하지 않습니다">
-              <input type="checkbox" data-corner="BR" /> BR (우하)
+            <div class="row">
+              <label for="axis" class="row-title">회피 방향</label>
+              <select id="axis">
+                <option value="free">자유 (4방향)</option>
+                <option value="vertical">상하</option>
+                <option value="horizontal">좌우</option>
+              </select>
+            </div>
+
+            <div class="row">
+              <label for="style" class="row-title">회피 방식</label>
+              <select id="style">
+                <option value="move">코너 이동</option>
+                <option value="fade">투명하게</option>
+              </select>
+            </div>
+
+            <label class="row">
+              <span class="label-stack">
+                <span class="row-title">자동 복귀</span>
+                <small>마우스가 떠나면 기본 위치로 돌아감</small>
+              </span>
+              <input id="autoReturn" class="switch" type="checkbox" role="switch" />
             </label>
           </div>
-        </div>
+        </details>
 
-        <label class="row">
-          <span>기본 코너 (Home)</span>
-          <select id="home">
-            <option value="TL">TL (좌상)</option>
-            <option value="TR">TR (우상)</option>
-            <option value="BL">BL (좌하)</option>
-            <option value="BR">BR (우하)</option>
-          </select>
-        </label>
+        <details id="hotkeyDetails">
+          <summary>단축키 및 조작</summary>
+          <div class="details-body">
+            <div class="row">
+              <label for="hold" class="row-title">조작 보조 키</label>
+              <select id="hold">
+                <option value="Ctrl+Alt">Ctrl + Alt</option>
+                <option value="Ctrl+Shift">Ctrl + Shift</option>
+                <option value="Alt+Shift">Alt + Shift</option>
+                <option value="Ctrl">Ctrl</option>
+                <option value="Alt">Alt</option>
+                <option value="Shift">Shift</option>
+              </select>
+            </div>
 
-        <label class="row">
-          <span>회피 축</span>
-          <select id="axis">
-            <option value="free">자유 (4방향)</option>
-            <option value="vertical">수직 (상하)</option>
-            <option value="horizontal">수평 (좌우)</option>
-          </select>
-        </label>
+            <div class="row">
+              <span class="row-title" id="hkClickThroughLabel">클릭 통과</span>
+              <button type="button" class="hotkey-btn" data-hotkey="clickThrough" id="hkClickThrough" aria-describedby="hkClickThroughLabel" title="누른 뒤 새 단축키 입력">Alt+G</button>
+            </div>
 
-        <label class="row">
-          <span>회피 방식</span>
-          <select id="style">
-            <option value="move">코너 이동 (Move)</option>
-            <option value="fade">투명화 (Fade)</option>
-          </select>
-        </label>
+            <div class="row">
+              <span class="row-title" id="hkDodgeLabel">자동 회피</span>
+              <button type="button" class="hotkey-btn" data-hotkey="dodge" id="hkDodge" aria-describedby="hkDodgeLabel" title="누른 뒤 새 단축키 입력">Alt+Shift+D</button>
+            </div>
 
-        <label class="row">
-          <span>자동 복귀 (Auto-Return)</span>
-          <input id="autoReturn" type="checkbox" />
-        </label>
+            <div class="row">
+              <span class="row-title" id="hkMuteLabel">음소거</span>
+              <button type="button" class="hotkey-btn" data-hotkey="mute" id="hkMute" aria-describedby="hkMuteLabel" title="누른 뒤 새 단축키 입력">Alt+M</button>
+            </div>
+
+            <ul class="tips">
+              <li>클릭 통과 중에도 <strong id="tipHoldKey">Ctrl+Alt</strong>를 누르고 있으면 창 이동·크기 조절·휠 투명도 조절이 됩니다.</li>
+              <li>사이트나 브라우저 PiP 버튼으로 연 창에도 투명도·클릭 통과·자동 회피가 적용됩니다.</li>
+            </ul>
+
+            <button id="resetHotkeys" type="button" class="btn btn-sub">기본값으로 되돌리기</button>
+          </div>
+        </details>
       </div>
-    </details>
+    </main>
 
-    <p class="tip">
-      • <strong>사이트·브라우저 자체 PiP 버튼</strong>으로 띄운 창에도 투명도·클릭 통과·자동 회피가 적용됩니다.<br />
-      • 클릭 통과 중에는 <strong id="tipHoldKey">Ctrl+Alt</strong>를 누른 채로 창 크기·위치 조절 및 <strong>마우스 휠 투명도 조절</strong>이 가능합니다.
-    </p>
-
-    <div id="engineBanner" class="banner">
-      GhostPiP Engine 다운로드 (PC 게임 오버레이 활성화)
-    </div>
+    <button id="engineBanner" type="button" class="banner">
+      <span class="label-stack">
+        <strong>PC 게임 위에도 띄우기</strong>
+        <small>GhostPiP Engine 설치</small>
+      </span>
+      <svg class="banner-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+    </button>
 
     <script src="../shared/settings.js"></script>
     <script src="popup.js"></script>

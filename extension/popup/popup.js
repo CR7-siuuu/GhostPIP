@@ -16,6 +16,7 @@
     clickThrough: document.getElementById("clickThrough"),
     dodgeEnabled: document.getElementById("dodgeEnabled"),
     showChat: document.getElementById("showChat"),
+    allSites: document.getElementById("allSites"),
     opacity: document.getElementById("opacity"),
     opacityValue: document.getElementById("opacityValue"),
     wheelSubHint: document.getElementById("wheelSubHint"),
@@ -52,7 +53,7 @@
     const isEnabled = Boolean(settings.enabled);
 
     document.body.toggleAttribute("data-disabled", !isEnabled);
-    els.modeBadge.textContent = !isEnabled ? "Disabled" : engine.connected ? "Engine Active" : "In-Tab Mode";
+    els.modeBadge.textContent = !isEnabled ? "꺼짐" : engine.connected ? "엔진 연결됨" : "웹 모드";
     els.modeBadge.toggleAttribute("data-active", isEnabled && Boolean(engine.connected));
     els.modeBadge.toggleAttribute("data-disabled", !isEnabled);
     els.engineBanner.hidden = Boolean(engine.connected || engine.installed);
@@ -71,10 +72,9 @@
     els.clickThrough.checked = settings.clickThrough;
     els.dodgeEnabled.checked = dodge.enabled;
     if (els.showChat) els.showChat.checked = Boolean(settings.showChat);
+    els.allSites.checked = settings.allSites;
 
-    const pct = Math.round(settings.opacity * 100);
-    els.opacity.value = String(pct);
-    els.opacityValue.textContent = `${pct}%`;
+    showOpacity(Math.round(settings.opacity * 100));
 
     for (const input of els.corners) {
       const corner = input.dataset.corner;
@@ -98,7 +98,7 @@
     els.autoReturn.checked = dodge.autoReturn;
     els.hold.value = hotkeys.hold;
     if (els.wheelSubHint) {
-      els.wheelSubHint.textContent = `클릭 통과 시 ${hotkeys.hold} + 휠`;
+      els.wheelSubHint.textContent = `영상 위 휠로도 조절 · 클릭 통과 중엔 ${hotkeys.hold} + 휠`;
     }
     if (els.tipHoldKey) {
       els.tipHoldKey.textContent = hotkeys.hold;
@@ -110,8 +110,14 @@
       const key = btn.dataset.hotkey;
       const isRec = recordingTarget === key;
       btn.toggleAttribute("data-recording", isRec);
-      btn.textContent = isRec ? "키 입력 대기... (Esc 취소)" : hotkeys[key];
+      btn.textContent = isRec ? "키 입력 · Esc 취소" : hotkeys[key];
     }
+  }
+
+  function showOpacity(pct) {
+    els.opacity.value = String(pct);
+    els.opacity.style.setProperty("--fill", `${((pct - 10) / 90) * 100}%`);
+    els.opacityValue.textContent = `${pct}%`;
   }
 
   async function applyPatch(partial) {
@@ -139,10 +145,11 @@
   els.clickThrough.addEventListener("change", () => applyIntent("TOGGLE_CLICK_THROUGH"));
   els.dodgeEnabled.addEventListener("change", () => applyIntent("TOGGLE_DODGE"));
   els.showChat?.addEventListener("change", () => applyPatch({ showChat: els.showChat.checked }));
+  els.allSites.addEventListener("change", () => applyPatch({ allSites: els.allSites.checked }));
 
   els.opacity.addEventListener("input", () => {
     const val = Number(els.opacity.value);
-    els.opacityValue.textContent = `${val}%`;
+    showOpacity(val);
     applyPatch({ opacity: val / 100 });
   });
 
@@ -200,6 +207,9 @@
       state.engine = { ...DEFAULT_ENGINE, ...res.engine };
       render();
     }
+    setTimeout(() => {
+      if (!state.engine.connected) chrome.tabs.create({ url: chrome.runtime.getURL("guide/guide.html#engineCard") });
+    }, 800);
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {

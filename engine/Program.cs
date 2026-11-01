@@ -40,9 +40,6 @@ public static unsafe class Program
     private const uint SWP_NOZORDER = 0x0004;
     private const uint SWP_NOACTIVATE = 0x0010;
 
-    private const uint TOKEN_QUERY = 0x0008;
-    private const int TokenElevation = 20;
-
     private delegate nint WndProcDelegate(nint hWnd, uint msg, nint wParam, nint lParam);
     private delegate nint LowLevelMouseProc(int nCode, nint wParam, nint lParam);
 
@@ -175,23 +172,6 @@ public static unsafe class Program
     [DllImport("user32.dll", EntryPoint = "PostMessageW", SetLastError = true)]
     private static extern bool PostMessageW(nint hWnd, uint Msg, nint wParam, nint lParam);
 
-    [DllImport("kernel32.dll")]
-    private static extern nint GetCurrentProcess();
-
-    [DllImport("advapi32.dll", SetLastError = true)]
-    private static extern bool OpenProcessToken(nint ProcessHandle, uint DesiredAccess, out nint TokenHandle);
-
-    [DllImport("advapi32.dll", SetLastError = true)]
-    private static extern bool GetTokenInformation(
-        nint TokenHandle,
-        int TokenInformationClass,
-        out int TokenInformation,
-        int TokenInformationLength,
-        out int ReturnLength);
-
-    [DllImport("kernel32.dll")]
-    private static extern bool CloseHandle(nint hObject);
-
     [DllImport("user32.dll", EntryPoint = "SetWindowsHookExW", SetLastError = true)]
     private static extern nint SetWindowsHookExW(int idHook, LowLevelMouseProc lpfn, nint hMod, uint dwThreadId);
 
@@ -268,10 +248,7 @@ public static unsafe class Program
             SetTimer(_hwnd, TIMER_ID_TICK, TICK_INTERVAL_MS, IntPtr.Zero);
             _nativeHost.Start();
 
-            _nativeHost.Send(new HelloMessage(
-                Protocol.EngineVersion,
-                IsElevated(),
-                hotkeyErrors));
+            _nativeHost.Send(new HelloMessage(Protocol.EngineVersion, hotkeyErrors));
 
             while (GetMessageW(out var msg, IntPtr.Zero, 0, 0) > 0)
             {
@@ -762,7 +739,7 @@ public static unsafe class Program
         if ((hotkeysChanged || enabledChanged) && _hotkeys is not null)
         {
             string[] hotkeyErrors = _hotkeys.Apply(_settings.Hotkeys);
-            _nativeHost?.Send(new HelloMessage(Protocol.EngineVersion, IsElevated(), hotkeyErrors));
+            _nativeHost?.Send(new HelloMessage(Protocol.EngineVersion, hotkeyErrors));
         }
 
         if (homeChanged || Array.IndexOf(DodgeSolver.CORNERS, _dodgeState.Corner) < 0)
@@ -999,23 +976,6 @@ public static unsafe class Program
             mi.rcWork.Top,
             mi.rcWork.Right,
             mi.rcWork.Bottom);
-    }
-
-    private static bool IsElevated()
-    {
-        if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, out nint token))
-            return false;
-
-        try
-        {
-            if (GetTokenInformation(token, TokenElevation, out int elevated, sizeof(int), out _))
-                return elevated != 0;
-            return false;
-        }
-        finally
-        {
-            CloseHandle(token);
-        }
     }
 
     private static void Cleanup()

@@ -1,8 +1,9 @@
 $ErrorActionPreference = "Stop"
 
 $HostName = "app.ghostpip.engine"
-$InstallerDir = $PSScriptRoot
-$ManifestPath = [System.IO.Path]::GetFullPath((Join-Path $InstallerDir "$HostName.json"))
+$InstallDir = Join-Path $env:LOCALAPPDATA "Programs\GhostPiP"
+
+Get-Process GhostPiP.Engine -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 
 $RegistryKeys = @(
     "HKCU:\Software\Google\Chrome\NativeMessagingHosts\$HostName",
@@ -10,15 +11,15 @@ $RegistryKeys = @(
     "HKCU:\Software\Naver\Naver Whale\NativeMessagingHosts\$HostName",
     "HKCU:\Software\BraveSoftware\Brave-Browser\NativeMessagingHosts\$HostName"
 )
-
 foreach ($RegKey in $RegistryKeys) {
     if (Test-Path -LiteralPath $RegKey) {
         Remove-Item -LiteralPath $RegKey -Recurse -Force
     }
 }
 
-if (Test-Path -LiteralPath $ManifestPath) {
-    Remove-Item -LiteralPath $ManifestPath -Force
+if (Test-Path -LiteralPath $InstallDir) {
+    Start-Sleep -Milliseconds 200
+    Remove-Item -LiteralPath $InstallDir -Recurse -Force
 }
 
-Write-Output "Unregistered $HostName"
+Write-Output "Uninstalled $HostName"

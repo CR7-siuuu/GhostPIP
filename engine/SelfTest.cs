@@ -322,7 +322,7 @@ public static class SelfTest
                Math.Abs(po.Rect.W - 480) < 1e-9,
                "PIP_OPENED parsed");
 
-        byte[] helloBytes = Protocol.SerializeOutgoing(new HelloMessage("0.1.0", false, ["Alt+G"]));
+        byte[] helloBytes = Protocol.SerializeOutgoing(new HelloMessage("1.0.0", ["Alt+G"]));
         using var helloDoc = JsonDocument.Parse(helloBytes);
         Assert(helloDoc.RootElement.GetProperty("type").GetString() == "HELLO" &&
                helloDoc.RootElement.GetProperty("hotkeyErrors")[0].GetString() == "Alt+G",

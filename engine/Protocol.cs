@@ -61,7 +61,7 @@ public sealed record TestWheelMessage(int X, int Y, int Delta, bool Hold = true)
 public sealed record TestHoldMessage(bool? Hold) : IncomingMessage("TEST_HOLD");
 
 public abstract record OutgoingMessage(string Type);
-public sealed record HelloMessage(string EngineVersion, bool Elevated, string[] HotkeyErrors) : OutgoingMessage("HELLO");
+public sealed record HelloMessage(string EngineVersion, string[] HotkeyErrors) : OutgoingMessage("HELLO");
 public sealed record IntentMessage(string Intent, string? Corner = null, double? Opacity = null) : OutgoingMessage("INTENT");
 public sealed record PipBoundMessage(int TabId) : OutgoingMessage("PIP_BOUND");
 public sealed record PipLostMessage(int TabId, string Reason) : OutgoingMessage("PIP_LOST");
@@ -71,7 +71,7 @@ public sealed record PongMessage() : OutgoingMessage("PONG");
 public static class Protocol
 {
     public const int ProtocolVersion = 1;
-    public const string EngineVersion = "0.1.0";
+    public const string EngineVersion = "1.0.0";
 
     public static bool TryParseIncoming(string json, out IncomingMessage? message) =>
         TryParseIncoming(Encoding.UTF8.GetBytes(json), out message);
@@ -334,7 +334,6 @@ public static class Protocol
             {
                 case HelloMessage hello:
                     writer.WriteString("engineVersion", hello.EngineVersion);
-                    writer.WriteBoolean("elevated", hello.Elevated);
                     writer.WritePropertyName("hotkeyErrors");
                     writer.WriteStartArray();
                     foreach (var err in hello.HotkeyErrors)

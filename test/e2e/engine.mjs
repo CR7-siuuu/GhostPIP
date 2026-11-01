@@ -121,7 +121,7 @@ function getEnginePids() {
 
 execFileSync(
   "powershell",
-  ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(ROOT, "engine/installer/install.ps1")],
+  ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(ROOT, "engine/installer/install.ps1"), "-InPlace"],
   { stdio: "inherit" },
 );
 await sleep(1600);
@@ -182,20 +182,20 @@ try {
           badge: document.getElementById("modeBadge").textContent,
           bannerHidden: document.getElementById("engineBanner").hidden,
         })),
-      (s) => s.badge === "Engine Active" && s.bannerHidden === true,
+      (s) => s.badge === "엔진 연결됨" && s.bannerHidden === true,
       4000,
     );
     const engineState = await sw.evaluate(async () => (await chrome.storage.session.get("engine")).engine);
     spawnedPids = getEnginePids().filter((pid) => !initialPids.has(pid));
     const ok =
-      st.badge === "Engine Active" &&
+      st.badge === "엔진 연결됨" &&
       st.bannerHidden === true &&
       engineState?.connected === true &&
-      engineState?.engineVersion === "0.1.0" &&
+      engineState?.engineVersion === "1.0.0" &&
       spawnedPids.length >= 1;
     return {
       ok,
-      info: `badge="${st.badge}" bannerHidden=${st.bannerHidden} version=${engineState?.engineVersion} elevated=${engineState?.elevated} spawnedPids=${spawnedPids.join(",")}`,
+      info: `badge="${st.badge}" bannerHidden=${st.bannerHidden} version=${engineState?.engineVersion} spawnedPids=${spawnedPids.join(",")}`,
     };
   });
 
@@ -317,6 +317,29 @@ try {
       };
     });
 
+    const opacityBeforeWheel = await sw.evaluate(async () => (await chrome.storage.local.get("settings")).settings?.opacity);
+    const shrunk = inspectWin32Pip(pipSize.w, pipSize.h - 420);
+    const wheelPt = {
+      x: Math.round((shrunk.rect.l + shrunk.rect.r) / 2),
+      y: Math.round((shrunk.rect.t + shrunk.rect.b) / 2),
+    };
+    await sw.evaluate((pt) => {
+      GhostPiPBackground.postToEngine({ v: 1, type: "TEST_WHEEL", x: pt.x, y: pt.y, delta: -120, hold: true });
+    }, wheelPt);
+    const opacityAfterWheel = await poll(
+      () => sw.evaluate(async () => (await chrome.storage.local.get("settings")).settings?.opacity),
+      (op) => op !== opacityBeforeWheel,
+      2000,
+    );
+    await sleep(400);
+    const chatStaysHiddenAfterWheel =
+      opacityAfterWheel !== opacityBeforeWheel &&
+      (await videoPage.evaluate(() => !documentPictureInPicture.window.document.querySelector("iframe")));
+    await popupPage.evaluate(
+      (op) => chrome.runtime.sendMessage({ v: 1, type: "PATCH_SETTINGS", patch: { opacity: op } }),
+      opacityBeforeWheel,
+    );
+
     await videoPage.evaluate(() => {
       documentPictureInPicture.window.document.querySelector('[data-action="toggleChat"]').click();
     });
@@ -403,13 +426,14 @@ try {
       chatBefore.hasIframe === true &&
       chatAfterHide.label === "채팅창 보기" &&
       chatAfterHide.hasIframe === false &&
+      chatStaysHiddenAfterWheel === true &&
       barHiddenWhenShowChatOff === true &&
       pipSkipAdWorked === true &&
       Boolean(chatHiddenWin) &&
       Boolean(chatRestoredWin);
     return {
       ok,
-      info: `bound=${boundEntry?.bound} layered=${win.layered} alpha=${win.alpha} rgnTop=${win.rgnTop}(hover:${winWhileHovered?.rgnTop}) hoverBar=${hoveredState.barOpacity} showChatOffHidden=${barHiddenWhenShowChatOff} chatBtn="${chatBefore.label}"->"${chatAfterHide.label}" h=${win.rect.h}->${chatHiddenWin?.rect?.h}->${chatRestoredWin?.rect?.h} rect=${fmt(win.rect)}`,
+      info: `bound=${boundEntry?.bound} layered=${win.layered} alpha=${win.alpha} rgnTop=${win.rgnTop}(hover:${winWhileHovered?.rgnTop}) hoverBar=${hoveredState.barOpacity} showChatOffHidden=${barHiddenWhenShowChatOff} chatBtn="${chatBefore.label}"->"${chatAfterHide.label}" wheelKeepsChatHidden=${chatStaysHiddenAfterWheel} h=${win.rect.h}->${chatHiddenWin?.rect?.h}->${chatRestoredWin?.rect?.h} rect=${fmt(win.rect)}`,
     };
   });
 

@@ -6,7 +6,6 @@ const DEFAULT_ENGINE = {
   connected: false,
   installed: false,
   engineVersion: null,
-  elevated: false,
   hotkeyErrors: [],
   protocolMismatch: false,
 };
@@ -256,8 +255,7 @@ function onEngineMessage(msg) {
       const engine = {
         connected: true,
         installed: true,
-        engineVersion: typeof msg.engineVersion === "string" ? msg.engineVersion : "0.1.0",
-        elevated: Boolean(msg.elevated),
+        engineVersion: typeof msg.engineVersion === "string" ? msg.engineVersion : null,
         hotkeyErrors: Array.isArray(msg.hotkeyErrors) ? msg.hotkeyErrors.map(String) : [],
         protocolMismatch: msg.v !== 1,
       };
@@ -449,7 +447,11 @@ function connectEngine() {
   return port;
 }
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  // Only store installs carry update_url; unpacked/dev installs (and test runs) skip onboarding.
+  if (reason === "install" && chrome.runtime.getManifest().update_url) {
+    chrome.tabs.create({ url: chrome.runtime.getURL("guide/guide.html") }).catch(() => {});
+  }
   updateSettings((s) => ({ ok: true, settings: s }));
   connectEngine();
   if (chrome.tabs?.query && chrome.scripting?.executeScript) {

@@ -8,11 +8,21 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>ghostpip.ico</ApplicationIcon>
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
     <OptimizationPreference>Size</OptimizationPreference>
+
+    <Version>1.0.0</Version>
+    <Company>GhostPiP</Company>
+    <Product>GhostPiP</Product>
+    <AssemblyTitle>GhostPiP Local Helper</AssemblyTitle>
+    <Copyright>Copyright (C) 2026 GhostPiP</Copyright>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+
+    <!-- Icon, manifest and VERSIONINFO come from GhostPiP.Engine.rc (rebuild the .res with
+         scripts/build-res.ps1). The SDK-generated resource would name the intermediate .dll as
+         OriginalFilename, which no longer matches the shipped .exe. -->
+    <Win32Resource>GhostPiP.Engine.res</Win32Resource>
   </PropertyGroup>
 
 </Project>

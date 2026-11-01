@@ -20,6 +20,7 @@
     clickThrough: false,
     opacity: 0.7,
     showChat: true,
+    allSites: true,
     dodge: {
       enabled: true,
       axis: "free",

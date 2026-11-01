@@ -1,51 +1,58 @@
 param(
-    [string]$ExePath = ""
+    [string]$ExePath = "",
+    [string[]]$ExtensionId = @(),
+    # Dev/test: register the build output where it is instead of copying it to %LOCALAPPDATA%.
+    [switch]$InPlace
 )
 
 $ErrorActionPreference = "Stop"
 
 $HostName = "app.ghostpip.engine"
-$ExtensionId = "iphdokhjjgakpbmhemjjgglcdgjfedea"
+# Unpacked/dev builds use the ID pinned by the manifest "key". Add the Chrome Web Store ID here
+# (or pass -ExtensionId) once the store listing exists.
+$DefaultExtensionIds = @("iphdokhjjgakpbmhemjjgglcdgjfedea")
 $InstallerDir = $PSScriptRoot
 $EngineDir = Split-Path -Parent $InstallerDir
+$InstallDir = Join-Path $env:LOCALAPPDATA "Programs\GhostPiP"
+$InstalledExe = Join-Path $InstallDir "GhostPiP.Engine.exe"
+$ManifestPath = Join-Path $InstallDir "$HostName.json"
 
 if ([string]::IsNullOrWhiteSpace($ExePath)) {
     $Candidates = @(
         (Join-Path $InstallerDir "GhostPiP.Engine.exe"),
         (Join-Path $EngineDir "GhostPiP.Engine.exe"),
-        (Join-Path $EngineDir "bin\Release\net8.0-windows\win-x64\publish\GhostPiP.Engine.exe"),
-        (Join-Path $EngineDir "bin\Release\net8.0-windows\win-x64\GhostPiP.Engine.exe"),
-        (Join-Path $EngineDir "bin\Release\net8.0-windows\GhostPiP.Engine.exe"),
-        (Join-Path $EngineDir "bin\Debug\net8.0-windows\win-x64\GhostPiP.Engine.exe"),
-        (Join-Path $EngineDir "bin\Debug\net8.0-windows\GhostPiP.Engine.exe")
+        (Join-Path $EngineDir "bin\Release\net8.0-windows\win-x64\publish\GhostPiP.Engine.exe")
     )
-    foreach ($Candidate in $Candidates) {
-        if (Test-Path -LiteralPath $Candidate) {
-            $ExePath = $Candidate
-            break
-        }
-    }
-    if ([string]::IsNullOrWhiteSpace($ExePath)) {
-        $ExePath = $Candidates[0]
-    }
+    $ExePath = $Candidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
 }
 
-$ResolvedExePath = [System.IO.Path]::GetFullPath($ExePath)
-$ManifestPath = [System.IO.Path]::GetFullPath((Join-Path $InstallerDir "$HostName.json"))
+if ([string]::IsNullOrWhiteSpace($ExePath) -or -not (Test-Path -LiteralPath $ExePath)) {
+    Write-Error ("GhostPiP.Engine.exe not found next to the installer. If your antivirus quarantined it, " +
+        "restore it from quarantine (it is a false positive for unsigned builds) and run install.bat again.")
+}
 
+Get-Process GhostPiP.Engine -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Start-Sleep -Milliseconds 200
+
+New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
+$SourceFull = [System.IO.Path]::GetFullPath($ExePath)
+if ($InPlace) {
+    $InstalledExe = $SourceFull
+} elseif ($SourceFull -ne [System.IO.Path]::GetFullPath($InstalledExe)) {
+    Copy-Item -LiteralPath $SourceFull -Destination $InstalledExe -Force
+}
+Copy-Item -LiteralPath (Join-Path $InstallerDir "uninstall.ps1") -Destination (Join-Path $InstallDir "uninstall.ps1") -Force
+
+$Ids = @($DefaultExtensionIds + $ExtensionId | Where-Object { $_ } | Select-Object -Unique)
 $ManifestObj = [ordered]@{
     name = $HostName
     description = "GhostPiP Local Helper Engine"
-    path = $ResolvedExePath
+    path = $InstalledExe
     type = "stdio"
-    allowed_origins = @(
-        "chrome-extension://$ExtensionId/"
-    )
+    allowed_origins = @($Ids | ForEach-Object { "chrome-extension://$_/" })
 }
-
-$Json = $ManifestObj | ConvertTo-Json -Depth 4
 $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-[System.IO.File]::WriteAllText($ManifestPath, $Json + "`n", $Utf8NoBom)
+[System.IO.File]::WriteAllText($ManifestPath, ($ManifestObj | ConvertTo-Json -Depth 4) + "`n", $Utf8NoBom)
 
 $RegistryKeys = @(
     "HKCU:\Software\Google\Chrome\NativeMessagingHosts\$HostName",
@@ -53,7 +60,6 @@ $RegistryKeys = @(
     "HKCU:\Software\Naver\Naver Whale\NativeMessagingHosts\$HostName",
     "HKCU:\Software\BraveSoftware\Brave-Browser\NativeMessagingHosts\$HostName"
 )
-
 foreach ($RegKey in $RegistryKeys) {
     if (-not (Test-Path -LiteralPath $RegKey)) {
         New-Item -Path $RegKey -Force | Out-Null
@@ -61,8 +67,4 @@ foreach ($RegKey in $RegistryKeys) {
     Set-Item -LiteralPath $RegKey -Value $ManifestPath
 }
 
-if ($env:GHOSTPIP_KEEP_RUNNING -ne "1") {
-    Get-Process GhostPiP.Engine -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-}
-
-Write-Output "Registered $HostName -> $ManifestPath (exe: $ResolvedExePath)"
+Write-Output "Installed $HostName -> $InstalledExe"

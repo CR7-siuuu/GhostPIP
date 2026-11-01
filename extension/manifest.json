@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "GhostPiP",
-  "version": "0.1.0",
-  "description": "화면을 안 가리는 투명/클릭통과/자동회피 PIP",
+  "version": "1.0.0",
+  "description": "화면을 가리지 않는 투명 · 클릭 통과 · 자동 회피 PiP. 유튜브, 치지직, SOOP, 트위치 지원",
   "minimum_chrome_version": "116",
   "icons": {
     "16": "icons/icon16.png",

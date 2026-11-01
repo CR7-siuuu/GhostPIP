@@ -1,0 +1,31 @@
+1 ICON "ghostpip.ico"
+1 24 "app.manifest"
+
+1 VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0x0L
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041204B0"
+        BEGIN
+            VALUE "CompanyName", "GhostPiP"
+            VALUE "FileDescription", "GhostPiP Local Helper (PiP window overlay for Chrome)"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "InternalName", "GhostPiP.Engine"
+            VALUE "LegalCopyright", "Copyright (C) 2026 GhostPiP"
+            VALUE "OriginalFilename", "GhostPiP.Engine.exe"
+            VALUE "ProductName", "GhostPiP"
+            VALUE "ProductVersion", "1.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0412, 1200
+    END
+END

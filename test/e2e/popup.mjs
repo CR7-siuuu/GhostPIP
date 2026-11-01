@@ -146,7 +146,7 @@ try {
     const init = await readPopupState();
     await popupPage.screenshot({ path: path.join(OUT, "popup_1_initial.png") }).catch(() => {});
     const initOk =
-      init.badge === "In-Tab Mode" &&
+      init.badge === "웹 모드" &&
       init.bannerHidden === false &&
       init.clickThrough === DEFAULTS.clickThrough &&
       init.dodgeEnabled === DEFAULTS.dodge.enabled &&
@@ -163,7 +163,7 @@ try {
     );
     const active = await poll(
       readPopupState,
-      (s) => s.badge === "Engine Active" && s.bannerHidden === true && s.warningHidden === false && s.warningText.includes("Alt+G"),
+      (s) => s.badge === "엔진 연결됨" && s.bannerHidden === true && s.warningHidden === false && s.warningText.includes("Alt+G"),
       2000,
     );
     await sw.evaluate(() =>
@@ -173,17 +173,17 @@ try {
     );
     const restored = await poll(
       readPopupState,
-      (s) => s.badge === "In-Tab Mode" && s.bannerHidden === false && s.warningHidden === true,
+      (s) => s.badge === "웹 모드" && s.bannerHidden === false && s.warningHidden === true,
       2000,
     );
     const ok =
       initOk &&
       init.warningHidden === true &&
-      active.badge === "Engine Active" &&
+      active.badge === "엔진 연결됨" &&
       active.bannerHidden &&
       !active.warningHidden &&
       active.warningText.includes("Alt+G") &&
-      restored.badge === "In-Tab Mode" &&
+      restored.badge === "웹 모드" &&
       restored.warningHidden === true;
     return {
       ok,
@@ -347,7 +347,7 @@ try {
           bodyDisabled: document.body.hasAttribute("data-disabled"),
           bannerHidden: document.getElementById("engineBanner").hidden,
         })),
-      (d) => d.enabled === false && d.badge === "Disabled" && d.bodyDisabled === true && d.bannerHidden === true,
+      (d) => d.enabled === false && d.badge === "꺼짐" && d.bodyDisabled === true && d.bannerHidden === true,
       2000,
     );
     await videoPage.bringToFront();
@@ -381,7 +381,7 @@ try {
       hkUpdated.btn === "F8" &&
       hkUpdated.kbd === "F8" &&
       disabledPopup.enabled === false &&
-      disabledPopup.badge === "Disabled" &&
+      disabledPopup.badge === "꺼짐" &&
       disabledPopup.bannerHidden === true &&
       disabledVideo.inTabOpen === false &&
       launcherStillClosed === true &&
