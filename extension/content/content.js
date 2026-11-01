@@ -1493,11 +1493,13 @@
     body { display: flex; flex-direction: column; position: relative; }
     video { flex: 1 1 auto; min-height: 0; width: 100%; height: 100%; object-fit: fill; background: #000; }
     iframe { flex: 0 0 ${PIP_CHAT_HEIGHT}px; width: 100%; border: 0; background: #fff; }
-    .pip-bar { position: fixed; top: 8px; left: 50%; z-index: 10; opacity: 0; pointer-events: none;
-      transform: translateX(-50%) translateY(-4px); transition: opacity 0.16s ease, transform 0.16s ease; }
+    .pip-bar { position: fixed; bottom: 14px; left: 50%; z-index: 12; opacity: 0; pointer-events: auto;
+      transform: translateX(-50%); transition: opacity 0.14s ease; }
+    body[data-chat-open] .pip-bar { bottom: ${PIP_CHAT_HEIGHT + 14}px; }
+    .pip-bar button { padding: 7px 14px; font-size: 12.5px; pointer-events: auto; }
     .pip-bar button[hidden] { display: none !important; }
     body:not([data-click-through]):hover .pip-bar,
-    body[data-hovered] .pip-bar { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+    body[data-hovered] .pip-bar { opacity: 1; pointer-events: auto; }
     .pip-handle { position: fixed; z-index: 11; pointer-events: none; opacity: 0; transition: opacity 0.16s ease; }
     body:not([data-click-through]):hover .pip-handle,
     body[data-hovered] .pip-handle { pointer-events: auto; opacity: 1; }
@@ -1612,13 +1614,21 @@
     }
     doc.body.append(pipBar);
 
+    let engineHovered = false;
+    let pointerHovered = false;
+    const syncHovered = () => {
+      doc.body.toggleAttribute("data-hovered", Boolean(engineHovered || pointerHovered));
+    };
     const onPointerHover = (e) => {
-      if (!isClickThrough?.() || isHoldEvent?.(e)) doc.body.setAttribute("data-hovered", "");
-      else doc.body.removeAttribute("data-hovered");
+      pointerHovered = Boolean(!isClickThrough?.() || isHoldEvent?.(e));
+      syncHovered();
     };
     doc.documentElement.addEventListener("pointerenter", onPointerHover);
     doc.documentElement.addEventListener("pointermove", onPointerHover);
-    doc.documentElement.addEventListener("mouseleave", () => doc.body.removeAttribute("data-hovered"));
+    doc.documentElement.addEventListener("mouseleave", () => {
+      pointerHovered = false;
+      syncHovered();
+    });
 
     let frame = null;
     let chatShown = Boolean(showChat && chatUrl);
@@ -1667,12 +1677,15 @@
     }
 
     function setHovered(hovered) {
-      doc.body.toggleAttribute("data-hovered", Boolean(hovered));
+      engineHovered = Boolean(hovered);
+      if (!engineHovered) pointerHovered = false;
+      syncHovered();
     }
 
     function setClickThrough(enabled) {
       doc.body.toggleAttribute("data-click-through", Boolean(enabled));
-      if (enabled) doc.body.removeAttribute("data-hovered");
+      if (enabled) pointerHovered = false;
+      syncHovered();
     }
 
     function setSkipAdVisible(visible) {

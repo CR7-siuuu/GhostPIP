@@ -12,6 +12,7 @@ fs.mkdirSync(DIST, { recursive: true });
 
 const PUBLISH_DIR = path.join(STAGE, "publish");
 fs.mkdirSync(PUBLISH_DIR, { recursive: true });
+fs.mkdirSync(path.join(ROOT, "engine/bin/Release/net8.0-windows/win-x64/native"), { recursive: true });
 
 console.log("[1/3] Publishing GhostPiP.Engine.exe (Release win-x64 Native AOT)...");
 execFileSync(
@@ -30,16 +31,28 @@ execFileSync(
   { stdio: "inherit" },
 );
 
-const exePath = path.join(PUBLISH_DIR, "GhostPiP.Engine.exe");
-if (!fs.existsSync(exePath)) {
-  throw new Error(`Published executable not found at ${exePath}`);
+function waitFileReady(filePath, timeoutMs = 5000) {
+  const deadline = Date.now() + timeoutMs;
+  while (true) {
+    try {
+      return fs.readFileSync(filePath);
+    } catch (err) {
+      if (Date.now() >= deadline) throw err;
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 150);
+    }
+  }
 }
+
+const exePath = path.join(PUBLISH_DIR, "GhostPiP.Engine.exe");
+waitFileReady(exePath);
 
 const defaultPublishDir = path.join(ROOT, "engine/bin/Release/net8.0-windows/win-x64/publish");
 fs.mkdirSync(defaultPublishDir, { recursive: true });
 try {
-  fs.copyFileSync(exePath, path.join(defaultPublishDir, "GhostPiP.Engine.exe"));
+  execFileSync("taskkill", ["/F", "/IM", "GhostPiP.Engine.exe"], { stdio: "ignore" });
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 200);
 } catch {}
+fs.copyFileSync(exePath, path.join(defaultPublishDir, "GhostPiP.Engine.exe"));
 
 function walkFiles(dir, baseDir = dir, out = []) {
   for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -62,7 +75,7 @@ function createZipFromDir(sourceDir, zipPath) {
 
   for (const { full, rel } of files) {
     const nameBuf = Buffer.from(rel, "utf8");
-    const raw = fs.readFileSync(full);
+    const raw = waitFileReady(full);
     const compressed = zlib.deflateRawSync(raw, { level: 9 });
     const useDeflate = compressed.length < raw.length;
     const data = useDeflate ? compressed : raw;

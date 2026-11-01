@@ -117,7 +117,7 @@ public sealed unsafe class PipTracker : IDisposable
 
     public void OnPipOpened(PipOpenedMessage msg, long nowMs)
     {
-        if (BoundHwnd != IntPtr.Zero && BoundTabId < 0 && GhostStyle.IsWindow(BoundHwnd) && IsWindowVisible(BoundHwnd))
+        if (BoundHwnd != IntPtr.Zero && (BoundTabId < 0 || BoundTabId == msg.TabId) && GhostStyle.IsWindow(BoundHwnd) && IsWindowVisible(BoundHwnd))
         {
             BoundTabId = msg.TabId;
             BoundKind = msg.Kind;

@@ -446,37 +446,33 @@ public static unsafe class Program
 
     private static string? GetResizeBorderDir(int x, int y, PipTracker.RECT rc, int clipT)
     {
-        int visL = rc.Left + 8;
+        int visL = clipT > 0 ? rc.Left + 8 : rc.Left;
         int visT = rc.Top;
-        int visR = Math.Max(visL + 40, rc.Right - 8);
-        int visB = clipT > 0 ? Math.Max(visT + 40, rc.Bottom - 8 - clipT) : Math.Max(visT + 40, rc.Bottom - 8);
+        int visR = clipT > 0 ? Math.Max(visL + 40, rc.Right - 8) : rc.Right;
+        int visB = clipT > 0 ? Math.Max(visT + 40, rc.Bottom - 8 - clipT) : rc.Bottom;
 
-        if (x < rc.Left - 6 || x > rc.Right + 6 || y < visT - 6 || y > rc.Bottom + 6)
+        if (x < visL - 6 || x > visR + 6 || y < visT - 6 || y > visB + 6)
             return null;
 
-        bool cornerW = x >= rc.Left - 6 && x <= visL + 18;
-        bool cornerE = x >= visR - 18 && x <= rc.Right + 6;
-        bool cornerN = y >= visT - 6 && y <= visT + 18;
-        bool cornerS = (y >= visB - 18 && y <= visB + 12) || (y >= rc.Bottom - 18 && y <= rc.Bottom + 6);
+        bool cornerW = x >= visL - 6 && x <= visL + 16;
+        bool cornerE = x >= visR - 16 && x <= visR + 6;
+        bool cornerN = y >= visT - 6 && y <= visT + 16;
+        bool cornerS = y >= visB - 16 && y <= visB + 6;
 
         if (cornerN && cornerW) return "nw";
         if (cornerN && cornerE) return "ne";
         if (cornerS && cornerW) return "sw";
         if (cornerS && cornerE) return "se";
 
-        if (y > visB + 12 && y < rc.Bottom - 12)
-            return null;
-
-        bool nearW = x >= rc.Left - 6 && x <= visL + 12;
-        bool nearE = x >= visR - 12 && x <= rc.Right + 6;
-        bool nearN = y >= visT - 6 && y <= visT + 10;
-        bool nearS = (y >= visB - 12 && y <= visB + 12) || (y >= rc.Bottom - 12 && y <= rc.Bottom + 6);
+        bool nearW = x >= visL - 6 && x <= visL + 8;
+        bool nearE = x >= visR - 8 && x <= visR + 6;
+        bool nearN = y >= visT - 6 && y <= visT + 8;
+        bool nearS = y >= visB - 8 && y <= visB + 6;
 
         if (nearW) return "w";
         if (nearE) return "e";
         if (nearS) return "s";
-        int centerX = (rc.Left + rc.Right) / 2;
-        if (nearN && Math.Abs(x - centerX) > 95) return "n";
+        if (nearN) return "n";
         return null;
     }
 
@@ -507,10 +503,6 @@ public static unsafe class Program
             return false;
 
         clipT = _ghostStyle.GetHeaderShift(pipHwnd);
-        int visB = clipT > 0 ? Math.Max(rc.Top + 40, rc.Bottom - 8 - clipT) : rc.Bottom;
-        if (clipT > 0 && y > visB + 12 && GetResizeBorderDir(x, y, rc, clipT) is null)
-            return false;
-
         int relX = x - rc.Left;
         int relY = y - rc.Top;
         translatedLParam = MakeLParam(relX, relY + clipT);
@@ -565,16 +557,17 @@ public static unsafe class Program
                         int relX = info.pt.X - upRc.Left;
                         int relY = info.pt.Y - upRc.Top;
                         nint translated = MakeLParam(relX, relY + downClipT);
+                        nint inputTarget = _ghostStyle.GetInputTargetHwnd(downHwnd);
                         if (wasHold && !wasDrag)
                         {
                             SetForegroundWindow(downHwnd);
-                            PostMessageW(downHwnd, WM_MOUSEMOVE, IntPtr.Zero, translated);
-                            PostMessageW(downHwnd, WM_LBUTTONDOWN, MK_LBUTTON, translated);
-                            PostMessageW(downHwnd, WM_LBUTTONUP, IntPtr.Zero, translated);
+                            PostMessageW(inputTarget, WM_MOUSEMOVE, IntPtr.Zero, translated);
+                            PostMessageW(inputTarget, WM_LBUTTONDOWN, MK_LBUTTON, translated);
+                            PostMessageW(inputTarget, WM_LBUTTONUP, IntPtr.Zero, translated);
                         }
                         else if (!wasHold && downClipT > 0)
                         {
-                            PostMessageW(downHwnd, WM_LBUTTONUP, IntPtr.Zero, translated);
+                            PostMessageW(inputTarget, WM_LBUTTONUP, IntPtr.Zero, translated);
                         }
                     }
                     return (nint)1;
@@ -603,8 +596,7 @@ public static unsafe class Program
                             _customPos = true;
                             _justResized = true;
                             _waitCursorLeave = true;
-                            GhostStyle.SetWindowPos(_pipDownHwnd, IntPtr.Zero, nextL, nextT, nextW, nextH, SWP_NOZORDER | SWP_NOACTIVATE);
-                            _ghostStyle.Apply(_pipDownHwnd, 1.0, clickThrough: false, hideHeader: true);
+                            _ghostStyle.MoveAndResizeLogicalWindow(_pipDownHwnd, nextL, nextT, nextW, nextH);
                         }
                     }
                     else if (_pipDownHold)
@@ -836,6 +828,7 @@ public static unsafe class Program
             _customPos = false;
             _wheelPreview = false;
             _dodgeState = DodgeSolver.InitialState(_settings.Dodge.Home);
+            _ghostStyle.Apply(pipHwnd, _settings.Opacity, _settings.ClickThrough, hideHeader: true);
             SnapWindowToCorner(pipHwnd, _settings.Dodge.Home);
         }
 

@@ -60,11 +60,12 @@ def proc_name(pid):
 
 cands = []
 def cb(hwnd, _):
-    if not win32gui.IsWindowVisible(hwnd) or win32gui.GetClassName(hwnd) != "Chrome_WidgetWin_1": return True
+    cn = win32gui.GetClassName(hwnd)
+    if not win32gui.IsWindowVisible(hwnd) or cn not in ("Chrome_WidgetWin_1", "GhostPiPClipHost"): return True
     ex = win32gui.GetWindowLong(hwnd, GWL_EXSTYLE)
     if not (ex & WS_EX_TOPMOST): return True
     _, pid = win32process.GetWindowThreadProcessId(hwnd)
-    if proc_name(pid) != "chrome.exe": return True
+    if proc_name(pid) not in ("chrome.exe", "ghostpip.engine.exe"): return True
     l, t, r, b = win32gui.GetWindowRect(hwnd)
     if r - l < 150 or b - t < 150: return True
     cr = wt.COLORREF(); alpha = ctypes.c_byte(); flags = wt.DWORD()
@@ -77,9 +78,11 @@ def cb(hwnd, _):
     d3d_rel_t = 0
     def child_cb(ch, __):
         nonlocal d3d_rel_t
-        if win32gui.GetClassName(ch) == "Intermediate D3D Window":
+        ccn = win32gui.GetClassName(ch)
+        if ccn in ("Chrome_WidgetWin_1", "Intermediate D3D Window"):
             cl, ct, cr2, cb2 = win32gui.GetWindowRect(ch)
-            d3d_rel_t = ct - t
+            if ct - t < d3d_rel_t:
+                d3d_rel_t = ct - t
         return True
     win32gui.EnumChildWindows(hwnd, child_cb, None)
     cx = (l + r) // 2
