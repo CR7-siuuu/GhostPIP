@@ -15,8 +15,8 @@
       ]
     },
     "condition": {
-      "urlFilter": "*",
-      "resourceTypes": ["sub_frame", "main_frame"]
+      "regexFilter": "^https://(chzzk\\.naver\\.com/live/[^/]+/chat|www\\.youtube\\.com/live_chat|www\\.twitch\\.tv/popout/[^/]+/chat)",
+      "resourceTypes": ["sub_frame"]
     }
   }
 ]

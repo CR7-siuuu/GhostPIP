@@ -88,6 +88,17 @@
         "content/overlay.css"
       ],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://chzzk.naver.com/live/*/chat",
+        "https://www.youtube.com/live_chat*",
+        "https://www.twitch.tv/popout/*/chat*"
+      ],
+      "js": ["content/chat-frame.js"],
+      "css": ["content/chat-frame.css"],
+      "all_frames": true,
+      "run_at": "document_start"
     }
   ],
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5+FqCVUGzZFFRG/E8DijX9hKKOqrKs9kUREC8iXclcyKlrC7oIcMwytlRnsleMF0cIHGxV3ee3PSTv8wgvqaZ3JlxnqK7kINId00Uo610m0TcS4uzMMQkUISEHwBovb+HZFQaQxc7U2Lj6J6hBE1wQGMnkiPJIiEL1XmYXog92hr+cheacU1EmkiW0yWpgWjFjpfToduzUovu27QvVf7JTKGlfZnOI2ApXAJ6vK6msQ3DecesfYzRnEEkFuF3RVPeRFEETgfwrza69DcR9xRV2ZsEqSnV7di0miv6N17j5UOw8ezdtTzfM2FmIzgIFdNoll4TEynInpoXL2YiCNGIQIDAQAB"

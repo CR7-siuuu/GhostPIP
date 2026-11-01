@@ -1,0 +1,6 @@
+/* 치지직 채팅 팝아웃: 주간 후원 랭킹 배너. Class names are hashed CSS modules, so match the stable
+   local part ("_ranking_button_", "_ranking_close_") and hide the wrapper that holds it. */
+html[data-ghostpip-embed] aside[class*="_is_popup_chat_"] > div:has(> [class*="_ranking_button_"]),
+html[data-ghostpip-embed] aside[class*="_is_popup_chat_"] > div:has(> [class*="_ranking_close_"]) {
+  display: none !important;
+}

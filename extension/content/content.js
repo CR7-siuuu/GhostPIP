@@ -19,6 +19,7 @@
   const DODGE_TICK_MS = 50;
   const SCAN_THROTTLE_MS = 250;
   const PIP_CHAT_HEIGHT = 420;
+  const MIN_CHAT_HEIGHT = 120;
   const GP_VARS = ["--gp-x", "--gp-y", "--gp-w", "--gp-h", "--gp-opacity"];
   const RESIZE_DIRS = ["nw", "ne", "sw", "se", "n", "s", "e", "w"];
   const HOLD = {
@@ -91,7 +92,8 @@
         ? { rx: Math.min(1, Math.max(0, raw.pos.rx)), ry: Math.min(1, Math.max(0, raw.pos.ry)) }
         : null;
     const chatOpen = Boolean(raw?.chatOpen);
-    return { width, height, pos, chatOpen };
+    const sizeOrNull = (v) => (Number.isFinite(v) && v >= MIN_CHAT_HEIGHT && v <= MAX_FLOAT_HEIGHT ? Math.round(v) : null);
+    return { width, height, pos, chatOpen, chatHeight: sizeOrNull(raw?.chatHeight), pipChatHeight: sizeOrNull(raw?.pipChatHeight) };
   }
 
   function toRelPos(l, t, s, vp) {
@@ -112,7 +114,7 @@
   }
 
   function persistLayout(next) {
-    ctx.layout = sanitizeLayout(next);
+    ctx.layout = sanitizeLayout({ ...ctx.layout, ...next });
     chrome.storage.local.set({ floatLayout: ctx.layout }).catch(() => {});
   }
 
@@ -199,7 +201,8 @@
       box-shadow: 0 4px 12px rgba(2, 6, 23, 0.55); backdrop-filter: blur(8px); }
     :host([data-bar-only]) .surface,
     :host([data-bar-only]) .handle,
-    :host([data-bar-only]) .hud { display: none; }
+    :host([data-bar-only]) .hud,
+    :host([data-chat-top-grip]) .handle.s { display: none; }
     :host([data-remote]) button[data-mode="local"],
     :host(:not([data-remote])) button[data-mode="remote"] { display: none; }`;
 
@@ -259,9 +262,18 @@
   );
   const WEB_CHAT_CSS = `
     :host { box-sizing: border-box; background: #0f172a; box-shadow: 0 8px 24px rgba(2, 6, 23, 0.55); }
-    iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }`;
+    iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+    .chat-resize { position: absolute; left: 14px; right: 14px; height: 12px; z-index: 2; cursor: ns-resize; touch-action: none; }
+    .chat-resize[data-edge="top"] { top: 0; }
+    .chat-resize[data-edge="bottom"] { bottom: 0; }
+    .chat-resize::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 4px; border-radius: 4px;
+      transform: translate(-50%, -50%); background: rgba(125, 211, 252, 0.9); box-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
+      opacity: 0; transition: opacity 0.14s ease; }
+    :host(:hover) .chat-resize::after, :host([data-interactive]) .chat-resize::after, .chat-resize[data-active]::after { opacity: 1; }
+    :host([data-resizing]) iframe { pointer-events: none; }`;
   const webChatFrame = h("iframe", {});
-  const webChat = overlayHost("ghostpip-chat", WEB_CHAT_CSS, webChatFrame);
+  const webChatResize = h("div", { class: "chat-resize", "data-edge": "bottom", title: "드래그해서 채팅창 크기 조절" });
+  const webChat = overlayHost("ghostpip-chat", WEB_CHAT_CSS, webChatFrame, webChatResize);
 
   const controller = overlayHost(
     "ghostpip-controller",
@@ -579,6 +591,8 @@
     let remoteChatUrl = chatUrl;
     let remoteHasAd = false;
     let webChatOpen = Boolean(ctx.layout.chatOpen);
+    let chatHeight = ctx.layout.chatHeight;
+    let chatResize = null;
 
     const resolveChatUrl = () =>
       ctx.settings.showChat ? (remoteChatUrl || (!isRemote ? chatUrlFor(ctx.site) : null)) : null;
@@ -628,18 +642,56 @@
     function boundsWithChat(r) {
       const curChatUrl = resolveChatUrl();
       if (!webChatOpen || !curChatUrl) {
-        return { l: r.l, t: r.t, r: r.r, b: r.b, videoT: r.t, chatT: r.b, chatH: 0, chatUrl: curChatUrl };
+        return { l: r.l, t: r.t, r: r.r, b: r.b, videoT: r.t, chatT: r.b, chatH: 0, chatUrl: curChatUrl, edge: "bottom" };
       }
       const vp = viewport();
       const h = Math.round(r.b - r.t);
-      const chatH = Math.min(320, Math.max(160, Math.round(vp.b * 0.36)));
-      const videoT = r.b + chatH <= vp.b - 8 ? r.t : Math.max(8, r.b - h - chatH);
+      const wanted = chatHeight ?? Math.min(320, Math.max(160, Math.round(vp.b * 0.36)));
+      const chatH = Math.round(Math.max(MIN_CHAT_HEIGHT, Math.min(wanted, vp.b - h - 16)));
+      const fitsBelow = r.b + chatH <= vp.b - 8;
+      const videoT = fitsBelow ? r.t : Math.max(8, r.b - h - chatH);
       const chatT = videoT + h;
-      return { l: r.l, t: videoT, r: r.r, b: chatT + chatH, videoT, chatT, chatH, chatUrl: curChatUrl };
+      // The grip sits on whichever chat edge is free to move, so it tracks the pointer while dragging.
+      const edge = fitsBelow ? "bottom" : "top";
+      return { l: r.l, t: videoT, r: r.r, b: chatT + chatH, videoT, chatT, chatH, chatUrl: curChatUrl, edge };
     }
 
+    webChatResize.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      const r = rect();
+      const b = boundsWithChat(r);
+      const vp = viewport();
+      const h = Math.round(r.b - r.t);
+      const edge = webChatResize.dataset.edge;
+      const maxH = edge === "bottom" ? vp.b - 8 - r.b : r.b - 8 - h;
+      chatResize = { edge, startY: e.clientY, startH: b.chatH, maxH: Math.max(MIN_CHAT_HEIGHT, maxH) };
+      try {
+        webChatResize.setPointerCapture(e.pointerId);
+      } catch {}
+      webChatResize.toggleAttribute("data-active", true);
+      webChat.host.toggleAttribute("data-resizing", true);
+    }, on);
+    webChatResize.addEventListener("pointermove", (e) => {
+      if (!chatResize) return;
+      const dy = e.clientY - chatResize.startY;
+      const raw = chatResize.startH + (chatResize.edge === "bottom" ? dy : -dy);
+      chatHeight = Math.round(Math.min(chatResize.maxH, Math.max(MIN_CHAT_HEIGHT, raw)));
+      render();
+    }, on);
+    const endChatResize = () => {
+      if (!chatResize) return;
+      chatResize = null;
+      webChatResize.removeAttribute("data-active");
+      webChat.host.removeAttribute("data-resizing");
+      persistLayout({ chatHeight });
+      render();
+    };
+    webChatResize.addEventListener("pointerup", endChatResize, on);
+    webChatResize.addEventListener("pointercancel", endChatResize, on);
+
     function isInteractive() {
-      if (held || drag !== null) return true;
+      if (held || drag !== null || chatResize !== null) return true;
       if (!ctx.settings.clickThrough && !cfg().enabled && cursor) {
         const b = boundsWithChat(rect());
         return cursor.x >= b.l && cursor.x <= b.r && cursor.y >= b.t && cursor.y <= b.b;
@@ -680,9 +732,11 @@
         }
       }
       if (showChatNow && b.chatH > 0) {
-        webChat.host.toggleAttribute("data-gp-anim", shouldAnim);
+        if (!chatResize) webChatResize.dataset.edge = b.edge;
+        webChat.host.toggleAttribute("data-gp-anim", shouldAnim && !chatResize);
         webChat.host.toggleAttribute("data-gp-pass", !interactive && ctx.settings.clickThrough);
         webChat.host.toggleAttribute("data-gp-drag", drag !== null);
+        webChat.host.toggleAttribute("data-interactive", interactive);
         webChat.show({
           x: px(r.l),
           y: px(b.chatT),
@@ -697,6 +751,7 @@
       hudEl.textContent = `투명도 ${Math.round(ctx.settings.opacity * 100)}% (휠 조절) · ${w}×${h}`;
       controller.host.toggleAttribute("data-hovered", hovered);
       controller.host.toggleAttribute("data-bar-only", showBarOnly);
+      controller.host.toggleAttribute("data-chat-top-grip", showChatNow && (chatResize ? chatResize.edge : b.edge) === "top");
       if (interactive || showBarOnly) controller.show(ctrlGeo);
       else controller.hide();
     }
@@ -718,6 +773,7 @@
       floatHeight = ctx.layout.height || null;
       customPos = ctx.layout.pos ? { ...ctx.layout.pos } : null;
       webChatOpen = Boolean(ctx.layout.chatOpen);
+      if (!chatResize) chatHeight = ctx.layout.chatHeight;
       render();
     }
 
@@ -1526,10 +1582,20 @@
     html, body { margin: 0; height: 100%; background: #000; color: #fff; font: 13px system-ui, "Malgun Gothic", sans-serif; overflow: hidden; }
     body { display: flex; flex-direction: column; position: relative; }
     video { flex: 1 1 auto; min-height: 0; width: 100%; height: 100%; object-fit: fill; background: #000; }
-    iframe { flex: 0 0 ${PIP_CHAT_HEIGHT}px; width: 100%; border: 0; background: #fff; }
+    iframe { flex: 0 0 var(--gp-chat-h, ${PIP_CHAT_HEIGHT}px); width: 100%; border: 0; background: #fff; }
+    body[data-chat-resizing] iframe { pointer-events: none; }
+    .pip-chat-split { position: fixed; left: 0; right: 0; bottom: calc(var(--gp-chat-h, ${PIP_CHAT_HEIGHT}px) - 6px); height: 12px; z-index: 13;
+      cursor: ns-resize; touch-action: none; display: none; }
+    body[data-chat-open] .pip-chat-split { display: block; }
+    .pip-chat-split::after { content: ""; position: absolute; left: 50%; top: 50%; width: 52px; height: 4px; border-radius: 4px;
+      transform: translate(-50%, -50%); background: rgba(125, 211, 252, 0.95); box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
+      opacity: 0; transition: opacity 0.14s ease; }
+    body:not([data-click-through]):hover .pip-chat-split::after, body[data-hovered] .pip-chat-split::after,
+    body[data-chat-resizing] .pip-chat-split::after { opacity: 1; }
+    body[data-click-through]:not([data-hovered]) .pip-chat-split { pointer-events: none; }
     .pip-bar { position: fixed; bottom: 14px; left: 50%; z-index: 12; opacity: 0; pointer-events: auto;
       transform: translateX(-50%); transition: opacity 0.14s ease; }
-    body[data-chat-open] .pip-bar { bottom: ${PIP_CHAT_HEIGHT + 14}px; }
+    body[data-chat-open] .pip-bar { bottom: calc(var(--gp-chat-h, ${PIP_CHAT_HEIGHT}px) + 14px); }
     .pip-bar button { padding: 7px 14px; font-size: 12.5px; pointer-events: auto; }
     .pip-bar button[hidden] { display: none !important; }
     body:not([data-click-through]):hover .pip-bar,
@@ -1560,7 +1626,7 @@
       color: #f8fafc; font: 700 11.5px/1 "Pretendard", system-ui, "Malgun Gothic", sans-serif;
       box-shadow: 0 6px 18px rgba(2, 6, 23, 0.65); cursor: pointer; transition: opacity 0.16s ease; }
     .pip-skip-ad[hidden] { display: none !important; }
-    body[data-chat-open] .pip-skip-ad { bottom: ${PIP_CHAT_HEIGHT + 12}px; }
+    body[data-chat-open] .pip-skip-ad { bottom: calc(var(--gp-chat-h, ${PIP_CHAT_HEIGHT}px) + 12px); }
     body:not([data-click-through]) .pip-skip-ad,
     body[data-hovered] .pip-skip-ad { opacity: 1; pointer-events: auto; }
     .pip-hud { position: fixed; top: 8px; left: 8px; z-index: 10; padding: 4px 8px; border-radius: 5px; pointer-events: none;
@@ -1666,6 +1732,40 @@
 
     let frame = null;
     let chatShown = Boolean(showChat && chatUrl);
+    let chatH = Number.isFinite(ctx.layout.pipChatHeight) ? ctx.layout.pipChatHeight : PIP_CHAT_HEIGHT;
+    const applyChatH = () => doc.body.style.setProperty("--gp-chat-h", `${chatH}px`);
+    applyChatH();
+
+    // Dragging the split trades height between video and chat inside the fixed-size window.
+    const split = doc.createElement("div");
+    split.className = "pip-chat-split";
+    split.title = "드래그해서 채팅창 크기 조절";
+    doc.body.append(split);
+    let splitDrag = null;
+    split.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      splitDrag = { startY: e.clientY, startH: chatH };
+      try {
+        split.setPointerCapture(e.pointerId);
+      } catch {}
+      doc.body.toggleAttribute("data-chat-resizing", true);
+    });
+    split.addEventListener("pointermove", (e) => {
+      if (!splitDrag) return;
+      const maxH = Math.max(MIN_CHAT_HEIGHT, win.innerHeight - MIN_FLOAT_HEIGHT);
+      chatH = Math.round(Math.min(maxH, Math.max(MIN_CHAT_HEIGHT, splitDrag.startH - (e.clientY - splitDrag.startY))));
+      applyChatH();
+    });
+    const endSplit = () => {
+      if (!splitDrag) return;
+      splitDrag = null;
+      doc.body.removeAttribute("data-chat-resizing");
+      persistLayout({ pipChatHeight: chatH });
+    };
+    split.addEventListener("pointerup", endSplit);
+    split.addEventListener("pointercancel", endSplit);
 
     function syncChat(enabled, resizeWin = false) {
       if (!chatUrl) return;
@@ -1696,7 +1796,7 @@
         frame.remove();
       }
       if (resizeWin && changed) {
-        onResizeChat?.(nextShown ? PIP_CHAT_HEIGHT : -PIP_CHAT_HEIGHT);
+        onResizeChat?.(nextShown ? chatH : -chatH);
       }
     }
 
@@ -1948,7 +2048,7 @@
     const chatUrl = chatUrlFor(ctx.site);
     const showChat = Boolean(ctx.settings.showChat && chatUrl);
     const size = floatSize(video, DEFAULT_FLOAT_WIDTH, DEFAULT_FLOAT_WIDTH);
-    const height = size.h + (showChat ? PIP_CHAT_HEIGHT : 0);
+    const height = size.h + (showChat ? (ctx.layout.pipChatHeight ?? PIP_CHAT_HEIGHT) : 0);
     go("docPip", { stream, chatUrl, win: documentPictureInPicture.requestWindow({ width: size.w, height }) });
   }
 
