@@ -20,6 +20,7 @@
   const SCAN_THROTTLE_MS = 250;
   const PIP_CHAT_HEIGHT = 420;
   const MIN_CHAT_HEIGHT = 120;
+  const CHAT_SIZE_STEP = 80;
   const GP_VARS = ["--gp-x", "--gp-y", "--gp-w", "--gp-h", "--gp-opacity"];
   const RESIZE_DIRS = ["nw", "ne", "sw", "se", "n", "s", "e", "w"];
   const HOLD = {
@@ -1590,7 +1591,7 @@
     body[data-chat-resizing] .pip-handle.s { pointer-events: auto; opacity: 1; }
     .pip-handle.n { top: 0; left: 16px; right: 16px; height: 8px; cursor: ns-resize; }
     .pip-handle.s { bottom: 0; left: 16px; right: 16px; height: 10px; cursor: ns-resize; touch-action: none; }
-    body[data-chat-open] .pip-handle.s { left: calc(50% - 32px); right: auto; width: 64px; height: 16px; }
+    body[data-chat-open] .pip-handle.s { height: 14px; }
     body[data-chat-open] .pip-handle.s::after {
       content: ""; position: absolute; left: 50%; bottom: 3px; width: 48px; height: 4px; border-radius: 4px;
       transform: translateX(-50%); background: rgba(125, 211, 252, 0.95);
@@ -1690,6 +1691,7 @@
 
     let chatBtn = null;
     let chatLabel = null;
+    const chatSizeBtns = [];
     if (chatUrl) {
       chatLabel = doc.createElement("span");
       chatBtn = doc.createElement("button");
@@ -1702,6 +1704,22 @@
         onToggleChat?.();
       });
       pipBar.append(chatBtn);
+      // Click buttons still work under click-through (the engine replays hold+click), and they can
+      // grow the chat by shrinking the video once Chrome's PiP size cap stops the window growing.
+      for (const [label, delta, title] of [["−", -CHAT_SIZE_STEP, "채팅창 작게"], ["+", CHAT_SIZE_STEP, "채팅창 크게"]]) {
+        const btn = doc.createElement("button");
+        btn.type = "button";
+        btn.dataset.action = delta > 0 ? "chatBigger" : "chatSmaller";
+        btn.title = title;
+        btn.textContent = label;
+        btn.hidden = true;
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          resizeChatBy(delta);
+        });
+        chatSizeBtns.push(btn);
+        pipBar.append(btn);
+      }
     }
     stage.append(mirror, pipHud, pipSkipAd, pipBar);
     doc.body.append(stage, ...handles);
@@ -1783,10 +1801,31 @@
     handleS.addEventListener("pointerup", endChatResize);
     handleS.addEventListener("pointercancel", endChatResize);
 
+    let persistChatTimer = null;
+    function resizeChatBy(delta) {
+      if (!chatShown || !frame?.isConnected) return;
+      const cur = Math.round(frame.getBoundingClientRect().height || activeChatH);
+      chatH = Math.max(MIN_CHAT_HEIGHT, cur + delta);
+      applyChatH(chatH);
+      togglingUntil = performance.now() + 600;
+      onResizeChat?.(chatH - cur);
+      clearTimeout(persistChatTimer);
+      persistChatTimer = setTimeout(() => {
+        const measured = Math.round(frame?.getBoundingClientRect().height || 0);
+        if (measured >= MIN_CHAT_HEIGHT) {
+          chatH = measured;
+          applyChatH(chatH);
+        }
+        lockedVideoH = Math.max(MIN_FLOAT_HEIGHT, win.innerHeight - activeChatH);
+        persistLayout({ pipChatHeight: chatH });
+      }, 650);
+    }
+
     let lastW = win.innerWidth;
     let lastH = win.innerHeight;
     let lastResizeAt = 0;
     let resizeMode = "window";
+    let gestureStartChatH = chatH;
     let gestureDw = 0;
     let gestureAbsDh = 0;
     let autoHeightTimer = null;
@@ -1806,25 +1845,32 @@
         return;
       }
 
+      // The mode is decided once per drag gesture: the vertical-only ticks of a corner drag must not
+      // flip into chat resizing halfway through.
       const isNewGesture = now - lastResizeAt > 220;
       lastResizeAt = now;
       if (isNewGesture) {
         gestureDw = 0;
         gestureAbsDh = 0;
-        const startedOnChatPill =
+        gestureStartChatH = chatH;
+        const startedOnBottomEdge =
           chatShown &&
           Boolean(frame?.isConnected) &&
-          now - lastPointerAt < 500 &&
-          Math.abs(lastPointerX - prevW / 2) <= 32 &&
-          lastPointerY >= prevH - 18 &&
+          now - lastPointerAt < 1500 &&
+          lastPointerY >= prevH - 24 &&
+          lastPointerX > 16 &&
+          lastPointerX < prevW - 16 &&
           dw === 0 &&
           Math.abs(dh) >= 1;
-        resizeMode = startedOnChatPill ? "chat" : "window";
-        if (startedOnChatPill) {
+        resizeMode = startedOnBottomEdge ? "chat" : "window";
+        if (startedOnBottomEdge) {
           lockedVideoH = Math.max(MIN_FLOAT_HEIGHT, prevH - activeChatH);
         }
-      } else if (Math.abs(dw) >= 1) {
+      } else if (Math.abs(dw) >= 1 && resizeMode === "chat") {
         resizeMode = "window";
+        chatH = gestureStartChatH;
+        applyChatH(chatH);
+        persistLayout({ pipChatHeight: chatH });
       }
       gestureDw += dw;
       gestureAbsDh += Math.abs(dh);
@@ -1874,6 +1920,7 @@
       doc.body.toggleAttribute("data-chat-open", nextShown);
       if (chatLabel) chatLabel.textContent = nextShown ? "채팅창 숨기기" : "채팅창 보기";
       if (chatBtn) chatBtn.toggleAttribute("data-active", nextShown);
+      for (const btn of chatSizeBtns) btn.hidden = !nextShown;
       if (nextShown) {
         applyChatH(chatH);
         if (!frame) {

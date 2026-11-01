@@ -287,6 +287,58 @@ try {
     afterResize.vidAfter - beforeResize.vid0 >= 220 && afterResize.chatAfter <= beforeResize.chat0,
     `video=${beforeResize.vid0}->${afterResize.vidAfter} chat=${beforeResize.chat0}->${afterResize.chatAfter}`,
   );
+
+  const readPip = () =>
+    page.evaluate(() => {
+      const w = documentPictureInPicture.window;
+      const d = w.document;
+      return {
+        innerH: w.innerHeight,
+        chat: Math.round(d.querySelector("iframe").getBoundingClientRect().height),
+        vid: Math.round(d.querySelector("video").getBoundingClientRect().height),
+        dpr: w.devicePixelRatio || 1,
+      };
+    });
+  const hoverPip = (fx, fy) =>
+    page.evaluate(([fx, fy]) => {
+      const w = documentPictureInPicture.window;
+      w.document.documentElement.dispatchEvent(
+        new w.PointerEvent("pointermove", { bubbles: true, clientX: Math.round(w.innerWidth * fx), clientY: Math.round(w.innerHeight * fy) }),
+      );
+    }, [fx, fy]);
+
+  // Engine-driven bottom-edge drag anywhere along the edge (not a corner) resizes the chat.
+  await sleep(700);
+  await page.evaluate(() => {
+    const w = documentPictureInPicture.window;
+    w.document.documentElement.dispatchEvent(
+      new w.PointerEvent("pointermove", { bubbles: true, clientX: Math.round(w.innerWidth * 0.3), clientY: w.innerHeight - 4 }),
+    );
+  });
+  const beforeEdge = await readPip();
+  await sw.evaluate((dpr) => GhostPiPBackground.postToEngine({ v: 1, type: "PIP_RESIZE", deltaH: 60, dpr }), beforeEdge.dpr);
+  await sleep(500);
+  const afterEdge = await readPip();
+  record(
+    "8 PiP bottom edge (off-center) resizes chat, keeps video",
+    Math.abs(afterEdge.chat - beforeEdge.chat - 60) <= 3 && Math.abs(afterEdge.vid - beforeEdge.vid) <= 1,
+    `chat=${beforeEdge.chat}->${afterEdge.chat} video=${beforeEdge.vid}->${afterEdge.vid}`,
+  );
+
+  // At Chrome's PiP size cap the window cannot grow; the + button grows chat by taking video height.
+  await sleep(700);
+  await hoverPip(0.5, 0.3);
+  await sw.evaluate((dpr) => GhostPiPBackground.postToEngine({ v: 1, type: "PIP_RESIZE", deltaH: 1600, dpr }), beforeEdge.dpr);
+  await sleep(700);
+  const atCap = await readPip();
+  await page.evaluate(() => documentPictureInPicture.window.document.querySelector('[data-action="chatBigger"]').click());
+  await sleep(900);
+  const afterPlus = await readPip();
+  record(
+    "9 PiP + button grows chat at Chrome size cap",
+    Math.abs(afterPlus.innerH - atCap.innerH) <= 2 && afterPlus.chat - atCap.chat >= 70 && atCap.vid - afterPlus.vid >= 70,
+    `innerH=${atCap.innerH}->${afterPlus.innerH} chat=${atCap.chat}->${afterPlus.chat} video=${atCap.vid}->${afterPlus.vid}`,
+  );
 } catch (e) {
   record("fatal", false, String(e?.message ?? e).slice(0, 200));
 } finally {
@@ -295,4 +347,4 @@ try {
 
 console.log("\n[chat e2e]");
 for (const r of results) console.log(`  ${r.ok ? "PASS" : "FAIL"} ${r.name.padEnd(40)} ${r.info}`);
-process.exit(results.length === 7 && results.every((r) => r.ok) ? 0 : 1);
+process.exit(results.length === 9 && results.every((r) => r.ok) ? 0 : 1);
