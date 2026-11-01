@@ -10,7 +10,10 @@ $ErrorActionPreference = "Stop"
 $HostName = "app.ghostpip.engine"
 # Unpacked/dev builds use the ID pinned by the manifest "key". Add the Chrome Web Store ID here
 # (or pass -ExtensionId) once the store listing exists.
-$DefaultExtensionIds = @("iphdokhjjgakpbmhemjjgglcdgjfedea")
+$DefaultExtensionIds = @(
+    "iphdokhjjgakpbmhemjjgglcdgjfedea",
+    "aobdinpjpmbnmbikjkmolfgeoooabfaa"
+)
 $InstallerDir = $PSScriptRoot
 $EngineDir = Split-Path -Parent $InstallerDir
 $InstallDir = Join-Path $env:LOCALAPPDATA "Programs\GhostPiP"

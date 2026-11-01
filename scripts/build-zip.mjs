@@ -126,8 +126,10 @@ function writeZip(zipPath, entries) {
 
 const prefixed = (prefix, entries) => entries.map((e) => ({ rel: `${prefix}/${e.rel}`, data: e.data }));
 
-fs.rmSync(DIST, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
+for (const ent of fs.readdirSync(DIST)) {
+  if (ent.endsWith(".zip")) fs.rmSync(path.join(DIST, ent), { force: true });
+}
 
 console.log("[1/4] GhostPiP.Engine.exe 빌드 (Release win-x64 Native AOT)...");
 const killEngine = () => {
