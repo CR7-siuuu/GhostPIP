@@ -201,8 +201,7 @@
       box-shadow: 0 4px 12px rgba(2, 6, 23, 0.55); backdrop-filter: blur(8px); }
     :host([data-bar-only]) .surface,
     :host([data-bar-only]) .handle,
-    :host([data-bar-only]) .hud,
-    :host([data-chat-top-grip]) .handle.s { display: none; }
+    :host([data-bar-only]) .hud { display: none; }
     :host([data-remote]) button[data-mode="local"],
     :host(:not([data-remote])) button[data-mode="remote"] { display: none; }`;
 
@@ -263,16 +262,14 @@
   const WEB_CHAT_CSS = `
     :host { box-sizing: border-box; background: #0f172a; box-shadow: 0 8px 24px rgba(2, 6, 23, 0.55); }
     iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
-    .chat-resize { position: absolute; left: 14px; right: 14px; height: 12px; z-index: 2; cursor: ns-resize; touch-action: none; }
-    .chat-resize[data-edge="top"] { top: 0; }
-    .chat-resize[data-edge="bottom"] { bottom: 0; }
+    .chat-resize { position: absolute; left: 14px; right: 14px; bottom: 0; height: 12px; z-index: 2; cursor: ns-resize; touch-action: none; }
     .chat-resize::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 4px; border-radius: 4px;
       transform: translate(-50%, -50%); background: rgba(125, 211, 252, 0.9); box-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
       opacity: 0; transition: opacity 0.14s ease; }
     :host(:hover) .chat-resize::after, :host([data-interactive]) .chat-resize::after, .chat-resize[data-active]::after { opacity: 1; }
     :host([data-resizing]) iframe { pointer-events: none; }`;
   const webChatFrame = h("iframe", {});
-  const webChatResize = h("div", { class: "chat-resize", "data-edge": "bottom", title: "드래그해서 채팅창 크기 조절" });
+  const webChatResize = h("div", { class: "chat-resize", title: "드래그해서 채팅창 크기 조절" });
   const webChat = overlayHost("ghostpip-chat", WEB_CHAT_CSS, webChatFrame, webChatResize);
 
   const controller = overlayHost(
@@ -642,7 +639,7 @@
     function boundsWithChat(r) {
       const curChatUrl = resolveChatUrl();
       if (!webChatOpen || !curChatUrl) {
-        return { l: r.l, t: r.t, r: r.r, b: r.b, videoT: r.t, chatT: r.b, chatH: 0, chatUrl: curChatUrl, edge: "bottom" };
+        return { l: r.l, t: r.t, r: r.r, b: r.b, videoT: r.t, chatT: r.b, chatH: 0, chatUrl: curChatUrl };
       }
       const vp = viewport();
       const h = Math.round(r.b - r.t);
@@ -651,9 +648,7 @@
       const fitsBelow = r.b + chatH <= vp.b - 8;
       const videoT = fitsBelow ? r.t : Math.max(8, r.b - h - chatH);
       const chatT = videoT + h;
-      // The grip sits on whichever chat edge is free to move, so it tracks the pointer while dragging.
-      const edge = fitsBelow ? "bottom" : "top";
-      return { l: r.l, t: videoT, r: r.r, b: chatT + chatH, videoT, chatT, chatH, chatUrl: curChatUrl, edge };
+      return { l: r.l, t: videoT, r: r.r, b: chatT + chatH, videoT, chatT, chatH, chatUrl: curChatUrl };
     }
 
     webChatResize.addEventListener("pointerdown", (e) => {
@@ -662,10 +657,11 @@
       const r = rect();
       const b = boundsWithChat(r);
       const vp = viewport();
+      const w = Math.round(r.r - r.l);
       const h = Math.round(r.b - r.t);
-      const edge = webChatResize.dataset.edge;
-      const maxH = edge === "bottom" ? vp.b - 8 - r.b : r.b - 8 - h;
-      chatResize = { edge, startY: e.clientY, startH: b.chatH, maxH: Math.max(MIN_CHAT_HEIGHT, maxH) };
+      customPos = toRelPos(r.l, b.videoT, { w, h }, vp);
+      const maxH = Math.max(MIN_CHAT_HEIGHT, vp.b - h - 16);
+      chatResize = { startY: e.clientY, startH: b.chatH, maxH };
       try {
         webChatResize.setPointerCapture(e.pointerId);
       } catch {}
@@ -675,8 +671,7 @@
     webChatResize.addEventListener("pointermove", (e) => {
       if (!chatResize) return;
       const dy = e.clientY - chatResize.startY;
-      const raw = chatResize.startH + (chatResize.edge === "bottom" ? dy : -dy);
-      chatHeight = Math.round(Math.min(chatResize.maxH, Math.max(MIN_CHAT_HEIGHT, raw)));
+      chatHeight = Math.round(Math.min(chatResize.maxH, Math.max(MIN_CHAT_HEIGHT, chatResize.startH + dy)));
       render();
     }, on);
     const endChatResize = () => {
@@ -684,7 +679,7 @@
       chatResize = null;
       webChatResize.removeAttribute("data-active");
       webChat.host.removeAttribute("data-resizing");
-      persistLayout({ chatHeight });
+      persistLayout({ pos: customPos, chatHeight });
       render();
     };
     webChatResize.addEventListener("pointerup", endChatResize, on);
@@ -732,7 +727,6 @@
         }
       }
       if (showChatNow && b.chatH > 0) {
-        if (!chatResize) webChatResize.dataset.edge = b.edge;
         webChat.host.toggleAttribute("data-gp-anim", shouldAnim && !chatResize);
         webChat.host.toggleAttribute("data-gp-pass", !interactive && ctx.settings.clickThrough);
         webChat.host.toggleAttribute("data-gp-drag", drag !== null);
@@ -751,7 +745,6 @@
       hudEl.textContent = `투명도 ${Math.round(ctx.settings.opacity * 100)}% (휠 조절) · ${w}×${h}`;
       controller.host.toggleAttribute("data-hovered", hovered);
       controller.host.toggleAttribute("data-bar-only", showBarOnly);
-      controller.host.toggleAttribute("data-chat-top-grip", showChatNow && (chatResize ? chatResize.edge : b.edge) === "top");
       if (interactive || showBarOnly) controller.show(ctrlGeo);
       else controller.hide();
     }
@@ -1581,30 +1574,28 @@
     ${BASE_CSS}
     html, body { margin: 0; height: 100%; background: #000; color: #fff; font: 13px system-ui, "Malgun Gothic", sans-serif; overflow: hidden; }
     body { display: flex; flex-direction: column; position: relative; }
-    video { flex: 1 1 auto; min-height: 0; width: 100%; height: 100%; object-fit: fill; background: #000; }
-    iframe { flex: 0 0 var(--gp-chat-h, ${PIP_CHAT_HEIGHT}px); width: 100%; border: 0; background: #fff; }
+    .pip-stage { position: relative; flex: 1 1 auto; min-height: 0; width: 100%; height: 100%; background: #000; }
+    body[data-chat-open] .pip-stage { flex: 0 0 auto; height: auto; aspect-ratio: var(--gp-video-aspect, 16 / 9); max-height: calc(100% - ${MIN_CHAT_HEIGHT}px); }
+    video { width: 100%; height: 100%; display: block; object-fit: fill; background: #000; }
+    iframe { flex: 1 1 auto; min-height: ${MIN_CHAT_HEIGHT}px; width: 100%; border: 0; background: #fff; }
     body[data-chat-resizing] iframe { pointer-events: none; }
-    .pip-chat-split { position: fixed; left: 0; right: 0; bottom: calc(var(--gp-chat-h, ${PIP_CHAT_HEIGHT}px) - 6px); height: 12px; z-index: 13;
-      cursor: ns-resize; touch-action: none; display: none; }
-    body[data-chat-open] .pip-chat-split { display: block; }
-    .pip-chat-split::after { content: ""; position: absolute; left: 50%; top: 50%; width: 52px; height: 4px; border-radius: 4px;
-      transform: translate(-50%, -50%); background: rgba(125, 211, 252, 0.95); box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
-      opacity: 0; transition: opacity 0.14s ease; }
-    body:not([data-click-through]):hover .pip-chat-split::after, body[data-hovered] .pip-chat-split::after,
-    body[data-chat-resizing] .pip-chat-split::after { opacity: 1; }
-    body[data-click-through]:not([data-hovered]) .pip-chat-split { pointer-events: none; }
-    .pip-bar { position: fixed; bottom: 14px; left: 50%; z-index: 12; opacity: 0; pointer-events: auto;
+    .pip-bar { position: absolute; bottom: 14px; left: 50%; z-index: 12; opacity: 0; pointer-events: auto;
       transform: translateX(-50%); transition: opacity 0.14s ease; }
-    body[data-chat-open] .pip-bar { bottom: calc(var(--gp-chat-h, ${PIP_CHAT_HEIGHT}px) + 14px); }
     .pip-bar button { padding: 7px 14px; font-size: 12.5px; pointer-events: auto; }
     .pip-bar button[hidden] { display: none !important; }
     body:not([data-click-through]):hover .pip-bar,
     body[data-hovered] .pip-bar { opacity: 1; pointer-events: auto; }
     .pip-handle { position: fixed; z-index: 11; pointer-events: none; opacity: 0; transition: opacity 0.16s ease; }
     body:not([data-click-through]):hover .pip-handle,
-    body[data-hovered] .pip-handle { pointer-events: auto; opacity: 1; }
+    body[data-hovered] .pip-handle,
+    body[data-chat-resizing] .pip-handle.s { pointer-events: auto; opacity: 1; }
     .pip-handle.n { top: 0; left: 16px; right: 16px; height: 8px; cursor: ns-resize; }
-    .pip-handle.s { bottom: 0; left: 16px; right: 16px; height: 8px; cursor: ns-resize; }
+    .pip-handle.s { bottom: 0; left: 16px; right: 16px; height: 10px; cursor: ns-resize; touch-action: none; }
+    body[data-chat-open] .pip-handle.s::after {
+      content: ""; position: absolute; left: 50%; bottom: 2px; width: 48px; height: 4px; border-radius: 4px;
+      transform: translateX(-50%); background: rgba(125, 211, 252, 0.95);
+      box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
+    }
     .pip-handle.w { left: 0; top: 16px; bottom: 16px; width: 8px; cursor: ew-resize; }
     .pip-handle.e { right: 0; top: 16px; bottom: 16px; width: 8px; cursor: ew-resize; }
     .pip-handle.nw { top: 0; left: 0; width: 16px; height: 16px; cursor: nwse-resize; }
@@ -1620,16 +1611,15 @@
     .pip-handle.ne::after { top: 3px; right: 3px; }
     .pip-handle.sw::after { bottom: 3px; left: 3px; }
     .pip-handle.se::after { bottom: 3px; right: 3px; }
-    .pip-skip-ad { position: fixed; right: 12px; bottom: 12px; z-index: 12; opacity: 0; pointer-events: none;
+    .pip-skip-ad { position: absolute; right: 12px; bottom: 12px; z-index: 12; opacity: 0; pointer-events: none;
       display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 999px;
       background: rgba(15, 23, 42, 0.92); border: 1.5px solid rgba(56, 189, 248, 0.78);
       color: #f8fafc; font: 700 11.5px/1 "Pretendard", system-ui, "Malgun Gothic", sans-serif;
       box-shadow: 0 6px 18px rgba(2, 6, 23, 0.65); cursor: pointer; transition: opacity 0.16s ease; }
     .pip-skip-ad[hidden] { display: none !important; }
-    body[data-chat-open] .pip-skip-ad { bottom: calc(var(--gp-chat-h, ${PIP_CHAT_HEIGHT}px) + 12px); }
     body:not([data-click-through]) .pip-skip-ad,
     body[data-hovered] .pip-skip-ad { opacity: 1; pointer-events: auto; }
-    .pip-hud { position: fixed; top: 8px; left: 8px; z-index: 10; padding: 4px 8px; border-radius: 5px; pointer-events: none;
+    .pip-hud { position: absolute; top: 8px; left: 8px; z-index: 10; padding: 4px 8px; border-radius: 5px; pointer-events: none;
       background: rgba(18, 18, 22, 0.85); color: #fff; font: 600 12px/1 system-ui, "Malgun Gothic", sans-serif;
       opacity: 0; transition: opacity 0.15s ease-out; }
     .pip-hud[data-show] { opacity: 1; }`;
@@ -1659,11 +1649,20 @@
     const style = doc.createElement("style");
     style.textContent = PIP_CSS;
     doc.head.append(style);
+    const stage = doc.createElement("div");
+    stage.className = "pip-stage";
     const mirror = doc.createElement("video");
     mirror.muted = true;
     mirror.autoplay = true;
     mirror.playsInline = true;
     mirror.srcObject = stream;
+    const syncAspect = () => {
+      if (mirror.videoWidth > 0 && mirror.videoHeight > 0) {
+        doc.body.style.setProperty("--gp-video-aspect", `${mirror.videoWidth} / ${mirror.videoHeight}`);
+      }
+    };
+    mirror.addEventListener("loadedmetadata", syncAspect);
+    mirror.addEventListener("resize", syncAspect);
     const pipHud = doc.createElement("div");
     pipHud.className = "pip-hud";
     const pipSkipAd = doc.createElement("button");
@@ -1683,7 +1682,6 @@
       return el;
     });
     doc.body.toggleAttribute("data-click-through", Boolean(isClickThrough?.()));
-    doc.body.append(mirror, ...handles, pipHud, pipSkipAd);
 
     const pipBar = doc.createElement("div");
     pipBar.className = "bar pip-bar";
@@ -1712,7 +1710,8 @@
       });
       pipBar.append(chatBtn);
     }
-    doc.body.append(pipBar);
+    stage.append(mirror, pipHud, pipSkipAd, pipBar);
+    doc.body.append(stage, ...handles);
 
     let engineHovered = false;
     let pointerHovered = false;
@@ -1733,39 +1732,58 @@
     let frame = null;
     let chatShown = Boolean(showChat && chatUrl);
     let chatH = Number.isFinite(ctx.layout.pipChatHeight) ? ctx.layout.pipChatHeight : PIP_CHAT_HEIGHT;
-    const applyChatH = () => doc.body.style.setProperty("--gp-chat-h", `${chatH}px`);
-    applyChatH();
+    let togglingUntil = 0;
 
-    // Dragging the split trades height between video and chat inside the fixed-size window.
-    const split = doc.createElement("div");
-    split.className = "pip-chat-split";
-    split.title = "드래그해서 채팅창 크기 조절";
-    doc.body.append(split);
-    let splitDrag = null;
-    split.addEventListener("pointerdown", (e) => {
-      if (e.button !== 0) return;
+    // The south handle sits at the bottom of the chat panel. When the engine is bound, its Win32
+    // border hook resizes the window directly; when unbound or triggered via DOM events, pointer
+    // drag dispatches PIP_RESIZE / resizeTo deltas. Either path updates the window height, which
+    // flexes the chat iframe while .pip-stage keeps the video aspect ratio.
+    const handleS = handles.find((el) => el.dataset.resize === "s");
+    handleS.title = "드래그해서 채팅창 크기 조절";
+    let chatResize = null;
+    handleS.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0 || !chatShown) return;
       e.preventDefault();
       e.stopPropagation();
-      splitDrag = { startY: e.clientY, startH: chatH };
+      const curH = Math.round(frame?.getBoundingClientRect().height || chatH);
+      chatResize = { startScreenY: e.screenY, startClientY: e.clientY, lastDelta: 0, startH: curH };
       try {
-        split.setPointerCapture(e.pointerId);
+        handleS.setPointerCapture(e.pointerId);
       } catch {}
       doc.body.toggleAttribute("data-chat-resizing", true);
     });
-    split.addEventListener("pointermove", (e) => {
-      if (!splitDrag) return;
-      const maxH = Math.max(MIN_CHAT_HEIGHT, win.innerHeight - MIN_FLOAT_HEIGHT);
-      chatH = Math.round(Math.min(maxH, Math.max(MIN_CHAT_HEIGHT, splitDrag.startH - (e.clientY - splitDrag.startY))));
-      applyChatH();
+    handleS.addEventListener("pointermove", (e) => {
+      if (!chatResize || !chatShown) return;
+      const rawDy = e.screenY !== chatResize.startScreenY ? e.screenY - chatResize.startScreenY : e.clientY - chatResize.startClientY;
+      const targetH = Math.max(MIN_CHAT_HEIGHT, Math.round(chatResize.startH + rawDy));
+      const clampedDy = targetH - chatResize.startH;
+      const step = clampedDy - chatResize.lastDelta;
+      if (Math.abs(step) < 6) return;
+      chatResize.lastDelta = clampedDy;
+      chatH = targetH;
+      onResizeChat?.(step);
     });
-    const endSplit = () => {
-      if (!splitDrag) return;
-      splitDrag = null;
+    const endChatResize = () => {
+      if (!chatResize) return;
+      chatResize = null;
       doc.body.removeAttribute("data-chat-resizing");
+      const measured = Math.round(frame?.getBoundingClientRect().height || 0);
+      if (measured >= MIN_CHAT_HEIGHT) chatH = measured;
       persistLayout({ pipChatHeight: chatH });
     };
-    split.addEventListener("pointerup", endSplit);
-    split.addEventListener("pointercancel", endSplit);
+    handleS.addEventListener("pointerup", endChatResize);
+    handleS.addEventListener("pointercancel", endChatResize);
+
+    const openedAt = performance.now();
+    win.addEventListener("resize", () => {
+      if (!chatShown || !frame?.isConnected || chatResize) return;
+      if (performance.now() - openedAt < 1200 || performance.now() < togglingUntil) return;
+      const h = Math.round(frame.getBoundingClientRect().height);
+      if (h >= MIN_CHAT_HEIGHT && Math.abs(h - chatH) >= 4) {
+        chatH = h;
+        persistLayout({ pipChatHeight: h });
+      }
+    });
 
     function syncChat(enabled, resizeWin = false) {
       if (!chatUrl) return;
@@ -1796,6 +1814,7 @@
         frame.remove();
       }
       if (resizeWin && changed) {
+        togglingUntil = performance.now() + 800;
         onResizeChat?.(nextShown ? chatH : -chatH);
       }
     }

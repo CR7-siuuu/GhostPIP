@@ -149,21 +149,29 @@ try {
       open: host.matches(":popover-open"),
       h: Math.round(hr.height),
       top: Math.round(hr.top),
-      edge: grip.dataset.edge,
+      atBottom: Math.abs(gr.bottom - hr.bottom) <= 2,
       grip: { x: gr.left + gr.width / 2, y: gr.top + gr.height / 2 },
     };
   });
   const before = await readChat();
-  const dir = before.edge === "bottom" ? 1 : -1;
   await page.mouse.move(before.grip.x, before.grip.y, { steps: 3 });
   await page.mouse.down();
-  await page.mouse.move(before.grip.x, before.grip.y + dir * 60, { steps: 8 });
+  await page.mouse.move(before.grip.x, before.grip.y - 60, { steps: 8 });
   await page.mouse.up();
-  await sleep(400);
+  await sleep(300);
+  const shrunk = await readChat();
+  await page.mouse.move(shrunk.grip.x, shrunk.grip.y, { steps: 3 });
+  await page.mouse.down();
+  await page.mouse.move(shrunk.grip.x, shrunk.grip.y + 40, { steps: 8 });
+  await page.mouse.up();
+  await sleep(300);
   const after = await readChat();
   const stored = await sw.evaluate(async () => (await chrome.storage.local.get("floatLayout")).floatLayout?.chatHeight);
-  record("3 web chat grip resizes and persists", before.open && after.h - before.h >= 50 && stored === after.h,
-    `open=${before.open} edge=${before.edge} h=${before.h}->${after.h} stored=${stored}`);
+  record(
+    "3 web chat bottom grip resizes and persists",
+    before.open && before.atBottom && before.h - shrunk.h === 60 && after.h - shrunk.h === 40 && after.top === before.top && stored === after.h,
+    `open=${before.open} atBottom=${before.atBottom} h=${before.h}->${shrunk.h}->${after.h} top=${before.top}->${after.top} stored=${stored}`,
+  );
 
   // ---- Full mode: click the controller's docPip button directly (trusted click preserves user activation).
   const dbtn = await poll(
@@ -199,26 +207,56 @@ try {
   const split = await page.evaluate(async () => {
     const w = documentPictureInPicture.window;
     const d = w.document;
-    const s = d.querySelector(".pip-chat-split");
+    const s = d.querySelector(".pip-handle.s");
     const frame = d.querySelector("iframe");
-    const before = Math.round(frame.getBoundingClientRect().height);
-    const r = s.getBoundingClientRect();
-    const y0 = r.top + r.height / 2;
-    const ev = (type, y) => s.dispatchEvent(new w.PointerEvent(type, { bubbles: true, clientX: r.left + 40, clientY: y, button: 0, pointerId: 7 }));
-    ev("pointerdown", y0);
-    ev("pointermove", y0 - 30);
-    ev("pointermove", y0 - 80);
-    ev("pointerup", y0 - 80);
-    await new Promise((res) => setTimeout(res, 200));
-    return { before, after: Math.round(frame.getBoundingClientRect().height), video: Math.round(d.querySelector("video").getBoundingClientRect().height) };
+    const video = d.querySelector("video");
+    const ir0 = frame.getBoundingClientRect();
+    const sr0 = s.getBoundingClientRect();
+    const vr0 = video.getBoundingClientRect();
+    const atBottom = Math.abs(sr0.bottom - ir0.bottom) <= 2 && !d.querySelector(".pip-chat-split");
+    const before = Math.round(ir0.height);
+    const videoBefore = Math.round(vr0.height);
+    const y0 = Math.round(sr0.top + sr0.height / 2);
+    const ev = (type, dy) =>
+      s.dispatchEvent(
+        new w.PointerEvent(type, {
+          bubbles: true,
+          clientX: Math.round(sr0.left + sr0.width / 2),
+          clientY: y0 + dy,
+          screenY: 500 + dy,
+          button: 0,
+          pointerId: 7,
+        }),
+      );
+    ev("pointerdown", 0);
+    ev("pointermove", -40);
+    ev("pointermove", -80);
+    ev("pointerup", -80);
+    await new Promise((res) => setTimeout(res, 500));
+    const shrunk = Math.round(frame.getBoundingClientRect().height);
+    ev("pointerdown", 0);
+    ev("pointermove", 50);
+    ev("pointerup", 50);
+    await new Promise((res) => setTimeout(res, 500));
+    return {
+      atBottom,
+      before,
+      shrunk,
+      after: Math.round(frame.getBoundingClientRect().height),
+      videoBefore,
+      videoAfter: Math.round(video.getBoundingClientRect().height),
+    };
   });
   const pipStored = await poll(
     () => sw.evaluate(async () => (await chrome.storage.local.get("floatLayout")).floatLayout?.pipChatHeight),
     (v) => v === split.after,
-    2000,
+    2500,
   );
-  record("6 PiP split resizes chat and persists", split.after - split.before === 80 && pipStored === split.after,
-    `chat ${split.before}->${split.after} video=${split.video} stored=${pipStored}`);
+  record(
+    "6 PiP bottom grip resizes chat and keeps video size",
+    split.atBottom && split.before - split.shrunk >= 60 && split.after - split.shrunk >= 40 && split.videoBefore === split.videoAfter && pipStored === split.after,
+    `atBottom=${split.atBottom} chat=${split.before}->${split.shrunk}->${split.after} video=${split.videoBefore}->${split.videoAfter} stored=${pipStored}`,
+  );
 } catch (e) {
   record("fatal", false, String(e?.message ?? e).slice(0, 200));
 } finally {
