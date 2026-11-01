@@ -257,6 +257,33 @@ try {
     split.atBottom && split.before - split.shrunk >= 60 && split.after - split.shrunk >= 40 && split.videoBefore === split.videoAfter && pipStored === split.after,
     `atBottom=${split.atBottom} chat=${split.before}->${split.shrunk}->${split.after} video=${split.videoBefore}->${split.videoAfter} stored=${pipStored}`,
   );
+
+  // Verify corner/top window resize freely enlarges the video stage while keeping chat height fixed.
+  const beforeTop = await page.evaluate(() => {
+    const w = documentPictureInPicture.window;
+    const d = w.document;
+    d.documentElement.dispatchEvent(new w.PointerEvent("pointermove", { bubbles: true, clientX: 20, clientY: 6 }));
+    return {
+      chat0: Math.round(d.querySelector("iframe").getBoundingClientRect().height),
+      vid0: Math.round(d.querySelector("video").getBoundingClientRect().height),
+      dpr: w.devicePixelRatio || 1,
+    };
+  });
+  await sleep(700);
+  await sw.evaluate((dpr) => GhostPiPBackground.postToEngine({ v: 1, type: "PIP_RESIZE", deltaH: 240, dpr }), beforeTop.dpr);
+  await sleep(500);
+  const afterTop = await page.evaluate(() => {
+    const d = documentPictureInPicture.window.document;
+    return {
+      chatAfterTop: Math.round(d.querySelector("iframe").getBoundingClientRect().height),
+      vidAfterTop: Math.round(d.querySelector("video").getBoundingClientRect().height),
+    };
+  });
+  record(
+    "7 PiP top/corner resize enlarges video without inflating chat",
+    afterTop.vidAfterTop - beforeTop.vid0 >= 200 && afterTop.chatAfterTop === beforeTop.chat0,
+    `video=${beforeTop.vid0}->${afterTop.vidAfterTop} chat=${beforeTop.chat0}->${afterTop.chatAfterTop}`,
+  );
 } catch (e) {
   record("fatal", false, String(e?.message ?? e).slice(0, 200));
 } finally {
@@ -265,4 +292,4 @@ try {
 
 console.log("\n[chat e2e]");
 for (const r of results) console.log(`  ${r.ok ? "PASS" : "FAIL"} ${r.name.padEnd(40)} ${r.info}`);
-process.exit(results.length === 6 && results.every((r) => r.ok) ? 0 : 1);
+process.exit(results.length === 7 && results.every((r) => r.ok) ? 0 : 1);

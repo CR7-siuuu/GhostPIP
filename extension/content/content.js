@@ -1574,10 +1574,9 @@
     ${BASE_CSS}
     html, body { margin: 0; height: 100%; background: #000; color: #fff; font: 13px system-ui, "Malgun Gothic", sans-serif; overflow: hidden; }
     body { display: flex; flex-direction: column; position: relative; }
-    .pip-stage { position: relative; flex: 1 1 auto; min-height: 0; width: 100%; height: 100%; background: #000; }
-    body[data-chat-open] .pip-stage { flex: 0 0 auto; height: auto; aspect-ratio: var(--gp-video-aspect, 16 / 9); max-height: calc(100% - ${MIN_CHAT_HEIGHT}px); }
+    .pip-stage { position: relative; flex: 1 1 auto; min-height: ${MIN_FLOAT_HEIGHT}px; width: 100%; height: 100%; background: #000; }
     video { width: 100%; height: 100%; display: block; object-fit: fill; background: #000; }
-    iframe { flex: 1 1 auto; min-height: ${MIN_CHAT_HEIGHT}px; width: 100%; border: 0; background: #fff; }
+    iframe { flex: 0 0 var(--gp-chat-h, ${PIP_CHAT_HEIGHT}px); max-height: calc(100% - ${MIN_FLOAT_HEIGHT}px); width: 100%; border: 0; background: #fff; }
     body[data-chat-resizing] iframe { pointer-events: none; }
     .pip-bar { position: absolute; bottom: 14px; left: 50%; z-index: 12; opacity: 0; pointer-events: auto;
       transform: translateX(-50%); transition: opacity 0.14s ease; }
@@ -1656,13 +1655,6 @@
     mirror.autoplay = true;
     mirror.playsInline = true;
     mirror.srcObject = stream;
-    const syncAspect = () => {
-      if (mirror.videoWidth > 0 && mirror.videoHeight > 0) {
-        doc.body.style.setProperty("--gp-video-aspect", `${mirror.videoWidth} / ${mirror.videoHeight}`);
-      }
-    };
-    mirror.addEventListener("loadedmetadata", syncAspect);
-    mirror.addEventListener("resize", syncAspect);
     const pipHud = doc.createElement("div");
     pipHud.className = "pip-hud";
     const pipSkipAd = doc.createElement("button");
@@ -1715,10 +1707,12 @@
 
     let engineHovered = false;
     let pointerHovered = false;
+    let lastPointerY = 999;
     const syncHovered = () => {
       doc.body.toggleAttribute("data-hovered", Boolean(engineHovered || pointerHovered));
     };
     const onPointerHover = (e) => {
+      if (Number.isFinite(e.clientY)) lastPointerY = e.clientY;
       pointerHovered = Boolean(!isClickThrough?.() || isHoldEvent?.(e));
       syncHovered();
     };
@@ -1732,20 +1726,27 @@
     let frame = null;
     let chatShown = Boolean(showChat && chatUrl);
     let chatH = Number.isFinite(ctx.layout.pipChatHeight) ? ctx.layout.pipChatHeight : PIP_CHAT_HEIGHT;
+    let activeChatH = chatH;
     let togglingUntil = 0;
+    const applyChatH = (h = activeChatH) => {
+      activeChatH = Math.max(MIN_CHAT_HEIGHT, Math.round(h));
+      doc.body.style.setProperty("--gp-chat-h", `${activeChatH}px`);
+    };
+    applyChatH(chatH);
 
-    // The south handle sits at the bottom of the chat panel. When the engine is bound, its Win32
-    // border hook resizes the window directly; when unbound or triggered via DOM events, pointer
-    // drag dispatches PIP_RESIZE / resizeTo deltas. Either path updates the window height, which
-    // flexes the chat iframe while .pip-stage keeps the video aspect ratio.
+    // The south handle sits at the bottom of the chat panel. Dragging it resizes only the chat
+    // height while locking the video stage height; dragging any other edge or corner resizes the
+    // video stage freely while keeping the chat height fixed.
     const handleS = handles.find((el) => el.dataset.resize === "s");
     handleS.title = "드래그해서 채팅창 크기 조절";
     let chatResize = null;
+    let lockedVideoH = Math.max(MIN_FLOAT_HEIGHT, win.innerHeight - (chatShown ? activeChatH : 0));
     handleS.addEventListener("pointerdown", (e) => {
       if (e.button !== 0 || !chatShown) return;
       e.preventDefault();
       e.stopPropagation();
-      const curH = Math.round(frame?.getBoundingClientRect().height || chatH);
+      const curH = Math.round(frame?.getBoundingClientRect().height || activeChatH);
+      lockedVideoH = Math.max(MIN_FLOAT_HEIGHT, Math.round(stage.getBoundingClientRect().height || win.innerHeight - curH));
       chatResize = { startScreenY: e.screenY, startClientY: e.clientY, lastDelta: 0, startH: curH };
       try {
         handleS.setPointerCapture(e.pointerId);
@@ -1761,39 +1762,69 @@
       if (Math.abs(step) < 6) return;
       chatResize.lastDelta = clampedDy;
       chatH = targetH;
+      applyChatH(chatH);
+      togglingUntil = performance.now() + 600;
       onResizeChat?.(step);
     });
     const endChatResize = () => {
       if (!chatResize) return;
       chatResize = null;
+      togglingUntil = performance.now() + 600;
       doc.body.removeAttribute("data-chat-resizing");
-      const measured = Math.round(frame?.getBoundingClientRect().height || 0);
-      if (measured >= MIN_CHAT_HEIGHT) chatH = measured;
       persistLayout({ pipChatHeight: chatH });
     };
     handleS.addEventListener("pointerup", endChatResize);
     handleS.addEventListener("pointercancel", endChatResize);
 
+    let lastW = win.innerWidth;
+    let lastH = win.innerHeight;
+    let lastScreenY = win.screenY;
     const openedAt = performance.now();
     win.addEventListener("resize", () => {
-      if (!chatShown || !frame?.isConnected || chatResize) return;
-      if (performance.now() - openedAt < 1200 || performance.now() < togglingUntil) return;
-      const h = Math.round(frame.getBoundingClientRect().height);
-      if (h >= MIN_CHAT_HEIGHT && Math.abs(h - chatH) >= 4) {
-        chatH = h;
-        persistLayout({ pipChatHeight: h });
+      const dw = win.innerWidth - lastW;
+      const dh = win.innerHeight - lastH;
+      const dTop = win.screenY - lastScreenY;
+      lastW = win.innerWidth;
+      lastH = win.innerHeight;
+      lastScreenY = win.screenY;
+
+      if (!chatShown || !frame?.isConnected) {
+        lockedVideoH = Math.max(MIN_FLOAT_HEIGHT, win.innerHeight);
+        return;
       }
+      if (chatResize || performance.now() < togglingUntil) return;
+      if (performance.now() - openedAt < 1000) {
+        lockedVideoH = Math.max(MIN_FLOAT_HEIGHT, win.innerHeight - activeChatH);
+        return;
+      }
+      const isBottomChatDrag = Math.abs(dw) <= 1 && Math.abs(dTop) <= 2 && Math.abs(dh) >= 1 && lastPointerY > 32;
+      if (isBottomChatDrag) {
+        chatH = Math.max(MIN_CHAT_HEIGHT, win.innerHeight - lockedVideoH);
+        applyChatH(chatH);
+        persistLayout({ pipChatHeight: chatH });
+        return;
+      }
+      const ratio = mirror.videoWidth > 0 && mirror.videoHeight > 0 ? mirror.videoHeight / mirror.videoWidth : 9 / 16;
+      if (dw > 0 && dh < dw * ratio * 0.5 && (Math.abs(dh) <= 2 || win.innerHeight >= (win.screen?.availHeight ?? 1080) * 0.65)) {
+        const yieldH = Math.round(dw * ratio - Math.max(0, dh));
+        applyChatH(Math.max(MIN_CHAT_HEIGHT, activeChatH - yieldH));
+      } else if (dw < 0 && Math.abs(dh) <= 2 && activeChatH < chatH) {
+        applyChatH(Math.min(chatH, activeChatH + Math.round(-dw * ratio)));
+      }
+      lockedVideoH = Math.max(MIN_FLOAT_HEIGHT, win.innerHeight - activeChatH);
     });
 
     function syncChat(enabled, resizeWin = false) {
       if (!chatUrl) return;
       const nextShown = Boolean(enabled);
       const changed = nextShown !== chatShown;
+      const prevActiveH = activeChatH;
       chatShown = nextShown;
       doc.body.toggleAttribute("data-chat-open", nextShown);
       if (chatLabel) chatLabel.textContent = nextShown ? "채팅창 숨기기" : "채팅창 보기";
       if (chatBtn) chatBtn.toggleAttribute("data-active", nextShown);
       if (nextShown) {
+        applyChatH(chatH);
         if (!frame) {
           frame = doc.createElement("iframe");
           frame.src = chatUrl;
@@ -1815,7 +1846,7 @@
       }
       if (resizeWin && changed) {
         togglingUntil = performance.now() + 800;
-        onResizeChat?.(nextShown ? chatH : -chatH);
+        onResizeChat?.(nextShown ? chatH : -prevActiveH);
       }
     }
 
