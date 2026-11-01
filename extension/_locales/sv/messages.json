@@ -1,0 +1,312 @@
+{
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "Genomskinlig PiP med klickgenomsläpp som flyttar sig undan muspekaren. Fungerar med YouTube, Twitch, CHZZK, SOOP m.fl."
+  },
+  "cmdClickThrough": {
+    "message": "Slå på/av klickgenomsläpp (spökläge)"
+  },
+  "cmdDodge": {
+    "message": "Slå på/av smart auto-undvik"
+  },
+  "cmdMute": {
+    "message": "Slå på/av ljud på videofliken"
+  },
+  "modeWeb": {
+    "message": "Webbläge"
+  },
+  "modeWebTitle": {
+    "message": "Webbläge (överlägg i webbläsarfliken)"
+  },
+  "modeFull": {
+    "message": "Fullt läge"
+  },
+  "modeFullTitle": {
+    "message": "Fullt läge (PiP-fönster på skrivbordet)"
+  },
+  "chatShow": {
+    "message": "Visa chatt"
+  },
+  "chatHide": {
+    "message": "Dölj chatt"
+  },
+  "chatResizeTitle": {
+    "message": "Dra för att ändra chattens storlek"
+  },
+  "chatSmaller": {
+    "message": "Mindre chatt"
+  },
+  "chatBigger": {
+    "message": "Större chatt"
+  },
+  "skipAd": {
+    "message": "Hoppa över annons ⏭"
+  },
+  "btnReturn": {
+    "message": "Tillbaka"
+  },
+  "btnSourceTab": {
+    "message": "Källflik"
+  },
+  "hudOpacity": {
+    "message": "Opacitet $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "Opacitet $PCT$% (scrolla för att justera) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "Genomskinligt PiP-överlägg"
+  },
+  "badgeOff": {
+    "message": "Av"
+  },
+  "engineConnected": {
+    "message": "Motorn ansluten"
+  },
+  "masterTitle": {
+    "message": "Aktivera GhostPiP"
+  },
+  "masterHint": {
+    "message": "Om du stänger av detta stängs överlägget och motorn"
+  },
+  "sectionBasic": {
+    "message": "Grundinställningar"
+  },
+  "clickThrough": {
+    "message": "Klickgenomsläpp"
+  },
+  "autoDodge": {
+    "message": "Auto-undvik"
+  },
+  "showChatFull": {
+    "message": "Visa chatt i fullt läge"
+  },
+  "allSites": {
+    "message": "Använd på alla webbplatser"
+  },
+  "allSitesHint": {
+    "message": "När det är av visas det bara på streaming- och OTT-webbplatser"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Opacitet"
+  },
+  "wheelHint": {
+    "message": "Du kan också scrolla över videon · vid klickgenomsläpp använder du $HOLD$ + scroll",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "Slå på/av ljud"
+  },
+  "dodgeSettings": {
+    "message": "Inställningar för auto-undvik"
+  },
+  "dodgeCorners": {
+    "message": "Hörn den får flytta till"
+  },
+  "cornerTL": {
+    "message": "Övre vänster"
+  },
+  "cornerTR": {
+    "message": "Övre höger"
+  },
+  "cornerBL": {
+    "message": "Nedre vänster"
+  },
+  "cornerBR": {
+    "message": "Nedre höger"
+  },
+  "dodgeCornersHint": {
+    "message": "Stäng av hörn som måste synas, t.ex. en minikarta i ett spel. Låsta hörn krävs av hempositionen eller undvikriktningen."
+  },
+  "homePosition": {
+    "message": "Hemposition"
+  },
+  "dodgeAxis": {
+    "message": "Undvikriktning"
+  },
+  "axisFree": {
+    "message": "Fri (4 riktningar)"
+  },
+  "axisVertical": {
+    "message": "Upp/ned"
+  },
+  "axisHorizontal": {
+    "message": "Vänster/höger"
+  },
+  "dodgeStyle": {
+    "message": "Undvikstil"
+  },
+  "styleMove": {
+    "message": "Flytta till ett annat hörn"
+  },
+  "styleFade": {
+    "message": "Tona ut"
+  },
+  "autoReturn": {
+    "message": "Automatisk återgång"
+  },
+  "autoReturnHint": {
+    "message": "Återgår till hempositionen när musen lämnar"
+  },
+  "hotkeySettings": {
+    "message": "Kortkommandon och kontroller"
+  },
+  "holdKey": {
+    "message": "Modifierartangent"
+  },
+  "mute": {
+    "message": "Ljud av"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Klicka och tryck sedan på ett nytt kortkommando"
+  },
+  "hotkeyRecording": {
+    "message": "Tryck på tangenter · Esc för att avbryta"
+  },
+  "tipHold": {
+    "message": "Även vid klickgenomsläpp kan du hålla ned $HOLD$ för att flytta, ändra storlek eller ändra opaciteten med scrollhjulet.",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "Opacitet, klickgenomsläpp och auto-undvik gäller även fönster som öppnas med webbplatsens eller webbläsarens egen PiP-knapp."
+  },
+  "resetHotkeys": {
+    "message": "Återställ standard"
+  },
+  "bannerTitle": {
+    "message": "Sväva även över PC-spel"
+  },
+  "bannerSub": {
+    "message": "Installera GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "Motorns protokollversion matchar inte"
+  },
+  "warnHotkeyConflict": {
+    "message": "Kortkommandokonflikt: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "Kom igång med GhostPiP"
+  },
+  "guideSub": {
+    "message": "Genomskinlig PiP med klickgenomsläpp och auto-undvik som aldrig skymmer skärmen"
+  },
+  "guideCheckingEngine": {
+    "message": "Kontrollerar motorn…"
+  },
+  "guideChecking": {
+    "message": "Kontrollerar…"
+  },
+  "guideEngineMissing": {
+    "message": "Motorn är inte installerad"
+  },
+  "guideStep1Title": {
+    "message": "1. Håll muspekaren över en video"
+  },
+  "guideStep1Body": {
+    "message": "Två knappar visas överst på videor på YouTube, Twitch, CHZZK, SOOP och OTT-tjänster som Netflix, Disney+ och Prime Video."
+  },
+  "guideWebModeBody": {
+    "message": "Ett flytande fönster i webbläsarfliken. Det följer med till andra flikar. Inget att installera."
+  },
+  "guideFullModeBody": {
+    "message": "Ett fönster som svävar över spel och andra program. Opacitet, klickgenomsläpp och auto-undvik kräver <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. Installera GhostPiP Engine (fullt läge, Windows)"
+  },
+  "guideStep2a": {
+    "message": "Packa upp <code>GhostPiP-Full-Package.zip</code> (eller <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "Dubbelklicka på <code>engine\\install.bat</code>. Inga administratörsrättigheter krävs."
+  },
+  "guideStep2c": {
+    "message": "Klart när statusen uppe till höger på den här sidan ändras till <b>Motorn ansluten</b>."
+  },
+  "guideRetry": {
+    "message": "Kontrollera anslutningen igen"
+  },
+  "guideEngineNote": {
+    "message": "Motorn installeras i <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, körs bara medan Chrome har fullt läge öppet och avslutas när du stänger av GhostPiP. Kör <code>uninstall.bat</code> för att ta bort den."
+  },
+  "guideAvTitle": {
+    "message": "Om ditt antivirusprogram blockerar motorn"
+  },
+  "guideAvBody": {
+    "message": "Motorn visar ett genomskinligt fönster ovanpå andra fönster och vidarebefordrar musinmatning, så vissa antivirusprogram (t.ex. Avast <code>Win64:Evo-gen</code>) kan felaktigt flagga osignerade versioner. Den använder aldrig nätverket och samlar aldrig in filer."
+  },
+  "guideAv1": {
+    "message": "Återställ <code>GhostPiP.Engine.exe</code> från antivirusprogrammets karantän."
+  },
+  "guideAv2": {
+    "message": "Lägg till mappen <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> i antivirusprogrammets undantag."
+  },
+  "guideAv3": {
+    "message": "Kör <code>install.bat</code> igen."
+  },
+  "guideControlsTitle": {
+    "message": "Kontroller"
+  },
+  "guideMoveResize": {
+    "message": "Flytta · ändra storlek"
+  },
+  "guideMoveResizeHow": {
+    "message": "Dra medan du håller ned <kbd class=\"hold\">Ctrl+Alt</kbd> / dra i en kant"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + mushjul"
+  },
+  "guideToggleClickThrough": {
+    "message": "Slå på/av klickgenomsläpp"
+  },
+  "guideToggleDodge": {
+    "message": "Slå på/av auto-undvik"
+  },
+  "guideHotkeyNote": {
+    "message": "Ändra kortkommandon och modifierartangent via GhostPiP-ikonen i verktygsfältet → Kortkommandon och kontroller."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (körs)"
+  },
+  "engineTrayEmergency": {
+    "message": "Nödläge: stäng av klickgenomsläpp"
+  },
+  "engineTrayExit": {
+    "message": "Avsluta"
+  }
+}

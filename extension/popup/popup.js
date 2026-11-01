@@ -1,5 +1,7 @@
 (() => {
   const Settings = globalThis.GhostPiPSettings;
+  const { t, apply: applyI18n } = globalThis.GhostPiPI18n;
+  applyI18n();
   const DEFAULT_ENGINE = {
     connected: false,
     installed: false,
@@ -24,7 +26,7 @@
     kbdClickThrough: document.getElementById("kbdClickThrough"),
     kbdDodge: document.getElementById("kbdDodge"),
     kbdMute: document.getElementById("kbdMute"),
-    tipHoldKey: document.getElementById("tipHoldKey"),
+    tipHold: document.getElementById("tipHold"),
     hotkeyBtns: [...document.querySelectorAll("button[data-hotkey]")],
     resetHotkeys: document.getElementById("resetHotkeys"),
     corners: [...document.querySelectorAll("input[data-corner]")],
@@ -53,17 +55,17 @@
     const isEnabled = Boolean(settings.enabled);
 
     document.body.toggleAttribute("data-disabled", !isEnabled);
-    els.modeBadge.textContent = !isEnabled ? "꺼짐" : engine.connected ? "엔진 연결됨" : "웹 모드";
+    els.modeBadge.textContent = !isEnabled ? t("badgeOff") : engine.connected ? t("engineConnected") : t("modeWeb");
     els.modeBadge.toggleAttribute("data-active", isEnabled && Boolean(engine.connected));
     els.modeBadge.toggleAttribute("data-disabled", !isEnabled);
     els.engineBanner.hidden = Boolean(engine.connected || engine.installed);
 
     const warnings = [];
     if (engine.protocolMismatch) {
-      warnings.push("엔진 프로토콜 버전 불일치");
+      warnings.push(t("warnProtocol"));
     }
     if (Array.isArray(engine.hotkeyErrors) && engine.hotkeyErrors.length > 0) {
-      warnings.push(`단축키 충돌: ${engine.hotkeyErrors.join(", ")}`);
+      warnings.push(t("warnHotkeyConflict", [engine.hotkeyErrors.join(", ")]));
     }
     els.engineWarning.hidden = warnings.length === 0;
     els.engineWarning.textContent = warnings.join(" · ");
@@ -98,10 +100,10 @@
     els.autoReturn.checked = dodge.autoReturn;
     els.hold.value = hotkeys.hold;
     if (els.wheelSubHint) {
-      els.wheelSubHint.textContent = `영상 위 휠로도 조절 · 클릭 통과 중엔 ${hotkeys.hold} + 휠`;
+      els.wheelSubHint.textContent = t("wheelHint", [hotkeys.hold]);
     }
-    if (els.tipHoldKey) {
-      els.tipHoldKey.textContent = hotkeys.hold;
+    if (els.tipHold) {
+      els.tipHold.textContent = t("tipHold", [hotkeys.hold]);
     }
     if (els.kbdClickThrough) els.kbdClickThrough.textContent = hotkeys.clickThrough;
     if (els.kbdDodge) els.kbdDodge.textContent = hotkeys.dodge;
@@ -110,7 +112,7 @@
       const key = btn.dataset.hotkey;
       const isRec = recordingTarget === key;
       btn.toggleAttribute("data-recording", isRec);
-      btn.textContent = isRec ? "키 입력 · Esc 취소" : hotkeys[key];
+      btn.textContent = isRec ? t("hotkeyRecording") : hotkeys[key];
     }
   }
 

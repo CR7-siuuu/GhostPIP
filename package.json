@@ -8,7 +8,9 @@
     "test:e2e": "node test/e2e/run.mjs",
     "test:crosstab": "node test/e2e/crosstab.mjs",
     "test:popup": "node test/e2e/popup.mjs",
-    "test:engine": "node test/e2e/engine.mjs"
+    "test:engine": "node test/e2e/engine.mjs",
+    "test:locales": "node scripts/check-locales.mjs",
+    "test:i18n": "node test/e2e/i18n.mjs"
   },
   "author": "",
   "license": "ISC",

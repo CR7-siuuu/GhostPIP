@@ -1,0 +1,312 @@
+{
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "İmlecinizden kaçan, tıklamaları geçiren şeffaf PiP. YouTube, Twitch, CHZZK, SOOP ve daha fazlasıyla çalışır."
+  },
+  "cmdClickThrough": {
+    "message": "Tıklama geçirmeyi aç/kapat (Hayalet Modu)"
+  },
+  "cmdDodge": {
+    "message": "Akıllı otomatik kaçınmayı aç/kapat"
+  },
+  "cmdMute": {
+    "message": "Video sekmesinin sesini aç/kapat"
+  },
+  "modeWeb": {
+    "message": "Web modu"
+  },
+  "modeWebTitle": {
+    "message": "Web modu (tarayıcı sekmesi içinde katman)"
+  },
+  "modeFull": {
+    "message": "Tam mod"
+  },
+  "modeFullTitle": {
+    "message": "Tam mod (masaüstü PiP penceresi)"
+  },
+  "chatShow": {
+    "message": "Sohbeti göster"
+  },
+  "chatHide": {
+    "message": "Sohbeti gizle"
+  },
+  "chatResizeTitle": {
+    "message": "Sohbeti yeniden boyutlandırmak için sürükleyin"
+  },
+  "chatSmaller": {
+    "message": "Sohbeti küçült"
+  },
+  "chatBigger": {
+    "message": "Sohbeti büyüt"
+  },
+  "skipAd": {
+    "message": "Reklamı atla ⏭"
+  },
+  "btnReturn": {
+    "message": "Geri döndür"
+  },
+  "btnSourceTab": {
+    "message": "Kaynak sekme"
+  },
+  "hudOpacity": {
+    "message": "Opaklık %$PCT$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "Opaklık %$PCT$ (ayarlamak için kaydırın) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "Şeffaf PiP katmanı"
+  },
+  "badgeOff": {
+    "message": "Kapalı"
+  },
+  "engineConnected": {
+    "message": "Motor bağlı"
+  },
+  "masterTitle": {
+    "message": "GhostPiP'i etkinleştir"
+  },
+  "masterHint": {
+    "message": "Kapatıldığında katman ve motor kapanır"
+  },
+  "sectionBasic": {
+    "message": "Temel ayarlar"
+  },
+  "clickThrough": {
+    "message": "Tıklama geçirme"
+  },
+  "autoDodge": {
+    "message": "Otomatik kaçınma"
+  },
+  "showChatFull": {
+    "message": "Tam modda sohbeti göster"
+  },
+  "allSites": {
+    "message": "Tüm sitelerde kullan"
+  },
+  "allSitesHint": {
+    "message": "Kapalıyken yalnızca yayın ve OTT sitelerinde görünür"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Opaklık"
+  },
+  "wheelHint": {
+    "message": "Video üzerinde kaydırarak da ayarlayabilirsiniz · tıklama geçirme sırasında $HOLD$ + kaydırma kullanın",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "Sesi aç/kapat"
+  },
+  "dodgeSettings": {
+    "message": "Kaçınma ayarları"
+  },
+  "dodgeCorners": {
+    "message": "Gidebileceği köşeler"
+  },
+  "cornerTL": {
+    "message": "Sol üst"
+  },
+  "cornerTR": {
+    "message": "Sağ üst"
+  },
+  "cornerBL": {
+    "message": "Sol alt"
+  },
+  "cornerBR": {
+    "message": "Sağ alt"
+  },
+  "dodgeCornersHint": {
+    "message": "Oyun mini haritası gibi görünür kalması gereken köşeleri kapatın. Kilitli köşeler ana konum veya kaçınma yönü için gereklidir."
+  },
+  "homePosition": {
+    "message": "Ana konum"
+  },
+  "dodgeAxis": {
+    "message": "Kaçınma yönü"
+  },
+  "axisFree": {
+    "message": "Serbest (4 yön)"
+  },
+  "axisVertical": {
+    "message": "Yukarı / aşağı"
+  },
+  "axisHorizontal": {
+    "message": "Sol / sağ"
+  },
+  "dodgeStyle": {
+    "message": "Kaçınma stili"
+  },
+  "styleMove": {
+    "message": "Başka köşeye taşı"
+  },
+  "styleFade": {
+    "message": "Soldur"
+  },
+  "autoReturn": {
+    "message": "Otomatik dönüş"
+  },
+  "autoReturnHint": {
+    "message": "Fare uzaklaştığında ana konuma geri döner"
+  },
+  "hotkeySettings": {
+    "message": "Kısayollar ve kontroller"
+  },
+  "holdKey": {
+    "message": "Değiştirici tuş"
+  },
+  "mute": {
+    "message": "Sessiz"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Tıklayın, ardından yeni kısayola basın"
+  },
+  "hotkeyRecording": {
+    "message": "Tuşlara basın · iptal için Esc"
+  },
+  "tipHold": {
+    "message": "Tıklama geçirme sırasında bile $HOLD$ tuşlarını basılı tutarak taşıyabilir, yeniden boyutlandırabilir veya kaydırma tekerleğiyle opaklığı değiştirebilirsiniz.",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "Opaklık, tıklama geçirme ve otomatik kaçınma, bir sitenin veya tarayıcının kendi PiP düğmesiyle açılan pencerelere de uygulanır."
+  },
+  "resetHotkeys": {
+    "message": "Varsayılanlara sıfırla"
+  },
+  "bannerTitle": {
+    "message": "PC oyunlarının üzerinde de süzülsün"
+  },
+  "bannerSub": {
+    "message": "GhostPiP Engine'i yükleyin"
+  },
+  "warnProtocol": {
+    "message": "Motor protokol sürümü uyuşmuyor"
+  },
+  "warnHotkeyConflict": {
+    "message": "Kısayol çakışması: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "GhostPiP'e başlarken"
+  },
+  "guideSub": {
+    "message": "Ekranınızı asla kapatmayan, tıklama geçirme ve otomatik kaçınma özellikli şeffaf PiP"
+  },
+  "guideCheckingEngine": {
+    "message": "Motor kontrol ediliyor…"
+  },
+  "guideChecking": {
+    "message": "Kontrol ediliyor…"
+  },
+  "guideEngineMissing": {
+    "message": "Motor yüklü değil"
+  },
+  "guideStep1Title": {
+    "message": "1. İmleci bir videonun üzerine getirin"
+  },
+  "guideStep1Body": {
+    "message": "YouTube, Twitch, CHZZK, SOOP ve Netflix, Disney+, Prime Video gibi OTT hizmetlerindeki videoların üstünde iki düğme görünür."
+  },
+  "guideWebModeBody": {
+    "message": "Tarayıcı sekmesi içinde yüzen bir pencere. Diğer sekmelerde de sizi takip eder. Hiçbir şey yüklemeniz gerekmez."
+  },
+  "guideFullModeBody": {
+    "message": "Oyunların ve diğer programların üzerinde yüzen bir pencere. Opaklık, tıklama geçirme ve otomatik kaçınma için <b>GhostPiP Engine</b> gerekir."
+  },
+  "guideStep2Title": {
+    "message": "2. GhostPiP Engine'i yükleyin (Tam mod, Windows)"
+  },
+  "guideStep2a": {
+    "message": "<code>GhostPiP-Full-Package.zip</code> (veya <code>GhostPiP-Engine-win-x64.zip</code>) dosyasını ayıklayın."
+  },
+  "guideStep2b": {
+    "message": "<code>engine\\install.bat</code> dosyasına çift tıklayın. Yönetici hakları gerekmez."
+  },
+  "guideStep2c": {
+    "message": "Bu sayfanın sağ üstündeki durum <b>Motor bağlı</b> olarak değiştiğinde işlem tamamdır."
+  },
+  "guideRetry": {
+    "message": "Bağlantıyı yeniden kontrol et"
+  },
+  "guideEngineNote": {
+    "message": "Motor <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> konumuna yüklenir, yalnızca Chrome'da Tam mod açıkken çalışır ve GhostPiP'i kapattığınızda kapanır. Kaldırmak için <code>uninstall.bat</code> dosyasını çalıştırın."
+  },
+  "guideAvTitle": {
+    "message": "Antivirüsünüz motoru engellerse"
+  },
+  "guideAvBody": {
+    "message": "Motor diğer pencerelerin üzerinde şeffaf bir pencere gösterip fare girdisini ilettiği için bazı antivirüs ürünleri (ör. Avast <code>Win64:Evo-gen</code>) imzasız sürümleri yanlışlıkla işaretleyebilir. Motor asla ağı kullanmaz ve dosya toplamaz."
+  },
+  "guideAv1": {
+    "message": "<code>GhostPiP.Engine.exe</code> dosyasını antivirüs karantinasından geri yükleyin."
+  },
+  "guideAv2": {
+    "message": "<code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> klasörünü antivirüs istisnalarına ekleyin."
+  },
+  "guideAv3": {
+    "message": "<code>install.bat</code> dosyasını yeniden çalıştırın."
+  },
+  "guideControlsTitle": {
+    "message": "Kontroller"
+  },
+  "guideMoveResize": {
+    "message": "Taşı · boyutlandır"
+  },
+  "guideMoveResizeHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> basılıyken sürükleyin / kenarı sürükleyin"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + fare tekerleği"
+  },
+  "guideToggleClickThrough": {
+    "message": "Tıklama geçirmeyi aç/kapat"
+  },
+  "guideToggleDodge": {
+    "message": "Otomatik kaçınmayı aç/kapat"
+  },
+  "guideHotkeyNote": {
+    "message": "Kısayolları ve değiştirici tuşu GhostPiP araç çubuğu simgesi → Kısayollar ve kontroller bölümünden değiştirin."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (çalışıyor)"
+  },
+  "engineTrayEmergency": {
+    "message": "Acil durum: tıklama geçirmeyi kapat"
+  },
+  "engineTrayExit": {
+    "message": "Çıkış"
+  }
+}

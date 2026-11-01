@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "GhostPiP",
+  "name": "__MSG_extName__",
   "version": "1.0.0",
-  "description": "화면을 가리지 않는 투명 · 클릭 통과 · 자동 회피 PiP. 유튜브, 치지직, SOOP, 트위치 지원",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "minimum_chrome_version": "116",
   "icons": {
     "16": "icons/icon16.png",
@@ -38,7 +39,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "GhostPiP",
+    "default_title": "__MSG_extName__",
     "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
@@ -53,19 +54,19 @@
       "suggested_key": {
         "default": "Alt+G"
       },
-      "description": "클릭 통과 (Ghost Mode) 토글"
+      "description": "__MSG_cmdClickThrough__"
     },
     "toggle-dodge": {
       "suggested_key": {
         "default": "Alt+Shift+D"
       },
-      "description": "스마트 자동 회피 토글"
+      "description": "__MSG_cmdDodge__"
     },
     "toggle-mute": {
       "suggested_key": {
         "default": "Alt+M"
       },
-      "description": "영상 탭 음소거 토글"
+      "description": "__MSG_cmdMute__"
     }
   },
   "content_scripts": [

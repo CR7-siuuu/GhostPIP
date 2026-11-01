@@ -56,6 +56,11 @@ public sealed record PipOpenedMessage(int TabId, string Kind, PipRect Rect, doub
 public sealed record PipClosedMessage(int TabId) : IncomingMessage("PIP_CLOSED");
 public sealed record PipResizeMessage(int DeltaH, double Dpr) : IncomingMessage("PIP_RESIZE");
 public sealed record PingMessage() : IncomingMessage("PING");
+public sealed record TrayStrings(string Tip, string Active, string Emergency, string Exit)
+{
+    public static readonly TrayStrings English = new("GhostPiP Engine", "GhostPiP Engine (running)", "Emergency: turn off click-through", "Exit");
+}
+public sealed record LocaleMessage(TrayStrings Tray) : IncomingMessage("LOCALE");
 public sealed record TestCursorMessage(DodgePoint? Cursor) : IncomingMessage("TEST_CURSOR");
 public sealed record TestWheelMessage(int X, int Y, int Delta, bool Hold = true) : IncomingMessage("TEST_WHEEL");
 public sealed record TestHoldMessage(bool? Hold) : IncomingMessage("TEST_HOLD");
@@ -103,6 +108,7 @@ public static class Protocol
                 "PIP_CLOSED" => TryParsePipClosed(root, out message),
                 "PIP_RESIZE" => TryParsePipResize(root, out message),
                 "PING" => SetResult(new PingMessage(), out message),
+                "LOCALE" => TryParseLocale(root, out message),
                 "TEST_CURSOR" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
                     TryParseTestCursor(root, out message),
                 "TEST_WHEEL" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
@@ -298,6 +304,21 @@ public static class Protocol
             return true;
         }
         message = new TestHoldMessage(null);
+        return true;
+    }
+
+    private static bool TryParseLocale(JsonElement root, out IncomingMessage? message)
+    {
+        message = null;
+        if (!root.TryGetProperty("strings", out var el) || el.ValueKind != JsonValueKind.Object)
+            return false;
+
+        var en = TrayStrings.English;
+        message = new LocaleMessage(new TrayStrings(
+            GetStringOrDefault(el, "trayTip", en.Tip),
+            GetStringOrDefault(el, "trayActive", en.Active),
+            GetStringOrDefault(el, "trayEmergency", en.Emergency),
+            GetStringOrDefault(el, "trayExit", en.Exit)));
         return true;
     }
 

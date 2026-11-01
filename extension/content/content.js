@@ -4,6 +4,13 @@
   } catch {}
 
   const Dodge = globalThis.GhostPiPDodge;
+  const t = (key, subs) => {
+    try {
+      return chrome.i18n.getMessage(key, subs) || key;
+    } catch {
+      return key;
+    }
+  };
   const Settings = globalThis.GhostPiPSettings;
 
   const FLOAT_CLASS = "ghostpip-inpage-target";
@@ -239,16 +246,16 @@
     "ghostpip-launcher",
     BASE_CSS,
     h("div", { class: "bar" },
-      h("button", { "data-action": "inTab", title: "웹 모드 (브라우저 탭 내 오버레이)" },
+      h("button", { "data-action": "inTab", title: t("modeWebTitle") },
         svgIcon(ICON_WEB_MODE),
-        "웹 모드"),
-      h("button", { "data-action": "docPip", title: "전체 모드 (데스크톱 PiP 창)" },
+        t("modeWeb")),
+      h("button", { "data-action": "docPip", title: t("modeFullTitle") },
         svgIcon(ICON_FULL_MODE),
-        "전체 모드")),
+        t("modeFull"))),
   );
 
   const hudEl = h("div", { class: "hud" }, "");
-  const webChatLabel = h("span", {}, "채팅창 보기");
+  const webChatLabel = h("span", {}, t("chatShow"));
   const webChatBtn = h(
     "button",
     { "data-action": "toggleWebChat" },
@@ -258,7 +265,7 @@
   const skipAdBtn = h(
     "button",
     { class: "skip-ad", "data-action": "skipAd", hidden: "" },
-    "광고 건너뛰기 ⏭",
+    t("skipAd"),
   );
   const WEB_CHAT_CSS = `
     :host { box-sizing: border-box; background: #0f172a; box-shadow: 0 8px 24px rgba(2, 6, 23, 0.55); }
@@ -270,7 +277,7 @@
     :host(:hover) .chat-resize::after, :host([data-interactive]) .chat-resize::after, .chat-resize[data-active]::after { opacity: 1; }
     :host([data-resizing]) iframe { pointer-events: none; }`;
   const webChatFrame = h("iframe", {});
-  const webChatResize = h("div", { class: "chat-resize", title: "드래그해서 채팅창 크기 조절" });
+  const webChatResize = h("div", { class: "chat-resize", title: t("chatResizeTitle") });
   const webChat = overlayHost("ghostpip-chat", WEB_CHAT_CSS, webChatFrame, webChatResize);
 
   const controller = overlayHost(
@@ -281,11 +288,11 @@
     hudEl,
     skipAdBtn,
     h("div", { class: "bar" },
-      h("button", { "data-action": "idle" }, "복귀"),
+      h("button", { "data-action": "idle" }, t("btnReturn")),
       h("button", { "data-action": "docPip", "data-mode": "local" },
         svgIcon(ICON_FULL_MODE),
-        "전체 모드"),
-      h("button", { "data-action": "focusSource", "data-mode": "remote" }, "원본 탭"),
+        t("modeFull")),
+      h("button", { "data-action": "focusSource", "data-mode": "remote" }, t("btnSourceTab")),
       webChatBtn),
   );
 
@@ -703,7 +710,7 @@
       const canShowChat = Boolean(b.chatUrl);
       const showChatNow = Boolean(webChatOpen && canShowChat);
       webChatBtn.style.display = canShowChat ? "inline-flex" : "none";
-      webChatLabel.textContent = showChatNow ? "채팅창 숨기기" : "채팅창 보기";
+      webChatLabel.textContent = showChatNow ? t("chatHide") : t("chatShow");
 
       const interactive = isInteractive();
       const hovered =
@@ -743,7 +750,7 @@
         webChat.hide();
       }
 
-      hudEl.textContent = `투명도 ${Math.round(ctx.settings.opacity * 100)}% (휠 조절) · ${w}×${h}`;
+      hudEl.textContent = t("hudOpacityWheel", [String(Math.round(ctx.settings.opacity * 100)), `${w}×${h}`]);
       controller.host.toggleAttribute("data-hovered", hovered);
       controller.host.toggleAttribute("data-bar-only", showBarOnly);
       if (interactive || showBarOnly) controller.show(ctrlGeo);
@@ -1664,7 +1671,7 @@
     pipSkipAd.className = "pip-skip-ad";
     pipSkipAd.dataset.action = "skipAd";
     pipSkipAd.hidden = true;
-    pipSkipAd.textContent = "광고 건너뛰기 ⏭";
+    pipSkipAd.textContent = t("skipAd");
     pipSkipAd.addEventListener("click", (e) => {
       e.stopPropagation();
       onSkipAd?.();
@@ -1682,7 +1689,7 @@
     const closeBtn = doc.createElement("button");
     closeBtn.type = "button";
     closeBtn.dataset.action = "closePip";
-    closeBtn.textContent = "복귀";
+    closeBtn.textContent = t("btnReturn");
     closeBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       onClosePip?.();
@@ -1706,7 +1713,7 @@
       pipBar.append(chatBtn);
       // Click buttons still work under click-through (the engine replays hold+click), and they can
       // grow the chat by shrinking the video once Chrome's PiP size cap stops the window growing.
-      for (const [label, delta, title] of [["−", -CHAT_SIZE_STEP, "채팅창 작게"], ["+", CHAT_SIZE_STEP, "채팅창 크게"]]) {
+      for (const [label, delta, title] of [["−", -CHAT_SIZE_STEP, t("chatSmaller")], ["+", CHAT_SIZE_STEP, t("chatBigger")]]) {
         const btn = doc.createElement("button");
         btn.type = "button";
         btn.dataset.action = delta > 0 ? "chatBigger" : "chatSmaller";
@@ -1763,7 +1770,7 @@
     // height while locking the video stage height; dragging any other edge or corner resizes the
     // video stage freely while keeping the chat height fixed.
     const handleS = handles.find((el) => el.dataset.resize === "s");
-    handleS.title = "드래그해서 채팅창 크기 조절";
+    handleS.title = t("chatResizeTitle");
     let chatResize = null;
     let lockedVideoH = Math.max(MIN_FLOAT_HEIGHT, win.innerHeight - (chatShown ? activeChatH : 0));
     handleS.addEventListener("pointerdown", (e) => {
@@ -1886,7 +1893,7 @@
       const prevActiveH = activeChatH;
       chatShown = nextShown;
       doc.body.toggleAttribute("data-chat-open", nextShown);
-      if (chatLabel) chatLabel.textContent = nextShown ? "채팅창 숨기기" : "채팅창 보기";
+      if (chatLabel) chatLabel.textContent = nextShown ? t("chatHide") : t("chatShow");
       if (chatBtn) chatBtn.toggleAttribute("data-active", nextShown);
       for (const btn of chatSizeBtns) btn.hidden = !nextShown;
       if (nextShown) {
@@ -1970,7 +1977,7 @@
       if (!mirror) return;
       mirror.style.opacity = engineConnected ? "1" : String(ctx.settings.opacity);
       if (showToast && pipHud) {
-        pipHud.textContent = `투명도 ${Math.round(ctx.settings.opacity * 100)}%`;
+        pipHud.textContent = t("hudOpacity", [String(Math.round(ctx.settings.opacity * 100))]);
         pipHud.setAttribute("data-show", "");
         clearTimeout(hudTimer);
         hudTimer = setTimeout(() => pipHud?.removeAttribute("data-show"), 900);

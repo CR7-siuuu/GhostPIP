@@ -36,7 +36,7 @@ const browser = await puppeteer.launch({
   pipe: true,
   enableExtensions: true,
   defaultViewport: { width: 1000, height: 700 },
-  args: ["--autoplay-policy=no-user-gesture-required", "--no-first-run"],
+  args: ["--autoplay-policy=no-user-gesture-required", "--no-first-run", "--lang=ko"],
 });
 
 const results = [];

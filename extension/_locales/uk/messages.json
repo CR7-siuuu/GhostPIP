@@ -1,0 +1,312 @@
+{
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "Прозорий PiP із наскрізними кліками, що ухиляється від курсора. Працює з YouTube, Twitch, CHZZK, SOOP та іншими."
+  },
+  "cmdClickThrough": {
+    "message": "Увімкнути/вимкнути наскрізні кліки (режим привида)"
+  },
+  "cmdDodge": {
+    "message": "Увімкнути/вимкнути розумне автоухилення"
+  },
+  "cmdMute": {
+    "message": "Увімкнути/вимкнути звук вкладки з відео"
+  },
+  "modeWeb": {
+    "message": "Веб-режим"
+  },
+  "modeWebTitle": {
+    "message": "Веб-режим (накладання у вкладці браузера)"
+  },
+  "modeFull": {
+    "message": "Повний режим"
+  },
+  "modeFullTitle": {
+    "message": "Повний режим (вікно PiP на робочому столі)"
+  },
+  "chatShow": {
+    "message": "Показати чат"
+  },
+  "chatHide": {
+    "message": "Сховати чат"
+  },
+  "chatResizeTitle": {
+    "message": "Перетягніть, щоб змінити розмір чату"
+  },
+  "chatSmaller": {
+    "message": "Менший чат"
+  },
+  "chatBigger": {
+    "message": "Більший чат"
+  },
+  "skipAd": {
+    "message": "Пропустити рекламу ⏭"
+  },
+  "btnReturn": {
+    "message": "Повернути"
+  },
+  "btnSourceTab": {
+    "message": "Вкладка джерела"
+  },
+  "hudOpacity": {
+    "message": "Непрозорість $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "Непрозорість $PCT$% (прокрутіть, щоб змінити) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "Прозоре накладання PiP"
+  },
+  "badgeOff": {
+    "message": "Вимк."
+  },
+  "engineConnected": {
+    "message": "Рушій підключено"
+  },
+  "masterTitle": {
+    "message": "Увімкнути GhostPiP"
+  },
+  "masterHint": {
+    "message": "Вимкнення закриває накладання та рушій"
+  },
+  "sectionBasic": {
+    "message": "Основні налаштування"
+  },
+  "clickThrough": {
+    "message": "Наскрізні кліки"
+  },
+  "autoDodge": {
+    "message": "Автоухилення"
+  },
+  "showChatFull": {
+    "message": "Показувати чат у повному режимі"
+  },
+  "allSites": {
+    "message": "Використовувати на всіх сайтах"
+  },
+  "allSitesHint": {
+    "message": "Якщо вимкнено, з'являється лише на стрімінгових та OTT-сайтах"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Непрозорість"
+  },
+  "wheelHint": {
+    "message": "Також можна прокручувати над відео · під час наскрізних кліків використовуйте $HOLD$ + прокручування",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "Увімкнути/вимкнути звук"
+  },
+  "dodgeSettings": {
+    "message": "Налаштування автоухилення"
+  },
+  "dodgeCorners": {
+    "message": "Кути, у які можна переміщатися"
+  },
+  "cornerTL": {
+    "message": "Угорі ліворуч"
+  },
+  "cornerTR": {
+    "message": "Угорі праворуч"
+  },
+  "cornerBL": {
+    "message": "Унизу ліворуч"
+  },
+  "cornerBR": {
+    "message": "Унизу праворуч"
+  },
+  "dodgeCornersHint": {
+    "message": "Вимкніть кути, які мають лишатися видимими, наприклад мінікарту гри. Заблоковані кути потрібні для початкової позиції або напрямку ухилення."
+  },
+  "homePosition": {
+    "message": "Початкова позиція"
+  },
+  "dodgeAxis": {
+    "message": "Напрямок ухилення"
+  },
+  "axisFree": {
+    "message": "Вільний (4 напрямки)"
+  },
+  "axisVertical": {
+    "message": "Вгору / вниз"
+  },
+  "axisHorizontal": {
+    "message": "Ліворуч / праворуч"
+  },
+  "dodgeStyle": {
+    "message": "Спосіб ухилення"
+  },
+  "styleMove": {
+    "message": "Перейти в інший кут"
+  },
+  "styleFade": {
+    "message": "Зникання"
+  },
+  "autoReturn": {
+    "message": "Автоповернення"
+  },
+  "autoReturnHint": {
+    "message": "Повертається на початкову позицію, коли миша відходить"
+  },
+  "hotkeySettings": {
+    "message": "Гарячі клавіші й керування"
+  },
+  "holdKey": {
+    "message": "Клавіша-модифікатор"
+  },
+  "mute": {
+    "message": "Вимкнути звук"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Натисніть, а потім введіть нове сполучення клавіш"
+  },
+  "hotkeyRecording": {
+    "message": "Натисніть клавіші · Esc — скасувати"
+  },
+  "tipHold": {
+    "message": "Навіть із наскрізними кліками утримуйте $HOLD$, щоб переміщати, змінювати розмір або непрозорість коліщатком миші.",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "Непрозорість, наскрізні кліки та автоухилення також діють для вікон, відкритих власною кнопкою PiP сайту чи браузера."
+  },
+  "resetHotkeys": {
+    "message": "Скинути до стандартних"
+  },
+  "bannerTitle": {
+    "message": "Поверх ігор на ПК теж"
+  },
+  "bannerSub": {
+    "message": "Установити GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "Версія протоколу рушія не збігається"
+  },
+  "warnHotkeyConflict": {
+    "message": "Конфлікт гарячих клавіш: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "Початок роботи з GhostPiP"
+  },
+  "guideSub": {
+    "message": "Прозорий PiP із наскрізними кліками й автоухиленням, що ніколи не закриває екран"
+  },
+  "guideCheckingEngine": {
+    "message": "Перевірка рушія…"
+  },
+  "guideChecking": {
+    "message": "Перевірка…"
+  },
+  "guideEngineMissing": {
+    "message": "Рушій не встановлено"
+  },
+  "guideStep1Title": {
+    "message": "1. Наведіть курсор на відео"
+  },
+  "guideStep1Body": {
+    "message": "Угорі відео на YouTube, Twitch, CHZZK, SOOP та в OTT-сервісах, як-от Netflix, Disney+ і Prime Video, з'являються дві кнопки."
+  },
+  "guideWebModeBody": {
+    "message": "Плаваюче вікно всередині вкладки браузера. Переходить разом із вами на інші вкладки. Нічого не потрібно встановлювати."
+  },
+  "guideFullModeBody": {
+    "message": "Вікно поверх ігор та інших програм. Для непрозорості, наскрізних кліків і автоухилення потрібен <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. Установіть GhostPiP Engine (повний режим, Windows)"
+  },
+  "guideStep2a": {
+    "message": "Розпакуйте <code>GhostPiP-Full-Package.zip</code> (або <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "Двічі клацніть <code>engine\\install.bat</code>. Права адміністратора не потрібні."
+  },
+  "guideStep2c": {
+    "message": "Готово, коли статус у правому верхньому куті цієї сторінки зміниться на <b>Рушій підключено</b>."
+  },
+  "guideRetry": {
+    "message": "Перевірити підключення ще раз"
+  },
+  "guideEngineNote": {
+    "message": "Рушій установлюється в <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, працює лише тоді, коли в Chrome відкрито повний режим, і завершується, коли ви вимикаєте GhostPiP. Щоб видалити його, запустіть <code>uninstall.bat</code>."
+  },
+  "guideAvTitle": {
+    "message": "Якщо антивірус блокує рушій"
+  },
+  "guideAvBody": {
+    "message": "Рушій показує прозоре вікно поверх інших вікон і передає введення миші, тому деякі антивіруси (напр., Avast <code>Win64:Evo-gen</code>) можуть помилково позначати непідписані збірки. Він ніколи не використовує мережу й не збирає файли."
+  },
+  "guideAv1": {
+    "message": "Відновіть <code>GhostPiP.Engine.exe</code> з карантину антивіруса."
+  },
+  "guideAv2": {
+    "message": "Додайте папку <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> до винятків антивіруса."
+  },
+  "guideAv3": {
+    "message": "Знову запустіть <code>install.bat</code>."
+  },
+  "guideControlsTitle": {
+    "message": "Керування"
+  },
+  "guideMoveResize": {
+    "message": "Переміщення · зміна розміру"
+  },
+  "guideMoveResizeHow": {
+    "message": "Перетягуйте, утримуючи <kbd class=\"hold\">Ctrl+Alt</kbd> / перетягніть край"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + коліщатко миші"
+  },
+  "guideToggleClickThrough": {
+    "message": "Увімкнути/вимкнути наскрізні кліки"
+  },
+  "guideToggleDodge": {
+    "message": "Увімкнути/вимкнути автоухилення"
+  },
+  "guideHotkeyNote": {
+    "message": "Змінюйте гарячі клавіші та клавішу-модифікатор через значок GhostPiP на панелі інструментів → Гарячі клавіші й керування."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (працює)"
+  },
+  "engineTrayEmergency": {
+    "message": "Аварійно: вимкнути наскрізні кліки"
+  },
+  "engineTrayExit": {
+    "message": "Вийти"
+  }
+}

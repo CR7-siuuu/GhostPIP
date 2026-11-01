@@ -22,7 +22,7 @@ header img { border-radius: 14px; }
 h1 { margin: 0; font-size: 26px; letter-spacing: -0.02em; }
 .sub { margin: 2px 0 0; color: var(--muted); }
 .status {
-  margin-left: auto; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 700;
+  margin-inline-start: auto; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 700;
   border: 1px solid var(--line); color: var(--muted); white-space: nowrap;
 }
 .status[data-state="on"] { color: #34d399; border-color: rgba(52, 211, 153, 0.45); background: rgba(16, 185, 129, 0.1); }

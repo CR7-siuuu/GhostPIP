@@ -11,6 +11,8 @@ const EXE_NAME = "GhostPiP.Engine.exe";
 const INSTALLER_FILES = ["install.ps1", "install.bat", "uninstall.ps1", "uninstall.bat"];
 const sleep = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 
+execFileSync(process.execPath, [path.join(ROOT, "scripts/check-locales.mjs")], { stdio: "inherit" });
+
 const QUARANTINE_HINT =
   `${EXE_NAME}을(를) 읽을 수 없습니다. 백신(Avast 등)이 서명되지 않은 새 빌드를 오탐으로 격리했을 가능성이 큽니다.\n` +
   "  - 백신 격리함에서 복원하고 engine 폴더를 예외로 추가한 뒤 다시 실행하거나\n" +

@@ -14,6 +14,7 @@ public sealed unsafe class TrayIcon : IDisposable
     public const uint WM_APP_TRAY = 0x8003;
 
     private const uint NIM_ADD = 0x00000000;
+    private const uint NIM_MODIFY = 0x00000001;
     private const uint NIM_DELETE = 0x00000002;
     private const uint NIF_MESSAGE = 0x00000001;
     private const uint NIF_ICON = 0x00000002;
@@ -97,6 +98,7 @@ public sealed unsafe class TrayIcon : IDisposable
 
     private readonly nint _hwnd;
     private bool _added;
+    private TrayStrings _strings = TrayStrings.English;
 
     public TrayIcon(nint hwnd)
     {
@@ -106,6 +108,15 @@ public sealed unsafe class TrayIcon : IDisposable
 
         var nid = CreateData();
         _added = Shell_NotifyIconW(NIM_ADD, ref nid);
+    }
+
+    public void SetStrings(TrayStrings strings)
+    {
+        _strings = strings;
+        if (!_added)
+            return;
+        var nid = CreateData();
+        Shell_NotifyIconW(NIM_MODIFY, ref nid);
     }
 
     private NOTIFYICONDATAW CreateData()
@@ -125,14 +136,14 @@ public sealed unsafe class TrayIcon : IDisposable
             hIcon = hIcon
         };
 
-        const string tip = "GhostPiP Engine";
+        string tip = _strings.Tip.Length > 127 ? _strings.Tip[..127] : _strings.Tip;
         for (int i = 0; i < tip.Length; i++)
             nid.szTip[i] = tip[i];
         nid.szTip[tip.Length] = '\0';
         return nid;
     }
 
-    public TrayAction HandleMessage(nint lParam)
+    public TrayAction HandleMessage(nint lParam, string clickThroughHotkey)
     {
         uint mouseMsg = (uint)((long)lParam & 0xFFFF);
         if (mouseMsg is not (WM_RBUTTONUP or WM_CONTEXTMENU))
@@ -144,10 +155,10 @@ public sealed unsafe class TrayIcon : IDisposable
 
         try
         {
-            AppendMenuW(hMenu, MF_STRING | MF_GRAYED, 0, "GhostPiP Engine (Active)");
+            AppendMenuW(hMenu, MF_STRING | MF_GRAYED, 0, _strings.Active);
             AppendMenuW(hMenu, MF_SEPARATOR, 0, null);
-            AppendMenuW(hMenu, MF_STRING, (nuint)TrayAction.EmergencyDisableClickThrough, "긴급 클릭통과 해제 (Alt+G)");
-            AppendMenuW(hMenu, MF_STRING, (nuint)TrayAction.Exit, "종료");
+            AppendMenuW(hMenu, MF_STRING, (nuint)TrayAction.EmergencyDisableClickThrough, $"{_strings.Emergency} ({clickThroughHotkey})");
+            AppendMenuW(hMenu, MF_STRING, (nuint)TrayAction.Exit, _strings.Exit);
 
             GetCursorPos(out var pt);
             SetForegroundWindow(_hwnd);

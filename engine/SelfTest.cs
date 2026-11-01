@@ -322,6 +322,16 @@ public static class SelfTest
                Math.Abs(po.Rect.W - 480) < 1e-9,
                "PIP_OPENED parsed");
 
+        const string localeJson = """
+        {"v":1,"type":"LOCALE","strings":{"trayTip":"GhostPiP Engine","trayActive":"GhostPiP Engine (実行中)","trayEmergency":"クリックスルーを解除","trayExit":"終了"}}
+        """;
+        Assert(Protocol.TryParseIncoming(localeJson, out var msg3) &&
+               msg3 is LocaleMessage { Tray: { Exit: "終了", Emergency: "クリックスルーを解除" } },
+               "LOCALE parsed");
+        Assert(Protocol.TryParseIncoming("""{"v":1,"type":"LOCALE","strings":{}}""", out var msg4) &&
+               msg4 is LocaleMessage lm && lm.Tray == TrayStrings.English,
+               "LOCALE falls back to English for missing strings");
+
         byte[] helloBytes = Protocol.SerializeOutgoing(new HelloMessage("1.0.0", ["Alt+G"]));
         using var helloDoc = JsonDocument.Parse(helloBytes);
         Assert(helloDoc.RootElement.GetProperty("type").GetString() == "HELLO" &&

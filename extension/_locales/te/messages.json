@@ -1,0 +1,312 @@
+{
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "కర్సర్ నుండి తప్పుకునే, క్లిక్‌లను దాటనిచ్చే పారదర్శక PiP. YouTube, Twitch, CHZZK, SOOP మొదలైన వాటితో పని చేస్తుంది."
+  },
+  "cmdClickThrough": {
+    "message": "క్లిక్-త్రూను టోగుల్ చేయి (ఘోస్ట్ మోడ్)"
+  },
+  "cmdDodge": {
+    "message": "స్మార్ట్ ఆటో-తప్పుకోవడాన్ని టోగుల్ చేయి"
+  },
+  "cmdMute": {
+    "message": "వీడియో ట్యాబ్ మ్యూట్‌ను టోగుల్ చేయి"
+  },
+  "modeWeb": {
+    "message": "వెబ్ మోడ్"
+  },
+  "modeWebTitle": {
+    "message": "వెబ్ మోడ్ (బ్రౌజర్ ట్యాబ్ లోపల ఓవర్‌లే)"
+  },
+  "modeFull": {
+    "message": "పూర్తి మోడ్"
+  },
+  "modeFullTitle": {
+    "message": "పూర్తి మోడ్ (డెస్క్‌టాప్ PiP విండో)"
+  },
+  "chatShow": {
+    "message": "చాట్ చూపించు"
+  },
+  "chatHide": {
+    "message": "చాట్ దాచు"
+  },
+  "chatResizeTitle": {
+    "message": "చాట్ పరిమాణం మార్చడానికి లాగండి"
+  },
+  "chatSmaller": {
+    "message": "చిన్న చాట్"
+  },
+  "chatBigger": {
+    "message": "పెద్ద చాట్"
+  },
+  "skipAd": {
+    "message": "యాడ్ స్కిప్ చేయి ⏭"
+  },
+  "btnReturn": {
+    "message": "తిరిగి ఉంచు"
+  },
+  "btnSourceTab": {
+    "message": "మూల ట్యాబ్"
+  },
+  "hudOpacity": {
+    "message": "అపారదర్శకత $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "అపారదర్శకత $PCT$% (సర్దుబాటుకు స్క్రోల్ చేయండి) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "పారదర్శక PiP ఓవర్‌లే"
+  },
+  "badgeOff": {
+    "message": "ఆఫ్"
+  },
+  "engineConnected": {
+    "message": "ఇంజిన్ కనెక్ట్ అయింది"
+  },
+  "masterTitle": {
+    "message": "GhostPiPను ప్రారంభించు"
+  },
+  "masterHint": {
+    "message": "దీన్ని ఆఫ్ చేస్తే ఓవర్‌లే మరియు ఇంజిన్ మూసివేయబడతాయి"
+  },
+  "sectionBasic": {
+    "message": "ప్రాథమిక సెట్టింగ్‌లు"
+  },
+  "clickThrough": {
+    "message": "క్లిక్-త్రూ"
+  },
+  "autoDodge": {
+    "message": "ఆటో-తప్పుకోవడం"
+  },
+  "showChatFull": {
+    "message": "పూర్తి మోడ్‌లో చాట్ చూపించు"
+  },
+  "allSites": {
+    "message": "అన్ని సైట్‌లలో ఉపయోగించు"
+  },
+  "allSitesHint": {
+    "message": "ఆఫ్‌లో ఉంటే, స్ట్రీమింగ్ మరియు OTT సైట్‌లలో మాత్రమే కనిపిస్తుంది"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "అపారదర్శకత"
+  },
+  "wheelHint": {
+    "message": "వీడియోపై స్క్రోల్ చేసి కూడా మార్చవచ్చు · క్లిక్-త్రూ సమయంలో $HOLD$ + స్క్రోల్ ఉపయోగించండి",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "మ్యూట్ టోగుల్ చేయి"
+  },
+  "dodgeSettings": {
+    "message": "ఆటో-తప్పుకోవడం సెట్టింగ్‌లు"
+  },
+  "dodgeCorners": {
+    "message": "కదలగల మూలలు"
+  },
+  "cornerTL": {
+    "message": "ఎగువ ఎడమ"
+  },
+  "cornerTR": {
+    "message": "ఎగువ కుడి"
+  },
+  "cornerBL": {
+    "message": "దిగువ ఎడమ"
+  },
+  "cornerBR": {
+    "message": "దిగువ కుడి"
+  },
+  "dodgeCornersHint": {
+    "message": "గేమ్ మినీమ్యాప్ వంటి ఎప్పుడూ కనిపించాల్సిన మూలలను ఆఫ్ చేయండి. లాక్ చేసిన మూలలు హోమ్ స్థానం లేదా తప్పుకునే దిశకు అవసరం."
+  },
+  "homePosition": {
+    "message": "హోమ్ స్థానం"
+  },
+  "dodgeAxis": {
+    "message": "తప్పుకునే దిశ"
+  },
+  "axisFree": {
+    "message": "స్వేచ్ఛ (4 దిశలు)"
+  },
+  "axisVertical": {
+    "message": "పైకి / కిందికి"
+  },
+  "axisHorizontal": {
+    "message": "ఎడమ / కుడి"
+  },
+  "dodgeStyle": {
+    "message": "తప్పుకునే శైలి"
+  },
+  "styleMove": {
+    "message": "మరో మూలకు జరుగు"
+  },
+  "styleFade": {
+    "message": "మసకబారు"
+  },
+  "autoReturn": {
+    "message": "ఆటోమేటిక్‌గా తిరిగి రావడం"
+  },
+  "autoReturnHint": {
+    "message": "మౌస్ దూరమైనప్పుడు హోమ్ స్థానానికి తిరిగి వస్తుంది"
+  },
+  "hotkeySettings": {
+    "message": "హాట్‌కీలు & నియంత్రణలు"
+  },
+  "holdKey": {
+    "message": "మాడిఫైయర్ కీ"
+  },
+  "mute": {
+    "message": "మ్యూట్"
+  },
+  "hotkeyBtnTitle": {
+    "message": "క్లిక్ చేసి, కొత్త హాట్‌కీని నొక్కండి"
+  },
+  "hotkeyRecording": {
+    "message": "కీలను నొక్కండి · రద్దు చేయడానికి Esc"
+  },
+  "tipHold": {
+    "message": "క్లిక్-త్రూ సమయంలో కూడా, $HOLD$ నొక్కి పట్టుకుని కదపవచ్చు, పరిమాణం మార్చవచ్చు లేదా స్క్రోల్ వీల్‌తో అపారదర్శకతను మార్చవచ్చు.",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "సైట్ లేదా బ్రౌజర్ స్వంత PiP బటన్‌తో తెరిచిన విండోలకు కూడా అపారదర్శకత, క్లిక్-త్రూ మరియు ఆటో-తప్పుకోవడం వర్తిస్తాయి."
+  },
+  "resetHotkeys": {
+    "message": "డిఫాల్ట్‌లకు రీసెట్ చేయి"
+  },
+  "bannerTitle": {
+    "message": "PC గేమ్‌లపై కూడా తేలియాడించండి"
+  },
+  "bannerSub": {
+    "message": "GhostPiP Engine ఇన్‌స్టాల్ చేయండి"
+  },
+  "warnProtocol": {
+    "message": "ఇంజిన్ ప్రోటోకాల్ వెర్షన్ సరిపోలలేదు"
+  },
+  "warnHotkeyConflict": {
+    "message": "హాట్‌కీ వైరుధ్యం: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "GhostPiPతో ప్రారంభించండి"
+  },
+  "guideSub": {
+    "message": "మీ స్క్రీన్‌ను ఎప్పుడూ అడ్డుకోని, క్లిక్-త్రూ మరియు ఆటో-తప్పుకోవడం ఉన్న పారదర్శక PiP"
+  },
+  "guideCheckingEngine": {
+    "message": "ఇంజిన్‌ను తనిఖీ చేస్తోంది…"
+  },
+  "guideChecking": {
+    "message": "తనిఖీ చేస్తోంది…"
+  },
+  "guideEngineMissing": {
+    "message": "ఇంజిన్ ఇన్‌స్టాల్ కాలేదు"
+  },
+  "guideStep1Title": {
+    "message": "1. వీడియోపై కర్సర్ ఉంచండి"
+  },
+  "guideStep1Body": {
+    "message": "YouTube, Twitch, CHZZK, SOOP మరియు Netflix, Disney+, Prime Video వంటి OTT సేవల్లో వీడియోల పైభాగంలో రెండు బటన్‌లు కనిపిస్తాయి."
+  },
+  "guideWebModeBody": {
+    "message": "బ్రౌజర్ ట్యాబ్ లోపల తేలియాడే విండో. ఇతర ట్యాబ్‌లకు కూడా మిమ్మల్ని అనుసరిస్తుంది. ఏమీ ఇన్‌స్టాల్ చేయనవసరం లేదు."
+  },
+  "guideFullModeBody": {
+    "message": "గేమ్‌లు మరియు ఇతర ప్రోగ్రామ్‌లపై తేలియాడే విండో. అపారదర్శకత, క్లిక్-త్రూ మరియు ఆటో-తప్పుకోవడానికి <b>GhostPiP Engine</b> అవసరం."
+  },
+  "guideStep2Title": {
+    "message": "2. GhostPiP Engine ఇన్‌స్టాల్ చేయండి (పూర్తి మోడ్, Windows)"
+  },
+  "guideStep2a": {
+    "message": "<code>GhostPiP-Full-Package.zip</code> (లేదా <code>GhostPiP-Engine-win-x64.zip</code>)ను అన్‌జిప్ చేయండి."
+  },
+  "guideStep2b": {
+    "message": "<code>engine\\install.bat</code>ను డబుల్-క్లిక్ చేయండి. అడ్మినిస్ట్రేటర్ హక్కులు అవసరం లేదు."
+  },
+  "guideStep2c": {
+    "message": "ఈ పేజీ ఎగువ కుడివైపున ఉన్న స్థితి <b>ఇంజిన్ కనెక్ట్ అయింది</b>గా మారితే పూర్తయినట్లే."
+  },
+  "guideRetry": {
+    "message": "కనెక్షన్‌ను మళ్లీ తనిఖీ చేయి"
+  },
+  "guideEngineNote": {
+    "message": "ఇంజిన్ <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>లో ఇన్‌స్టాల్ అవుతుంది, Chromeలో పూర్తి మోడ్ తెరిచి ఉన్నప్పుడు మాత్రమే రన్ అవుతుంది, GhostPiPను ఆఫ్ చేసినప్పుడు నిష్క్రమిస్తుంది. తీసివేయడానికి <code>uninstall.bat</code>ను రన్ చేయండి."
+  },
+  "guideAvTitle": {
+    "message": "మీ యాంటీవైరస్ ఇంజిన్‌ను బ్లాక్ చేస్తే"
+  },
+  "guideAvBody": {
+    "message": "ఇంజిన్ ఇతర విండోలపై పారదర్శక విండోను చూపించి మౌస్ ఇన్‌పుట్‌ను ఫార్వర్డ్ చేస్తుంది కాబట్టి, కొన్ని యాంటీవైరస్ ఉత్పత్తులు (ఉదా. Avast <code>Win64:Evo-gen</code>) సంతకం చేయని బిల్డ్‌లను పొరపాటున ఫ్లాగ్ చేయవచ్చు. ఇది ఎప్పుడూ నెట్‌వర్క్‌ను ఉపయోగించదు, ఫైల్‌లను సేకరించదు."
+  },
+  "guideAv1": {
+    "message": "యాంటీవైరస్ క్వారంటైన్ నుండి <code>GhostPiP.Engine.exe</code>ను పునరుద్ధరించండి."
+  },
+  "guideAv2": {
+    "message": "<code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> ఫోల్డర్‌ను యాంటీవైరస్ మినహాయింపులకు జోడించండి."
+  },
+  "guideAv3": {
+    "message": "<code>install.bat</code>ను మళ్లీ రన్ చేయండి."
+  },
+  "guideControlsTitle": {
+    "message": "నియంత్రణలు"
+  },
+  "guideMoveResize": {
+    "message": "కదపడం · పరిమాణం మార్చడం"
+  },
+  "guideMoveResizeHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> నొక్కి పట్టుకుని లాగండి / అంచును లాగండి"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + మౌస్ వీల్"
+  },
+  "guideToggleClickThrough": {
+    "message": "క్లిక్-త్రూ టోగుల్ చేయి"
+  },
+  "guideToggleDodge": {
+    "message": "ఆటో-తప్పుకోవడం టోగుల్ చేయి"
+  },
+  "guideHotkeyNote": {
+    "message": "GhostPiP టూల్‌బార్ చిహ్నం → హాట్‌కీలు & నియంత్రణలు నుండి హాట్‌కీలు మరియు మాడిఫైయర్ కీని మార్చండి."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (రన్ అవుతోంది)"
+  },
+  "engineTrayEmergency": {
+    "message": "అత్యవసరం: క్లిక్-త్రూను ఆఫ్ చేయి"
+  },
+  "engineTrayExit": {
+    "message": "నిష్క్రమించు"
+  }
+}

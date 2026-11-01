@@ -1,0 +1,312 @@
+{
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "கர்சரை விட்டு விலகும், கிளிக்குகளை ஊடுருவ விடும் வெளிப்படையான PiP. YouTube, Twitch, CHZZK, SOOP மற்றும் பலவற்றில் இயங்கும்."
+  },
+  "cmdClickThrough": {
+    "message": "கிளிக் ஊடுருவலை இயக்கு/முடக்கு (கோஸ்ட் பயன்முறை)"
+  },
+  "cmdDodge": {
+    "message": "ஸ்மார்ட் தானியங்கு விலகலை இயக்கு/முடக்கு"
+  },
+  "cmdMute": {
+    "message": "வீடியோ தாவலின் ஒலியை முடக்கு/இயக்கு"
+  },
+  "modeWeb": {
+    "message": "வலைப் பயன்முறை"
+  },
+  "modeWebTitle": {
+    "message": "வலைப் பயன்முறை (உலாவித் தாவலுக்குள் மேலடுக்கு)"
+  },
+  "modeFull": {
+    "message": "முழுப் பயன்முறை"
+  },
+  "modeFullTitle": {
+    "message": "முழுப் பயன்முறை (டெஸ்க்டாப் PiP சாளரம்)"
+  },
+  "chatShow": {
+    "message": "அரட்டையைக் காட்டு"
+  },
+  "chatHide": {
+    "message": "அரட்டையை மறை"
+  },
+  "chatResizeTitle": {
+    "message": "அரட்டையின் அளவை மாற்ற இழுக்கவும்"
+  },
+  "chatSmaller": {
+    "message": "சிறிய அரட்டை"
+  },
+  "chatBigger": {
+    "message": "பெரிய அரட்டை"
+  },
+  "skipAd": {
+    "message": "விளம்பரத்தைத் தவிர் ⏭"
+  },
+  "btnReturn": {
+    "message": "திரும்பு"
+  },
+  "btnSourceTab": {
+    "message": "மூலத் தாவல்"
+  },
+  "hudOpacity": {
+    "message": "ஒளிபுகாமை $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "ஒளிபுகாமை $PCT$% (சரிசெய்ய ஸ்க்ரோல் செய்யவும்) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "வெளிப்படையான PiP மேலடுக்கு"
+  },
+  "badgeOff": {
+    "message": "முடக்கம்"
+  },
+  "engineConnected": {
+    "message": "இன்ஜின் இணைக்கப்பட்டது"
+  },
+  "masterTitle": {
+    "message": "GhostPiP-ஐ இயக்கு"
+  },
+  "masterHint": {
+    "message": "இதை முடக்கினால் மேலடுக்கும் இன்ஜினும் மூடப்படும்"
+  },
+  "sectionBasic": {
+    "message": "அடிப்படை அமைப்புகள்"
+  },
+  "clickThrough": {
+    "message": "கிளிக் ஊடுருவல்"
+  },
+  "autoDodge": {
+    "message": "தானியங்கு விலகல்"
+  },
+  "showChatFull": {
+    "message": "முழுப் பயன்முறையில் அரட்டையைக் காட்டு"
+  },
+  "allSites": {
+    "message": "எல்லா தளங்களிலும் பயன்படுத்து"
+  },
+  "allSitesHint": {
+    "message": "முடக்கியிருந்தால், ஸ்ட்ரீமிங் மற்றும் OTT தளங்களில் மட்டும் தோன்றும்"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "ஒளிபுகாமை"
+  },
+  "wheelHint": {
+    "message": "வீடியோவின் மேல் ஸ்க்ரோல் செய்தும் மாற்றலாம் · கிளிக் ஊடுருவலின்போது $HOLD$ + ஸ்க்ரோல் பயன்படுத்தவும்",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "ஒலியை முடக்கு/இயக்கு"
+  },
+  "dodgeSettings": {
+    "message": "விலகல் அமைப்புகள்"
+  },
+  "dodgeCorners": {
+    "message": "நகரக்கூடிய மூலைகள்"
+  },
+  "cornerTL": {
+    "message": "மேல் இடது"
+  },
+  "cornerTR": {
+    "message": "மேல் வலது"
+  },
+  "cornerBL": {
+    "message": "கீழ் இடது"
+  },
+  "cornerBR": {
+    "message": "கீழ் வலது"
+  },
+  "dodgeCornersHint": {
+    "message": "கேம் மினிமேப் போல எப்போதும் தெரிய வேண்டிய மூலைகளை முடக்கவும். பூட்டிய மூலைகள் முகப்பு நிலை அல்லது விலகல் திசைக்குத் தேவை."
+  },
+  "homePosition": {
+    "message": "முகப்பு நிலை"
+  },
+  "dodgeAxis": {
+    "message": "விலகல் திசை"
+  },
+  "axisFree": {
+    "message": "கட்டற்றது (4 திசைகள்)"
+  },
+  "axisVertical": {
+    "message": "மேல் / கீழ்"
+  },
+  "axisHorizontal": {
+    "message": "இடது / வலது"
+  },
+  "dodgeStyle": {
+    "message": "விலகல் பாணி"
+  },
+  "styleMove": {
+    "message": "வேறு மூலைக்கு நகர்த்து"
+  },
+  "styleFade": {
+    "message": "மங்கச் செய்"
+  },
+  "autoReturn": {
+    "message": "தானாகத் திரும்புதல்"
+  },
+  "autoReturnHint": {
+    "message": "மவுஸ் விலகியதும் முகப்பு நிலைக்குத் திரும்பும்"
+  },
+  "hotkeySettings": {
+    "message": "ஹாட்கீகள் & கட்டுப்பாடுகள்"
+  },
+  "holdKey": {
+    "message": "மாற்றி விசை"
+  },
+  "mute": {
+    "message": "ஒலியடக்கு"
+  },
+  "hotkeyBtnTitle": {
+    "message": "கிளிக் செய்து, புதிய ஹாட்கீயை அழுத்தவும்"
+  },
+  "hotkeyRecording": {
+    "message": "விசைகளை அழுத்தவும் · ரத்துசெய்ய Esc"
+  },
+  "tipHold": {
+    "message": "கிளிக் ஊடுருவலின்போதும், $HOLD$-ஐ அழுத்திப் பிடித்து நகர்த்தலாம், அளவை மாற்றலாம் அல்லது ஸ்க்ரோல் வீல் மூலம் ஒளிபுகாமையை மாற்றலாம்.",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "தளத்தின் அல்லது உலாவியின் சொந்த PiP பட்டன் மூலம் திறக்கும் சாளரங்களுக்கும் ஒளிபுகாமை, கிளிக் ஊடுருவல், தானியங்கு விலகல் பொருந்தும்."
+  },
+  "resetHotkeys": {
+    "message": "இயல்புநிலைக்கு மீட்டமை"
+  },
+  "bannerTitle": {
+    "message": "PC கேம்களின் மேலும் மிதக்கச் செய்யுங்கள்"
+  },
+  "bannerSub": {
+    "message": "GhostPiP Engine-ஐ நிறுவு"
+  },
+  "warnProtocol": {
+    "message": "இன்ஜின் நெறிமுறைப் பதிப்பு பொருந்தவில்லை"
+  },
+  "warnHotkeyConflict": {
+    "message": "ஹாட்கீ முரண்பாடு: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "GhostPiP-ஐப் பயன்படுத்தத் தொடங்குதல்"
+  },
+  "guideSub": {
+    "message": "திரையை ஒருபோதும் மறைக்காத, கிளிக் ஊடுருவலும் தானியங்கு விலகலும் கொண்ட வெளிப்படையான PiP"
+  },
+  "guideCheckingEngine": {
+    "message": "இன்ஜினைச் சரிபார்க்கிறது…"
+  },
+  "guideChecking": {
+    "message": "சரிபார்க்கிறது…"
+  },
+  "guideEngineMissing": {
+    "message": "இன்ஜின் நிறுவப்படவில்லை"
+  },
+  "guideStep1Title": {
+    "message": "1. வீடியோவின் மேல் கர்சரை வைக்கவும்"
+  },
+  "guideStep1Body": {
+    "message": "YouTube, Twitch, CHZZK, SOOP மற்றும் Netflix, Disney+, Prime Video போன்ற OTT சேவைகளில் வீடியோக்களின் மேலே இரண்டு பட்டன்கள் தோன்றும்."
+  },
+  "guideWebModeBody": {
+    "message": "உலாவித் தாவலுக்குள் மிதக்கும் சாளரம். பிற தாவல்களுக்கும் உங்களைப் பின்தொடரும். எதையும் நிறுவத் தேவையில்லை."
+  },
+  "guideFullModeBody": {
+    "message": "கேம்கள் மற்றும் பிற நிரல்களின் மேல் மிதக்கும் சாளரம். ஒளிபுகாமை, கிளிக் ஊடுருவல், தானியங்கு விலகலுக்கு <b>GhostPiP Engine</b> தேவை."
+  },
+  "guideStep2Title": {
+    "message": "2. GhostPiP Engine-ஐ நிறுவுதல் (முழுப் பயன்முறை, Windows)"
+  },
+  "guideStep2a": {
+    "message": "<code>GhostPiP-Full-Package.zip</code> (அல்லது <code>GhostPiP-Engine-win-x64.zip</code>) கோப்பைப் பிரித்தெடுக்கவும்."
+  },
+  "guideStep2b": {
+    "message": "<code>engine\\install.bat</code>-ஐ இருமுறை கிளிக் செய்யவும். நிர்வாகி உரிமைகள் தேவையில்லை."
+  },
+  "guideStep2c": {
+    "message": "இந்தப் பக்கத்தின் மேல் வலதுபுறத்தில் உள்ள நிலை <b>இன்ஜின் இணைக்கப்பட்டது</b> என மாறியதும் முடிந்தது."
+  },
+  "guideRetry": {
+    "message": "இணைப்பை மீண்டும் சரிபார்"
+  },
+  "guideEngineNote": {
+    "message": "இன்ஜின் <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>-இல் நிறுவப்படும், Chrome-இல் முழுப் பயன்முறை திறந்திருக்கும்போது மட்டும் இயங்கும், GhostPiP-ஐ முடக்கும்போது வெளியேறும். அதை அகற்ற <code>uninstall.bat</code>-ஐ இயக்கவும்."
+  },
+  "guideAvTitle": {
+    "message": "வைரஸ் தடுப்பு இன்ஜினைத் தடுத்தால்"
+  },
+  "guideAvBody": {
+    "message": "இன்ஜின் பிற சாளரங்களின் மேல் வெளிப்படையான சாளரத்தைக் காட்டி மவுஸ் உள்ளீட்டை அனுப்புவதால், சில வைரஸ் தடுப்பு நிரல்கள் (எ.கா. Avast <code>Win64:Evo-gen</code>) கையொப்பமிடாத பதிப்புகளைத் தவறாகக் குறிக்கலாம். இது ஒருபோதும் நெட்வொர்க்கைப் பயன்படுத்தாது, கோப்புகளைச் சேகரிக்காது."
+  },
+  "guideAv1": {
+    "message": "வைரஸ் தடுப்பு தனிமைப்படுத்தலில் இருந்து <code>GhostPiP.Engine.exe</code>-ஐ மீட்டெடுக்கவும்."
+  },
+  "guideAv2": {
+    "message": "<code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> கோப்புறையை வைரஸ் தடுப்பு விலக்குகளில் சேர்க்கவும்."
+  },
+  "guideAv3": {
+    "message": "<code>install.bat</code>-ஐ மீண்டும் இயக்கவும்."
+  },
+  "guideControlsTitle": {
+    "message": "கட்டுப்பாடுகள்"
+  },
+  "guideMoveResize": {
+    "message": "நகர்த்து · அளவு மாற்று"
+  },
+  "guideMoveResizeHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd>-ஐப் பிடித்தபடி இழுக்கவும் / ஓரத்தை இழுக்கவும்"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + மவுஸ் வீல்"
+  },
+  "guideToggleClickThrough": {
+    "message": "கிளிக் ஊடுருவலை இயக்கு/முடக்கு"
+  },
+  "guideToggleDodge": {
+    "message": "தானியங்கு விலகலை இயக்கு/முடக்கு"
+  },
+  "guideHotkeyNote": {
+    "message": "GhostPiP கருவிப்பட்டி ஐகான் → ஹாட்கீகள் & கட்டுப்பாடுகள் என்பதில் ஹாட்கீகளையும் மாற்றி விசையையும் மாற்றலாம்."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (இயங்குகிறது)"
+  },
+  "engineTrayEmergency": {
+    "message": "அவசரம்: கிளிக் ஊடுருவலை முடக்கு"
+  },
+  "engineTrayExit": {
+    "message": "வெளியேறு"
+  }
+}

@@ -146,7 +146,7 @@ const browser = await puppeteer.launch({
   enableExtensions: true,
   defaultViewport: null,
   env: { ...process.env, GHOSTPIP_TEST_MODE: "1" },
-  args: ["--autoplay-policy=no-user-gesture-required", "--no-first-run"],
+  args: ["--autoplay-policy=no-user-gesture-required", "--no-first-run", "--lang=ko"],
 });
 
 try {

@@ -425,6 +425,16 @@ function connectEngine() {
       engineAllowed = Boolean(merged.enabled);
       if (nativePort !== port) return;
       postToEngine({ v: 1, type: "STATE", settings: merged });
+      postToEngine({
+        v: 1,
+        type: "LOCALE",
+        strings: {
+          trayTip: chrome.i18n.getMessage("engineTrayTip"),
+          trayActive: chrome.i18n.getMessage("engineTrayActive"),
+          trayEmergency: chrome.i18n.getMessage("engineTrayEmergency"),
+          trayExit: chrome.i18n.getMessage("engineTrayExit"),
+        },
+      });
       if (!engineAllowed) {
         disconnectEngine();
         return;

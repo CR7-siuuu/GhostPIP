@@ -324,7 +324,7 @@ public static unsafe class Program
             case TrayIcon.WM_APP_TRAY:
                 if (_trayIcon is not null)
                 {
-                    var action = _trayIcon.HandleMessage(lParam);
+                    var action = _trayIcon.HandleMessage(lParam, _settings.Hotkeys.ClickThrough);
                     if (action == TrayAction.EmergencyDisableClickThrough)
                     {
                         _settings = _settings with { ClickThrough = false };
@@ -381,6 +381,10 @@ public static unsafe class Program
 
                 case PingMessage:
                     _nativeHost.Send(new PongMessage());
+                    break;
+
+                case LocaleMessage localeMsg:
+                    _trayIcon?.SetStrings(localeMsg.Tray);
                     break;
 
                 case TestCursorMessage cursorMsg:

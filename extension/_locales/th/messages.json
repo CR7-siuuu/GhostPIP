@@ -1,0 +1,312 @@
+{
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "PiP โปร่งใสที่คลิกทะลุได้และหลบเคอร์เซอร์ ใช้ได้กับ YouTube, Twitch, CHZZK, SOOP และอื่นๆ"
+  },
+  "cmdClickThrough": {
+    "message": "เปิด/ปิดคลิกทะลุ (โหมดผี)"
+  },
+  "cmdDodge": {
+    "message": "เปิด/ปิดหลบอัตโนมัติอัจฉริยะ"
+  },
+  "cmdMute": {
+    "message": "เปิด/ปิดเสียงแท็บวิดีโอ"
+  },
+  "modeWeb": {
+    "message": "โหมดเว็บ"
+  },
+  "modeWebTitle": {
+    "message": "โหมดเว็บ (ซ้อนทับในแท็บเบราว์เซอร์)"
+  },
+  "modeFull": {
+    "message": "โหมดเต็ม"
+  },
+  "modeFullTitle": {
+    "message": "โหมดเต็ม (หน้าต่าง PiP บนเดสก์ท็อป)"
+  },
+  "chatShow": {
+    "message": "แสดงแชท"
+  },
+  "chatHide": {
+    "message": "ซ่อนแชท"
+  },
+  "chatResizeTitle": {
+    "message": "ลากเพื่อปรับขนาดแชท"
+  },
+  "chatSmaller": {
+    "message": "แชทเล็กลง"
+  },
+  "chatBigger": {
+    "message": "แชทใหญ่ขึ้น"
+  },
+  "skipAd": {
+    "message": "ข้ามโฆษณา ⏭"
+  },
+  "btnReturn": {
+    "message": "กลับคืน"
+  },
+  "btnSourceTab": {
+    "message": "แท็บต้นทาง"
+  },
+  "hudOpacity": {
+    "message": "ความทึบ $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "ความทึบ $PCT$% (เลื่อนเพื่อปรับ) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "PiP ซ้อนทับแบบโปร่งใส"
+  },
+  "badgeOff": {
+    "message": "ปิด"
+  },
+  "engineConnected": {
+    "message": "เชื่อมต่อเอนจินแล้ว"
+  },
+  "masterTitle": {
+    "message": "เปิดใช้ GhostPiP"
+  },
+  "masterHint": {
+    "message": "เมื่อปิด หน้าต่างซ้อนทับและเอนจินจะปิดลง"
+  },
+  "sectionBasic": {
+    "message": "การตั้งค่าพื้นฐาน"
+  },
+  "clickThrough": {
+    "message": "คลิกทะลุ"
+  },
+  "autoDodge": {
+    "message": "หลบอัตโนมัติ"
+  },
+  "showChatFull": {
+    "message": "แสดงแชทในโหมดเต็ม"
+  },
+  "allSites": {
+    "message": "ใช้กับทุกเว็บไซต์"
+  },
+  "allSitesHint": {
+    "message": "เมื่อปิด จะแสดงเฉพาะบนเว็บไซต์สตรีมมิงและ OTT"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "ความทึบ"
+  },
+  "wheelHint": {
+    "message": "เลื่อนเมาส์บนวิดีโอเพื่อปรับได้เช่นกัน · ขณะคลิกทะลุให้ใช้ $HOLD$ + เลื่อน",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "เปิด/ปิดเสียง"
+  },
+  "dodgeSettings": {
+    "message": "การตั้งค่าการหลบ"
+  },
+  "dodgeCorners": {
+    "message": "มุมที่ย้ายไปได้"
+  },
+  "cornerTL": {
+    "message": "ซ้ายบน"
+  },
+  "cornerTR": {
+    "message": "ขวาบน"
+  },
+  "cornerBL": {
+    "message": "ซ้ายล่าง"
+  },
+  "cornerBR": {
+    "message": "ขวาล่าง"
+  },
+  "dodgeCornersHint": {
+    "message": "ปิดมุมที่ต้องมองเห็นเสมอ เช่น มินิแมปในเกม มุมที่ล็อกไว้จำเป็นสำหรับตำแหน่งหลักหรือทิศทางการหลบ"
+  },
+  "homePosition": {
+    "message": "ตำแหน่งหลัก"
+  },
+  "dodgeAxis": {
+    "message": "ทิศทางการหลบ"
+  },
+  "axisFree": {
+    "message": "อิสระ (4 ทิศทาง)"
+  },
+  "axisVertical": {
+    "message": "ขึ้น / ลง"
+  },
+  "axisHorizontal": {
+    "message": "ซ้าย / ขวา"
+  },
+  "dodgeStyle": {
+    "message": "รูปแบบการหลบ"
+  },
+  "styleMove": {
+    "message": "ย้ายไปมุมอื่น"
+  },
+  "styleFade": {
+    "message": "จางหาย"
+  },
+  "autoReturn": {
+    "message": "กลับอัตโนมัติ"
+  },
+  "autoReturnHint": {
+    "message": "กลับไปตำแหน่งหลักเมื่อเมาส์ออกไป"
+  },
+  "hotkeySettings": {
+    "message": "ปุ่มลัดและการควบคุม"
+  },
+  "holdKey": {
+    "message": "ปุ่มตัวปรับแต่ง"
+  },
+  "mute": {
+    "message": "ปิดเสียง"
+  },
+  "hotkeyBtnTitle": {
+    "message": "คลิกแล้วกดปุ่มลัดใหม่"
+  },
+  "hotkeyRecording": {
+    "message": "กดปุ่ม · Esc เพื่อยกเลิก"
+  },
+  "tipHold": {
+    "message": "แม้ขณะคลิกทะลุ ให้กด $HOLD$ ค้างไว้เพื่อย้าย ปรับขนาด หรือเปลี่ยนความทึบด้วยล้อเลื่อน",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "ความทึบ คลิกทะลุ และหลบอัตโนมัติยังใช้กับหน้าต่างที่เปิดด้วยปุ่ม PiP ของเว็บไซต์หรือของเบราว์เซอร์ด้วย"
+  },
+  "resetHotkeys": {
+    "message": "รีเซ็ตเป็นค่าเริ่มต้น"
+  },
+  "bannerTitle": {
+    "message": "ลอยเหนือเกม PC ได้ด้วย"
+  },
+  "bannerSub": {
+    "message": "ติดตั้ง GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "เวอร์ชันโปรโตคอลของเอนจินไม่ตรงกัน"
+  },
+  "warnHotkeyConflict": {
+    "message": "ปุ่มลัดซ้ำกัน: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "เริ่มต้นใช้งาน GhostPiP"
+  },
+  "guideSub": {
+    "message": "PiP โปร่งใสที่คลิกทะลุและหลบอัตโนมัติได้ ไม่บังหน้าจอของคุณ"
+  },
+  "guideCheckingEngine": {
+    "message": "กำลังตรวจสอบเอนจิน…"
+  },
+  "guideChecking": {
+    "message": "กำลังตรวจสอบ…"
+  },
+  "guideEngineMissing": {
+    "message": "ยังไม่ได้ติดตั้งเอนจิน"
+  },
+  "guideStep1Title": {
+    "message": "1. วางเมาส์เหนือวิดีโอ"
+  },
+  "guideStep1Body": {
+    "message": "ปุ่มสองปุ่มจะปรากฏที่ด้านบนของวิดีโอบน YouTube, Twitch, CHZZK, SOOP และบริการ OTT เช่น Netflix, Disney+ และ Prime Video"
+  },
+  "guideWebModeBody": {
+    "message": "หน้าต่างลอยภายในแท็บเบราว์เซอร์ ติดตามคุณไปยังแท็บอื่นได้ ไม่ต้องติดตั้งอะไร"
+  },
+  "guideFullModeBody": {
+    "message": "หน้าต่างที่ลอยเหนือเกมและโปรแกรมอื่นๆ ความทึบ คลิกทะลุ และหลบอัตโนมัติต้องใช้ <b>GhostPiP Engine</b>"
+  },
+  "guideStep2Title": {
+    "message": "2. ติดตั้ง GhostPiP Engine (โหมดเต็ม, Windows)"
+  },
+  "guideStep2a": {
+    "message": "แตกไฟล์ <code>GhostPiP-Full-Package.zip</code> (หรือ <code>GhostPiP-Engine-win-x64.zip</code>)"
+  },
+  "guideStep2b": {
+    "message": "ดับเบิลคลิก <code>engine\\install.bat</code> ไม่ต้องใช้สิทธิ์ผู้ดูแลระบบ"
+  },
+  "guideStep2c": {
+    "message": "เสร็จสิ้นเมื่อสถานะที่มุมขวาบนของหน้านี้เปลี่ยนเป็น <b>เชื่อมต่อเอนจินแล้ว</b>"
+  },
+  "guideRetry": {
+    "message": "ตรวจสอบการเชื่อมต่ออีกครั้ง"
+  },
+  "guideEngineNote": {
+    "message": "เอนจินจะติดตั้งที่ <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> ทำงานเฉพาะเมื่อ Chrome เปิดโหมดเต็มอยู่ และจะปิดเมื่อคุณปิด GhostPiP หากต้องการลบ ให้เรียกใช้ <code>uninstall.bat</code>"
+  },
+  "guideAvTitle": {
+    "message": "หากโปรแกรมป้องกันไวรัสบล็อกเอนจิน"
+  },
+  "guideAvBody": {
+    "message": "เอนจินแสดงหน้าต่างโปร่งใสเหนือหน้าต่างอื่นและส่งต่ออินพุตเมาส์ โปรแกรมป้องกันไวรัสบางตัว (เช่น Avast <code>Win64:Evo-gen</code>) จึงอาจตรวจจับบิลด์ที่ไม่ได้ลงนามผิดพลาด เอนจินไม่ใช้เครือข่ายและไม่เก็บรวบรวมไฟล์ใดๆ"
+  },
+  "guideAv1": {
+    "message": "กู้คืน <code>GhostPiP.Engine.exe</code> จากพื้นที่กักกันของโปรแกรมป้องกันไวรัส"
+  },
+  "guideAv2": {
+    "message": "เพิ่มโฟลเดอร์ <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> ในรายการยกเว้นของโปรแกรมป้องกันไวรัส"
+  },
+  "guideAv3": {
+    "message": "เรียกใช้ <code>install.bat</code> อีกครั้ง"
+  },
+  "guideControlsTitle": {
+    "message": "การควบคุม"
+  },
+  "guideMoveResize": {
+    "message": "ย้าย · ปรับขนาด"
+  },
+  "guideMoveResizeHow": {
+    "message": "ลากขณะกด <kbd class=\"hold\">Ctrl+Alt</kbd> ค้างไว้ / ลากขอบ"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + ล้อเมาส์"
+  },
+  "guideToggleClickThrough": {
+    "message": "เปิด/ปิดคลิกทะลุ"
+  },
+  "guideToggleDodge": {
+    "message": "เปิด/ปิดหลบอัตโนมัติ"
+  },
+  "guideHotkeyNote": {
+    "message": "เปลี่ยนปุ่มลัดและปุ่มตัวปรับแต่งได้จากไอคอน GhostPiP บนแถบเครื่องมือ → ปุ่มลัดและการควบคุม"
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (กำลังทำงาน)"
+  },
+  "engineTrayEmergency": {
+    "message": "ฉุกเฉิน: ปิดคลิกทะลุ"
+  },
+  "engineTrayExit": {
+    "message": "ออก"
+  }
+}

@@ -52,7 +52,7 @@ const browser = await puppeteer.launch({  executablePath: CHROME,
   pipe: true,
   enableExtensions: true,
   defaultViewport: null,
-  args: ["--autoplay-policy=no-user-gesture-required", "--no-first-run"],
+  args: ["--autoplay-policy=no-user-gesture-required", "--no-first-run", "--lang=ko"],
 });
 
 try {

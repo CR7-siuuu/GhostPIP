@@ -38,7 +38,7 @@ const browser = await puppeteer.launch({
   pipe: true,
   enableExtensions: true,
   defaultViewport: null,
-  args: ["--autoplay-policy=no-user-gesture-required", "--no-first-run"],
+  args: ["--autoplay-policy=no-user-gesture-required", "--no-first-run", "--lang=ko"],
 });
 
 const row = Object.fromEntries(STEPS.map((s) => [s, { status: "FAIL", info: "not reached" }]));
@@ -332,9 +332,9 @@ try {
           hold: document.getElementById("hold").value,
           btn: document.getElementById("hkClickThrough").textContent,
           kbd: document.getElementById("kbdClickThrough").textContent,
-          tip: document.getElementById("tipHoldKey").textContent,
+          tip: document.getElementById("tipHold").textContent,
         })),
-      (h) => h.hold === "Alt" && h.btn === "F8" && h.kbd === "F8" && h.tip === "Alt",
+      (h) => h.hold === "Alt" && h.btn === "F8" && h.kbd === "F8" && h.tip.startsWith("클릭 통과 중에도 Alt를"),
       2000,
     );
 

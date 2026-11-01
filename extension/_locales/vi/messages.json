@@ -1,0 +1,312 @@
+{
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "PiP trong suốt, cho phép nhấp xuyên qua và tự né con trỏ. Hoạt động với YouTube, Twitch, CHZZK, SOOP và nhiều trang khác."
+  },
+  "cmdClickThrough": {
+    "message": "Bật/tắt nhấp xuyên qua (Chế độ bóng ma)"
+  },
+  "cmdDodge": {
+    "message": "Bật/tắt tự động né thông minh"
+  },
+  "cmdMute": {
+    "message": "Bật/tắt tiếng thẻ video"
+  },
+  "modeWeb": {
+    "message": "Chế độ web"
+  },
+  "modeWebTitle": {
+    "message": "Chế độ web (lớp phủ trong thẻ trình duyệt)"
+  },
+  "modeFull": {
+    "message": "Chế độ toàn phần"
+  },
+  "modeFullTitle": {
+    "message": "Chế độ toàn phần (cửa sổ PiP trên màn hình nền)"
+  },
+  "chatShow": {
+    "message": "Hiện chat"
+  },
+  "chatHide": {
+    "message": "Ẩn chat"
+  },
+  "chatResizeTitle": {
+    "message": "Kéo để đổi kích thước chat"
+  },
+  "chatSmaller": {
+    "message": "Thu nhỏ chat"
+  },
+  "chatBigger": {
+    "message": "Phóng to chat"
+  },
+  "skipAd": {
+    "message": "Bỏ qua quảng cáo ⏭"
+  },
+  "btnReturn": {
+    "message": "Trả về"
+  },
+  "btnSourceTab": {
+    "message": "Thẻ nguồn"
+  },
+  "hudOpacity": {
+    "message": "Độ mờ đục $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "Độ mờ đục $PCT$% (cuộn để điều chỉnh) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "Lớp phủ PiP trong suốt"
+  },
+  "badgeOff": {
+    "message": "Tắt"
+  },
+  "engineConnected": {
+    "message": "Đã kết nối engine"
+  },
+  "masterTitle": {
+    "message": "Bật GhostPiP"
+  },
+  "masterHint": {
+    "message": "Tắt mục này sẽ đóng lớp phủ và engine"
+  },
+  "sectionBasic": {
+    "message": "Cài đặt cơ bản"
+  },
+  "clickThrough": {
+    "message": "Nhấp xuyên qua"
+  },
+  "autoDodge": {
+    "message": "Tự động né"
+  },
+  "showChatFull": {
+    "message": "Hiện chat ở chế độ toàn phần"
+  },
+  "allSites": {
+    "message": "Dùng trên mọi trang web"
+  },
+  "allSitesHint": {
+    "message": "Khi tắt, chỉ xuất hiện trên các trang phát trực tuyến và OTT"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Độ mờ đục"
+  },
+  "wheelHint": {
+    "message": "Bạn cũng có thể cuộn trên video · khi nhấp xuyên qua, dùng $HOLD$ + cuộn",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "Bật/tắt tiếng"
+  },
+  "dodgeSettings": {
+    "message": "Cài đặt tự động né"
+  },
+  "dodgeCorners": {
+    "message": "Các góc được phép di chuyển tới"
+  },
+  "cornerTL": {
+    "message": "Trên cùng bên trái"
+  },
+  "cornerTR": {
+    "message": "Trên cùng bên phải"
+  },
+  "cornerBL": {
+    "message": "Dưới cùng bên trái"
+  },
+  "cornerBR": {
+    "message": "Dưới cùng bên phải"
+  },
+  "dodgeCornersHint": {
+    "message": "Tắt các góc cần luôn hiển thị, như bản đồ nhỏ trong game. Các góc bị khóa là cần thiết cho vị trí gốc hoặc hướng né."
+  },
+  "homePosition": {
+    "message": "Vị trí gốc"
+  },
+  "dodgeAxis": {
+    "message": "Hướng né"
+  },
+  "axisFree": {
+    "message": "Tự do (4 hướng)"
+  },
+  "axisVertical": {
+    "message": "Lên / xuống"
+  },
+  "axisHorizontal": {
+    "message": "Trái / phải"
+  },
+  "dodgeStyle": {
+    "message": "Kiểu né"
+  },
+  "styleMove": {
+    "message": "Chuyển sang góc khác"
+  },
+  "styleFade": {
+    "message": "Mờ dần"
+  },
+  "autoReturn": {
+    "message": "Tự động quay lại"
+  },
+  "autoReturnHint": {
+    "message": "Quay về vị trí gốc khi chuột rời đi"
+  },
+  "hotkeySettings": {
+    "message": "Phím tắt và điều khiển"
+  },
+  "holdKey": {
+    "message": "Phím bổ trợ"
+  },
+  "mute": {
+    "message": "Tắt tiếng"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Nhấp rồi nhấn phím tắt mới"
+  },
+  "hotkeyRecording": {
+    "message": "Nhấn phím · Esc để hủy"
+  },
+  "tipHold": {
+    "message": "Ngay cả khi nhấp xuyên qua, hãy giữ $HOLD$ để di chuyển, đổi kích thước hoặc chỉnh độ mờ đục bằng con lăn chuột.",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "Độ mờ đục, nhấp xuyên qua và tự động né cũng áp dụng cho cửa sổ mở bằng nút PiP của trang web hoặc của trình duyệt."
+  },
+  "resetHotkeys": {
+    "message": "Khôi phục mặc định"
+  },
+  "bannerTitle": {
+    "message": "Nổi trên cả game PC"
+  },
+  "bannerSub": {
+    "message": "Cài đặt GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "Phiên bản giao thức engine không khớp"
+  },
+  "warnHotkeyConflict": {
+    "message": "Xung đột phím tắt: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "Bắt đầu với GhostPiP"
+  },
+  "guideSub": {
+    "message": "PiP trong suốt, nhấp xuyên qua và tự động né, không bao giờ che màn hình của bạn"
+  },
+  "guideCheckingEngine": {
+    "message": "Đang kiểm tra engine…"
+  },
+  "guideChecking": {
+    "message": "Đang kiểm tra…"
+  },
+  "guideEngineMissing": {
+    "message": "Chưa cài đặt engine"
+  },
+  "guideStep1Title": {
+    "message": "1. Di chuột lên video"
+  },
+  "guideStep1Body": {
+    "message": "Hai nút sẽ xuất hiện ở đầu video trên YouTube, Twitch, CHZZK, SOOP và các dịch vụ OTT như Netflix, Disney+ và Prime Video."
+  },
+  "guideWebModeBody": {
+    "message": "Cửa sổ nổi bên trong thẻ trình duyệt. Đi theo bạn sang các thẻ khác. Không cần cài đặt gì."
+  },
+  "guideFullModeBody": {
+    "message": "Cửa sổ nổi trên game và các chương trình khác. Độ mờ đục, nhấp xuyên qua và tự động né cần có <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. Cài đặt GhostPiP Engine (chế độ toàn phần, Windows)"
+  },
+  "guideStep2a": {
+    "message": "Giải nén <code>GhostPiP-Full-Package.zip</code> (hoặc <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "Nhấp đúp vào <code>engine\\install.bat</code>. Không cần quyền quản trị viên."
+  },
+  "guideStep2c": {
+    "message": "Hoàn tất khi trạng thái ở góc trên bên phải trang này chuyển thành <b>Đã kết nối engine</b>."
+  },
+  "guideRetry": {
+    "message": "Kiểm tra lại kết nối"
+  },
+  "guideEngineNote": {
+    "message": "Engine được cài vào <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, chỉ chạy khi Chrome đang mở chế độ toàn phần và thoát khi bạn tắt GhostPiP. Để gỡ bỏ, hãy chạy <code>uninstall.bat</code>."
+  },
+  "guideAvTitle": {
+    "message": "Nếu phần mềm diệt virus chặn engine"
+  },
+  "guideAvBody": {
+    "message": "Engine hiển thị cửa sổ trong suốt phía trên các cửa sổ khác và chuyển tiếp thao tác chuột, nên một số phần mềm diệt virus (ví dụ Avast <code>Win64:Evo-gen</code>) có thể nhận nhầm các bản dựng chưa ký. Engine không bao giờ dùng mạng hay thu thập tệp."
+  },
+  "guideAv1": {
+    "message": "Khôi phục <code>GhostPiP.Engine.exe</code> từ khu cách ly của phần mềm diệt virus."
+  },
+  "guideAv2": {
+    "message": "Thêm thư mục <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> vào danh sách loại trừ của phần mềm diệt virus."
+  },
+  "guideAv3": {
+    "message": "Chạy lại <code>install.bat</code>."
+  },
+  "guideControlsTitle": {
+    "message": "Điều khiển"
+  },
+  "guideMoveResize": {
+    "message": "Di chuyển · đổi kích thước"
+  },
+  "guideMoveResizeHow": {
+    "message": "Kéo trong khi giữ <kbd class=\"hold\">Ctrl+Alt</kbd> / kéo cạnh"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + con lăn chuột"
+  },
+  "guideToggleClickThrough": {
+    "message": "Bật/tắt nhấp xuyên qua"
+  },
+  "guideToggleDodge": {
+    "message": "Bật/tắt tự động né"
+  },
+  "guideHotkeyNote": {
+    "message": "Đổi phím tắt và phím bổ trợ từ biểu tượng GhostPiP trên thanh công cụ → Phím tắt và điều khiển."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (đang chạy)"
+  },
+  "engineTrayEmergency": {
+    "message": "Khẩn cấp: tắt nhấp xuyên qua"
+  },
+  "engineTrayExit": {
+    "message": "Thoát"
+  }
+}

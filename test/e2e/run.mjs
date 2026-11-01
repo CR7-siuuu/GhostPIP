@@ -42,7 +42,7 @@ const browser = await puppeteer.launch({
   enableExtensions: true,
   defaultViewport: null,
   // --window-size would also force the Document PiP window to that size, so size the window via CDP.
-  args: ["--autoplay-policy=no-user-gesture-required", "--no-first-run"],
+  args: ["--autoplay-policy=no-user-gesture-required", "--no-first-run", "--lang=ko"],
 });
 const extId = await browser.installExtension(path.join(ROOT, "extension"));
 

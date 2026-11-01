@@ -1,0 +1,312 @@
+{
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "透明、可點擊穿透並會自動閃避游標的 PiP。支援 YouTube、Twitch、CHZZK、SOOP 等平台。"
+  },
+  "cmdClickThrough": {
+    "message": "切換點擊穿透（幽靈模式）"
+  },
+  "cmdDodge": {
+    "message": "切換智慧自動閃避"
+  },
+  "cmdMute": {
+    "message": "切換影片分頁靜音"
+  },
+  "modeWeb": {
+    "message": "網頁模式"
+  },
+  "modeWebTitle": {
+    "message": "網頁模式（瀏覽器分頁內的浮動層）"
+  },
+  "modeFull": {
+    "message": "完整模式"
+  },
+  "modeFullTitle": {
+    "message": "完整模式（桌面 PiP 視窗）"
+  },
+  "chatShow": {
+    "message": "顯示聊天室"
+  },
+  "chatHide": {
+    "message": "隱藏聊天室"
+  },
+  "chatResizeTitle": {
+    "message": "拖曳以調整聊天室大小"
+  },
+  "chatSmaller": {
+    "message": "縮小聊天室"
+  },
+  "chatBigger": {
+    "message": "放大聊天室"
+  },
+  "skipAd": {
+    "message": "略過廣告 ⏭"
+  },
+  "btnReturn": {
+    "message": "還原"
+  },
+  "btnSourceTab": {
+    "message": "來源分頁"
+  },
+  "hudOpacity": {
+    "message": "不透明度 $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "不透明度 $PCT$%（捲動以調整）· $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "透明 PiP 浮動視窗"
+  },
+  "badgeOff": {
+    "message": "關"
+  },
+  "engineConnected": {
+    "message": "引擎已連線"
+  },
+  "masterTitle": {
+    "message": "啟用 GhostPiP"
+  },
+  "masterHint": {
+    "message": "關閉後將一併關閉浮動視窗和引擎"
+  },
+  "sectionBasic": {
+    "message": "基本設定"
+  },
+  "clickThrough": {
+    "message": "點擊穿透"
+  },
+  "autoDodge": {
+    "message": "自動閃避"
+  },
+  "showChatFull": {
+    "message": "在完整模式中顯示聊天室"
+  },
+  "allSites": {
+    "message": "在所有網站上使用"
+  },
+  "allSitesHint": {
+    "message": "關閉時僅在直播和 OTT 網站上顯示"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "不透明度"
+  },
+  "wheelHint": {
+    "message": "也可在影片上捲動調整 · 點擊穿透時請使用 $HOLD$ + 捲動",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "切換靜音"
+  },
+  "dodgeSettings": {
+    "message": "閃避設定"
+  },
+  "dodgeCorners": {
+    "message": "可移動到的角落"
+  },
+  "cornerTL": {
+    "message": "左上"
+  },
+  "cornerTR": {
+    "message": "右上"
+  },
+  "cornerBL": {
+    "message": "左下"
+  },
+  "cornerBR": {
+    "message": "右下"
+  },
+  "dodgeCornersHint": {
+    "message": "關閉必須保持可見的角落，例如遊戲小地圖。已鎖定的角落是初始位置或閃避方向所需。"
+  },
+  "homePosition": {
+    "message": "初始位置"
+  },
+  "dodgeAxis": {
+    "message": "閃避方向"
+  },
+  "axisFree": {
+    "message": "自由（4 個方向）"
+  },
+  "axisVertical": {
+    "message": "上 / 下"
+  },
+  "axisHorizontal": {
+    "message": "左 / 右"
+  },
+  "dodgeStyle": {
+    "message": "閃避方式"
+  },
+  "styleMove": {
+    "message": "移到其他角落"
+  },
+  "styleFade": {
+    "message": "淡出"
+  },
+  "autoReturn": {
+    "message": "自動返回"
+  },
+  "autoReturnHint": {
+    "message": "滑鼠離開後回到初始位置"
+  },
+  "hotkeySettings": {
+    "message": "快速鍵與操作"
+  },
+  "holdKey": {
+    "message": "輔助鍵"
+  },
+  "mute": {
+    "message": "靜音"
+  },
+  "hotkeyBtnTitle": {
+    "message": "按一下後，再按下新的快速鍵"
+  },
+  "hotkeyRecording": {
+    "message": "請按鍵 · 按 Esc 取消"
+  },
+  "tipHold": {
+    "message": "即使在點擊穿透時，按住 $HOLD$ 也能移動、調整大小，或用滾輪變更不透明度。",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "不透明度、點擊穿透和自動閃避也適用於透過網站或瀏覽器內建 PiP 按鈕開啟的視窗。"
+  },
+  "resetHotkeys": {
+    "message": "還原為預設值"
+  },
+  "bannerTitle": {
+    "message": "也能浮在 PC 遊戲上"
+  },
+  "bannerSub": {
+    "message": "安裝 GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "引擎通訊協定版本不符"
+  },
+  "warnHotkeyConflict": {
+    "message": "快速鍵衝突：$KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "GhostPiP 使用入門"
+  },
+  "guideSub": {
+    "message": "透明、點擊穿透、自動閃避，絕不擋住畫面的 PiP"
+  },
+  "guideCheckingEngine": {
+    "message": "正在檢查引擎…"
+  },
+  "guideChecking": {
+    "message": "正在檢查…"
+  },
+  "guideEngineMissing": {
+    "message": "尚未安裝引擎"
+  },
+  "guideStep1Title": {
+    "message": "1. 將滑鼠移到影片上"
+  },
+  "guideStep1Body": {
+    "message": "在 YouTube、Twitch、CHZZK、SOOP 以及 Netflix、Disney+、Prime Video 等 OTT 服務的影片上方會出現兩個按鈕。"
+  },
+  "guideWebModeBody": {
+    "message": "瀏覽器分頁內的浮動視窗，切換到其他分頁時也會跟著移動。不需要安裝任何程式。"
+  },
+  "guideFullModeBody": {
+    "message": "浮在遊戲和其他程式上方的視窗。不透明度、點擊穿透和自動閃避需要 <b>GhostPiP Engine</b>。"
+  },
+  "guideStep2Title": {
+    "message": "2. 安裝 GhostPiP Engine（完整模式，Windows）"
+  },
+  "guideStep2a": {
+    "message": "解壓縮 <code>GhostPiP-Full-Package.zip</code>（或 <code>GhostPiP-Engine-win-x64.zip</code>）。"
+  },
+  "guideStep2b": {
+    "message": "按兩下 <code>engine\\install.bat</code>。不需要系統管理員權限。"
+  },
+  "guideStep2c": {
+    "message": "當本頁右上角的狀態變成 <b>引擎已連線</b> 即完成。"
+  },
+  "guideRetry": {
+    "message": "重新檢查連線"
+  },
+  "guideEngineNote": {
+    "message": "引擎會安裝到 <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>，只在 Chrome 開啟完整模式時執行，關閉 GhostPiP 後就會結束。如要移除，請執行 <code>uninstall.bat</code>。"
+  },
+  "guideAvTitle": {
+    "message": "如果防毒軟體封鎖了引擎"
+  },
+  "guideAvBody": {
+    "message": "引擎會在其他視窗上方顯示透明視窗並轉送滑鼠輸入，因此部分防毒軟體（例如 Avast <code>Win64:Evo-gen</code>）可能會誤判未簽署的版本。引擎絕不使用網路，也不會收集檔案。"
+  },
+  "guideAv1": {
+    "message": "從防毒軟體的隔離區還原 <code>GhostPiP.Engine.exe</code>。"
+  },
+  "guideAv2": {
+    "message": "將 <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> 資料夾加入防毒軟體的排除清單。"
+  },
+  "guideAv3": {
+    "message": "再次執行 <code>install.bat</code>。"
+  },
+  "guideControlsTitle": {
+    "message": "操作方式"
+  },
+  "guideMoveResize": {
+    "message": "移動 · 調整大小"
+  },
+  "guideMoveResizeHow": {
+    "message": "按住 <kbd class=\"hold\">Ctrl+Alt</kbd> 拖曳 / 拖曳邊緣"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + 滑鼠滾輪"
+  },
+  "guideToggleClickThrough": {
+    "message": "切換點擊穿透"
+  },
+  "guideToggleDodge": {
+    "message": "切換自動閃避"
+  },
+  "guideHotkeyNote": {
+    "message": "可從工具列的 GhostPiP 圖示 → 快速鍵與操作 變更快速鍵和輔助鍵。"
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine（執行中）"
+  },
+  "engineTrayEmergency": {
+    "message": "緊急：關閉點擊穿透"
+  },
+  "engineTrayExit": {
+    "message": "結束"
+  }
+}

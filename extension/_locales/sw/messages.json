@@ -1,0 +1,312 @@
+{
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "PiP angavu inayoruhusu mibofyo kupita na kukwepa kiteuzi chako. Inafanya kazi na YouTube, Twitch, CHZZK, SOOP na zaidi."
+  },
+  "cmdClickThrough": {
+    "message": "Washa/zima kubofya kupitia (Hali ya Mzimu)"
+  },
+  "cmdDodge": {
+    "message": "Washa/zima kukwepa kiotomatiki kwa akili"
+  },
+  "cmdMute": {
+    "message": "Washa/zima sauti ya kichupo cha video"
+  },
+  "modeWeb": {
+    "message": "Hali ya wavuti"
+  },
+  "modeWebTitle": {
+    "message": "Hali ya wavuti (dirisha ndani ya kichupo cha kivinjari)"
+  },
+  "modeFull": {
+    "message": "Hali kamili"
+  },
+  "modeFullTitle": {
+    "message": "Hali kamili (dirisha la PiP kwenye eneo-kazi)"
+  },
+  "chatShow": {
+    "message": "Onyesha gumzo"
+  },
+  "chatHide": {
+    "message": "Ficha gumzo"
+  },
+  "chatResizeTitle": {
+    "message": "Buruta ili kubadilisha ukubwa wa gumzo"
+  },
+  "chatSmaller": {
+    "message": "Gumzo dogo"
+  },
+  "chatBigger": {
+    "message": "Gumzo kubwa"
+  },
+  "skipAd": {
+    "message": "Ruka tangazo ⏭"
+  },
+  "btnReturn": {
+    "message": "Rudisha"
+  },
+  "btnSourceTab": {
+    "message": "Kichupo asili"
+  },
+  "hudOpacity": {
+    "message": "Uangavu $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "Uangavu $PCT$% (sogeza gurudumu kurekebisha) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "Dirisha angavu la PiP"
+  },
+  "badgeOff": {
+    "message": "Imezimwa"
+  },
+  "engineConnected": {
+    "message": "Injini imeunganishwa"
+  },
+  "masterTitle": {
+    "message": "Washa GhostPiP"
+  },
+  "masterHint": {
+    "message": "Ukizima hii, dirisha na injini vitafungwa"
+  },
+  "sectionBasic": {
+    "message": "Mipangilio ya msingi"
+  },
+  "clickThrough": {
+    "message": "Kubofya kupitia"
+  },
+  "autoDodge": {
+    "message": "Kukwepa kiotomatiki"
+  },
+  "showChatFull": {
+    "message": "Onyesha gumzo katika Hali kamili"
+  },
+  "allSites": {
+    "message": "Tumia kwenye tovuti zote"
+  },
+  "allSitesHint": {
+    "message": "Ikizimwa, inaonekana tu kwenye tovuti za utiririshaji na OTT"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Uangavu"
+  },
+  "wheelHint": {
+    "message": "Unaweza pia kusogeza gurudumu juu ya video · wakati wa kubofya kupitia tumia $HOLD$ + gurudumu",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "Washa/zima sauti"
+  },
+  "dodgeSettings": {
+    "message": "Mipangilio ya kukwepa"
+  },
+  "dodgeCorners": {
+    "message": "Pembe inazoweza kuhamia"
+  },
+  "cornerTL": {
+    "message": "Juu kushoto"
+  },
+  "cornerTR": {
+    "message": "Juu kulia"
+  },
+  "cornerBL": {
+    "message": "Chini kushoto"
+  },
+  "cornerBR": {
+    "message": "Chini kulia"
+  },
+  "dodgeCornersHint": {
+    "message": "Zima pembe zinazopaswa kuonekana, kama ramani ndogo ya mchezo. Pembe zilizofungwa zinahitajika na nafasi ya nyumbani au mwelekeo wa kukwepa."
+  },
+  "homePosition": {
+    "message": "Nafasi ya nyumbani"
+  },
+  "dodgeAxis": {
+    "message": "Mwelekeo wa kukwepa"
+  },
+  "axisFree": {
+    "message": "Huru (pande 4)"
+  },
+  "axisVertical": {
+    "message": "Juu / chini"
+  },
+  "axisHorizontal": {
+    "message": "Kushoto / kulia"
+  },
+  "dodgeStyle": {
+    "message": "Mtindo wa kukwepa"
+  },
+  "styleMove": {
+    "message": "Hamia pembe nyingine"
+  },
+  "styleFade": {
+    "message": "Fifia"
+  },
+  "autoReturn": {
+    "message": "Rudi kiotomatiki"
+  },
+  "autoReturnHint": {
+    "message": "Inarudi kwenye nafasi ya nyumbani kipanya kinapoondoka"
+  },
+  "hotkeySettings": {
+    "message": "Mikato ya kibodi na vidhibiti"
+  },
+  "holdKey": {
+    "message": "Kitufe cha kurekebisha"
+  },
+  "mute": {
+    "message": "Zima sauti"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Bofya, kisha bonyeza mkato mpya"
+  },
+  "hotkeyRecording": {
+    "message": "Bonyeza vitufe · Esc kughairi"
+  },
+  "tipHold": {
+    "message": "Hata wakati wa kubofya kupitia, shikilia $HOLD$ ili kusogeza, kubadilisha ukubwa au kubadilisha uangavu kwa gurudumu la kipanya.",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "Uangavu, kubofya kupitia na kukwepa kiotomatiki pia hutumika kwa madirisha yaliyofunguliwa kwa kitufe cha PiP cha tovuti au cha kivinjari."
+  },
+  "resetHotkeys": {
+    "message": "Rejesha chaguomsingi"
+  },
+  "bannerTitle": {
+    "message": "Elea juu ya michezo ya PC pia"
+  },
+  "bannerSub": {
+    "message": "Sakinisha GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "Toleo la itifaki ya injini halilingani"
+  },
+  "warnHotkeyConflict": {
+    "message": "Mgongano wa mkato: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "Kuanza kutumia GhostPiP"
+  },
+  "guideSub": {
+    "message": "PiP angavu yenye kubofya kupitia na kukwepa kiotomatiki, isiyozuia skrini yako kamwe"
+  },
+  "guideCheckingEngine": {
+    "message": "Inakagua injini…"
+  },
+  "guideChecking": {
+    "message": "Inakagua…"
+  },
+  "guideEngineMissing": {
+    "message": "Injini haijasakinishwa"
+  },
+  "guideStep1Title": {
+    "message": "1. Weka kipanya juu ya video"
+  },
+  "guideStep1Body": {
+    "message": "Vitufe viwili vinaonekana juu ya video kwenye YouTube, Twitch, CHZZK, SOOP na huduma za OTT kama Netflix, Disney+ na Prime Video."
+  },
+  "guideWebModeBody": {
+    "message": "Dirisha linaloelea ndani ya kichupo cha kivinjari. Linakufuata kwenye vichupo vingine. Hakuna cha kusakinisha."
+  },
+  "guideFullModeBody": {
+    "message": "Dirisha linaloelea juu ya michezo na programu nyingine. Uangavu, kubofya kupitia na kukwepa kiotomatiki vinahitaji <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. Sakinisha GhostPiP Engine (Hali kamili, Windows)"
+  },
+  "guideStep2a": {
+    "message": "Toa faili kutoka <code>GhostPiP-Full-Package.zip</code> (au <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "Bofya mara mbili <code>engine\\install.bat</code>. Haihitaji haki za msimamizi."
+  },
+  "guideStep2c": {
+    "message": "Umemaliza hali iliyo juu kulia mwa ukurasa huu ikibadilika kuwa <b>Injini imeunganishwa</b>."
+  },
+  "guideRetry": {
+    "message": "Kagua muunganisho tena"
+  },
+  "guideEngineNote": {
+    "message": "Injini husakinishwa kwenye <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, huendeshwa tu wakati Chrome ina Hali kamili wazi, na hufungwa unapozima GhostPiP. Ili kuiondoa, endesha <code>uninstall.bat</code>."
+  },
+  "guideAvTitle": {
+    "message": "Kingavirusi chako kikizuia injini"
+  },
+  "guideAvBody": {
+    "message": "Injini huonyesha dirisha angavu juu ya madirisha mengine na kupitisha ingizo la kipanya, kwa hivyo baadhi ya programu za kingavirusi (k.m. Avast <code>Win64:Evo-gen</code>) zinaweza kutia alama matoleo yasiyotiwa saini kimakosa. Haitumii mtandao wala kukusanya faili kamwe."
+  },
+  "guideAv1": {
+    "message": "Rejesha <code>GhostPiP.Engine.exe</code> kutoka karantini ya kingavirusi chako."
+  },
+  "guideAv2": {
+    "message": "Ongeza folda ya <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> kwenye vighairi vya kingavirusi chako."
+  },
+  "guideAv3": {
+    "message": "Endesha <code>install.bat</code> tena."
+  },
+  "guideControlsTitle": {
+    "message": "Vidhibiti"
+  },
+  "guideMoveResize": {
+    "message": "Sogeza · badilisha ukubwa"
+  },
+  "guideMoveResizeHow": {
+    "message": "Buruta huku ukishikilia <kbd class=\"hold\">Ctrl+Alt</kbd> / buruta ukingo"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + gurudumu la kipanya"
+  },
+  "guideToggleClickThrough": {
+    "message": "Washa/zima kubofya kupitia"
+  },
+  "guideToggleDodge": {
+    "message": "Washa/zima kukwepa kiotomatiki"
+  },
+  "guideHotkeyNote": {
+    "message": "Badilisha mikato na kitufe cha kurekebisha kupitia aikoni ya GhostPiP kwenye upau wa zana → Mikato ya kibodi na vidhibiti."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (inaendeshwa)"
+  },
+  "engineTrayEmergency": {
+    "message": "Dharura: zima kubofya kupitia"
+  },
+  "engineTrayExit": {
+    "message": "Ondoka"
+  }
+}
