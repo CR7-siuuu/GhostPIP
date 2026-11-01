@@ -1826,9 +1826,6 @@
     let lastResizeAt = 0;
     let resizeMode = "window";
     let gestureStartChatH = chatH;
-    let gestureDw = 0;
-    let gestureAbsDh = 0;
-    let autoHeightTimer = null;
     const openedAt = performance.now();
     win.addEventListener("resize", () => {
       const now = performance.now();
@@ -1850,8 +1847,6 @@
       const isNewGesture = now - lastResizeAt > 220;
       lastResizeAt = now;
       if (isNewGesture) {
-        gestureDw = 0;
-        gestureAbsDh = 0;
         gestureStartChatH = chatH;
         const startedOnBottomEdge =
           chatShown &&
@@ -1872,8 +1867,6 @@
         applyChatH(chatH);
         persistLayout({ pipChatHeight: chatH });
       }
-      gestureDw += dw;
-      gestureAbsDh += Math.abs(dh);
 
       if (resizeMode === "chat" && chatShown && frame?.isConnected) {
         chatH = Math.max(MIN_CHAT_HEIGHT, win.innerHeight - lockedVideoH);
@@ -1882,33 +1875,8 @@
         return;
       }
 
-      const ratio = mirror.videoWidth > 0 && mirror.videoHeight > 0 ? mirror.videoHeight / mirror.videoWidth : 9 / 16;
-      const targetVideoH = Math.round(win.innerWidth * ratio);
-      if (chatShown && frame?.isConnected) {
-        if (dw > 0 && win.innerHeight - activeChatH < targetVideoH) {
-          applyChatH(Math.max(MIN_CHAT_HEIGHT, win.innerHeight - targetVideoH));
-        } else if (dw < 0 && activeChatH < chatH && win.innerHeight - activeChatH > targetVideoH) {
-          applyChatH(Math.min(chatH, Math.max(MIN_CHAT_HEIGHT, win.innerHeight - targetVideoH)));
-        }
-        lockedVideoH = Math.max(MIN_FLOAT_HEIGHT, win.innerHeight - activeChatH);
-      } else {
-        lockedVideoH = Math.max(MIN_FLOAT_HEIGHT, win.innerHeight);
-      }
-
-      clearTimeout(autoHeightTimer);
-      if (gestureDw > 8 && gestureAbsDh <= 4) {
-        autoHeightTimer = setTimeout(() => {
-          if (chatResize || performance.now() < togglingUntil) return;
-          const ratioNow = mirror.videoWidth > 0 && mirror.videoHeight > 0 ? mirror.videoHeight / mirror.videoWidth : 9 / 16;
-          const wantedVideoH = Math.round(win.innerWidth * ratioNow);
-          const reserveChatH = chatShown && frame?.isConnected ? activeChatH : 0;
-          const neededDeltaH = wantedVideoH + reserveChatH - win.innerHeight;
-          if (neededDeltaH > 8) {
-            togglingUntil = performance.now() + 500;
-            onResizeChat?.(neededDeltaH);
-          }
-        }, 120);
-      }
+      // Window resizes never touch the chat height; the video takes all of the change.
+      lockedVideoH = Math.max(MIN_FLOAT_HEIGHT, win.innerHeight - (chatShown && frame?.isConnected ? activeChatH : 0));
     });
 
     function syncChat(enabled, resizeWin = false) {

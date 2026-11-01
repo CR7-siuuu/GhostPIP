@@ -1,4 +1,5 @@
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import puppeteer from "puppeteer-core";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
@@ -308,6 +309,50 @@ try {
     }, [fx, fy]);
 
   // Engine-driven bottom-edge drag anywhere along the edge (not a corner) resizes the chat.
+  // A real Win32 corner drag (wider and taller) first must leave the chat height alone.
+  await sleep(700);
+  await hoverPip(0.99, 0.99);
+  const beforeCorner = await readPip();
+  execFileSync("powershell", ["-NoProfile", "-Command", `
+Add-Type @"
+using System;
+using System.Text;
+using System.Runtime.InteropServices;
+public class GpDrag {
+  [StructLayout(LayoutKind.Sequential)] public struct RECT { public int L, T, R, B; }
+  public delegate bool EnumProc(IntPtr h, IntPtr l);
+  [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc f, IntPtr l);
+  [DllImport("user32.dll")] public static extern bool EnumChildWindows(IntPtr p, EnumProc f, IntPtr l);
+  [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr h);
+  [DllImport("user32.dll", CharSet=CharSet.Unicode)] public static extern int GetClassNameW(IntPtr h, StringBuilder s, int m);
+  [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out RECT r);
+  [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr a, int x, int y, int w, int ht, uint f);
+  public static string Cls(IntPtr h) { var sb = new StringBuilder(64); GetClassNameW(h, sb, 64); return sb.ToString(); }
+}
+"@
+$hostHwnd = [IntPtr]::Zero
+[GpDrag]::EnumWindows({ param($h, $l) if ([GpDrag]::IsWindowVisible($h) -and [GpDrag]::Cls($h) -eq "GhostPiPClipHost") { $script:hostHwnd = $h; return $false }; return $true }, [IntPtr]::Zero) | Out-Null
+$cw = [IntPtr]::Zero
+[GpDrag]::EnumChildWindows($hostHwnd, { param($h, $l) if ([GpDrag]::Cls($h) -eq "Chrome_WidgetWin_1") { $script:cw = $h; return $false }; return $true }, [IntPtr]::Zero) | Out-Null
+$hr = New-Object GpDrag+RECT; [GpDrag]::GetWindowRect($hostHwnd, [ref]$hr) | Out-Null
+$cr = New-Object GpDrag+RECT; [GpDrag]::GetWindowRect($cw, [ref]$cr) | Out-Null
+$w = $hr.R - $hr.L; $h = $hr.B - $hr.T
+$padW = ($cr.R - $cr.L) - $w; $padH = ($cr.B - $cr.T) - $h
+$offX = $cr.L - $hr.L; $offY = $cr.T - $hr.T
+for ($i = 0; $i -lt 40; $i++) {
+  if ($i % 2 -eq 0) { $w += 12; $h += 3 } else { $h += 3 }
+  [GpDrag]::SetWindowPos($hostHwnd, [IntPtr]::Zero, 0, 0, $w, $h, 0x0016) | Out-Null
+  [GpDrag]::SetWindowPos($cw, [IntPtr]::Zero, $offX, $offY, $w + $padW, $h + $padH, 0x0014) | Out-Null
+  Start-Sleep -Milliseconds 15
+}
+`]);
+  await sleep(500);
+  const afterCorner = await readPip();
+  record(
+    "7b PiP Win32 corner drag keeps chat height, grows video",
+    afterCorner.chat === beforeCorner.chat && afterCorner.vid - beforeCorner.vid >= 100,
+    `chat=${beforeCorner.chat}->${afterCorner.chat} video=${beforeCorner.vid}->${afterCorner.vid} innerH=${beforeCorner.innerH}->${afterCorner.innerH}`,
+  );
   await sleep(700);
   await page.evaluate(() => {
     const w = documentPictureInPicture.window;
@@ -347,4 +392,4 @@ try {
 
 console.log("\n[chat e2e]");
 for (const r of results) console.log(`  ${r.ok ? "PASS" : "FAIL"} ${r.name.padEnd(40)} ${r.info}`);
-process.exit(results.length === 9 && results.every((r) => r.ok) ? 0 : 1);
+process.exit(results.length === 10 && results.every((r) => r.ok) ? 0 : 1);
