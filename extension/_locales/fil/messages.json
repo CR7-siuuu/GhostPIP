@@ -1,96 +1,318 @@
 {
-  "extName": {"message":"GhostPiP"},
-  "extDescription": {"message":"Transparent na PiP na may click-through at umiiwas sa cursor mo. Gumagana sa YouTube, Twitch, CHZZK, SOOP at iba pa."},
-  "cmdClickThrough": {"message":"I-toggle ang click-through (Ghost Mode)"},
-  "cmdDodge": {"message":"I-toggle ang matalinong auto-iwas"},
-  "cmdMute": {"message":"I-toggle ang mute sa tab ng video"},
-  "modeWeb": {"message":"Web mode"},
-  "modeWebTitle": {"message":"Web mode (overlay sa loob ng tab ng browser)"},
-  "modeFull": {"message":"Buong mode"},
-  "modeFullTitle": {"message":"Buong mode (PiP window sa desktop)"},
-  "chatShow": {"message":"Ipakita ang chat"},
-  "chatHide": {"message":"Itago ang chat"},
-  "chatResizeTitle": {"message":"I-drag para baguhin ang laki ng chat"},
-  "chatSmaller": {"message":"Mas maliit na chat"},
-  "chatBigger": {"message":"Mas malaking chat"},
-  "skipAd": {"message":"Laktawan ang ad ⏭"},
-  "btnReturn": {"message":"Ibalik"},
-  "btnSourceTab": {"message":"Pinagmulang tab"},
-  "hudOpacity": {"message":"Opacity $PCT$%","placeholders":{"pct":{"content":"$1","example":"70"}}},
-  "hudOpacityWheel": {"message":"Opacity $PCT$% (mag-scroll para i-adjust) · $SIZE$","placeholders":{"pct":{"content":"$1","example":"70"},"size":{"content":"$2","example":"480×270"}}},
-  "popupSubtitle": {"message":"Transparent na PiP overlay"},
-  "badgeOff": {"message":"Naka-off"},
-  "engineConnected": {"message":"Nakakonekta ang engine"},
-  "masterTitle": {"message":"I-enable ang GhostPiP"},
-  "masterHint": {"message":"Kapag in-off, isasara ang overlay at ang engine"},
-  "sectionBasic": {"message":"Mga pangunahing setting"},
-  "clickThrough": {"message":"Click-through"},
-  "autoDodge": {"message":"Auto-iwas"},
-  "showChatFull": {"message":"Ipakita ang chat sa Buong mode"},
-  "allSites": {"message":"Gamitin sa lahat ng site"},
-  "allSitesHint": {"message":"Kapag naka-off, lalabas lang ito sa mga streaming at OTT site"},
-  "allSitesList": {"message":"YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"},
-  "opacity": {"message":"Opacity"},
-  "wheelHint": {"message":"Puwede ka ring mag-scroll sa ibabaw ng video · habang naka-click-through, gamitin ang $HOLD$ + scroll","placeholders":{"hold":{"content":"$1","example":"Ctrl+Alt"}}},
-  "toggleMute": {"message":"I-toggle ang mute"},
-  "dodgeSettings": {"message":"Mga setting ng pag-iwas"},
-  "dodgeCorners": {"message":"Mga sulok na puwedeng lipatan"},
-  "cornerTL": {"message":"Kaliwa sa itaas"},
-  "cornerTR": {"message":"Kanan sa itaas"},
-  "cornerBL": {"message":"Kaliwa sa ibaba"},
-  "cornerBR": {"message":"Kanan sa ibaba"},
-  "dodgeCornersHint": {"message":"I-off ang mga sulok na dapat manatiling nakikita, gaya ng minimap ng laro. Kailangan ang mga naka-lock na sulok para sa panimulang posisyon o direksyon ng pag-iwas."},
-  "homePosition": {"message":"Panimulang posisyon"},
-  "dodgeAxis": {"message":"Direksyon ng pag-iwas"},
-  "axisFree": {"message":"Malaya (4 na direksyon)"},
-  "axisVertical": {"message":"Taas / baba"},
-  "axisHorizontal": {"message":"Kaliwa / kanan"},
-  "dodgeStyle": {"message":"Istilo ng pag-iwas"},
-  "styleMove": {"message":"Lumipat sa ibang sulok"},
-  "styleFade": {"message":"Mag-fade out"},
-  "autoReturn": {"message":"Auto-balik"},
-  "autoReturnHint": {"message":"Bumabalik sa panimulang posisyon kapag lumayo ang mouse"},
-  "hotkeySettings": {"message":"Mga hotkey at kontrol"},
-  "holdKey": {"message":"Modifier key"},
-  "mute": {"message":"I-mute"},
-  "hotkeyBtnTitle": {"message":"I-click, pagkatapos ay pindutin ang bagong shortcut"},
-  "hotkeyRecording": {"message":"Pindutin ang mga key · Esc para kanselahin"},
-  "tipHold": {"message":"Kahit naka-click-through, pindutin nang matagal ang $HOLD$ para ilipat, baguhin ang laki, o baguhin ang opacity gamit ang scroll wheel.","placeholders":{"hold":{"content":"$1","example":"Ctrl+Alt"}}},
-  "tipNativePip": {"message":"Gumagana rin ang opacity, click-through at auto-iwas sa mga window na binuksan gamit ang sariling PiP button ng site o ng browser."},
-  "resetHotkeys": {"message":"I-reset sa default"},
-  "bannerTitle": {"message":"Lumutang din sa ibabaw ng mga PC game"},
-  "bannerSub": {"message":"I-install ang GhostPiP Engine"},
-  "warnProtocol": {"message":"Hindi tugma ang bersyon ng protocol ng engine"},
-  "warnHotkeyConflict": {"message":"Salungatan sa hotkey: $KEYS$","placeholders":{"keys":{"content":"$1","example":"Alt+G"}}},
-  "guideTitle": {"message":"Pagsisimula sa GhostPiP"},
-  "guideSub": {"message":"Transparent, click-through at auto-iwas na PiP na hindi kailanman tumatakip sa screen mo"},
-  "guideCheckingEngine": {"message":"Sinusuri ang engine…"},
-  "guideChecking": {"message":"Sinusuri…"},
-  "guideEngineMissing": {"message":"Hindi naka-install ang engine"},
-  "guideStep1Title": {"message":"1. I-hover ang mouse sa isang video"},
-  "guideStep1Body": {"message":"May dalawang button na lalabas sa itaas ng mga video sa YouTube, Twitch, CHZZK, SOOP at mga OTT service gaya ng Netflix, Disney+ at Prime Video."},
-  "guideWebModeBody": {"message":"Isang lumulutang na window sa loob ng tab ng browser. Sinusundan ka nito sa ibang tab. Walang kailangang i-install."},
-  "guideFullModeBody": {"message":"Isang window na lumulutang sa ibabaw ng mga laro at ibang program. Kailangan ng <b>GhostPiP Engine</b> para sa opacity, click-through at auto-iwas."},
-  "guideStep2Title": {"message":"2. I-install ang GhostPiP Engine (Buong mode, Windows)"},
-  "guideStep2a": {"message":"I-unzip ang <code>GhostPiP-Full-Package.zip</code> (o <code>GhostPiP-Engine-win-x64.zip</code>)."},
-  "guideStep2b": {"message":"I-double click ang <code>engine\\install.bat</code>. Hindi kailangan ng administrator rights."},
-  "guideStep2c": {"message":"Tapos na kapag naging <b>Nakakonekta ang engine</b> ang status sa kanang itaas ng page na ito."},
-  "guideRetry": {"message":"Suriin muli ang koneksyon"},
-  "guideEngineNote": {"message":"Nag-i-install ang engine sa <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, tumatakbo lang habang bukas ang Buong mode sa Chrome, at humihinto kapag in-off mo ang GhostPiP. Para alisin ito, patakbuhin ang <code>uninstall.bat</code>."},
-  "guideAvTitle": {"message":"Kung bina-block ng antivirus mo ang engine"},
-  "guideAvBody": {"message":"Nagpapakita ang engine ng transparent na window sa ibabaw ng ibang window at nagpapasa ng mouse input, kaya maaaring magkamaling i-flag ng ilang antivirus (hal. Avast <code>Win64:Evo-gen</code>) ang mga unsigned build. Hindi ito kailanman gumagamit ng network o nangongolekta ng mga file."},
-  "guideAv1": {"message":"I-restore ang <code>GhostPiP.Engine.exe</code> mula sa quarantine ng antivirus mo."},
-  "guideAv2": {"message":"Idagdag ang folder na <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> sa mga exclusion ng antivirus mo."},
-  "guideAv3": {"message":"Patakbuhin muli ang <code>install.bat</code>."},
-  "guideControlsTitle": {"message":"Mga kontrol"},
-  "guideMoveResize": {"message":"Ilipat · baguhin ang laki"},
-  "guideMoveResizeHow": {"message":"I-drag habang pinipindot ang <kbd class=\"hold\">Ctrl+Alt</kbd> / i-drag ang gilid"},
-  "guideOpacityHow": {"message":"<kbd class=\"hold\">Ctrl+Alt</kbd> + mouse wheel"},
-  "guideToggleClickThrough": {"message":"I-toggle ang click-through"},
-  "guideToggleDodge": {"message":"I-toggle ang auto-iwas"},
-  "guideHotkeyNote": {"message":"Baguhin ang mga hotkey at ang modifier key mula sa icon ng GhostPiP sa toolbar → Mga hotkey at kontrol."},
-  "engineTrayTip": {"message":"GhostPiP Engine"},
-  "engineTrayActive": {"message":"GhostPiP Engine (tumatakbo)"},
-  "engineTrayEmergency": {"message":"Emergency: i-off ang click-through"},
-  "engineTrayExit": {"message":"Lumabas"}
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "Transparent na PiP na may click-through at umiiwas sa cursor mo. Para sa mga streaming at video site."
+  },
+  "cmdClickThrough": {
+    "message": "I-toggle ang click-through (Ghost Mode)"
+  },
+  "cmdDodge": {
+    "message": "I-toggle ang matalinong auto-iwas"
+  },
+  "cmdMute": {
+    "message": "I-toggle ang mute sa tab ng video"
+  },
+  "modeWeb": {
+    "message": "Web mode"
+  },
+  "modeWebTitle": {
+    "message": "Web mode (overlay sa loob ng tab ng browser)"
+  },
+  "modeFull": {
+    "message": "Buong mode"
+  },
+  "modeFullTitle": {
+    "message": "Buong mode (PiP window sa desktop)"
+  },
+  "chatShow": {
+    "message": "Ipakita ang chat"
+  },
+  "chatHide": {
+    "message": "Itago ang chat"
+  },
+  "chatResizeTitle": {
+    "message": "I-drag para baguhin ang laki ng chat"
+  },
+  "chatSmaller": {
+    "message": "Mas maliit na chat"
+  },
+  "chatBigger": {
+    "message": "Mas malaking chat"
+  },
+  "skipAd": {
+    "message": "Laktawan ang ad ⏭"
+  },
+  "btnReturn": {
+    "message": "Ibalik"
+  },
+  "btnSourceTab": {
+    "message": "Pinagmulang tab"
+  },
+  "hudOpacity": {
+    "message": "Opacity $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "70"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "Opacity $PCT$% (mag-scroll para i-adjust) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "70"
+      },
+      "size": {
+        "content": "$2",
+        "example": "480×270"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "Transparent na PiP overlay"
+  },
+  "badgeOff": {
+    "message": "Naka-off"
+  },
+  "engineConnected": {
+    "message": "Nakakonekta ang engine"
+  },
+  "masterTitle": {
+    "message": "I-enable ang GhostPiP"
+  },
+  "masterHint": {
+    "message": "Kapag in-off, isasara ang overlay at ang engine"
+  },
+  "sectionBasic": {
+    "message": "Mga pangunahing setting"
+  },
+  "clickThrough": {
+    "message": "Click-through"
+  },
+  "autoDodge": {
+    "message": "Auto-iwas"
+  },
+  "showChatFull": {
+    "message": "Ipakita ang chat sa Buong mode"
+  },
+  "allSites": {
+    "message": "Gamitin sa lahat ng site"
+  },
+  "allSitesHint": {
+    "message": "Kapag naka-off, lalabas lang ito sa mga streaming at OTT site"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Opacity"
+  },
+  "wheelHint": {
+    "message": "Puwede ka ring mag-scroll sa ibabaw ng video · habang naka-click-through, gamitin ang $HOLD$ + scroll",
+    "placeholders": {
+      "hold": {
+        "content": "$1",
+        "example": "Ctrl+Alt"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "I-toggle ang mute"
+  },
+  "dodgeSettings": {
+    "message": "Mga setting ng pag-iwas"
+  },
+  "dodgeCorners": {
+    "message": "Mga sulok na puwedeng lipatan"
+  },
+  "cornerTL": {
+    "message": "Kaliwa sa itaas"
+  },
+  "cornerTR": {
+    "message": "Kanan sa itaas"
+  },
+  "cornerBL": {
+    "message": "Kaliwa sa ibaba"
+  },
+  "cornerBR": {
+    "message": "Kanan sa ibaba"
+  },
+  "dodgeCornersHint": {
+    "message": "I-off ang mga sulok na dapat manatiling nakikita, gaya ng minimap ng laro. Kailangan ang mga naka-lock na sulok para sa panimulang posisyon o direksyon ng pag-iwas."
+  },
+  "homePosition": {
+    "message": "Panimulang posisyon"
+  },
+  "dodgeAxis": {
+    "message": "Direksyon ng pag-iwas"
+  },
+  "axisFree": {
+    "message": "Malaya (4 na direksyon)"
+  },
+  "axisVertical": {
+    "message": "Taas / baba"
+  },
+  "axisHorizontal": {
+    "message": "Kaliwa / kanan"
+  },
+  "dodgeStyle": {
+    "message": "Istilo ng pag-iwas"
+  },
+  "styleMove": {
+    "message": "Lumipat sa ibang sulok"
+  },
+  "styleFade": {
+    "message": "Mag-fade out"
+  },
+  "autoReturn": {
+    "message": "Auto-balik"
+  },
+  "autoReturnHint": {
+    "message": "Bumabalik sa panimulang posisyon kapag lumayo ang mouse"
+  },
+  "hotkeySettings": {
+    "message": "Mga hotkey at kontrol"
+  },
+  "holdKey": {
+    "message": "Modifier key"
+  },
+  "mute": {
+    "message": "I-mute"
+  },
+  "hotkeyBtnTitle": {
+    "message": "I-click, pagkatapos ay pindutin ang bagong shortcut"
+  },
+  "hotkeyRecording": {
+    "message": "Pindutin ang mga key · Esc para kanselahin"
+  },
+  "tipHold": {
+    "message": "Kahit naka-click-through, pindutin nang matagal ang $HOLD$ para ilipat, baguhin ang laki, o baguhin ang opacity gamit ang scroll wheel.",
+    "placeholders": {
+      "hold": {
+        "content": "$1",
+        "example": "Ctrl+Alt"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "Gumagana rin ang opacity, click-through at auto-iwas sa mga window na binuksan gamit ang sariling PiP button ng site o ng browser."
+  },
+  "resetHotkeys": {
+    "message": "I-reset sa default"
+  },
+  "bannerTitle": {
+    "message": "Lumutang din sa ibabaw ng mga PC game"
+  },
+  "bannerSub": {
+    "message": "I-install ang GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "Hindi tugma ang bersyon ng protocol ng engine"
+  },
+  "warnHotkeyConflict": {
+    "message": "Salungatan sa hotkey: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1",
+        "example": "Alt+G"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "Pagsisimula sa GhostPiP"
+  },
+  "guideSub": {
+    "message": "Transparent, click-through at auto-iwas na PiP na hindi kailanman tumatakip sa screen mo"
+  },
+  "guideCheckingEngine": {
+    "message": "Sinusuri ang engine…"
+  },
+  "guideChecking": {
+    "message": "Sinusuri…"
+  },
+  "guideEngineMissing": {
+    "message": "Hindi naka-install ang engine"
+  },
+  "guideStep1Title": {
+    "message": "1. I-hover ang mouse sa isang video"
+  },
+  "guideStep1Body": {
+    "message": "May dalawang button na lalabas sa itaas ng mga video sa YouTube, Twitch, CHZZK, SOOP at mga OTT service gaya ng Netflix, Disney+ at Prime Video."
+  },
+  "guideWebModeBody": {
+    "message": "Isang lumulutang na window sa loob ng tab ng browser. Sinusundan ka nito sa ibang tab. Walang kailangang i-install."
+  },
+  "guideFullModeBody": {
+    "message": "Isang window na lumulutang sa ibabaw ng mga laro at ibang program. Kailangan ng <b>GhostPiP Engine</b> para sa opacity, click-through at auto-iwas."
+  },
+  "guideStep2Title": {
+    "message": "2. I-install ang GhostPiP Engine (Buong mode, Windows)"
+  },
+  "guideStep2a": {
+    "message": "I-unzip ang <code>GhostPiP-Full-Package.zip</code> (o <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "I-double click ang <code>engine\\install.bat</code>. Hindi kailangan ng administrator rights."
+  },
+  "guideStep2c": {
+    "message": "Tapos na kapag naging <b>Nakakonekta ang engine</b> ang status sa kanang itaas ng page na ito."
+  },
+  "guideRetry": {
+    "message": "Suriin muli ang koneksyon"
+  },
+  "guideEngineNote": {
+    "message": "Nag-i-install ang engine sa <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, tumatakbo lang habang bukas ang Buong mode sa Chrome, at humihinto kapag in-off mo ang GhostPiP. Para alisin ito, patakbuhin ang <code>uninstall.bat</code>."
+  },
+  "guideAvTitle": {
+    "message": "Kung bina-block ng antivirus mo ang engine"
+  },
+  "guideAvBody": {
+    "message": "Nagpapakita ang engine ng transparent na window sa ibabaw ng ibang window at nagpapasa ng mouse input, kaya maaaring magkamaling i-flag ng ilang antivirus (hal. Avast <code>Win64:Evo-gen</code>) ang mga unsigned build. Hindi ito kailanman gumagamit ng network o nangongolekta ng mga file."
+  },
+  "guideAv1": {
+    "message": "I-restore ang <code>GhostPiP.Engine.exe</code> mula sa quarantine ng antivirus mo."
+  },
+  "guideAv2": {
+    "message": "Idagdag ang folder na <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> sa mga exclusion ng antivirus mo."
+  },
+  "guideAv3": {
+    "message": "Patakbuhin muli ang <code>install.bat</code>."
+  },
+  "guideControlsTitle": {
+    "message": "Mga kontrol"
+  },
+  "guideMoveResize": {
+    "message": "Ilipat · baguhin ang laki"
+  },
+  "guideMoveResizeHow": {
+    "message": "I-drag habang pinipindot ang <kbd class=\"hold\">Ctrl+Alt</kbd> / i-drag ang gilid"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + mouse wheel"
+  },
+  "guideToggleClickThrough": {
+    "message": "I-toggle ang click-through"
+  },
+  "guideToggleDodge": {
+    "message": "I-toggle ang auto-iwas"
+  },
+  "guideHotkeyNote": {
+    "message": "Baguhin ang mga hotkey at ang modifier key mula sa icon ng GhostPiP sa toolbar → Mga hotkey at kontrol."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (tumatakbo)"
+  },
+  "engineTrayEmergency": {
+    "message": "Emergency: i-off ang click-through"
+  },
+  "engineTrayExit": {
+    "message": "Lumabas"
+  }
 }

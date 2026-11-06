@@ -1,115 +1,312 @@
 {
-  "extName": { "message": "GhostPiP" },
-  "extDescription": { "message": "Caurspīdīgs PiP ar klikšķu caurlaidību, kas izvairās no kursora. Darbojas ar YouTube, Twitch, CHZZK, SOOP u.c." },
-  "cmdClickThrough": { "message": "Ieslēgt/izslēgt klikšķu caurlaidību (spoka režīms)" },
-  "cmdDodge": { "message": "Ieslēgt/izslēgt viedo automātisko izvairīšanos" },
-  "cmdMute": { "message": "Ieslēgt/izslēgt video cilnes skaņu" },
-
-  "modeWeb": { "message": "Tīmekļa režīms" },
-  "modeWebTitle": { "message": "Tīmekļa režīms (pārklājums pārlūka cilnē)" },
-  "modeFull": { "message": "Pilnais režīms" },
-  "modeFullTitle": { "message": "Pilnais režīms (PiP logs darbvirsmā)" },
-  "chatShow": { "message": "Rādīt tērzēšanu" },
-  "chatHide": { "message": "Paslēpt tērzēšanu" },
-  "chatResizeTitle": { "message": "Velciet, lai mainītu tērzēšanas izmēru" },
-  "chatSmaller": { "message": "Mazāka tērzēšana" },
-  "chatBigger": { "message": "Lielāka tērzēšana" },
-  "skipAd": { "message": "Izlaist reklāmu ⏭" },
-  "btnReturn": { "message": "Atgriezt" },
-  "btnSourceTab": { "message": "Avota cilne" },
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "Caurspīdīgs PiP ar klikšķu caurlaidību, kas izvairās no kursora. Darbojas straumēšanas un video vietnēs."
+  },
+  "cmdClickThrough": {
+    "message": "Ieslēgt/izslēgt klikšķu caurlaidību (spoka režīms)"
+  },
+  "cmdDodge": {
+    "message": "Ieslēgt/izslēgt viedo automātisko izvairīšanos"
+  },
+  "cmdMute": {
+    "message": "Ieslēgt/izslēgt video cilnes skaņu"
+  },
+  "modeWeb": {
+    "message": "Tīmekļa režīms"
+  },
+  "modeWebTitle": {
+    "message": "Tīmekļa režīms (pārklājums pārlūka cilnē)"
+  },
+  "modeFull": {
+    "message": "Pilnais režīms"
+  },
+  "modeFullTitle": {
+    "message": "Pilnais režīms (PiP logs darbvirsmā)"
+  },
+  "chatShow": {
+    "message": "Rādīt tērzēšanu"
+  },
+  "chatHide": {
+    "message": "Paslēpt tērzēšanu"
+  },
+  "chatResizeTitle": {
+    "message": "Velciet, lai mainītu tērzēšanas izmēru"
+  },
+  "chatSmaller": {
+    "message": "Mazāka tērzēšana"
+  },
+  "chatBigger": {
+    "message": "Lielāka tērzēšana"
+  },
+  "skipAd": {
+    "message": "Izlaist reklāmu ⏭"
+  },
+  "btnReturn": {
+    "message": "Atgriezt"
+  },
+  "btnSourceTab": {
+    "message": "Avota cilne"
+  },
   "hudOpacity": {
     "message": "Necaurredzamība $PCT$%",
-    "placeholders": { "pct": { "content": "$1" } }
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   },
   "hudOpacityWheel": {
     "message": "Necaurredzamība $PCT$% (ritiniet, lai pielāgotu) · $SIZE$",
-    "placeholders": { "pct": { "content": "$1" }, "size": { "content": "$2" } }
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
   },
-
-  "popupSubtitle": { "message": "Caurspīdīgs PiP pārklājums" },
-  "badgeOff": { "message": "Izsl." },
-  "engineConnected": { "message": "Dzinējs savienots" },
-  "masterTitle": { "message": "Iespējot GhostPiP" },
-  "masterHint": { "message": "Izslēdzot tiek aizvērts pārklājums un dzinējs" },
-  "sectionBasic": { "message": "Pamatiestatījumi" },
-  "clickThrough": { "message": "Klikšķu caurlaidība" },
-  "autoDodge": { "message": "Automātiska izvairīšanās" },
-  "showChatFull": { "message": "Rādīt tērzēšanu pilnajā režīmā" },
-  "allSites": { "message": "Lietot visās vietnēs" },
-  "allSitesHint": { "message": "Ja izslēgts, tiek rādīts tikai straumēšanas un OTT vietnēs" },
-  "allSitesList": { "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll" },
-  "opacity": { "message": "Necaurredzamība" },
+  "popupSubtitle": {
+    "message": "Caurspīdīgs PiP pārklājums"
+  },
+  "badgeOff": {
+    "message": "Izsl."
+  },
+  "engineConnected": {
+    "message": "Dzinējs savienots"
+  },
+  "masterTitle": {
+    "message": "Iespējot GhostPiP"
+  },
+  "masterHint": {
+    "message": "Izslēdzot tiek aizvērts pārklājums un dzinējs"
+  },
+  "sectionBasic": {
+    "message": "Pamatiestatījumi"
+  },
+  "clickThrough": {
+    "message": "Klikšķu caurlaidība"
+  },
+  "autoDodge": {
+    "message": "Automātiska izvairīšanās"
+  },
+  "showChatFull": {
+    "message": "Rādīt tērzēšanu pilnajā režīmā"
+  },
+  "allSites": {
+    "message": "Lietot visās vietnēs"
+  },
+  "allSitesHint": {
+    "message": "Ja izslēgts, tiek rādīts tikai straumēšanas un OTT vietnēs"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Necaurredzamība"
+  },
   "wheelHint": {
     "message": "Varat arī ritināt virs video · klikšķu caurlaidības laikā izmantojiet $HOLD$ + ritināšanu",
-    "placeholders": { "hold": { "content": "$1" } }
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
   },
-  "toggleMute": { "message": "Ieslēgt/izslēgt skaņu" },
-  "dodgeSettings": { "message": "Izvairīšanās iestatījumi" },
-  "dodgeCorners": { "message": "Atļautie stūri" },
-  "cornerTL": { "message": "Augšā pa kreisi" },
-  "cornerTR": { "message": "Augšā pa labi" },
-  "cornerBL": { "message": "Apakšā pa kreisi" },
-  "cornerBR": { "message": "Apakšā pa labi" },
-  "dodgeCornersHint": { "message": "Izslēdziet stūrus, kuriem jāpaliek redzamiem, piemēram, spēles minikarti. Bloķētie stūri ir nepieciešami sākuma pozīcijai vai izvairīšanās virzienam." },
-  "homePosition": { "message": "Sākuma pozīcija" },
-  "dodgeAxis": { "message": "Izvairīšanās virziens" },
-  "axisFree": { "message": "Brīvs (4 virzieni)" },
-  "axisVertical": { "message": "Augšup / lejup" },
-  "axisHorizontal": { "message": "Pa kreisi / pa labi" },
-  "dodgeStyle": { "message": "Izvairīšanās stils" },
-  "styleMove": { "message": "Pārvietot uz citu stūri" },
-  "styleFade": { "message": "Izbalēt" },
-  "autoReturn": { "message": "Automātiska atgriešanās" },
-  "autoReturnHint": { "message": "Atgriežas sākuma pozīcijā, kad pele attālinās" },
-  "hotkeySettings": { "message": "Īsinājumtaustiņi un vadība" },
-  "holdKey": { "message": "Modificētājtaustiņš" },
-  "mute": { "message": "Izslēgt skaņu" },
-  "hotkeyBtnTitle": { "message": "Noklikšķiniet un nospiediet jaunu īsinājumtaustiņu" },
-  "hotkeyRecording": { "message": "Nospiediet taustiņus · Esc — atcelt" },
+  "toggleMute": {
+    "message": "Ieslēgt/izslēgt skaņu"
+  },
+  "dodgeSettings": {
+    "message": "Izvairīšanās iestatījumi"
+  },
+  "dodgeCorners": {
+    "message": "Atļautie stūri"
+  },
+  "cornerTL": {
+    "message": "Augšā pa kreisi"
+  },
+  "cornerTR": {
+    "message": "Augšā pa labi"
+  },
+  "cornerBL": {
+    "message": "Apakšā pa kreisi"
+  },
+  "cornerBR": {
+    "message": "Apakšā pa labi"
+  },
+  "dodgeCornersHint": {
+    "message": "Izslēdziet stūrus, kuriem jāpaliek redzamiem, piemēram, spēles minikarti. Bloķētie stūri ir nepieciešami sākuma pozīcijai vai izvairīšanās virzienam."
+  },
+  "homePosition": {
+    "message": "Sākuma pozīcija"
+  },
+  "dodgeAxis": {
+    "message": "Izvairīšanās virziens"
+  },
+  "axisFree": {
+    "message": "Brīvs (4 virzieni)"
+  },
+  "axisVertical": {
+    "message": "Augšup / lejup"
+  },
+  "axisHorizontal": {
+    "message": "Pa kreisi / pa labi"
+  },
+  "dodgeStyle": {
+    "message": "Izvairīšanās stils"
+  },
+  "styleMove": {
+    "message": "Pārvietot uz citu stūri"
+  },
+  "styleFade": {
+    "message": "Izbalēt"
+  },
+  "autoReturn": {
+    "message": "Automātiska atgriešanās"
+  },
+  "autoReturnHint": {
+    "message": "Atgriežas sākuma pozīcijā, kad pele attālinās"
+  },
+  "hotkeySettings": {
+    "message": "Īsinājumtaustiņi un vadība"
+  },
+  "holdKey": {
+    "message": "Modificētājtaustiņš"
+  },
+  "mute": {
+    "message": "Izslēgt skaņu"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Noklikšķiniet un nospiediet jaunu īsinājumtaustiņu"
+  },
+  "hotkeyRecording": {
+    "message": "Nospiediet taustiņus · Esc — atcelt"
+  },
   "tipHold": {
     "message": "Arī klikšķu caurlaidības laikā turiet $HOLD$, lai pārvietotu, mainītu izmēru vai ar ritenīti mainītu necaurredzamību.",
-    "placeholders": { "hold": { "content": "$1" } }
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
   },
-  "tipNativePip": { "message": "Necaurredzamība, klikšķu caurlaidība un automātiska izvairīšanās attiecas arī uz logiem, kas atvērti ar vietnes vai pārlūka PiP pogu." },
-  "resetHotkeys": { "message": "Atiestatīt noklusējumus" },
-  "bannerTitle": { "message": "Rādiet arī virs datorspēlēm" },
-  "bannerSub": { "message": "Instalēt GhostPiP Engine" },
-  "warnProtocol": { "message": "Dzinēja protokola versija nesakrīt" },
+  "tipNativePip": {
+    "message": "Necaurredzamība, klikšķu caurlaidība un automātiska izvairīšanās attiecas arī uz logiem, kas atvērti ar vietnes vai pārlūka PiP pogu."
+  },
+  "resetHotkeys": {
+    "message": "Atiestatīt noklusējumus"
+  },
+  "bannerTitle": {
+    "message": "Rādiet arī virs datorspēlēm"
+  },
+  "bannerSub": {
+    "message": "Instalēt GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "Dzinēja protokola versija nesakrīt"
+  },
   "warnHotkeyConflict": {
     "message": "Īsinājumtaustiņu konflikts: $KEYS$",
-    "placeholders": { "keys": { "content": "$1" } }
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
   },
-
-  "guideTitle": { "message": "Darba sākšana ar GhostPiP" },
-  "guideSub": { "message": "Caurspīdīgs PiP ar klikšķu caurlaidību un automātisku izvairīšanos, kas nekad neaizsedz ekrānu" },
-  "guideCheckingEngine": { "message": "Pārbauda dzinēju…" },
-  "guideChecking": { "message": "Pārbauda…" },
-  "guideEngineMissing": { "message": "Dzinējs nav instalēts" },
-  "guideStep1Title": { "message": "1. Novietojiet kursoru virs video" },
-  "guideStep1Body": { "message": "Video augšdaļā parādās divas pogas vietnēs YouTube, Twitch, CHZZK, SOOP un OTT pakalpojumos, piemēram, Netflix, Disney+ un Prime Video." },
-  "guideWebModeBody": { "message": "Peldošs logs pārlūka cilnē. Tas seko jums uz citām cilnēm. Nekas nav jāinstalē." },
-  "guideFullModeBody": { "message": "Logs, kas peld virs spēlēm un citām programmām. Necaurredzamībai, klikšķu caurlaidībai un automātiskai izvairīšanās ir nepieciešams <b>GhostPiP Engine</b>." },
-  "guideStep2Title": { "message": "2. Instalējiet GhostPiP Engine (pilnais režīms, Windows)" },
-  "guideStep2a": { "message": "Izpakojiet <code>GhostPiP-Full-Package.zip</code> (vai <code>GhostPiP-Engine-win-x64.zip</code>)." },
-  "guideStep2b": { "message": "Veiciet dubultklikšķi uz <code>engine\\install.bat</code>. Administratora tiesības nav vajadzīgas." },
-  "guideStep2c": { "message": "Gatavs, kad statuss šīs lapas augšējā labajā stūrī mainās uz <b>Dzinējs savienots</b>." },
-  "guideRetry": { "message": "Vēlreiz pārbaudīt savienojumu" },
-  "guideEngineNote": { "message": "Dzinējs tiek instalēts mapē <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, darbojas tikai tad, kad pārlūkā Chrome ir atvērts pilnais režīms, un beidz darbu, kad izslēdzat GhostPiP. Lai to noņemtu, palaidiet <code>uninstall.bat</code>." },
-  "guideAvTitle": { "message": "Ja antivīruss bloķē dzinēju" },
-  "guideAvBody": { "message": "Dzinējs rāda caurspīdīgu logu virs citiem logiem un pārsūta peles ievadi, tāpēc daži antivīrusi (piem., Avast <code>Win64:Evo-gen</code>) var kļūdaini atzīmēt neparakstītas versijas. Tas nekad neizmanto tīklu un nevāc failus." },
-  "guideAv1": { "message": "Atjaunojiet <code>GhostPiP.Engine.exe</code> no antivīrusa karantīnas." },
-  "guideAv2": { "message": "Pievienojiet mapi <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> antivīrusa izņēmumiem." },
-  "guideAv3": { "message": "Vēlreiz palaidiet <code>install.bat</code>." },
-  "guideControlsTitle": { "message": "Vadība" },
-  "guideMoveResize": { "message": "Pārvietot · mainīt izmēru" },
-  "guideMoveResizeHow": { "message": "Velciet, turot <kbd class=\"hold\">Ctrl+Alt</kbd> / velciet malu" },
-  "guideOpacityHow": { "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + peles ritenītis" },
-  "guideToggleClickThrough": { "message": "Ieslēgt/izslēgt klikšķu caurlaidību" },
-  "guideToggleDodge": { "message": "Ieslēgt/izslēgt automātisku izvairīšanos" },
-  "guideHotkeyNote": { "message": "Īsinājumtaustiņus un modificētājtaustiņu varat mainīt rīkjoslā, noklikšķinot uz GhostPiP ikonas → Īsinājumtaustiņi un vadība." },
-
-  "engineTrayTip": { "message": "GhostPiP Engine" },
-  "engineTrayActive": { "message": "GhostPiP Engine (darbojas)" },
-  "engineTrayEmergency": { "message": "Ārkārtas: izslēgt klikšķu caurlaidību" },
-  "engineTrayExit": { "message": "Iziet" }
+  "guideTitle": {
+    "message": "Darba sākšana ar GhostPiP"
+  },
+  "guideSub": {
+    "message": "Caurspīdīgs PiP ar klikšķu caurlaidību un automātisku izvairīšanos, kas nekad neaizsedz ekrānu"
+  },
+  "guideCheckingEngine": {
+    "message": "Pārbauda dzinēju…"
+  },
+  "guideChecking": {
+    "message": "Pārbauda…"
+  },
+  "guideEngineMissing": {
+    "message": "Dzinējs nav instalēts"
+  },
+  "guideStep1Title": {
+    "message": "1. Novietojiet kursoru virs video"
+  },
+  "guideStep1Body": {
+    "message": "Video augšdaļā parādās divas pogas vietnēs YouTube, Twitch, CHZZK, SOOP un OTT pakalpojumos, piemēram, Netflix, Disney+ un Prime Video."
+  },
+  "guideWebModeBody": {
+    "message": "Peldošs logs pārlūka cilnē. Tas seko jums uz citām cilnēm. Nekas nav jāinstalē."
+  },
+  "guideFullModeBody": {
+    "message": "Logs, kas peld virs spēlēm un citām programmām. Necaurredzamībai, klikšķu caurlaidībai un automātiskai izvairīšanās ir nepieciešams <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. Instalējiet GhostPiP Engine (pilnais režīms, Windows)"
+  },
+  "guideStep2a": {
+    "message": "Izpakojiet <code>GhostPiP-Full-Package.zip</code> (vai <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "Veiciet dubultklikšķi uz <code>engine\\install.bat</code>. Administratora tiesības nav vajadzīgas."
+  },
+  "guideStep2c": {
+    "message": "Gatavs, kad statuss šīs lapas augšējā labajā stūrī mainās uz <b>Dzinējs savienots</b>."
+  },
+  "guideRetry": {
+    "message": "Vēlreiz pārbaudīt savienojumu"
+  },
+  "guideEngineNote": {
+    "message": "Dzinējs tiek instalēts mapē <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, darbojas tikai tad, kad pārlūkā Chrome ir atvērts pilnais režīms, un beidz darbu, kad izslēdzat GhostPiP. Lai to noņemtu, palaidiet <code>uninstall.bat</code>."
+  },
+  "guideAvTitle": {
+    "message": "Ja antivīruss bloķē dzinēju"
+  },
+  "guideAvBody": {
+    "message": "Dzinējs rāda caurspīdīgu logu virs citiem logiem un pārsūta peles ievadi, tāpēc daži antivīrusi (piem., Avast <code>Win64:Evo-gen</code>) var kļūdaini atzīmēt neparakstītas versijas. Tas nekad neizmanto tīklu un nevāc failus."
+  },
+  "guideAv1": {
+    "message": "Atjaunojiet <code>GhostPiP.Engine.exe</code> no antivīrusa karantīnas."
+  },
+  "guideAv2": {
+    "message": "Pievienojiet mapi <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> antivīrusa izņēmumiem."
+  },
+  "guideAv3": {
+    "message": "Vēlreiz palaidiet <code>install.bat</code>."
+  },
+  "guideControlsTitle": {
+    "message": "Vadība"
+  },
+  "guideMoveResize": {
+    "message": "Pārvietot · mainīt izmēru"
+  },
+  "guideMoveResizeHow": {
+    "message": "Velciet, turot <kbd class=\"hold\">Ctrl+Alt</kbd> / velciet malu"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + peles ritenītis"
+  },
+  "guideToggleClickThrough": {
+    "message": "Ieslēgt/izslēgt klikšķu caurlaidību"
+  },
+  "guideToggleDodge": {
+    "message": "Ieslēgt/izslēgt automātisku izvairīšanos"
+  },
+  "guideHotkeyNote": {
+    "message": "Īsinājumtaustiņus un modificētājtaustiņu varat mainīt rīkjoslā, noklikšķinot uz GhostPiP ikonas → Īsinājumtaustiņi un vadība."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (darbojas)"
+  },
+  "engineTrayEmergency": {
+    "message": "Ārkārtas: izslēgt klikšķu caurlaidību"
+  },
+  "engineTrayExit": {
+    "message": "Iziet"
+  }
 }

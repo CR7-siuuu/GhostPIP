@@ -1,96 +1,312 @@
 {
-  "extName": {"message":"GhostPiP"},
-  "extDescription": {"message":"ጠቅታዎችን የሚያሳልፍ እና ከጠቋሚዎ የሚያመልጥ ግልጽ PiP። ከYouTube፣ Twitch፣ CHZZK፣ SOOP እና ሌሎችም ጋር ይሰራል።"},
-  "cmdClickThrough": {"message":"ጠቅታ ማሳለፍን ቀያይር (የመንፈስ ሁነታ)"},
-  "cmdDodge": {"message":"ብልህ ራስ-ሰር ማምለጥን ቀያይር"},
-  "cmdMute": {"message":"የቪዲዮ ትሩን ድምጸ-ከል ቀያይር"},
-  "modeWeb": {"message":"የድር ሁነታ"},
-  "modeWebTitle": {"message":"የድር ሁነታ (በአሳሽ ትር ውስጥ ተደራቢ)"},
-  "modeFull": {"message":"ሙሉ ሁነታ"},
-  "modeFullTitle": {"message":"ሙሉ ሁነታ (የዴስክቶፕ PiP መስኮት)"},
-  "chatShow": {"message":"ውይይት አሳይ"},
-  "chatHide": {"message":"ውይይት ደብቅ"},
-  "chatResizeTitle": {"message":"የውይይቱን መጠን ለመቀየር ይጎትቱ"},
-  "chatSmaller": {"message":"ትንሽ ውይይት"},
-  "chatBigger": {"message":"ትልቅ ውይይት"},
-  "skipAd": {"message":"ማስታወቂያ ዝለል ⏭"},
-  "btnReturn": {"message":"መልስ"},
-  "btnSourceTab": {"message":"ምንጭ ትር"},
-  "hudOpacity": {"message":"ግልጽ አለመሆን $PCT$%","placeholders":{"pct":{"content":"$1"}}},
-  "hudOpacityWheel": {"message":"ግልጽ አለመሆን $PCT$% (ለማስተካከል ይሸብልሉ) · $SIZE$","placeholders":{"pct":{"content":"$1"},"size":{"content":"$2"}}},
-  "popupSubtitle": {"message":"ግልጽ የPiP ተደራቢ"},
-  "badgeOff": {"message":"ጠፍቷል"},
-  "engineConnected": {"message":"ሞተሩ ተገናኝቷል"},
-  "masterTitle": {"message":"GhostPiPን አንቃ"},
-  "masterHint": {"message":"ይህን ማጥፋት ተደራቢውን እና ሞተሩን ይዘጋል"},
-  "sectionBasic": {"message":"መሠረታዊ ቅንብሮች"},
-  "clickThrough": {"message":"ጠቅታ ማሳለፍ"},
-  "autoDodge": {"message":"ራስ-ሰር ማምለጥ"},
-  "showChatFull": {"message":"በሙሉ ሁነታ ውይይት አሳይ"},
-  "allSites": {"message":"በሁሉም ጣቢያዎች ላይ ተጠቀም"},
-  "allSitesHint": {"message":"ሲጠፋ በዥረት እና በOTT ጣቢያዎች ላይ ብቻ ይታያል"},
-  "allSitesList": {"message":"YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"},
-  "opacity": {"message":"ግልጽ አለመሆን"},
-  "wheelHint": {"message":"በቪዲዮው ላይም መሸብለል ይችላሉ · ጠቅታ ማሳለፍ ሲበራ $HOLD$ + ሸብልል ይጠቀሙ","placeholders":{"hold":{"content":"$1"}}},
-  "toggleMute": {"message":"ድምጸ-ከል ቀያይር"},
-  "dodgeSettings": {"message":"የማምለጥ ቅንብሮች"},
-  "dodgeCorners": {"message":"ሊሄድባቸው የሚችሉ ጥጎች"},
-  "cornerTL": {"message":"ላይ ግራ"},
-  "cornerTR": {"message":"ላይ ቀኝ"},
-  "cornerBL": {"message":"ታች ግራ"},
-  "cornerBR": {"message":"ታች ቀኝ"},
-  "dodgeCornersHint": {"message":"እንደ የጨዋታ ትንሽ ካርታ ያሉ መታየት ያለባቸውን ጥጎች ያጥፉ። የተቆለፉ ጥጎች ለመነሻ ቦታ ወይም ለማምለጫ አቅጣጫ ያስፈልጋሉ።"},
-  "homePosition": {"message":"መነሻ ቦታ"},
-  "dodgeAxis": {"message":"የማምለጫ አቅጣጫ"},
-  "axisFree": {"message":"ነጻ (4 አቅጣጫዎች)"},
-  "axisVertical": {"message":"ላይ / ታች"},
-  "axisHorizontal": {"message":"ግራ / ቀኝ"},
-  "dodgeStyle": {"message":"የማምለጫ ዘይቤ"},
-  "styleMove": {"message":"ወደ ሌላ ጥግ ውሰድ"},
-  "styleFade": {"message":"ደብዝዝ"},
-  "autoReturn": {"message":"ራስ-ሰር መመለስ"},
-  "autoReturnHint": {"message":"መዳፊቱ ሲርቅ ወደ መነሻ ቦታው ይመለሳል"},
-  "hotkeySettings": {"message":"አቋራጭ ቁልፎች እና መቆጣጠሪያዎች"},
-  "holdKey": {"message":"ቀያሪ ቁልፍ"},
-  "mute": {"message":"ድምጸ-ከል"},
-  "hotkeyBtnTitle": {"message":"ጠቅ ያድርጉ፣ ከዚያ አዲስ አቋራጭ ይጫኑ"},
-  "hotkeyRecording": {"message":"ቁልፎችን ይጫኑ · ለመሰረዝ Esc"},
-  "tipHold": {"message":"ጠቅታ ማሳለፍ ሲበራም $HOLD$ ተጭነው በመያዝ መስኮቱን ማንቀሳቀስ፣ መጠኑን መቀየር ወይም በመዳፊት መንኮራኩር ግልጽ አለመሆንን ማስተካከል ይችላሉ።","placeholders":{"hold":{"content":"$1"}}},
-  "tipNativePip": {"message":"ግልጽ አለመሆን፣ ጠቅታ ማሳለፍ እና ራስ-ሰር ማምለጥ በጣቢያው ወይም በአሳሹ የራሱ PiP አዝራር በተከፈቱ መስኮቶች ላይም ይሰራሉ።"},
-  "resetHotkeys": {"message":"ወደ ነባሪ ዳግም አስጀምር"},
-  "bannerTitle": {"message":"በፒሲ ጨዋታዎች ላይም ያንሳፍፉ"},
-  "bannerSub": {"message":"GhostPiP Engineን ጫን"},
-  "warnProtocol": {"message":"የሞተሩ ፕሮቶኮል ስሪት አይዛመድም"},
-  "warnHotkeyConflict": {"message":"የአቋራጭ ቁልፍ ግጭት፦ $KEYS$","placeholders":{"keys":{"content":"$1"}}},
-  "guideTitle": {"message":"በGhostPiP መጀመር"},
-  "guideSub": {"message":"ማያ ገጽዎን በጭራሽ የማይጋርድ፣ ጠቅታ የሚያሳልፍ እና በራስ-ሰር የሚያመልጥ ግልጽ PiP"},
-  "guideCheckingEngine": {"message":"ሞተሩን በማረጋገጥ ላይ…"},
-  "guideChecking": {"message":"በማረጋገጥ ላይ…"},
-  "guideEngineMissing": {"message":"ሞተሩ አልተጫነም"},
-  "guideStep1Title": {"message":"1. መዳፊቱን በቪዲዮ ላይ ያንዣብቡ"},
-  "guideStep1Body": {"message":"በYouTube፣ Twitch፣ CHZZK፣ SOOP እና እንደ Netflix፣ Disney+ እና Prime Video ባሉ የOTT አገልግሎቶች ላይ በቪዲዮዎች አናት ሁለት አዝራሮች ይታያሉ።"},
-  "guideWebModeBody": {"message":"በአሳሽ ትር ውስጥ የሚንሳፈፍ መስኮት። ወደ ሌሎች ትሮችም ይከተልዎታል። ምንም መጫን አያስፈልግም።"},
-  "guideFullModeBody": {"message":"ከጨዋታዎች እና ከሌሎች ፕሮግራሞች በላይ የሚንሳፈፍ መስኮት። ግልጽ አለመሆን፣ ጠቅታ ማሳለፍ እና ራስ-ሰር ማምለጥ <b>GhostPiP Engine</b> ያስፈልጋቸዋል።"},
-  "guideStep2Title": {"message":"2. GhostPiP Engineን ይጫኑ (ሙሉ ሁነታ፣ Windows)"},
-  "guideStep2a": {"message":"<code>GhostPiP-Full-Package.zip</code> (ወይም <code>GhostPiP-Engine-win-x64.zip</code>) ከዚፕ ያውጡ።"},
-  "guideStep2b": {"message":"<code>engine\\install.bat</code> ላይ ሁለቴ ጠቅ ያድርጉ። የአስተዳዳሪ መብቶች አያስፈልጉም።"},
-  "guideStep2c": {"message":"በዚህ ገጽ ላይኛው ቀኝ ጥግ ያለው ሁኔታ ወደ <b>ሞተሩ ተገናኝቷል</b> ሲቀየር ጨርሰዋል።"},
-  "guideRetry": {"message":"ግንኙነቱን እንደገና አረጋግጥ"},
-  "guideEngineNote": {"message":"ሞተሩ በ<code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> ውስጥ ይጫናል፣ Chrome ሙሉ ሁነታን ሲከፍት ብቻ ይሰራል፣ GhostPiPን ሲያጠፉም ይዘጋል። ለማስወገድ <code>uninstall.bat</code>ን ያሂዱ።"},
-  "guideAvTitle": {"message":"ጸረ-ቫይረስዎ ሞተሩን ካገደ"},
-  "guideAvBody": {"message":"ሞተሩ ከሌሎች መስኮቶች በላይ ግልጽ መስኮት ያሳያል እና የመዳፊት ግብዓትን ያስተላልፋል፣ ስለዚህ አንዳንድ የጸረ-ቫይረስ ምርቶች (ለምሳሌ Avast <code>Win64:Evo-gen</code>) ያልተፈረሙ ስሪቶችን በስህተት ሊጠቁሙ ይችላሉ። አውታረ መረብን በጭራሽ አይጠቀምም፣ ፋይሎችንም አይሰበስብም።"},
-  "guideAv1": {"message":"<code>GhostPiP.Engine.exe</code>ን ከጸረ-ቫይረስዎ ማቆያ ወደነበረበት ይመልሱ።"},
-  "guideAv2": {"message":"የ<code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> አቃፊን ወደ ጸረ-ቫይረስዎ የማይካተቱ ዝርዝር ያክሉ።"},
-  "guideAv3": {"message":"<code>install.bat</code>ን እንደገና ያሂዱ።"},
-  "guideControlsTitle": {"message":"መቆጣጠሪያዎች"},
-  "guideMoveResize": {"message":"ማንቀሳቀስ · መጠን መቀየር"},
-  "guideMoveResizeHow": {"message":"<kbd class=\"hold\">Ctrl+Alt</kbd> ይዘው ይጎትቱ / ጠርዙን ይጎትቱ"},
-  "guideOpacityHow": {"message":"<kbd class=\"hold\">Ctrl+Alt</kbd> + የመዳፊት መንኮራኩር"},
-  "guideToggleClickThrough": {"message":"ጠቅታ ማሳለፍን ቀያይር"},
-  "guideToggleDodge": {"message":"ራስ-ሰር ማምለጥን ቀያይር"},
-  "guideHotkeyNote": {"message":"አቋራጭ ቁልፎችን እና ቀያሪ ቁልፉን ከGhostPiP የመሳሪያ አሞሌ አዶ → አቋራጭ ቁልፎች እና መቆጣጠሪያዎች ይቀይሩ።"},
-  "engineTrayTip": {"message":"GhostPiP Engine"},
-  "engineTrayActive": {"message":"GhostPiP Engine (እየሰራ ነው)"},
-  "engineTrayEmergency": {"message":"ድንገተኛ፦ ጠቅታ ማሳለፍን አጥፋ"},
-  "engineTrayExit": {"message":"ውጣ"}
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "ጠቅታዎችን የሚያሳልፍ እና ከጠቋሚዎ የሚያመልጥ ግልጽ PiP። በቀጥታ ስርጭት እና በቪዲዮ ጣቢያዎች ላይ ይሰራል።"
+  },
+  "cmdClickThrough": {
+    "message": "ጠቅታ ማሳለፍን ቀያይር (የመንፈስ ሁነታ)"
+  },
+  "cmdDodge": {
+    "message": "ብልህ ራስ-ሰር ማምለጥን ቀያይር"
+  },
+  "cmdMute": {
+    "message": "የቪዲዮ ትሩን ድምጸ-ከል ቀያይር"
+  },
+  "modeWeb": {
+    "message": "የድር ሁነታ"
+  },
+  "modeWebTitle": {
+    "message": "የድር ሁነታ (በአሳሽ ትር ውስጥ ተደራቢ)"
+  },
+  "modeFull": {
+    "message": "ሙሉ ሁነታ"
+  },
+  "modeFullTitle": {
+    "message": "ሙሉ ሁነታ (የዴስክቶፕ PiP መስኮት)"
+  },
+  "chatShow": {
+    "message": "ውይይት አሳይ"
+  },
+  "chatHide": {
+    "message": "ውይይት ደብቅ"
+  },
+  "chatResizeTitle": {
+    "message": "የውይይቱን መጠን ለመቀየር ይጎትቱ"
+  },
+  "chatSmaller": {
+    "message": "ትንሽ ውይይት"
+  },
+  "chatBigger": {
+    "message": "ትልቅ ውይይት"
+  },
+  "skipAd": {
+    "message": "ማስታወቂያ ዝለል ⏭"
+  },
+  "btnReturn": {
+    "message": "መልስ"
+  },
+  "btnSourceTab": {
+    "message": "ምንጭ ትር"
+  },
+  "hudOpacity": {
+    "message": "ግልጽ አለመሆን $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "ግልጽ አለመሆን $PCT$% (ለማስተካከል ይሸብልሉ) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "ግልጽ የPiP ተደራቢ"
+  },
+  "badgeOff": {
+    "message": "ጠፍቷል"
+  },
+  "engineConnected": {
+    "message": "ሞተሩ ተገናኝቷል"
+  },
+  "masterTitle": {
+    "message": "GhostPiPን አንቃ"
+  },
+  "masterHint": {
+    "message": "ይህን ማጥፋት ተደራቢውን እና ሞተሩን ይዘጋል"
+  },
+  "sectionBasic": {
+    "message": "መሠረታዊ ቅንብሮች"
+  },
+  "clickThrough": {
+    "message": "ጠቅታ ማሳለፍ"
+  },
+  "autoDodge": {
+    "message": "ራስ-ሰር ማምለጥ"
+  },
+  "showChatFull": {
+    "message": "በሙሉ ሁነታ ውይይት አሳይ"
+  },
+  "allSites": {
+    "message": "በሁሉም ጣቢያዎች ላይ ተጠቀም"
+  },
+  "allSitesHint": {
+    "message": "ሲጠፋ በዥረት እና በOTT ጣቢያዎች ላይ ብቻ ይታያል"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "ግልጽ አለመሆን"
+  },
+  "wheelHint": {
+    "message": "በቪዲዮው ላይም መሸብለል ይችላሉ · ጠቅታ ማሳለፍ ሲበራ $HOLD$ + ሸብልል ይጠቀሙ",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "ድምጸ-ከል ቀያይር"
+  },
+  "dodgeSettings": {
+    "message": "የማምለጥ ቅንብሮች"
+  },
+  "dodgeCorners": {
+    "message": "ሊሄድባቸው የሚችሉ ጥጎች"
+  },
+  "cornerTL": {
+    "message": "ላይ ግራ"
+  },
+  "cornerTR": {
+    "message": "ላይ ቀኝ"
+  },
+  "cornerBL": {
+    "message": "ታች ግራ"
+  },
+  "cornerBR": {
+    "message": "ታች ቀኝ"
+  },
+  "dodgeCornersHint": {
+    "message": "እንደ የጨዋታ ትንሽ ካርታ ያሉ መታየት ያለባቸውን ጥጎች ያጥፉ። የተቆለፉ ጥጎች ለመነሻ ቦታ ወይም ለማምለጫ አቅጣጫ ያስፈልጋሉ።"
+  },
+  "homePosition": {
+    "message": "መነሻ ቦታ"
+  },
+  "dodgeAxis": {
+    "message": "የማምለጫ አቅጣጫ"
+  },
+  "axisFree": {
+    "message": "ነጻ (4 አቅጣጫዎች)"
+  },
+  "axisVertical": {
+    "message": "ላይ / ታች"
+  },
+  "axisHorizontal": {
+    "message": "ግራ / ቀኝ"
+  },
+  "dodgeStyle": {
+    "message": "የማምለጫ ዘይቤ"
+  },
+  "styleMove": {
+    "message": "ወደ ሌላ ጥግ ውሰድ"
+  },
+  "styleFade": {
+    "message": "ደብዝዝ"
+  },
+  "autoReturn": {
+    "message": "ራስ-ሰር መመለስ"
+  },
+  "autoReturnHint": {
+    "message": "መዳፊቱ ሲርቅ ወደ መነሻ ቦታው ይመለሳል"
+  },
+  "hotkeySettings": {
+    "message": "አቋራጭ ቁልፎች እና መቆጣጠሪያዎች"
+  },
+  "holdKey": {
+    "message": "ቀያሪ ቁልፍ"
+  },
+  "mute": {
+    "message": "ድምጸ-ከል"
+  },
+  "hotkeyBtnTitle": {
+    "message": "ጠቅ ያድርጉ፣ ከዚያ አዲስ አቋራጭ ይጫኑ"
+  },
+  "hotkeyRecording": {
+    "message": "ቁልፎችን ይጫኑ · ለመሰረዝ Esc"
+  },
+  "tipHold": {
+    "message": "ጠቅታ ማሳለፍ ሲበራም $HOLD$ ተጭነው በመያዝ መስኮቱን ማንቀሳቀስ፣ መጠኑን መቀየር ወይም በመዳፊት መንኮራኩር ግልጽ አለመሆንን ማስተካከል ይችላሉ።",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "ግልጽ አለመሆን፣ ጠቅታ ማሳለፍ እና ራስ-ሰር ማምለጥ በጣቢያው ወይም በአሳሹ የራሱ PiP አዝራር በተከፈቱ መስኮቶች ላይም ይሰራሉ።"
+  },
+  "resetHotkeys": {
+    "message": "ወደ ነባሪ ዳግም አስጀምር"
+  },
+  "bannerTitle": {
+    "message": "በፒሲ ጨዋታዎች ላይም ያንሳፍፉ"
+  },
+  "bannerSub": {
+    "message": "GhostPiP Engineን ጫን"
+  },
+  "warnProtocol": {
+    "message": "የሞተሩ ፕሮቶኮል ስሪት አይዛመድም"
+  },
+  "warnHotkeyConflict": {
+    "message": "የአቋራጭ ቁልፍ ግጭት፦ $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "በGhostPiP መጀመር"
+  },
+  "guideSub": {
+    "message": "ማያ ገጽዎን በጭራሽ የማይጋርድ፣ ጠቅታ የሚያሳልፍ እና በራስ-ሰር የሚያመልጥ ግልጽ PiP"
+  },
+  "guideCheckingEngine": {
+    "message": "ሞተሩን በማረጋገጥ ላይ…"
+  },
+  "guideChecking": {
+    "message": "በማረጋገጥ ላይ…"
+  },
+  "guideEngineMissing": {
+    "message": "ሞተሩ አልተጫነም"
+  },
+  "guideStep1Title": {
+    "message": "1. መዳፊቱን በቪዲዮ ላይ ያንዣብቡ"
+  },
+  "guideStep1Body": {
+    "message": "በYouTube፣ Twitch፣ CHZZK፣ SOOP እና እንደ Netflix፣ Disney+ እና Prime Video ባሉ የOTT አገልግሎቶች ላይ በቪዲዮዎች አናት ሁለት አዝራሮች ይታያሉ።"
+  },
+  "guideWebModeBody": {
+    "message": "በአሳሽ ትር ውስጥ የሚንሳፈፍ መስኮት። ወደ ሌሎች ትሮችም ይከተልዎታል። ምንም መጫን አያስፈልግም።"
+  },
+  "guideFullModeBody": {
+    "message": "ከጨዋታዎች እና ከሌሎች ፕሮግራሞች በላይ የሚንሳፈፍ መስኮት። ግልጽ አለመሆን፣ ጠቅታ ማሳለፍ እና ራስ-ሰር ማምለጥ <b>GhostPiP Engine</b> ያስፈልጋቸዋል።"
+  },
+  "guideStep2Title": {
+    "message": "2. GhostPiP Engineን ይጫኑ (ሙሉ ሁነታ፣ Windows)"
+  },
+  "guideStep2a": {
+    "message": "<code>GhostPiP-Full-Package.zip</code> (ወይም <code>GhostPiP-Engine-win-x64.zip</code>) ከዚፕ ያውጡ።"
+  },
+  "guideStep2b": {
+    "message": "<code>engine\\install.bat</code> ላይ ሁለቴ ጠቅ ያድርጉ። የአስተዳዳሪ መብቶች አያስፈልጉም።"
+  },
+  "guideStep2c": {
+    "message": "በዚህ ገጽ ላይኛው ቀኝ ጥግ ያለው ሁኔታ ወደ <b>ሞተሩ ተገናኝቷል</b> ሲቀየር ጨርሰዋል።"
+  },
+  "guideRetry": {
+    "message": "ግንኙነቱን እንደገና አረጋግጥ"
+  },
+  "guideEngineNote": {
+    "message": "ሞተሩ በ<code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> ውስጥ ይጫናል፣ Chrome ሙሉ ሁነታን ሲከፍት ብቻ ይሰራል፣ GhostPiPን ሲያጠፉም ይዘጋል። ለማስወገድ <code>uninstall.bat</code>ን ያሂዱ።"
+  },
+  "guideAvTitle": {
+    "message": "ጸረ-ቫይረስዎ ሞተሩን ካገደ"
+  },
+  "guideAvBody": {
+    "message": "ሞተሩ ከሌሎች መስኮቶች በላይ ግልጽ መስኮት ያሳያል እና የመዳፊት ግብዓትን ያስተላልፋል፣ ስለዚህ አንዳንድ የጸረ-ቫይረስ ምርቶች (ለምሳሌ Avast <code>Win64:Evo-gen</code>) ያልተፈረሙ ስሪቶችን በስህተት ሊጠቁሙ ይችላሉ። አውታረ መረብን በጭራሽ አይጠቀምም፣ ፋይሎችንም አይሰበስብም።"
+  },
+  "guideAv1": {
+    "message": "<code>GhostPiP.Engine.exe</code>ን ከጸረ-ቫይረስዎ ማቆያ ወደነበረበት ይመልሱ።"
+  },
+  "guideAv2": {
+    "message": "የ<code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> አቃፊን ወደ ጸረ-ቫይረስዎ የማይካተቱ ዝርዝር ያክሉ።"
+  },
+  "guideAv3": {
+    "message": "<code>install.bat</code>ን እንደገና ያሂዱ።"
+  },
+  "guideControlsTitle": {
+    "message": "መቆጣጠሪያዎች"
+  },
+  "guideMoveResize": {
+    "message": "ማንቀሳቀስ · መጠን መቀየር"
+  },
+  "guideMoveResizeHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> ይዘው ይጎትቱ / ጠርዙን ይጎትቱ"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + የመዳፊት መንኮራኩር"
+  },
+  "guideToggleClickThrough": {
+    "message": "ጠቅታ ማሳለፍን ቀያይር"
+  },
+  "guideToggleDodge": {
+    "message": "ራስ-ሰር ማምለጥን ቀያይር"
+  },
+  "guideHotkeyNote": {
+    "message": "አቋራጭ ቁልፎችን እና ቀያሪ ቁልፉን ከGhostPiP የመሳሪያ አሞሌ አዶ → አቋራጭ ቁልፎች እና መቆጣጠሪያዎች ይቀይሩ።"
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (እየሰራ ነው)"
+  },
+  "engineTrayEmergency": {
+    "message": "ድንገተኛ፦ ጠቅታ ማሳለፍን አጥፋ"
+  },
+  "engineTrayExit": {
+    "message": "ውጣ"
+  }
 }

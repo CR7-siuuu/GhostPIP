@@ -1,96 +1,312 @@
 {
-  "extName": {"message":"GhostPiP"},
-  "extDescription": {"message":"Transparante, doorklikbare PiP die je cursor ontwijkt. Werkt met YouTube, Twitch, CHZZK, SOOP en meer."},
-  "cmdClickThrough": {"message":"Doorklikken aan/uit (Ghost-modus)"},
-  "cmdDodge": {"message":"Slim automatisch ontwijken aan/uit"},
-  "cmdMute": {"message":"Geluid van videotabblad aan/uit"},
-  "modeWeb": {"message":"Webmodus"},
-  "modeWebTitle": {"message":"Webmodus (overlay in het browsertabblad)"},
-  "modeFull": {"message":"Volledige modus"},
-  "modeFullTitle": {"message":"Volledige modus (PiP-venster op bureaublad)"},
-  "chatShow": {"message":"Chat tonen"},
-  "chatHide": {"message":"Chat verbergen"},
-  "chatResizeTitle": {"message":"Sleep om het formaat van de chat te wijzigen"},
-  "chatSmaller": {"message":"Kleinere chat"},
-  "chatBigger": {"message":"Grotere chat"},
-  "skipAd": {"message":"Advertentie overslaan ⏭"},
-  "btnReturn": {"message":"Terugzetten"},
-  "btnSourceTab": {"message":"Brontabblad"},
-  "hudOpacity": {"message":"Dekking $PCT$%","placeholders":{"pct":{"content":"$1"}}},
-  "hudOpacityWheel": {"message":"Dekking $PCT$% (scrol om aan te passen) · $SIZE$","placeholders":{"pct":{"content":"$1"},"size":{"content":"$2"}}},
-  "popupSubtitle": {"message":"Transparante PiP-overlay"},
-  "badgeOff": {"message":"Uit"},
-  "engineConnected": {"message":"Engine verbonden"},
-  "masterTitle": {"message":"GhostPiP inschakelen"},
-  "masterHint": {"message":"Uitschakelen sluit de overlay en de engine"},
-  "sectionBasic": {"message":"Basisinstellingen"},
-  "clickThrough": {"message":"Doorklikken"},
-  "autoDodge": {"message":"Automatisch ontwijken"},
-  "showChatFull": {"message":"Chat tonen in volledige modus"},
-  "allSites": {"message":"Op alle sites gebruiken"},
-  "allSitesHint": {"message":"Indien uit, verschijnt het alleen op streaming- en OTT-sites"},
-  "allSitesList": {"message":"YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"},
-  "opacity": {"message":"Dekking"},
-  "wheelHint": {"message":"Je kunt ook boven de video scrollen · tijdens doorklikken $HOLD$ + scrollen","placeholders":{"hold":{"content":"$1"}}},
-  "toggleMute": {"message":"Geluid aan/uit"},
-  "dodgeSettings": {"message":"Ontwijkinstellingen"},
-  "dodgeCorners": {"message":"Hoeken waarheen het mag bewegen"},
-  "cornerTL": {"message":"Linksboven"},
-  "cornerTR": {"message":"Rechtsboven"},
-  "cornerBL": {"message":"Linksonder"},
-  "cornerBR": {"message":"Rechtsonder"},
-  "dodgeCornersHint": {"message":"Schakel hoeken uit die zichtbaar moeten blijven, zoals een minimap in een game. Vergrendelde hoeken zijn nodig voor de beginpositie of ontwijkrichting."},
-  "homePosition": {"message":"Beginpositie"},
-  "dodgeAxis": {"message":"Ontwijkrichting"},
-  "axisFree": {"message":"Vrij (4 richtingen)"},
-  "axisVertical": {"message":"Omhoog / omlaag"},
-  "axisHorizontal": {"message":"Links / rechts"},
-  "dodgeStyle": {"message":"Ontwijkstijl"},
-  "styleMove": {"message":"Naar andere hoek verplaatsen"},
-  "styleFade": {"message":"Vervagen"},
-  "autoReturn": {"message":"Automatisch terugkeren"},
-  "autoReturnHint": {"message":"Keert terug naar de beginpositie als de muis weggaat"},
-  "hotkeySettings": {"message":"Sneltoetsen en bediening"},
-  "holdKey": {"message":"Modificatietoets"},
-  "mute": {"message":"Dempen"},
-  "hotkeyBtnTitle": {"message":"Klik en druk dan op een nieuwe sneltoets"},
-  "hotkeyRecording": {"message":"Druk op toetsen · Esc om te annuleren"},
-  "tipHold": {"message":"Houd ook tijdens doorklikken $HOLD$ ingedrukt om te verplaatsen, het formaat te wijzigen of de dekking met het scrollwiel aan te passen.","placeholders":{"hold":{"content":"$1"}}},
-  "tipNativePip": {"message":"Dekking, doorklikken en automatisch ontwijken werken ook voor vensters die zijn geopend met de eigen PiP-knop van een site of de browser."},
-  "resetHotkeys": {"message":"Standaardwaarden herstellen"},
-  "bannerTitle": {"message":"Ook over pc-games zweven"},
-  "bannerSub": {"message":"GhostPiP Engine installeren"},
-  "warnProtocol": {"message":"Protocolversie van engine komt niet overeen"},
-  "warnHotkeyConflict": {"message":"Sneltoetsconflict: $KEYS$","placeholders":{"keys":{"content":"$1"}}},
-  "guideTitle": {"message":"Aan de slag met GhostPiP"},
-  "guideSub": {"message":"Transparante, doorklikbare PiP die automatisch ontwijkt en je scherm nooit blokkeert"},
-  "guideCheckingEngine": {"message":"Engine controleren…"},
-  "guideChecking": {"message":"Controleren…"},
-  "guideEngineMissing": {"message":"Engine niet geïnstalleerd"},
-  "guideStep1Title": {"message":"1. Beweeg over een video"},
-  "guideStep1Body": {"message":"Er verschijnen twee knoppen boven aan video's op YouTube, Twitch, CHZZK, SOOP en OTT-diensten zoals Netflix, Disney+ en Prime Video."},
-  "guideWebModeBody": {"message":"Een zwevend venster in het browsertabblad. Het volgt je naar andere tabbladen. Niets te installeren."},
-  "guideFullModeBody": {"message":"Een venster dat boven games en andere programma's zweeft. Dekking, doorklikken en automatisch ontwijken vereisen <b>GhostPiP Engine</b>."},
-  "guideStep2Title": {"message":"2. GhostPiP Engine installeren (volledige modus, Windows)"},
-  "guideStep2a": {"message":"Pak <code>GhostPiP-Full-Package.zip</code> (of <code>GhostPiP-Engine-win-x64.zip</code>) uit."},
-  "guideStep2b": {"message":"Dubbelklik op <code>engine\\install.bat</code>. Geen beheerdersrechten nodig."},
-  "guideStep2c": {"message":"Je bent klaar als de status rechtsboven op deze pagina verandert in <b>Engine verbonden</b>."},
-  "guideRetry": {"message":"Verbinding opnieuw controleren"},
-  "guideEngineNote": {"message":"De engine wordt geïnstalleerd in <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, draait alleen als Chrome de volledige modus open heeft en stopt als je GhostPiP uitschakelt. Voer <code>uninstall.bat</code> uit om de engine te verwijderen."},
-  "guideAvTitle": {"message":"Als je antivirus de engine blokkeert"},
-  "guideAvBody": {"message":"De engine toont een transparant venster boven andere vensters en stuurt muisinvoer door, waardoor sommige antivirusprogramma's (bijv. Avast <code>Win64:Evo-gen</code>) niet-ondertekende builds per vergissing kunnen markeren. De engine gebruikt nooit het netwerk en verzamelt geen bestanden."},
-  "guideAv1": {"message":"Zet <code>GhostPiP.Engine.exe</code> terug uit de quarantaine van je antivirus."},
-  "guideAv2": {"message":"Voeg de map <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> toe aan de uitzonderingen van je antivirus."},
-  "guideAv3": {"message":"Voer <code>install.bat</code> opnieuw uit."},
-  "guideControlsTitle": {"message":"Bediening"},
-  "guideMoveResize": {"message":"Verplaatsen · formaat wijzigen"},
-  "guideMoveResizeHow": {"message":"Slepen met <kbd class=\"hold\">Ctrl+Alt</kbd> ingedrukt / een rand slepen"},
-  "guideOpacityHow": {"message":"<kbd class=\"hold\">Ctrl+Alt</kbd> + muiswiel"},
-  "guideToggleClickThrough": {"message":"Doorklikken aan/uit"},
-  "guideToggleDodge": {"message":"Automatisch ontwijken aan/uit"},
-  "guideHotkeyNote": {"message":"Wijzig sneltoetsen en de modificatietoets via het GhostPiP-pictogram in de werkbalk → Sneltoetsen en bediening."},
-  "engineTrayTip": {"message":"GhostPiP Engine"},
-  "engineTrayActive": {"message":"GhostPiP Engine (actief)"},
-  "engineTrayEmergency": {"message":"Noodgeval: doorklikken uitschakelen"},
-  "engineTrayExit": {"message":"Afsluiten"}
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "Transparante, doorklikbare PiP die je cursor ontwijkt. Werkt op streaming- en videosites."
+  },
+  "cmdClickThrough": {
+    "message": "Doorklikken aan/uit (Ghost-modus)"
+  },
+  "cmdDodge": {
+    "message": "Slim automatisch ontwijken aan/uit"
+  },
+  "cmdMute": {
+    "message": "Geluid van videotabblad aan/uit"
+  },
+  "modeWeb": {
+    "message": "Webmodus"
+  },
+  "modeWebTitle": {
+    "message": "Webmodus (overlay in het browsertabblad)"
+  },
+  "modeFull": {
+    "message": "Volledige modus"
+  },
+  "modeFullTitle": {
+    "message": "Volledige modus (PiP-venster op bureaublad)"
+  },
+  "chatShow": {
+    "message": "Chat tonen"
+  },
+  "chatHide": {
+    "message": "Chat verbergen"
+  },
+  "chatResizeTitle": {
+    "message": "Sleep om het formaat van de chat te wijzigen"
+  },
+  "chatSmaller": {
+    "message": "Kleinere chat"
+  },
+  "chatBigger": {
+    "message": "Grotere chat"
+  },
+  "skipAd": {
+    "message": "Advertentie overslaan ⏭"
+  },
+  "btnReturn": {
+    "message": "Terugzetten"
+  },
+  "btnSourceTab": {
+    "message": "Brontabblad"
+  },
+  "hudOpacity": {
+    "message": "Dekking $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "Dekking $PCT$% (scrol om aan te passen) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "Transparante PiP-overlay"
+  },
+  "badgeOff": {
+    "message": "Uit"
+  },
+  "engineConnected": {
+    "message": "Engine verbonden"
+  },
+  "masterTitle": {
+    "message": "GhostPiP inschakelen"
+  },
+  "masterHint": {
+    "message": "Uitschakelen sluit de overlay en de engine"
+  },
+  "sectionBasic": {
+    "message": "Basisinstellingen"
+  },
+  "clickThrough": {
+    "message": "Doorklikken"
+  },
+  "autoDodge": {
+    "message": "Automatisch ontwijken"
+  },
+  "showChatFull": {
+    "message": "Chat tonen in volledige modus"
+  },
+  "allSites": {
+    "message": "Op alle sites gebruiken"
+  },
+  "allSitesHint": {
+    "message": "Indien uit, verschijnt het alleen op streaming- en OTT-sites"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Dekking"
+  },
+  "wheelHint": {
+    "message": "Je kunt ook boven de video scrollen · tijdens doorklikken $HOLD$ + scrollen",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "Geluid aan/uit"
+  },
+  "dodgeSettings": {
+    "message": "Ontwijkinstellingen"
+  },
+  "dodgeCorners": {
+    "message": "Hoeken waarheen het mag bewegen"
+  },
+  "cornerTL": {
+    "message": "Linksboven"
+  },
+  "cornerTR": {
+    "message": "Rechtsboven"
+  },
+  "cornerBL": {
+    "message": "Linksonder"
+  },
+  "cornerBR": {
+    "message": "Rechtsonder"
+  },
+  "dodgeCornersHint": {
+    "message": "Schakel hoeken uit die zichtbaar moeten blijven, zoals een minimap in een game. Vergrendelde hoeken zijn nodig voor de beginpositie of ontwijkrichting."
+  },
+  "homePosition": {
+    "message": "Beginpositie"
+  },
+  "dodgeAxis": {
+    "message": "Ontwijkrichting"
+  },
+  "axisFree": {
+    "message": "Vrij (4 richtingen)"
+  },
+  "axisVertical": {
+    "message": "Omhoog / omlaag"
+  },
+  "axisHorizontal": {
+    "message": "Links / rechts"
+  },
+  "dodgeStyle": {
+    "message": "Ontwijkstijl"
+  },
+  "styleMove": {
+    "message": "Naar andere hoek verplaatsen"
+  },
+  "styleFade": {
+    "message": "Vervagen"
+  },
+  "autoReturn": {
+    "message": "Automatisch terugkeren"
+  },
+  "autoReturnHint": {
+    "message": "Keert terug naar de beginpositie als de muis weggaat"
+  },
+  "hotkeySettings": {
+    "message": "Sneltoetsen en bediening"
+  },
+  "holdKey": {
+    "message": "Modificatietoets"
+  },
+  "mute": {
+    "message": "Dempen"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Klik en druk dan op een nieuwe sneltoets"
+  },
+  "hotkeyRecording": {
+    "message": "Druk op toetsen · Esc om te annuleren"
+  },
+  "tipHold": {
+    "message": "Houd ook tijdens doorklikken $HOLD$ ingedrukt om te verplaatsen, het formaat te wijzigen of de dekking met het scrollwiel aan te passen.",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "Dekking, doorklikken en automatisch ontwijken werken ook voor vensters die zijn geopend met de eigen PiP-knop van een site of de browser."
+  },
+  "resetHotkeys": {
+    "message": "Standaardwaarden herstellen"
+  },
+  "bannerTitle": {
+    "message": "Ook over pc-games zweven"
+  },
+  "bannerSub": {
+    "message": "GhostPiP Engine installeren"
+  },
+  "warnProtocol": {
+    "message": "Protocolversie van engine komt niet overeen"
+  },
+  "warnHotkeyConflict": {
+    "message": "Sneltoetsconflict: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "Aan de slag met GhostPiP"
+  },
+  "guideSub": {
+    "message": "Transparante, doorklikbare PiP die automatisch ontwijkt en je scherm nooit blokkeert"
+  },
+  "guideCheckingEngine": {
+    "message": "Engine controleren…"
+  },
+  "guideChecking": {
+    "message": "Controleren…"
+  },
+  "guideEngineMissing": {
+    "message": "Engine niet geïnstalleerd"
+  },
+  "guideStep1Title": {
+    "message": "1. Beweeg over een video"
+  },
+  "guideStep1Body": {
+    "message": "Er verschijnen twee knoppen boven aan video's op YouTube, Twitch, CHZZK, SOOP en OTT-diensten zoals Netflix, Disney+ en Prime Video."
+  },
+  "guideWebModeBody": {
+    "message": "Een zwevend venster in het browsertabblad. Het volgt je naar andere tabbladen. Niets te installeren."
+  },
+  "guideFullModeBody": {
+    "message": "Een venster dat boven games en andere programma's zweeft. Dekking, doorklikken en automatisch ontwijken vereisen <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. GhostPiP Engine installeren (volledige modus, Windows)"
+  },
+  "guideStep2a": {
+    "message": "Pak <code>GhostPiP-Full-Package.zip</code> (of <code>GhostPiP-Engine-win-x64.zip</code>) uit."
+  },
+  "guideStep2b": {
+    "message": "Dubbelklik op <code>engine\\install.bat</code>. Geen beheerdersrechten nodig."
+  },
+  "guideStep2c": {
+    "message": "Je bent klaar als de status rechtsboven op deze pagina verandert in <b>Engine verbonden</b>."
+  },
+  "guideRetry": {
+    "message": "Verbinding opnieuw controleren"
+  },
+  "guideEngineNote": {
+    "message": "De engine wordt geïnstalleerd in <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, draait alleen als Chrome de volledige modus open heeft en stopt als je GhostPiP uitschakelt. Voer <code>uninstall.bat</code> uit om de engine te verwijderen."
+  },
+  "guideAvTitle": {
+    "message": "Als je antivirus de engine blokkeert"
+  },
+  "guideAvBody": {
+    "message": "De engine toont een transparant venster boven andere vensters en stuurt muisinvoer door, waardoor sommige antivirusprogramma's (bijv. Avast <code>Win64:Evo-gen</code>) niet-ondertekende builds per vergissing kunnen markeren. De engine gebruikt nooit het netwerk en verzamelt geen bestanden."
+  },
+  "guideAv1": {
+    "message": "Zet <code>GhostPiP.Engine.exe</code> terug uit de quarantaine van je antivirus."
+  },
+  "guideAv2": {
+    "message": "Voeg de map <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> toe aan de uitzonderingen van je antivirus."
+  },
+  "guideAv3": {
+    "message": "Voer <code>install.bat</code> opnieuw uit."
+  },
+  "guideControlsTitle": {
+    "message": "Bediening"
+  },
+  "guideMoveResize": {
+    "message": "Verplaatsen · formaat wijzigen"
+  },
+  "guideMoveResizeHow": {
+    "message": "Slepen met <kbd class=\"hold\">Ctrl+Alt</kbd> ingedrukt / een rand slepen"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + muiswiel"
+  },
+  "guideToggleClickThrough": {
+    "message": "Doorklikken aan/uit"
+  },
+  "guideToggleDodge": {
+    "message": "Automatisch ontwijken aan/uit"
+  },
+  "guideHotkeyNote": {
+    "message": "Wijzig sneltoetsen en de modificatietoets via het GhostPiP-pictogram in de werkbalk → Sneltoetsen en bediening."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (actief)"
+  },
+  "engineTrayEmergency": {
+    "message": "Noodgeval: doorklikken uitschakelen"
+  },
+  "engineTrayExit": {
+    "message": "Afsluiten"
+  }
 }

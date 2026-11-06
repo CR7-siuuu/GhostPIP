@@ -3,7 +3,7 @@
     "message": "GhostPiP"
   },
   "extDescription": {
-    "message": "PiP trong suốt, cho phép nhấp xuyên qua và tự né con trỏ. Hoạt động với YouTube, Twitch, CHZZK, SOOP và nhiều trang khác."
+    "message": "PiP trong suốt, cho phép nhấp xuyên qua và tự né con trỏ. Hoạt động trên các trang phát trực tiếp và video."
   },
   "cmdClickThrough": {
     "message": "Bật/tắt nhấp xuyên qua (Chế độ bóng ma)"

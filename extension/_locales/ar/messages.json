@@ -1,96 +1,312 @@
 {
-  "extName": {"message":"GhostPiP"},
-  "extDescription": {"message":"نافذة PiP شفافة تمرّر النقرات وتتفادى المؤشر. تعمل مع YouTube وTwitch وCHZZK وSOOP وغيرها."},
-  "cmdClickThrough": {"message":"تبديل تمرير النقرات (وضع الشبح)"},
-  "cmdDodge": {"message":"تبديل التفادي التلقائي الذكي"},
-  "cmdMute": {"message":"تبديل كتم صوت علامة تبويب الفيديو"},
-  "modeWeb": {"message":"وضع الويب"},
-  "modeWebTitle": {"message":"وضع الويب (طبقة داخل علامة تبويب المتصفح)"},
-  "modeFull": {"message":"الوضع الكامل"},
-  "modeFullTitle": {"message":"الوضع الكامل (نافذة PiP على سطح المكتب)"},
-  "chatShow": {"message":"إظهار الدردشة"},
-  "chatHide": {"message":"إخفاء الدردشة"},
-  "chatResizeTitle": {"message":"اسحب لتغيير حجم الدردشة"},
-  "chatSmaller": {"message":"تصغير الدردشة"},
-  "chatBigger": {"message":"تكبير الدردشة"},
-  "skipAd": {"message":"تخطي الإعلان ⏭"},
-  "btnReturn": {"message":"إرجاع"},
-  "btnSourceTab": {"message":"علامة التبويب المصدر"},
-  "hudOpacity": {"message":"العتامة $PCT$%","placeholders":{"pct":{"content":"$1"}}},
-  "hudOpacityWheel": {"message":"العتامة $PCT$% (مرّر العجلة للضبط) · $SIZE$","placeholders":{"pct":{"content":"$1"},"size":{"content":"$2"}}},
-  "popupSubtitle": {"message":"طبقة PiP شفافة"},
-  "badgeOff": {"message":"متوقف"},
-  "engineConnected": {"message":"المحرك متصل"},
-  "masterTitle": {"message":"تفعيل GhostPiP"},
-  "masterHint": {"message":"يؤدي الإيقاف إلى إغلاق الطبقة والمحرك"},
-  "sectionBasic": {"message":"الإعدادات الأساسية"},
-  "clickThrough": {"message":"تمرير النقرات"},
-  "autoDodge": {"message":"التفادي التلقائي"},
-  "showChatFull": {"message":"إظهار الدردشة في الوضع الكامل"},
-  "allSites": {"message":"الاستخدام على جميع المواقع"},
-  "allSitesHint": {"message":"عند الإيقاف، يظهر فقط على مواقع البث ومواقع OTT"},
-  "allSitesList": {"message":"YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"},
-  "opacity": {"message":"العتامة"},
-  "wheelHint": {"message":"يمكنك أيضًا التمرير فوق الفيديو · أثناء تمرير النقرات استخدم $HOLD$ + العجلة","placeholders":{"hold":{"content":"$1"}}},
-  "toggleMute": {"message":"تبديل كتم الصوت"},
-  "dodgeSettings": {"message":"إعدادات التفادي"},
-  "dodgeCorners": {"message":"الزوايا المسموح بها"},
-  "cornerTL": {"message":"أعلى اليسار"},
-  "cornerTR": {"message":"أعلى اليمين"},
-  "cornerBL": {"message":"أسفل اليسار"},
-  "cornerBR": {"message":"أسفل اليمين"},
-  "dodgeCornersHint": {"message":"أوقف الزوايا التي يجب أن تبقى مرئية، مثل الخريطة المصغّرة في لعبة. الزوايا المقفلة مطلوبة لموضع البداية أو اتجاه التفادي."},
-  "homePosition": {"message":"موضع البداية"},
-  "dodgeAxis": {"message":"اتجاه التفادي"},
-  "axisFree": {"message":"حر (4 اتجاهات)"},
-  "axisVertical": {"message":"أعلى / أسفل"},
-  "axisHorizontal": {"message":"يسار / يمين"},
-  "dodgeStyle": {"message":"نمط التفادي"},
-  "styleMove": {"message":"الانتقال إلى زاوية أخرى"},
-  "styleFade": {"message":"التلاشي"},
-  "autoReturn": {"message":"الرجوع التلقائي"},
-  "autoReturnHint": {"message":"يعود إلى موضع البداية عند ابتعاد الماوس"},
-  "hotkeySettings": {"message":"مفاتيح الاختصار والتحكم"},
-  "holdKey": {"message":"مفتاح التعديل"},
-  "mute": {"message":"كتم الصوت"},
-  "hotkeyBtnTitle": {"message":"انقر ثم اضغط اختصارًا جديدًا"},
-  "hotkeyRecording": {"message":"اضغط المفاتيح · Esc للإلغاء"},
-  "tipHold": {"message":"حتى أثناء تمرير النقرات، اضغط مع الاستمرار على $HOLD$ للتحريك أو تغيير الحجم أو ضبط العتامة بعجلة الماوس.","placeholders":{"hold":{"content":"$1"}}},
-  "tipNativePip": {"message":"تنطبق العتامة وتمرير النقرات والتفادي التلقائي أيضًا على النوافذ المفتوحة بزر PiP الخاص بالموقع أو بالمتصفح."},
-  "resetHotkeys": {"message":"استعادة الإعدادات الافتراضية"},
-  "bannerTitle": {"message":"اعرضها فوق ألعاب الكمبيوتر أيضًا"},
-  "bannerSub": {"message":"ثبّت GhostPiP Engine"},
-  "warnProtocol": {"message":"عدم تطابق إصدار بروتوكول المحرك"},
-  "warnHotkeyConflict": {"message":"تعارض في مفاتيح الاختصار: $KEYS$","placeholders":{"keys":{"content":"$1"}}},
-  "guideTitle": {"message":"بدء استخدام GhostPiP"},
-  "guideSub": {"message":"نافذة PiP شفافة تمرّر النقرات وتتفادى المؤشر تلقائيًا، فلا تحجب شاشتك أبدًا"},
-  "guideCheckingEngine": {"message":"جارٍ فحص المحرك…"},
-  "guideChecking": {"message":"جارٍ الفحص…"},
-  "guideEngineMissing": {"message":"المحرك غير مثبّت"},
-  "guideStep1Title": {"message":"1. مرّر الماوس فوق فيديو"},
-  "guideStep1Body": {"message":"يظهر زران أعلى الفيديوهات على YouTube وTwitch وCHZZK وSOOP وخدمات OTT مثل Netflix وDisney+ وPrime Video."},
-  "guideWebModeBody": {"message":"نافذة عائمة داخل علامة تبويب المتصفح. تتبعك إلى علامات التبويب الأخرى. لا حاجة إلى تثبيت أي شيء."},
-  "guideFullModeBody": {"message":"نافذة تطفو فوق الألعاب والبرامج الأخرى. تتطلب العتامة وتمرير النقرات والتفادي التلقائي <b>GhostPiP Engine</b>."},
-  "guideStep2Title": {"message":"2. ثبّت GhostPiP Engine (الوضع الكامل، Windows)"},
-  "guideStep2a": {"message":"فك ضغط <code>GhostPiP-Full-Package.zip</code> (أو <code>GhostPiP-Engine-win-x64.zip</code>)."},
-  "guideStep2b": {"message":"انقر نقرًا مزدوجًا على <code>engine\\install.bat</code>. لا حاجة إلى صلاحيات المسؤول."},
-  "guideStep2c": {"message":"يكتمل التثبيت عندما تتغير الحالة في أعلى يسار هذه الصفحة إلى <b>المحرك متصل</b>."},
-  "guideRetry": {"message":"إعادة فحص الاتصال"},
-  "guideEngineNote": {"message":"يُثبَّت المحرك في <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>، ولا يعمل إلا أثناء فتح الوضع الكامل في Chrome، ويُغلق عند إيقاف GhostPiP. لإزالته، شغّل <code>uninstall.bat</code>."},
-  "guideAvTitle": {"message":"إذا حظر برنامج مكافحة الفيروسات المحرك"},
-  "guideAvBody": {"message":"يعرض المحرك نافذة شفافة فوق النوافذ الأخرى ويمرّر إدخال الماوس، لذا قد تصنّف بعض برامج مكافحة الفيروسات (مثل Avast <code>Win64:Evo-gen</code>) الإصدارات غير الموقّعة كتهديد عن طريق الخطأ. لا يستخدم الشبكة أبدًا ولا يجمع أي ملفات."},
-  "guideAv1": {"message":"استعد <code>GhostPiP.Engine.exe</code> من الحجر الصحي لبرنامج مكافحة الفيروسات."},
-  "guideAv2": {"message":"أضف المجلد <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> إلى استثناءات برنامج مكافحة الفيروسات."},
-  "guideAv3": {"message":"شغّل <code>install.bat</code> مرة أخرى."},
-  "guideControlsTitle": {"message":"التحكم"},
-  "guideMoveResize": {"message":"التحريك · تغيير الحجم"},
-  "guideMoveResizeHow": {"message":"اسحب مع الضغط على <kbd class=\"hold\">Ctrl+Alt</kbd> / اسحب الحافة"},
-  "guideOpacityHow": {"message":"<kbd class=\"hold\">Ctrl+Alt</kbd> + عجلة الماوس"},
-  "guideToggleClickThrough": {"message":"تبديل تمرير النقرات"},
-  "guideToggleDodge": {"message":"تبديل التفادي التلقائي"},
-  "guideHotkeyNote": {"message":"غيّر مفاتيح الاختصار ومفتاح التعديل من أيقونة GhostPiP في شريط الأدوات ← مفاتيح الاختصار والتحكم."},
-  "engineTrayTip": {"message":"GhostPiP Engine"},
-  "engineTrayActive": {"message":"GhostPiP Engine (قيد التشغيل)"},
-  "engineTrayEmergency": {"message":"طوارئ: إيقاف تمرير النقرات"},
-  "engineTrayExit": {"message":"خروج"}
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "نافذة PiP شفافة تمرّر النقرات وتتفادى المؤشر. تعمل على مواقع البث المباشر والفيديو."
+  },
+  "cmdClickThrough": {
+    "message": "تبديل تمرير النقرات (وضع الشبح)"
+  },
+  "cmdDodge": {
+    "message": "تبديل التفادي التلقائي الذكي"
+  },
+  "cmdMute": {
+    "message": "تبديل كتم صوت علامة تبويب الفيديو"
+  },
+  "modeWeb": {
+    "message": "وضع الويب"
+  },
+  "modeWebTitle": {
+    "message": "وضع الويب (طبقة داخل علامة تبويب المتصفح)"
+  },
+  "modeFull": {
+    "message": "الوضع الكامل"
+  },
+  "modeFullTitle": {
+    "message": "الوضع الكامل (نافذة PiP على سطح المكتب)"
+  },
+  "chatShow": {
+    "message": "إظهار الدردشة"
+  },
+  "chatHide": {
+    "message": "إخفاء الدردشة"
+  },
+  "chatResizeTitle": {
+    "message": "اسحب لتغيير حجم الدردشة"
+  },
+  "chatSmaller": {
+    "message": "تصغير الدردشة"
+  },
+  "chatBigger": {
+    "message": "تكبير الدردشة"
+  },
+  "skipAd": {
+    "message": "تخطي الإعلان ⏭"
+  },
+  "btnReturn": {
+    "message": "إرجاع"
+  },
+  "btnSourceTab": {
+    "message": "علامة التبويب المصدر"
+  },
+  "hudOpacity": {
+    "message": "العتامة $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "العتامة $PCT$% (مرّر العجلة للضبط) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "طبقة PiP شفافة"
+  },
+  "badgeOff": {
+    "message": "متوقف"
+  },
+  "engineConnected": {
+    "message": "المحرك متصل"
+  },
+  "masterTitle": {
+    "message": "تفعيل GhostPiP"
+  },
+  "masterHint": {
+    "message": "يؤدي الإيقاف إلى إغلاق الطبقة والمحرك"
+  },
+  "sectionBasic": {
+    "message": "الإعدادات الأساسية"
+  },
+  "clickThrough": {
+    "message": "تمرير النقرات"
+  },
+  "autoDodge": {
+    "message": "التفادي التلقائي"
+  },
+  "showChatFull": {
+    "message": "إظهار الدردشة في الوضع الكامل"
+  },
+  "allSites": {
+    "message": "الاستخدام على جميع المواقع"
+  },
+  "allSitesHint": {
+    "message": "عند الإيقاف، يظهر فقط على مواقع البث ومواقع OTT"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "العتامة"
+  },
+  "wheelHint": {
+    "message": "يمكنك أيضًا التمرير فوق الفيديو · أثناء تمرير النقرات استخدم $HOLD$ + العجلة",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "تبديل كتم الصوت"
+  },
+  "dodgeSettings": {
+    "message": "إعدادات التفادي"
+  },
+  "dodgeCorners": {
+    "message": "الزوايا المسموح بها"
+  },
+  "cornerTL": {
+    "message": "أعلى اليسار"
+  },
+  "cornerTR": {
+    "message": "أعلى اليمين"
+  },
+  "cornerBL": {
+    "message": "أسفل اليسار"
+  },
+  "cornerBR": {
+    "message": "أسفل اليمين"
+  },
+  "dodgeCornersHint": {
+    "message": "أوقف الزوايا التي يجب أن تبقى مرئية، مثل الخريطة المصغّرة في لعبة. الزوايا المقفلة مطلوبة لموضع البداية أو اتجاه التفادي."
+  },
+  "homePosition": {
+    "message": "موضع البداية"
+  },
+  "dodgeAxis": {
+    "message": "اتجاه التفادي"
+  },
+  "axisFree": {
+    "message": "حر (4 اتجاهات)"
+  },
+  "axisVertical": {
+    "message": "أعلى / أسفل"
+  },
+  "axisHorizontal": {
+    "message": "يسار / يمين"
+  },
+  "dodgeStyle": {
+    "message": "نمط التفادي"
+  },
+  "styleMove": {
+    "message": "الانتقال إلى زاوية أخرى"
+  },
+  "styleFade": {
+    "message": "التلاشي"
+  },
+  "autoReturn": {
+    "message": "الرجوع التلقائي"
+  },
+  "autoReturnHint": {
+    "message": "يعود إلى موضع البداية عند ابتعاد الماوس"
+  },
+  "hotkeySettings": {
+    "message": "مفاتيح الاختصار والتحكم"
+  },
+  "holdKey": {
+    "message": "مفتاح التعديل"
+  },
+  "mute": {
+    "message": "كتم الصوت"
+  },
+  "hotkeyBtnTitle": {
+    "message": "انقر ثم اضغط اختصارًا جديدًا"
+  },
+  "hotkeyRecording": {
+    "message": "اضغط المفاتيح · Esc للإلغاء"
+  },
+  "tipHold": {
+    "message": "حتى أثناء تمرير النقرات، اضغط مع الاستمرار على $HOLD$ للتحريك أو تغيير الحجم أو ضبط العتامة بعجلة الماوس.",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "تنطبق العتامة وتمرير النقرات والتفادي التلقائي أيضًا على النوافذ المفتوحة بزر PiP الخاص بالموقع أو بالمتصفح."
+  },
+  "resetHotkeys": {
+    "message": "استعادة الإعدادات الافتراضية"
+  },
+  "bannerTitle": {
+    "message": "اعرضها فوق ألعاب الكمبيوتر أيضًا"
+  },
+  "bannerSub": {
+    "message": "ثبّت GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "عدم تطابق إصدار بروتوكول المحرك"
+  },
+  "warnHotkeyConflict": {
+    "message": "تعارض في مفاتيح الاختصار: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "بدء استخدام GhostPiP"
+  },
+  "guideSub": {
+    "message": "نافذة PiP شفافة تمرّر النقرات وتتفادى المؤشر تلقائيًا، فلا تحجب شاشتك أبدًا"
+  },
+  "guideCheckingEngine": {
+    "message": "جارٍ فحص المحرك…"
+  },
+  "guideChecking": {
+    "message": "جارٍ الفحص…"
+  },
+  "guideEngineMissing": {
+    "message": "المحرك غير مثبّت"
+  },
+  "guideStep1Title": {
+    "message": "1. مرّر الماوس فوق فيديو"
+  },
+  "guideStep1Body": {
+    "message": "يظهر زران أعلى الفيديوهات على YouTube وTwitch وCHZZK وSOOP وخدمات OTT مثل Netflix وDisney+ وPrime Video."
+  },
+  "guideWebModeBody": {
+    "message": "نافذة عائمة داخل علامة تبويب المتصفح. تتبعك إلى علامات التبويب الأخرى. لا حاجة إلى تثبيت أي شيء."
+  },
+  "guideFullModeBody": {
+    "message": "نافذة تطفو فوق الألعاب والبرامج الأخرى. تتطلب العتامة وتمرير النقرات والتفادي التلقائي <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. ثبّت GhostPiP Engine (الوضع الكامل، Windows)"
+  },
+  "guideStep2a": {
+    "message": "فك ضغط <code>GhostPiP-Full-Package.zip</code> (أو <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "انقر نقرًا مزدوجًا على <code>engine\\install.bat</code>. لا حاجة إلى صلاحيات المسؤول."
+  },
+  "guideStep2c": {
+    "message": "يكتمل التثبيت عندما تتغير الحالة في أعلى يسار هذه الصفحة إلى <b>المحرك متصل</b>."
+  },
+  "guideRetry": {
+    "message": "إعادة فحص الاتصال"
+  },
+  "guideEngineNote": {
+    "message": "يُثبَّت المحرك في <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>، ولا يعمل إلا أثناء فتح الوضع الكامل في Chrome، ويُغلق عند إيقاف GhostPiP. لإزالته، شغّل <code>uninstall.bat</code>."
+  },
+  "guideAvTitle": {
+    "message": "إذا حظر برنامج مكافحة الفيروسات المحرك"
+  },
+  "guideAvBody": {
+    "message": "يعرض المحرك نافذة شفافة فوق النوافذ الأخرى ويمرّر إدخال الماوس، لذا قد تصنّف بعض برامج مكافحة الفيروسات (مثل Avast <code>Win64:Evo-gen</code>) الإصدارات غير الموقّعة كتهديد عن طريق الخطأ. لا يستخدم الشبكة أبدًا ولا يجمع أي ملفات."
+  },
+  "guideAv1": {
+    "message": "استعد <code>GhostPiP.Engine.exe</code> من الحجر الصحي لبرنامج مكافحة الفيروسات."
+  },
+  "guideAv2": {
+    "message": "أضف المجلد <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> إلى استثناءات برنامج مكافحة الفيروسات."
+  },
+  "guideAv3": {
+    "message": "شغّل <code>install.bat</code> مرة أخرى."
+  },
+  "guideControlsTitle": {
+    "message": "التحكم"
+  },
+  "guideMoveResize": {
+    "message": "التحريك · تغيير الحجم"
+  },
+  "guideMoveResizeHow": {
+    "message": "اسحب مع الضغط على <kbd class=\"hold\">Ctrl+Alt</kbd> / اسحب الحافة"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + عجلة الماوس"
+  },
+  "guideToggleClickThrough": {
+    "message": "تبديل تمرير النقرات"
+  },
+  "guideToggleDodge": {
+    "message": "تبديل التفادي التلقائي"
+  },
+  "guideHotkeyNote": {
+    "message": "غيّر مفاتيح الاختصار ومفتاح التعديل من أيقونة GhostPiP في شريط الأدوات ← مفاتيح الاختصار والتحكم."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (قيد التشغيل)"
+  },
+  "engineTrayEmergency": {
+    "message": "طوارئ: إيقاف تمرير النقرات"
+  },
+  "engineTrayExit": {
+    "message": "خروج"
+  }
 }

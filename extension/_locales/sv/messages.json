@@ -3,7 +3,7 @@
     "message": "GhostPiP"
   },
   "extDescription": {
-    "message": "Genomskinlig PiP med klickgenomsläpp som flyttar sig undan muspekaren. Fungerar med YouTube, Twitch, CHZZK, SOOP m.fl."
+    "message": "Genomskinlig PiP med klickgenomsläpp som flyttar sig undan muspekaren. För streaming- och videosajter."
   },
   "cmdClickThrough": {
     "message": "Slå på/av klickgenomsläpp (spökläge)"

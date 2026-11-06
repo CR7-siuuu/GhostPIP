@@ -1,96 +1,312 @@
 {
-  "extName": {"message":"GhostPiP"},
-  "extDescription": {"message":"PiP transparent, cu clic prin, care evită cursorul. Funcționează cu YouTube, Twitch, CHZZK, SOOP și altele."},
-  "cmdClickThrough": {"message":"Comută clic prin (modul Ghost)"},
-  "cmdDodge": {"message":"Comută evitarea automată inteligentă"},
-  "cmdMute": {"message":"Comută sunetul filei video"},
-  "modeWeb": {"message":"Modul web"},
-  "modeWebTitle": {"message":"Modul web (suprapunere în fila browserului)"},
-  "modeFull": {"message":"Modul complet"},
-  "modeFullTitle": {"message":"Modul complet (fereastră PiP pe desktop)"},
-  "chatShow": {"message":"Afișează chatul"},
-  "chatHide": {"message":"Ascunde chatul"},
-  "chatResizeTitle": {"message":"Trage pentru a redimensiona chatul"},
-  "chatSmaller": {"message":"Chat mai mic"},
-  "chatBigger": {"message":"Chat mai mare"},
-  "skipAd": {"message":"Omite reclama ⏭"},
-  "btnReturn": {"message":"Revino"},
-  "btnSourceTab": {"message":"Fila sursă"},
-  "hudOpacity": {"message":"Opacitate $PCT$%","placeholders":{"pct":{"content":"$1"}}},
-  "hudOpacityWheel": {"message":"Opacitate $PCT$% (derulează pentru a ajusta) · $SIZE$","placeholders":{"pct":{"content":"$1"},"size":{"content":"$2"}}},
-  "popupSubtitle": {"message":"Suprapunere PiP transparentă"},
-  "badgeOff": {"message":"Oprit"},
-  "engineConnected": {"message":"Motor conectat"},
-  "masterTitle": {"message":"Activează GhostPiP"},
-  "masterHint": {"message":"Dezactivarea închide suprapunerea și motorul"},
-  "sectionBasic": {"message":"Setări de bază"},
-  "clickThrough": {"message":"Clic prin"},
-  "autoDodge": {"message":"Evitare automată"},
-  "showChatFull": {"message":"Afișează chatul în modul complet"},
-  "allSites": {"message":"Folosește pe toate site-urile"},
-  "allSitesHint": {"message":"Când este dezactivat, apare doar pe site-urile de streaming și OTT"},
-  "allSitesList": {"message":"YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"},
-  "opacity": {"message":"Opacitate"},
-  "wheelHint": {"message":"Poți derula și deasupra videoclipului · în timpul clic prin folosește $HOLD$ + derulare","placeholders":{"hold":{"content":"$1"}}},
-  "toggleMute": {"message":"Comută sunetul"},
-  "dodgeSettings": {"message":"Setări de evitare"},
-  "dodgeCorners": {"message":"Colțuri permise"},
-  "cornerTL": {"message":"Stânga sus"},
-  "cornerTR": {"message":"Dreapta sus"},
-  "cornerBL": {"message":"Stânga jos"},
-  "cornerBR": {"message":"Dreapta jos"},
-  "dodgeCornersHint": {"message":"Dezactivează colțurile care trebuie să rămână vizibile, cum ar fi minimapa unui joc. Colțurile blocate sunt necesare pentru poziția inițială sau direcția de evitare."},
-  "homePosition": {"message":"Poziție inițială"},
-  "dodgeAxis": {"message":"Direcția de evitare"},
-  "axisFree": {"message":"Liber (4 direcții)"},
-  "axisVertical": {"message":"Sus / jos"},
-  "axisHorizontal": {"message":"Stânga / dreapta"},
-  "dodgeStyle": {"message":"Stil de evitare"},
-  "styleMove": {"message":"Mută în alt colț"},
-  "styleFade": {"message":"Estompare"},
-  "autoReturn": {"message":"Revenire automată"},
-  "autoReturnHint": {"message":"Revine la poziția inițială când mouse-ul se îndepărtează"},
-  "hotkeySettings": {"message":"Taste rapide și comenzi"},
-  "holdKey": {"message":"Tastă modificatoare"},
-  "mute": {"message":"Dezactivează sunetul"},
-  "hotkeyBtnTitle": {"message":"Dă clic, apoi apasă o nouă comandă rapidă"},
-  "hotkeyRecording": {"message":"Apasă tastele · Esc pentru anulare"},
-  "tipHold": {"message":"Chiar și în timpul clic prin, ține apăsat $HOLD$ pentru a muta, a redimensiona sau a ajusta opacitatea cu rotița mouse-ului.","placeholders":{"hold":{"content":"$1"}}},
-  "tipNativePip": {"message":"Opacitatea, clic prin și evitarea automată se aplică și ferestrelor deschise cu butonul PiP propriu al unui site sau al browserului."},
-  "resetHotkeys": {"message":"Resetează la valorile prestabilite"},
-  "bannerTitle": {"message":"Plutește și peste jocurile PC"},
-  "bannerSub": {"message":"Instalează GhostPiP Engine"},
-  "warnProtocol": {"message":"Versiunea protocolului motorului nu corespunde"},
-  "warnHotkeyConflict": {"message":"Conflict de taste rapide: $KEYS$","placeholders":{"keys":{"content":"$1"}}},
-  "guideTitle": {"message":"Primii pași cu GhostPiP"},
-  "guideSub": {"message":"PiP transparent, cu clic prin și evitare automată, care nu îți blochează niciodată ecranul"},
-  "guideCheckingEngine": {"message":"Se verifică motorul…"},
-  "guideChecking": {"message":"Se verifică…"},
-  "guideEngineMissing": {"message":"Motorul nu este instalat"},
-  "guideStep1Title": {"message":"1. Treci cu mouse-ul peste un videoclip"},
-  "guideStep1Body": {"message":"Două butoane apar în partea de sus a videoclipurilor pe YouTube, Twitch, CHZZK, SOOP și servicii OTT precum Netflix, Disney+ și Prime Video."},
-  "guideWebModeBody": {"message":"O fereastră plutitoare în fila browserului. Te urmează în alte file. Nimic de instalat."},
-  "guideFullModeBody": {"message":"O fereastră care plutește peste jocuri și alte programe. Opacitatea, clic prin și evitarea automată necesită <b>GhostPiP Engine</b>."},
-  "guideStep2Title": {"message":"2. Instalează GhostPiP Engine (modul complet, Windows)"},
-  "guideStep2a": {"message":"Dezarhivează <code>GhostPiP-Full-Package.zip</code> (sau <code>GhostPiP-Engine-win-x64.zip</code>)."},
-  "guideStep2b": {"message":"Dă dublu clic pe <code>engine\\install.bat</code>. Nu sunt necesare drepturi de administrator."},
-  "guideStep2c": {"message":"Ai terminat când starea din dreapta sus a acestei pagini se schimbă în <b>Motor conectat</b>."},
-  "guideRetry": {"message":"Verifică din nou conexiunea"},
-  "guideEngineNote": {"message":"Motorul se instalează în <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, rulează doar cât timp Chrome are modul complet deschis și se închide când dezactivezi GhostPiP. Pentru a-l elimina, rulează <code>uninstall.bat</code>."},
-  "guideAvTitle": {"message":"Dacă antivirusul blochează motorul"},
-  "guideAvBody": {"message":"Motorul afișează o fereastră transparentă peste alte ferestre și transmite intrarea mouse-ului, așa că unele antivirusuri (de ex. Avast <code>Win64:Evo-gen</code>) pot semnala din greșeală versiunile nesemnate. Nu folosește niciodată rețeaua și nu colectează fișiere."},
-  "guideAv1": {"message":"Restaurează <code>GhostPiP.Engine.exe</code> din carantina antivirusului."},
-  "guideAv2": {"message":"Adaugă dosarul <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> la excepțiile antivirusului."},
-  "guideAv3": {"message":"Rulează din nou <code>install.bat</code>."},
-  "guideControlsTitle": {"message":"Comenzi"},
-  "guideMoveResize": {"message":"Mutare · redimensionare"},
-  "guideMoveResizeHow": {"message":"Trage ținând apăsat <kbd class=\"hold\">Ctrl+Alt</kbd> / trage de o margine"},
-  "guideOpacityHow": {"message":"<kbd class=\"hold\">Ctrl+Alt</kbd> + rotița mouse-ului"},
-  "guideToggleClickThrough": {"message":"Comută clic prin"},
-  "guideToggleDodge": {"message":"Comută evitarea automată"},
-  "guideHotkeyNote": {"message":"Schimbă tastele rapide și tasta modificatoare din pictograma GhostPiP din bara de instrumente → Taste rapide și comenzi."},
-  "engineTrayTip": {"message":"GhostPiP Engine"},
-  "engineTrayActive": {"message":"GhostPiP Engine (rulează)"},
-  "engineTrayEmergency": {"message":"Urgență: dezactivează clic prin"},
-  "engineTrayExit": {"message":"Ieșire"}
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "PiP transparent, cu clic prin, care evită cursorul. Funcționează pe site-uri de streaming și video."
+  },
+  "cmdClickThrough": {
+    "message": "Comută clic prin (modul Ghost)"
+  },
+  "cmdDodge": {
+    "message": "Comută evitarea automată inteligentă"
+  },
+  "cmdMute": {
+    "message": "Comută sunetul filei video"
+  },
+  "modeWeb": {
+    "message": "Modul web"
+  },
+  "modeWebTitle": {
+    "message": "Modul web (suprapunere în fila browserului)"
+  },
+  "modeFull": {
+    "message": "Modul complet"
+  },
+  "modeFullTitle": {
+    "message": "Modul complet (fereastră PiP pe desktop)"
+  },
+  "chatShow": {
+    "message": "Afișează chatul"
+  },
+  "chatHide": {
+    "message": "Ascunde chatul"
+  },
+  "chatResizeTitle": {
+    "message": "Trage pentru a redimensiona chatul"
+  },
+  "chatSmaller": {
+    "message": "Chat mai mic"
+  },
+  "chatBigger": {
+    "message": "Chat mai mare"
+  },
+  "skipAd": {
+    "message": "Omite reclama ⏭"
+  },
+  "btnReturn": {
+    "message": "Revino"
+  },
+  "btnSourceTab": {
+    "message": "Fila sursă"
+  },
+  "hudOpacity": {
+    "message": "Opacitate $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "Opacitate $PCT$% (derulează pentru a ajusta) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "Suprapunere PiP transparentă"
+  },
+  "badgeOff": {
+    "message": "Oprit"
+  },
+  "engineConnected": {
+    "message": "Motor conectat"
+  },
+  "masterTitle": {
+    "message": "Activează GhostPiP"
+  },
+  "masterHint": {
+    "message": "Dezactivarea închide suprapunerea și motorul"
+  },
+  "sectionBasic": {
+    "message": "Setări de bază"
+  },
+  "clickThrough": {
+    "message": "Clic prin"
+  },
+  "autoDodge": {
+    "message": "Evitare automată"
+  },
+  "showChatFull": {
+    "message": "Afișează chatul în modul complet"
+  },
+  "allSites": {
+    "message": "Folosește pe toate site-urile"
+  },
+  "allSitesHint": {
+    "message": "Când este dezactivat, apare doar pe site-urile de streaming și OTT"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Opacitate"
+  },
+  "wheelHint": {
+    "message": "Poți derula și deasupra videoclipului · în timpul clic prin folosește $HOLD$ + derulare",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "Comută sunetul"
+  },
+  "dodgeSettings": {
+    "message": "Setări de evitare"
+  },
+  "dodgeCorners": {
+    "message": "Colțuri permise"
+  },
+  "cornerTL": {
+    "message": "Stânga sus"
+  },
+  "cornerTR": {
+    "message": "Dreapta sus"
+  },
+  "cornerBL": {
+    "message": "Stânga jos"
+  },
+  "cornerBR": {
+    "message": "Dreapta jos"
+  },
+  "dodgeCornersHint": {
+    "message": "Dezactivează colțurile care trebuie să rămână vizibile, cum ar fi minimapa unui joc. Colțurile blocate sunt necesare pentru poziția inițială sau direcția de evitare."
+  },
+  "homePosition": {
+    "message": "Poziție inițială"
+  },
+  "dodgeAxis": {
+    "message": "Direcția de evitare"
+  },
+  "axisFree": {
+    "message": "Liber (4 direcții)"
+  },
+  "axisVertical": {
+    "message": "Sus / jos"
+  },
+  "axisHorizontal": {
+    "message": "Stânga / dreapta"
+  },
+  "dodgeStyle": {
+    "message": "Stil de evitare"
+  },
+  "styleMove": {
+    "message": "Mută în alt colț"
+  },
+  "styleFade": {
+    "message": "Estompare"
+  },
+  "autoReturn": {
+    "message": "Revenire automată"
+  },
+  "autoReturnHint": {
+    "message": "Revine la poziția inițială când mouse-ul se îndepărtează"
+  },
+  "hotkeySettings": {
+    "message": "Taste rapide și comenzi"
+  },
+  "holdKey": {
+    "message": "Tastă modificatoare"
+  },
+  "mute": {
+    "message": "Dezactivează sunetul"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Dă clic, apoi apasă o nouă comandă rapidă"
+  },
+  "hotkeyRecording": {
+    "message": "Apasă tastele · Esc pentru anulare"
+  },
+  "tipHold": {
+    "message": "Chiar și în timpul clic prin, ține apăsat $HOLD$ pentru a muta, a redimensiona sau a ajusta opacitatea cu rotița mouse-ului.",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "Opacitatea, clic prin și evitarea automată se aplică și ferestrelor deschise cu butonul PiP propriu al unui site sau al browserului."
+  },
+  "resetHotkeys": {
+    "message": "Resetează la valorile prestabilite"
+  },
+  "bannerTitle": {
+    "message": "Plutește și peste jocurile PC"
+  },
+  "bannerSub": {
+    "message": "Instalează GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "Versiunea protocolului motorului nu corespunde"
+  },
+  "warnHotkeyConflict": {
+    "message": "Conflict de taste rapide: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "Primii pași cu GhostPiP"
+  },
+  "guideSub": {
+    "message": "PiP transparent, cu clic prin și evitare automată, care nu îți blochează niciodată ecranul"
+  },
+  "guideCheckingEngine": {
+    "message": "Se verifică motorul…"
+  },
+  "guideChecking": {
+    "message": "Se verifică…"
+  },
+  "guideEngineMissing": {
+    "message": "Motorul nu este instalat"
+  },
+  "guideStep1Title": {
+    "message": "1. Treci cu mouse-ul peste un videoclip"
+  },
+  "guideStep1Body": {
+    "message": "Două butoane apar în partea de sus a videoclipurilor pe YouTube, Twitch, CHZZK, SOOP și servicii OTT precum Netflix, Disney+ și Prime Video."
+  },
+  "guideWebModeBody": {
+    "message": "O fereastră plutitoare în fila browserului. Te urmează în alte file. Nimic de instalat."
+  },
+  "guideFullModeBody": {
+    "message": "O fereastră care plutește peste jocuri și alte programe. Opacitatea, clic prin și evitarea automată necesită <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. Instalează GhostPiP Engine (modul complet, Windows)"
+  },
+  "guideStep2a": {
+    "message": "Dezarhivează <code>GhostPiP-Full-Package.zip</code> (sau <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "Dă dublu clic pe <code>engine\\install.bat</code>. Nu sunt necesare drepturi de administrator."
+  },
+  "guideStep2c": {
+    "message": "Ai terminat când starea din dreapta sus a acestei pagini se schimbă în <b>Motor conectat</b>."
+  },
+  "guideRetry": {
+    "message": "Verifică din nou conexiunea"
+  },
+  "guideEngineNote": {
+    "message": "Motorul se instalează în <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, rulează doar cât timp Chrome are modul complet deschis și se închide când dezactivezi GhostPiP. Pentru a-l elimina, rulează <code>uninstall.bat</code>."
+  },
+  "guideAvTitle": {
+    "message": "Dacă antivirusul blochează motorul"
+  },
+  "guideAvBody": {
+    "message": "Motorul afișează o fereastră transparentă peste alte ferestre și transmite intrarea mouse-ului, așa că unele antivirusuri (de ex. Avast <code>Win64:Evo-gen</code>) pot semnala din greșeală versiunile nesemnate. Nu folosește niciodată rețeaua și nu colectează fișiere."
+  },
+  "guideAv1": {
+    "message": "Restaurează <code>GhostPiP.Engine.exe</code> din carantina antivirusului."
+  },
+  "guideAv2": {
+    "message": "Adaugă dosarul <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> la excepțiile antivirusului."
+  },
+  "guideAv3": {
+    "message": "Rulează din nou <code>install.bat</code>."
+  },
+  "guideControlsTitle": {
+    "message": "Comenzi"
+  },
+  "guideMoveResize": {
+    "message": "Mutare · redimensionare"
+  },
+  "guideMoveResizeHow": {
+    "message": "Trage ținând apăsat <kbd class=\"hold\">Ctrl+Alt</kbd> / trage de o margine"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + rotița mouse-ului"
+  },
+  "guideToggleClickThrough": {
+    "message": "Comută clic prin"
+  },
+  "guideToggleDodge": {
+    "message": "Comută evitarea automată"
+  },
+  "guideHotkeyNote": {
+    "message": "Schimbă tastele rapide și tasta modificatoare din pictograma GhostPiP din bara de instrumente → Taste rapide și comenzi."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (rulează)"
+  },
+  "engineTrayEmergency": {
+    "message": "Urgență: dezactivează clic prin"
+  },
+  "engineTrayExit": {
+    "message": "Ieșire"
+  }
 }

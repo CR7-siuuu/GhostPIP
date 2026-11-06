@@ -3,7 +3,7 @@
     "message": "GhostPiP"
   },
   "extDescription": {
-    "message": "PiP โปร่งใสที่คลิกทะลุได้และหลบเคอร์เซอร์ ใช้ได้กับ YouTube, Twitch, CHZZK, SOOP และอื่นๆ"
+    "message": "PiP โปร่งใสที่คลิกทะลุได้และหลบเคอร์เซอร์ ใช้ได้กับเว็บสตรีมมิงและวิดีโอ"
   },
   "cmdClickThrough": {
     "message": "เปิด/ปิดคลิกทะลุ (โหมดผี)"

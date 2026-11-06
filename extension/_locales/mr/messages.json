@@ -1,115 +1,312 @@
 {
-  "extName": { "message": "GhostPiP" },
-  "extDescription": { "message": "कर्सरपासून बाजूला होणारा पारदर्शक, क्लिक-थ्रू PiP. YouTube, Twitch, CHZZK, SOOP आणि इतर साइटवर चालतो." },
-  "cmdClickThrough": { "message": "क्लिक-थ्रू चालू/बंद करा (घोस्ट मोड)" },
-  "cmdDodge": { "message": "स्मार्ट आपोआप बाजूला होणे चालू/बंद करा" },
-  "cmdMute": { "message": "व्हिडिओ टॅबचा म्यूट चालू/बंद करा" },
-
-  "modeWeb": { "message": "वेब मोड" },
-  "modeWebTitle": { "message": "वेब मोड (ब्राउझर टॅबमधील ओव्हरले)" },
-  "modeFull": { "message": "पूर्ण मोड" },
-  "modeFullTitle": { "message": "पूर्ण मोड (डेस्कटॉप PiP विंडो)" },
-  "chatShow": { "message": "चॅट दाखवा" },
-  "chatHide": { "message": "चॅट लपवा" },
-  "chatResizeTitle": { "message": "चॅटचा आकार बदलण्यासाठी ड्रॅग करा" },
-  "chatSmaller": { "message": "लहान चॅट" },
-  "chatBigger": { "message": "मोठी चॅट" },
-  "skipAd": { "message": "जाहिरात वगळा ⏭" },
-  "btnReturn": { "message": "परत ठेवा" },
-  "btnSourceTab": { "message": "मूळ टॅब" },
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "कर्सरपासून बाजूला होणारा पारदर्शक, क्लिक-थ्रू PiP. स्ट्रीमिंग आणि व्हिडिओ साइटवर चालतो."
+  },
+  "cmdClickThrough": {
+    "message": "क्लिक-थ्रू चालू/बंद करा (घोस्ट मोड)"
+  },
+  "cmdDodge": {
+    "message": "स्मार्ट आपोआप बाजूला होणे चालू/बंद करा"
+  },
+  "cmdMute": {
+    "message": "व्हिडिओ टॅबचा म्यूट चालू/बंद करा"
+  },
+  "modeWeb": {
+    "message": "वेब मोड"
+  },
+  "modeWebTitle": {
+    "message": "वेब मोड (ब्राउझर टॅबमधील ओव्हरले)"
+  },
+  "modeFull": {
+    "message": "पूर्ण मोड"
+  },
+  "modeFullTitle": {
+    "message": "पूर्ण मोड (डेस्कटॉप PiP विंडो)"
+  },
+  "chatShow": {
+    "message": "चॅट दाखवा"
+  },
+  "chatHide": {
+    "message": "चॅट लपवा"
+  },
+  "chatResizeTitle": {
+    "message": "चॅटचा आकार बदलण्यासाठी ड्रॅग करा"
+  },
+  "chatSmaller": {
+    "message": "लहान चॅट"
+  },
+  "chatBigger": {
+    "message": "मोठी चॅट"
+  },
+  "skipAd": {
+    "message": "जाहिरात वगळा ⏭"
+  },
+  "btnReturn": {
+    "message": "परत ठेवा"
+  },
+  "btnSourceTab": {
+    "message": "मूळ टॅब"
+  },
   "hudOpacity": {
     "message": "अपारदर्शकता $PCT$%",
-    "placeholders": { "pct": { "content": "$1" } }
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   },
   "hudOpacityWheel": {
     "message": "अपारदर्शकता $PCT$% (बदलण्यासाठी स्क्रोल करा) · $SIZE$",
-    "placeholders": { "pct": { "content": "$1" }, "size": { "content": "$2" } }
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
   },
-
-  "popupSubtitle": { "message": "पारदर्शक PiP ओव्हरले" },
-  "badgeOff": { "message": "बंद" },
-  "engineConnected": { "message": "इंजिन कनेक्ट झाले" },
-  "masterTitle": { "message": "GhostPiP सक्षम करा" },
-  "masterHint": { "message": "हे बंद केल्यास ओव्हरले आणि इंजिन बंद होतात" },
-  "sectionBasic": { "message": "मूलभूत सेटिंग्ज" },
-  "clickThrough": { "message": "क्लिक-थ्रू" },
-  "autoDodge": { "message": "आपोआप बाजूला होणे" },
-  "showChatFull": { "message": "पूर्ण मोडमध्ये चॅट दाखवा" },
-  "allSites": { "message": "सर्व साइटवर वापरा" },
-  "allSitesHint": { "message": "बंद असल्यास, फक्त स्ट्रीमिंग आणि OTT साइटवर दिसते" },
-  "allSitesList": { "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll" },
-  "opacity": { "message": "अपारदर्शकता" },
+  "popupSubtitle": {
+    "message": "पारदर्शक PiP ओव्हरले"
+  },
+  "badgeOff": {
+    "message": "बंद"
+  },
+  "engineConnected": {
+    "message": "इंजिन कनेक्ट झाले"
+  },
+  "masterTitle": {
+    "message": "GhostPiP सक्षम करा"
+  },
+  "masterHint": {
+    "message": "हे बंद केल्यास ओव्हरले आणि इंजिन बंद होतात"
+  },
+  "sectionBasic": {
+    "message": "मूलभूत सेटिंग्ज"
+  },
+  "clickThrough": {
+    "message": "क्लिक-थ्रू"
+  },
+  "autoDodge": {
+    "message": "आपोआप बाजूला होणे"
+  },
+  "showChatFull": {
+    "message": "पूर्ण मोडमध्ये चॅट दाखवा"
+  },
+  "allSites": {
+    "message": "सर्व साइटवर वापरा"
+  },
+  "allSitesHint": {
+    "message": "बंद असल्यास, फक्त स्ट्रीमिंग आणि OTT साइटवर दिसते"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "अपारदर्शकता"
+  },
   "wheelHint": {
     "message": "व्हिडिओवर स्क्रोल करूनही बदलू शकता · क्लिक-थ्रू चालू असताना $HOLD$ + स्क्रोल वापरा",
-    "placeholders": { "hold": { "content": "$1" } }
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
   },
-  "toggleMute": { "message": "म्यूट चालू/बंद" },
-  "dodgeSettings": { "message": "बाजूला होण्याची सेटिंग्ज" },
-  "dodgeCorners": { "message": "जाऊ शकणारे कोपरे" },
-  "cornerTL": { "message": "वर डावीकडे" },
-  "cornerTR": { "message": "वर उजवीकडे" },
-  "cornerBL": { "message": "खाली डावीकडे" },
-  "cornerBR": { "message": "खाली उजवीकडे" },
-  "dodgeCornersHint": { "message": "गेमच्या मिनिमॅपसारखे नेहमी दिसायला हवेत असे कोपरे बंद करा. लॉक केलेले कोपरे होम स्थान किंवा बाजूला होण्याच्या दिशेसाठी आवश्यक आहेत." },
-  "homePosition": { "message": "होम स्थान" },
-  "dodgeAxis": { "message": "बाजूला होण्याची दिशा" },
-  "axisFree": { "message": "मुक्त (4 दिशा)" },
-  "axisVertical": { "message": "वर / खाली" },
-  "axisHorizontal": { "message": "डावीकडे / उजवीकडे" },
-  "dodgeStyle": { "message": "बाजूला होण्याची शैली" },
-  "styleMove": { "message": "दुसऱ्या कोपऱ्यात हलवा" },
-  "styleFade": { "message": "फिकट होऊन लपवा" },
-  "autoReturn": { "message": "आपोआप परत येणे" },
-  "autoReturnHint": { "message": "माउस दूर गेल्यावर होम स्थानावर परत जाते" },
-  "hotkeySettings": { "message": "शॉर्टकट आणि नियंत्रणे" },
-  "holdKey": { "message": "मॉडिफायर की" },
-  "mute": { "message": "म्यूट" },
-  "hotkeyBtnTitle": { "message": "क्लिक करा, नंतर नवीन शॉर्टकट दाबा" },
-  "hotkeyRecording": { "message": "की दाबा · रद्द करण्यासाठी Esc" },
+  "toggleMute": {
+    "message": "म्यूट चालू/बंद"
+  },
+  "dodgeSettings": {
+    "message": "बाजूला होण्याची सेटिंग्ज"
+  },
+  "dodgeCorners": {
+    "message": "जाऊ शकणारे कोपरे"
+  },
+  "cornerTL": {
+    "message": "वर डावीकडे"
+  },
+  "cornerTR": {
+    "message": "वर उजवीकडे"
+  },
+  "cornerBL": {
+    "message": "खाली डावीकडे"
+  },
+  "cornerBR": {
+    "message": "खाली उजवीकडे"
+  },
+  "dodgeCornersHint": {
+    "message": "गेमच्या मिनिमॅपसारखे नेहमी दिसायला हवेत असे कोपरे बंद करा. लॉक केलेले कोपरे होम स्थान किंवा बाजूला होण्याच्या दिशेसाठी आवश्यक आहेत."
+  },
+  "homePosition": {
+    "message": "होम स्थान"
+  },
+  "dodgeAxis": {
+    "message": "बाजूला होण्याची दिशा"
+  },
+  "axisFree": {
+    "message": "मुक्त (4 दिशा)"
+  },
+  "axisVertical": {
+    "message": "वर / खाली"
+  },
+  "axisHorizontal": {
+    "message": "डावीकडे / उजवीकडे"
+  },
+  "dodgeStyle": {
+    "message": "बाजूला होण्याची शैली"
+  },
+  "styleMove": {
+    "message": "दुसऱ्या कोपऱ्यात हलवा"
+  },
+  "styleFade": {
+    "message": "फिकट होऊन लपवा"
+  },
+  "autoReturn": {
+    "message": "आपोआप परत येणे"
+  },
+  "autoReturnHint": {
+    "message": "माउस दूर गेल्यावर होम स्थानावर परत जाते"
+  },
+  "hotkeySettings": {
+    "message": "शॉर्टकट आणि नियंत्रणे"
+  },
+  "holdKey": {
+    "message": "मॉडिफायर की"
+  },
+  "mute": {
+    "message": "म्यूट"
+  },
+  "hotkeyBtnTitle": {
+    "message": "क्लिक करा, नंतर नवीन शॉर्टकट दाबा"
+  },
+  "hotkeyRecording": {
+    "message": "की दाबा · रद्द करण्यासाठी Esc"
+  },
   "tipHold": {
     "message": "क्लिक-थ्रू चालू असतानाही, हलवण्यासाठी, आकार बदलण्यासाठी किंवा स्क्रोल व्हीलने अपारदर्शकता बदलण्यासाठी $HOLD$ दाबून ठेवा.",
-    "placeholders": { "hold": { "content": "$1" } }
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
   },
-  "tipNativePip": { "message": "साइटच्या किंवा ब्राउझरच्या स्वतःच्या PiP बटणाने उघडलेल्या विंडोंनाही अपारदर्शकता, क्लिक-थ्रू आणि आपोआप बाजूला होणे लागू होते." },
-  "resetHotkeys": { "message": "डीफॉल्टवर रीसेट करा" },
-  "bannerTitle": { "message": "PC गेमवरही तरंगू द्या" },
-  "bannerSub": { "message": "GhostPiP Engine इंस्टॉल करा" },
-  "warnProtocol": { "message": "इंजिन प्रोटोकॉल आवृत्ती जुळत नाही" },
+  "tipNativePip": {
+    "message": "साइटच्या किंवा ब्राउझरच्या स्वतःच्या PiP बटणाने उघडलेल्या विंडोंनाही अपारदर्शकता, क्लिक-थ्रू आणि आपोआप बाजूला होणे लागू होते."
+  },
+  "resetHotkeys": {
+    "message": "डीफॉल्टवर रीसेट करा"
+  },
+  "bannerTitle": {
+    "message": "PC गेमवरही तरंगू द्या"
+  },
+  "bannerSub": {
+    "message": "GhostPiP Engine इंस्टॉल करा"
+  },
+  "warnProtocol": {
+    "message": "इंजिन प्रोटोकॉल आवृत्ती जुळत नाही"
+  },
   "warnHotkeyConflict": {
     "message": "शॉर्टकट संघर्ष: $KEYS$",
-    "placeholders": { "keys": { "content": "$1" } }
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
   },
-
-  "guideTitle": { "message": "GhostPiP सह सुरुवात करा" },
-  "guideSub": { "message": "तुमची स्क्रीन कधीही न अडवणारा पारदर्शक, क्लिक-थ्रू, आपोआप बाजूला होणारा PiP" },
-  "guideCheckingEngine": { "message": "इंजिन तपासत आहे…" },
-  "guideChecking": { "message": "तपासत आहे…" },
-  "guideEngineMissing": { "message": "इंजिन इंस्टॉल केलेले नाही" },
-  "guideStep1Title": { "message": "1. व्हिडिओवर कर्सर न्या" },
-  "guideStep1Body": { "message": "YouTube, Twitch, CHZZK, SOOP आणि Netflix, Disney+, Prime Video सारख्या OTT सेवांवरील व्हिडिओंच्या वरच्या भागात दोन बटणे दिसतात." },
-  "guideWebModeBody": { "message": "ब्राउझर टॅबमध्ये तरंगणारी विंडो. ती इतर टॅबमध्येही तुमच्यासोबत येते. काहीही इंस्टॉल करण्याची गरज नाही." },
-  "guideFullModeBody": { "message": "गेम आणि इतर प्रोग्रामवर तरंगणारी विंडो. अपारदर्शकता, क्लिक-थ्रू आणि आपोआप बाजूला होणे यासाठी <b>GhostPiP Engine</b> आवश्यक आहे." },
-  "guideStep2Title": { "message": "2. GhostPiP Engine इंस्टॉल करा (पूर्ण मोड, Windows)" },
-  "guideStep2a": { "message": "<code>GhostPiP-Full-Package.zip</code> (किंवा <code>GhostPiP-Engine-win-x64.zip</code>) अनझिप करा." },
-  "guideStep2b": { "message": "<code>engine\\install.bat</code> वर डबल-क्लिक करा. प्रशासक अधिकारांची गरज नाही." },
-  "guideStep2c": { "message": "या पेजच्या वर उजवीकडील स्थिती <b>इंजिन कनेक्ट झाले</b> अशी बदलली की काम पूर्ण झाले." },
-  "guideRetry": { "message": "कनेक्शन पुन्हा तपासा" },
-  "guideEngineNote": { "message": "इंजिन <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> मध्ये इंस्टॉल होते, Chrome मध्ये पूर्ण मोड उघडा असतानाच चालते आणि तुम्ही GhostPiP बंद केल्यावर बाहेर पडते. ते काढण्यासाठी <code>uninstall.bat</code> चालवा." },
-  "guideAvTitle": { "message": "तुमचा अँटीव्हायरस इंजिन ब्लॉक करत असल्यास" },
-  "guideAvBody": { "message": "इंजिन इतर विंडोंवर पारदर्शक विंडो दाखवते आणि माउस इनपुट पुढे पाठवते, त्यामुळे काही अँटीव्हायरस (उदा. Avast <code>Win64:Evo-gen</code>) स्वाक्षरी नसलेल्या बिल्डना चुकून धोकादायक ठरवू शकतात. ते कधीही नेटवर्क वापरत नाही किंवा फाइल गोळा करत नाही." },
-  "guideAv1": { "message": "अँटीव्हायरसच्या क्वारंटाइनमधून <code>GhostPiP.Engine.exe</code> पुनर्संचयित करा." },
-  "guideAv2": { "message": "<code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> फोल्डर अँटीव्हायरस अपवादांमध्ये जोडा." },
-  "guideAv3": { "message": "<code>install.bat</code> पुन्हा चालवा." },
-  "guideControlsTitle": { "message": "नियंत्रणे" },
-  "guideMoveResize": { "message": "हलवा · आकार बदला" },
-  "guideMoveResizeHow": { "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> दाबून ठेवून ड्रॅग करा / कडा ड्रॅग करा" },
-  "guideOpacityHow": { "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + माउस व्हील" },
-  "guideToggleClickThrough": { "message": "क्लिक-थ्रू चालू/बंद" },
-  "guideToggleDodge": { "message": "आपोआप बाजूला होणे चालू/बंद" },
-  "guideHotkeyNote": { "message": "टूलबारमधील GhostPiP आयकॉन → शॉर्टकट आणि नियंत्रणे येथून शॉर्टकट आणि मॉडिफायर की बदला." },
-
-  "engineTrayTip": { "message": "GhostPiP Engine" },
-  "engineTrayActive": { "message": "GhostPiP Engine (चालू आहे)" },
-  "engineTrayEmergency": { "message": "आपत्कालीन: क्लिक-थ्रू बंद करा" },
-  "engineTrayExit": { "message": "बाहेर पडा" }
+  "guideTitle": {
+    "message": "GhostPiP सह सुरुवात करा"
+  },
+  "guideSub": {
+    "message": "तुमची स्क्रीन कधीही न अडवणारा पारदर्शक, क्लिक-थ्रू, आपोआप बाजूला होणारा PiP"
+  },
+  "guideCheckingEngine": {
+    "message": "इंजिन तपासत आहे…"
+  },
+  "guideChecking": {
+    "message": "तपासत आहे…"
+  },
+  "guideEngineMissing": {
+    "message": "इंजिन इंस्टॉल केलेले नाही"
+  },
+  "guideStep1Title": {
+    "message": "1. व्हिडिओवर कर्सर न्या"
+  },
+  "guideStep1Body": {
+    "message": "YouTube, Twitch, CHZZK, SOOP आणि Netflix, Disney+, Prime Video सारख्या OTT सेवांवरील व्हिडिओंच्या वरच्या भागात दोन बटणे दिसतात."
+  },
+  "guideWebModeBody": {
+    "message": "ब्राउझर टॅबमध्ये तरंगणारी विंडो. ती इतर टॅबमध्येही तुमच्यासोबत येते. काहीही इंस्टॉल करण्याची गरज नाही."
+  },
+  "guideFullModeBody": {
+    "message": "गेम आणि इतर प्रोग्रामवर तरंगणारी विंडो. अपारदर्शकता, क्लिक-थ्रू आणि आपोआप बाजूला होणे यासाठी <b>GhostPiP Engine</b> आवश्यक आहे."
+  },
+  "guideStep2Title": {
+    "message": "2. GhostPiP Engine इंस्टॉल करा (पूर्ण मोड, Windows)"
+  },
+  "guideStep2a": {
+    "message": "<code>GhostPiP-Full-Package.zip</code> (किंवा <code>GhostPiP-Engine-win-x64.zip</code>) अनझिप करा."
+  },
+  "guideStep2b": {
+    "message": "<code>engine\\install.bat</code> वर डबल-क्लिक करा. प्रशासक अधिकारांची गरज नाही."
+  },
+  "guideStep2c": {
+    "message": "या पेजच्या वर उजवीकडील स्थिती <b>इंजिन कनेक्ट झाले</b> अशी बदलली की काम पूर्ण झाले."
+  },
+  "guideRetry": {
+    "message": "कनेक्शन पुन्हा तपासा"
+  },
+  "guideEngineNote": {
+    "message": "इंजिन <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> मध्ये इंस्टॉल होते, Chrome मध्ये पूर्ण मोड उघडा असतानाच चालते आणि तुम्ही GhostPiP बंद केल्यावर बाहेर पडते. ते काढण्यासाठी <code>uninstall.bat</code> चालवा."
+  },
+  "guideAvTitle": {
+    "message": "तुमचा अँटीव्हायरस इंजिन ब्लॉक करत असल्यास"
+  },
+  "guideAvBody": {
+    "message": "इंजिन इतर विंडोंवर पारदर्शक विंडो दाखवते आणि माउस इनपुट पुढे पाठवते, त्यामुळे काही अँटीव्हायरस (उदा. Avast <code>Win64:Evo-gen</code>) स्वाक्षरी नसलेल्या बिल्डना चुकून धोकादायक ठरवू शकतात. ते कधीही नेटवर्क वापरत नाही किंवा फाइल गोळा करत नाही."
+  },
+  "guideAv1": {
+    "message": "अँटीव्हायरसच्या क्वारंटाइनमधून <code>GhostPiP.Engine.exe</code> पुनर्संचयित करा."
+  },
+  "guideAv2": {
+    "message": "<code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> फोल्डर अँटीव्हायरस अपवादांमध्ये जोडा."
+  },
+  "guideAv3": {
+    "message": "<code>install.bat</code> पुन्हा चालवा."
+  },
+  "guideControlsTitle": {
+    "message": "नियंत्रणे"
+  },
+  "guideMoveResize": {
+    "message": "हलवा · आकार बदला"
+  },
+  "guideMoveResizeHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> दाबून ठेवून ड्रॅग करा / कडा ड्रॅग करा"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + माउस व्हील"
+  },
+  "guideToggleClickThrough": {
+    "message": "क्लिक-थ्रू चालू/बंद"
+  },
+  "guideToggleDodge": {
+    "message": "आपोआप बाजूला होणे चालू/बंद"
+  },
+  "guideHotkeyNote": {
+    "message": "टूलबारमधील GhostPiP आयकॉन → शॉर्टकट आणि नियंत्रणे येथून शॉर्टकट आणि मॉडिफायर की बदला."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (चालू आहे)"
+  },
+  "engineTrayEmergency": {
+    "message": "आपत्कालीन: क्लिक-थ्रू बंद करा"
+  },
+  "engineTrayExit": {
+    "message": "बाहेर पडा"
+  }
 }

@@ -3,7 +3,7 @@
     "message": "GhostPiP"
   },
   "extDescription": {
-    "message": "透明、可点击穿透并会自动避开光标的 PiP。支持 YouTube、Twitch、CHZZK、SOOP 等平台。"
+    "message": "透明、可点击穿透并会自动避开光标的画中画 (PiP)。支持各大直播与视频网站。"
   },
   "cmdClickThrough": {
     "message": "切换点击穿透（幽灵模式）"

@@ -1,96 +1,312 @@
 {
-  "extName": {"message":"GhostPiP"},
-  "extDescription": {"message":"Priehľadné PiP s preklikávaním, ktoré uhýba kurzoru. Funguje s YouTube, Twitch, CHZZK, SOOP a ďalšími."},
-  "cmdClickThrough": {"message":"Prepnúť preklikávanie (režim Ghost)"},
-  "cmdDodge": {"message":"Prepnúť inteligentné automatické uhýbanie"},
-  "cmdMute": {"message":"Prepnúť stlmenie karty s videom"},
-  "modeWeb": {"message":"Webový režim"},
-  "modeWebTitle": {"message":"Webový režim (prekrytie v karte prehliadača)"},
-  "modeFull": {"message":"Úplný režim"},
-  "modeFullTitle": {"message":"Úplný režim (okno PiP na ploche)"},
-  "chatShow": {"message":"Zobraziť chat"},
-  "chatHide": {"message":"Skryť chat"},
-  "chatResizeTitle": {"message":"Potiahnutím zmeníte veľkosť chatu"},
-  "chatSmaller": {"message":"Menší chat"},
-  "chatBigger": {"message":"Väčší chat"},
-  "skipAd": {"message":"Preskočiť reklamu ⏭"},
-  "btnReturn": {"message":"Vrátiť"},
-  "btnSourceTab": {"message":"Zdrojová karta"},
-  "hudOpacity": {"message":"Nepriehľadnosť $PCT$%","placeholders":{"pct":{"content":"$1"}}},
-  "hudOpacityWheel": {"message":"Nepriehľadnosť $PCT$% (upravte kolieskom) · $SIZE$","placeholders":{"pct":{"content":"$1"},"size":{"content":"$2"}}},
-  "popupSubtitle": {"message":"Priehľadné prekrytie PiP"},
-  "badgeOff": {"message":"Vyp."},
-  "engineConnected": {"message":"Jadro pripojené"},
-  "masterTitle": {"message":"Zapnúť GhostPiP"},
-  "masterHint": {"message":"Vypnutím sa zatvorí prekrytie aj jadro"},
-  "sectionBasic": {"message":"Základné nastavenia"},
-  "clickThrough": {"message":"Preklikávanie"},
-  "autoDodge": {"message":"Automatické uhýbanie"},
-  "showChatFull": {"message":"Zobraziť chat v úplnom režime"},
-  "allSites": {"message":"Používať na všetkých stránkach"},
-  "allSitesHint": {"message":"Ak je vypnuté, zobrazí sa len na streamovacích a OTT stránkach"},
-  "allSitesList": {"message":"YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"},
-  "opacity": {"message":"Nepriehľadnosť"},
-  "wheelHint": {"message":"Môžete tiež posúvať kolieskom nad videom · pri preklikávaní použite $HOLD$ + koliesko","placeholders":{"hold":{"content":"$1"}}},
-  "toggleMute": {"message":"Prepnúť stlmenie"},
-  "dodgeSettings": {"message":"Nastavenia uhýbania"},
-  "dodgeCorners": {"message":"Povolené rohy"},
-  "cornerTL": {"message":"Vľavo hore"},
-  "cornerTR": {"message":"Vpravo hore"},
-  "cornerBL": {"message":"Vľavo dole"},
-  "cornerBR": {"message":"Vpravo dole"},
-  "dodgeCornersHint": {"message":"Vypnite rohy, ktoré musia zostať viditeľné, napríklad minimapu v hre. Zamknuté rohy vyžaduje východisková poloha alebo smer uhýbania."},
-  "homePosition": {"message":"Východisková poloha"},
-  "dodgeAxis": {"message":"Smer uhýbania"},
-  "axisFree": {"message":"Voľný (4 smery)"},
-  "axisVertical": {"message":"Hore / dole"},
-  "axisHorizontal": {"message":"Vľavo / vpravo"},
-  "dodgeStyle": {"message":"Štýl uhýbania"},
-  "styleMove": {"message":"Presunúť do iného rohu"},
-  "styleFade": {"message":"Vyblednúť"},
-  "autoReturn": {"message":"Automatický návrat"},
-  "autoReturnHint": {"message":"Vráti sa do východiskovej polohy, keď sa myš vzdiali"},
-  "hotkeySettings": {"message":"Klávesové skratky a ovládanie"},
-  "holdKey": {"message":"Modifikačný kláves"},
-  "mute": {"message":"Stlmiť"},
-  "hotkeyBtnTitle": {"message":"Kliknite a potom stlačte novú skratku"},
-  "hotkeyRecording": {"message":"Stlačte klávesy · Esc na zrušenie"},
-  "tipHold": {"message":"Aj počas preklikávania podržte $HOLD$ a môžete presúvať, meniť veľkosť alebo kolieskom upravovať nepriehľadnosť.","placeholders":{"hold":{"content":"$1"}}},
-  "tipNativePip": {"message":"Nepriehľadnosť, preklikávanie a automatické uhýbanie platia aj pre okná otvorené vlastným tlačidlom PiP stránky alebo prehliadača."},
-  "resetHotkeys": {"message":"Obnoviť predvolené"},
-  "bannerTitle": {"message":"Aj nad hrami na PC"},
-  "bannerSub": {"message":"Nainštalovať GhostPiP Engine"},
-  "warnProtocol": {"message":"Nezhoda verzie protokolu jadra"},
-  "warnHotkeyConflict": {"message":"Konflikt skratiek: $KEYS$","placeholders":{"keys":{"content":"$1"}}},
-  "guideTitle": {"message":"Začíname s GhostPiP"},
-  "guideSub": {"message":"Priehľadné PiP s preklikávaním a automatickým uhýbaním, ktoré nikdy nezakryje obrazovku"},
-  "guideCheckingEngine": {"message":"Kontroluje sa jadro…"},
-  "guideChecking": {"message":"Kontroluje sa…"},
-  "guideEngineMissing": {"message":"Jadro nie je nainštalované"},
-  "guideStep1Title": {"message":"1. Prejdite kurzorom nad video"},
-  "guideStep1Body": {"message":"V hornej časti videí na YouTube, Twitch, CHZZK, SOOP a OTT službách ako Netflix, Disney+ a Prime Video sa zobrazia dve tlačidlá."},
-  "guideWebModeBody": {"message":"Plávajúce okno v karte prehliadača. Nasleduje vás do ďalších kariet. Nič netreba inštalovať."},
-  "guideFullModeBody": {"message":"Okno, ktoré pláva nad hrami a inými programami. Nepriehľadnosť, preklikávanie a automatické uhýbanie vyžadujú <b>GhostPiP Engine</b>."},
-  "guideStep2Title": {"message":"2. Nainštalujte GhostPiP Engine (úplný režim, Windows)"},
-  "guideStep2a": {"message":"Rozbaľte <code>GhostPiP-Full-Package.zip</code> (alebo <code>GhostPiP-Engine-win-x64.zip</code>)."},
-  "guideStep2b": {"message":"Dvakrát kliknite na <code>engine\\install.bat</code>. Nevyžaduje práva správcu."},
-  "guideStep2c": {"message":"Hotovo, keď sa stav vpravo hore na tejto stránke zmení na <b>Jadro pripojené</b>."},
-  "guideRetry": {"message":"Znova skontrolovať pripojenie"},
-  "guideEngineNote": {"message":"Jadro sa inštaluje do <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, beží len vtedy, keď má Chrome otvorený úplný režim, a ukončí sa po vypnutí GhostPiP. Ak ho chcete odstrániť, spustite <code>uninstall.bat</code>."},
-  "guideAvTitle": {"message":"Ak antivírus blokuje jadro"},
-  "guideAvBody": {"message":"Jadro zobrazuje priehľadné okno nad inými oknami a preposiela vstup myši, preto niektoré antivírusy (napr. Avast <code>Win64:Evo-gen</code>) môžu omylom označiť nepodpísané zostavy. Nikdy nepoužíva sieť ani nezhromažďuje súbory."},
-  "guideAv1": {"message":"Obnovte <code>GhostPiP.Engine.exe</code> z karantény antivírusu."},
-  "guideAv2": {"message":"Pridajte priečinok <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> do výnimiek antivírusu."},
-  "guideAv3": {"message":"Znova spustite <code>install.bat</code>."},
-  "guideControlsTitle": {"message":"Ovládanie"},
-  "guideMoveResize": {"message":"Presun · zmena veľkosti"},
-  "guideMoveResizeHow": {"message":"Ťahajte s podržaným <kbd class=\"hold\">Ctrl+Alt</kbd> / ťahajte za okraj"},
-  "guideOpacityHow": {"message":"<kbd class=\"hold\">Ctrl+Alt</kbd> + koliesko myši"},
-  "guideToggleClickThrough": {"message":"Prepnúť preklikávanie"},
-  "guideToggleDodge": {"message":"Prepnúť automatické uhýbanie"},
-  "guideHotkeyNote": {"message":"Klávesové skratky a modifikačný kláves zmeníte cez ikonu GhostPiP na paneli nástrojov → Klávesové skratky a ovládanie."},
-  "engineTrayTip": {"message":"GhostPiP Engine"},
-  "engineTrayActive": {"message":"GhostPiP Engine (spustené)"},
-  "engineTrayEmergency": {"message":"Núdzovo: vypnúť preklikávanie"},
-  "engineTrayExit": {"message":"Ukončiť"}
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "Priehľadné PiP s preklikávaním, ktoré uhýba kurzoru. Funguje na streamovacích a video stránkach."
+  },
+  "cmdClickThrough": {
+    "message": "Prepnúť preklikávanie (režim Ghost)"
+  },
+  "cmdDodge": {
+    "message": "Prepnúť inteligentné automatické uhýbanie"
+  },
+  "cmdMute": {
+    "message": "Prepnúť stlmenie karty s videom"
+  },
+  "modeWeb": {
+    "message": "Webový režim"
+  },
+  "modeWebTitle": {
+    "message": "Webový režim (prekrytie v karte prehliadača)"
+  },
+  "modeFull": {
+    "message": "Úplný režim"
+  },
+  "modeFullTitle": {
+    "message": "Úplný režim (okno PiP na ploche)"
+  },
+  "chatShow": {
+    "message": "Zobraziť chat"
+  },
+  "chatHide": {
+    "message": "Skryť chat"
+  },
+  "chatResizeTitle": {
+    "message": "Potiahnutím zmeníte veľkosť chatu"
+  },
+  "chatSmaller": {
+    "message": "Menší chat"
+  },
+  "chatBigger": {
+    "message": "Väčší chat"
+  },
+  "skipAd": {
+    "message": "Preskočiť reklamu ⏭"
+  },
+  "btnReturn": {
+    "message": "Vrátiť"
+  },
+  "btnSourceTab": {
+    "message": "Zdrojová karta"
+  },
+  "hudOpacity": {
+    "message": "Nepriehľadnosť $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "Nepriehľadnosť $PCT$% (upravte kolieskom) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "Priehľadné prekrytie PiP"
+  },
+  "badgeOff": {
+    "message": "Vyp."
+  },
+  "engineConnected": {
+    "message": "Jadro pripojené"
+  },
+  "masterTitle": {
+    "message": "Zapnúť GhostPiP"
+  },
+  "masterHint": {
+    "message": "Vypnutím sa zatvorí prekrytie aj jadro"
+  },
+  "sectionBasic": {
+    "message": "Základné nastavenia"
+  },
+  "clickThrough": {
+    "message": "Preklikávanie"
+  },
+  "autoDodge": {
+    "message": "Automatické uhýbanie"
+  },
+  "showChatFull": {
+    "message": "Zobraziť chat v úplnom režime"
+  },
+  "allSites": {
+    "message": "Používať na všetkých stránkach"
+  },
+  "allSitesHint": {
+    "message": "Ak je vypnuté, zobrazí sa len na streamovacích a OTT stránkach"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Nepriehľadnosť"
+  },
+  "wheelHint": {
+    "message": "Môžete tiež posúvať kolieskom nad videom · pri preklikávaní použite $HOLD$ + koliesko",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "Prepnúť stlmenie"
+  },
+  "dodgeSettings": {
+    "message": "Nastavenia uhýbania"
+  },
+  "dodgeCorners": {
+    "message": "Povolené rohy"
+  },
+  "cornerTL": {
+    "message": "Vľavo hore"
+  },
+  "cornerTR": {
+    "message": "Vpravo hore"
+  },
+  "cornerBL": {
+    "message": "Vľavo dole"
+  },
+  "cornerBR": {
+    "message": "Vpravo dole"
+  },
+  "dodgeCornersHint": {
+    "message": "Vypnite rohy, ktoré musia zostať viditeľné, napríklad minimapu v hre. Zamknuté rohy vyžaduje východisková poloha alebo smer uhýbania."
+  },
+  "homePosition": {
+    "message": "Východisková poloha"
+  },
+  "dodgeAxis": {
+    "message": "Smer uhýbania"
+  },
+  "axisFree": {
+    "message": "Voľný (4 smery)"
+  },
+  "axisVertical": {
+    "message": "Hore / dole"
+  },
+  "axisHorizontal": {
+    "message": "Vľavo / vpravo"
+  },
+  "dodgeStyle": {
+    "message": "Štýl uhýbania"
+  },
+  "styleMove": {
+    "message": "Presunúť do iného rohu"
+  },
+  "styleFade": {
+    "message": "Vyblednúť"
+  },
+  "autoReturn": {
+    "message": "Automatický návrat"
+  },
+  "autoReturnHint": {
+    "message": "Vráti sa do východiskovej polohy, keď sa myš vzdiali"
+  },
+  "hotkeySettings": {
+    "message": "Klávesové skratky a ovládanie"
+  },
+  "holdKey": {
+    "message": "Modifikačný kláves"
+  },
+  "mute": {
+    "message": "Stlmiť"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Kliknite a potom stlačte novú skratku"
+  },
+  "hotkeyRecording": {
+    "message": "Stlačte klávesy · Esc na zrušenie"
+  },
+  "tipHold": {
+    "message": "Aj počas preklikávania podržte $HOLD$ a môžete presúvať, meniť veľkosť alebo kolieskom upravovať nepriehľadnosť.",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "Nepriehľadnosť, preklikávanie a automatické uhýbanie platia aj pre okná otvorené vlastným tlačidlom PiP stránky alebo prehliadača."
+  },
+  "resetHotkeys": {
+    "message": "Obnoviť predvolené"
+  },
+  "bannerTitle": {
+    "message": "Aj nad hrami na PC"
+  },
+  "bannerSub": {
+    "message": "Nainštalovať GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "Nezhoda verzie protokolu jadra"
+  },
+  "warnHotkeyConflict": {
+    "message": "Konflikt skratiek: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "Začíname s GhostPiP"
+  },
+  "guideSub": {
+    "message": "Priehľadné PiP s preklikávaním a automatickým uhýbaním, ktoré nikdy nezakryje obrazovku"
+  },
+  "guideCheckingEngine": {
+    "message": "Kontroluje sa jadro…"
+  },
+  "guideChecking": {
+    "message": "Kontroluje sa…"
+  },
+  "guideEngineMissing": {
+    "message": "Jadro nie je nainštalované"
+  },
+  "guideStep1Title": {
+    "message": "1. Prejdite kurzorom nad video"
+  },
+  "guideStep1Body": {
+    "message": "V hornej časti videí na YouTube, Twitch, CHZZK, SOOP a OTT službách ako Netflix, Disney+ a Prime Video sa zobrazia dve tlačidlá."
+  },
+  "guideWebModeBody": {
+    "message": "Plávajúce okno v karte prehliadača. Nasleduje vás do ďalších kariet. Nič netreba inštalovať."
+  },
+  "guideFullModeBody": {
+    "message": "Okno, ktoré pláva nad hrami a inými programami. Nepriehľadnosť, preklikávanie a automatické uhýbanie vyžadujú <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. Nainštalujte GhostPiP Engine (úplný režim, Windows)"
+  },
+  "guideStep2a": {
+    "message": "Rozbaľte <code>GhostPiP-Full-Package.zip</code> (alebo <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "Dvakrát kliknite na <code>engine\\install.bat</code>. Nevyžaduje práva správcu."
+  },
+  "guideStep2c": {
+    "message": "Hotovo, keď sa stav vpravo hore na tejto stránke zmení na <b>Jadro pripojené</b>."
+  },
+  "guideRetry": {
+    "message": "Znova skontrolovať pripojenie"
+  },
+  "guideEngineNote": {
+    "message": "Jadro sa inštaluje do <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, beží len vtedy, keď má Chrome otvorený úplný režim, a ukončí sa po vypnutí GhostPiP. Ak ho chcete odstrániť, spustite <code>uninstall.bat</code>."
+  },
+  "guideAvTitle": {
+    "message": "Ak antivírus blokuje jadro"
+  },
+  "guideAvBody": {
+    "message": "Jadro zobrazuje priehľadné okno nad inými oknami a preposiela vstup myši, preto niektoré antivírusy (napr. Avast <code>Win64:Evo-gen</code>) môžu omylom označiť nepodpísané zostavy. Nikdy nepoužíva sieť ani nezhromažďuje súbory."
+  },
+  "guideAv1": {
+    "message": "Obnovte <code>GhostPiP.Engine.exe</code> z karantény antivírusu."
+  },
+  "guideAv2": {
+    "message": "Pridajte priečinok <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> do výnimiek antivírusu."
+  },
+  "guideAv3": {
+    "message": "Znova spustite <code>install.bat</code>."
+  },
+  "guideControlsTitle": {
+    "message": "Ovládanie"
+  },
+  "guideMoveResize": {
+    "message": "Presun · zmena veľkosti"
+  },
+  "guideMoveResizeHow": {
+    "message": "Ťahajte s podržaným <kbd class=\"hold\">Ctrl+Alt</kbd> / ťahajte za okraj"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + koliesko myši"
+  },
+  "guideToggleClickThrough": {
+    "message": "Prepnúť preklikávanie"
+  },
+  "guideToggleDodge": {
+    "message": "Prepnúť automatické uhýbanie"
+  },
+  "guideHotkeyNote": {
+    "message": "Klávesové skratky a modifikačný kláves zmeníte cez ikonu GhostPiP na paneli nástrojov → Klávesové skratky a ovládanie."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (spustené)"
+  },
+  "engineTrayEmergency": {
+    "message": "Núdzovo: vypnúť preklikávanie"
+  },
+  "engineTrayExit": {
+    "message": "Ukončiť"
+  }
 }

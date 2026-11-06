@@ -49,6 +49,9 @@ for (const loc of STORE_LOCALES) {
   }
   for (const key of Object.keys(msgs)) if (!(key in master)) errors.push(`${loc}.${key}: not in en`);
   if ([...msgs.extDescription.message].length > 132) errors.push(`${loc}.extDescription: over 132 characters`);
+  if (/youtube|twitch|chzzk|soop|afreeca|netflix|disney|prime video|coupang|tving|wavve|watcha|laftel|hulu|paramount|peacock|crunchyroll|유튜브|치지직|트위치|넷플릭스/i.test(msgs.extDescription.message)) {
+    errors.push(`${loc}.extDescription: must not mention specific third-party platform names`);
+  }
   if (msgs.extName.message !== "GhostPiP") errors.push(`${loc}.extName: must stay "GhostPiP"`);
 }
 

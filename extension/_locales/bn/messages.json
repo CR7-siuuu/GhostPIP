@@ -1,96 +1,312 @@
 {
-  "extName": {"message":"GhostPiP"},
-  "extDescription": {"message":"স্বচ্ছ PiP যা ক্লিক পার হতে দেয় এবং কার্সর থেকে সরে যায়। YouTube, Twitch, CHZZK, SOOP ও আরও অনেক সাইটে চলে।"},
-  "cmdClickThrough": {"message":"ক্লিক-থ্রু চালু/বন্ধ (ঘোস্ট মোড)"},
-  "cmdDodge": {"message":"স্মার্ট স্বয়ংক্রিয় সরে যাওয়া চালু/বন্ধ"},
-  "cmdMute": {"message":"ভিডিও ট্যাবের শব্দ বন্ধ/চালু"},
-  "modeWeb": {"message":"ওয়েব মোড"},
-  "modeWebTitle": {"message":"ওয়েব মোড (ব্রাউজার ট্যাবের ভেতরে ওভারলে)"},
-  "modeFull": {"message":"ফুল মোড"},
-  "modeFullTitle": {"message":"ফুল মোড (ডেস্কটপ PiP উইন্ডো)"},
-  "chatShow": {"message":"চ্যাট দেখান"},
-  "chatHide": {"message":"চ্যাট লুকান"},
-  "chatResizeTitle": {"message":"চ্যাটের আকার বদলাতে টেনে আনুন"},
-  "chatSmaller": {"message":"ছোট চ্যাট"},
-  "chatBigger": {"message":"বড় চ্যাট"},
-  "skipAd": {"message":"বিজ্ঞাপন এড়িয়ে যান ⏭"},
-  "btnReturn": {"message":"ফেরত"},
-  "btnSourceTab": {"message":"উৎস ট্যাব"},
-  "hudOpacity": {"message":"অস্বচ্ছতা $PCT$%","placeholders":{"pct":{"content":"$1"}}},
-  "hudOpacityWheel": {"message":"অস্বচ্ছতা $PCT$% (সামঞ্জস্য করতে স্ক্রল করুন) · $SIZE$","placeholders":{"pct":{"content":"$1"},"size":{"content":"$2"}}},
-  "popupSubtitle": {"message":"স্বচ্ছ PiP ওভারলে"},
-  "badgeOff": {"message":"বন্ধ"},
-  "engineConnected": {"message":"ইঞ্জিন সংযুক্ত"},
-  "masterTitle": {"message":"GhostPiP চালু করুন"},
-  "masterHint": {"message":"বন্ধ করলে ওভারলে ও ইঞ্জিন বন্ধ হয়ে যায়"},
-  "sectionBasic": {"message":"মৌলিক সেটিংস"},
-  "clickThrough": {"message":"ক্লিক-থ্রু"},
-  "autoDodge": {"message":"স্বয়ংক্রিয় সরে যাওয়া"},
-  "showChatFull": {"message":"ফুল মোডে চ্যাট দেখান"},
-  "allSites": {"message":"সব সাইটে ব্যবহার করুন"},
-  "allSitesHint": {"message":"বন্ধ থাকলে শুধু স্ট্রিমিং ও OTT সাইটে দেখা যায়"},
-  "allSitesList": {"message":"YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"},
-  "opacity": {"message":"অস্বচ্ছতা"},
-  "wheelHint": {"message":"ভিডিওর ওপরেও স্ক্রল করতে পারেন · ক্লিক-থ্রু চালু থাকলে $HOLD$ + স্ক্রল ব্যবহার করুন","placeholders":{"hold":{"content":"$1"}}},
-  "toggleMute": {"message":"শব্দ বন্ধ/চালু"},
-  "dodgeSettings": {"message":"সরে যাওয়ার সেটিংস"},
-  "dodgeCorners": {"message":"যে কোণে সরতে পারবে"},
-  "cornerTL": {"message":"উপরে বামে"},
-  "cornerTR": {"message":"উপরে ডানে"},
-  "cornerBL": {"message":"নিচে বামে"},
-  "cornerBR": {"message":"নিচে ডানে"},
-  "dodgeCornersHint": {"message":"যে কোণগুলো দৃশ্যমান রাখতে হবে, যেমন গেমের মিনিম্যাপ, সেগুলো বন্ধ করুন। লক করা কোণগুলো হোম অবস্থান বা সরে যাওয়ার দিকের জন্য প্রয়োজন।"},
-  "homePosition": {"message":"হোম অবস্থান"},
-  "dodgeAxis": {"message":"সরে যাওয়ার দিক"},
-  "axisFree": {"message":"মুক্ত (৪ দিক)"},
-  "axisVertical": {"message":"উপরে / নিচে"},
-  "axisHorizontal": {"message":"বামে / ডানে"},
-  "dodgeStyle": {"message":"সরে যাওয়ার ধরন"},
-  "styleMove": {"message":"অন্য কোণে সরান"},
-  "styleFade": {"message":"মিলিয়ে যাওয়া"},
-  "autoReturn": {"message":"স্বয়ংক্রিয়ভাবে ফেরা"},
-  "autoReturnHint": {"message":"মাউস সরে গেলে হোম অবস্থানে ফিরে যায়"},
-  "hotkeySettings": {"message":"হটকি ও নিয়ন্ত্রণ"},
-  "holdKey": {"message":"মডিফায়ার কী"},
-  "mute": {"message":"নিঃশব্দ"},
-  "hotkeyBtnTitle": {"message":"ক্লিক করে নতুন শর্টকাট চাপুন"},
-  "hotkeyRecording": {"message":"কী চাপুন · বাতিল করতে Esc"},
-  "tipHold": {"message":"ক্লিক-থ্রু চালু থাকলেও $HOLD$ ধরে রেখে সরাতে, আকার বদলাতে বা স্ক্রল হুইল দিয়ে অস্বচ্ছতা বদলাতে পারেন।","placeholders":{"hold":{"content":"$1"}}},
-  "tipNativePip": {"message":"সাইট বা ব্রাউজারের নিজস্ব PiP বোতাম দিয়ে খোলা উইন্ডোতেও অস্বচ্ছতা, ক্লিক-থ্রু ও স্বয়ংক্রিয় সরে যাওয়া কাজ করে।"},
-  "resetHotkeys": {"message":"ডিফল্টে রিসেট করুন"},
-  "bannerTitle": {"message":"পিসি গেমের ওপরেও ভাসান"},
-  "bannerSub": {"message":"GhostPiP Engine ইনস্টল করুন"},
-  "warnProtocol": {"message":"ইঞ্জিন প্রোটোকল সংস্করণ মেলেনি"},
-  "warnHotkeyConflict": {"message":"হটকি দ্বন্দ্ব: $KEYS$","placeholders":{"keys":{"content":"$1"}}},
-  "guideTitle": {"message":"GhostPiP দিয়ে শুরু করুন"},
-  "guideSub": {"message":"স্বচ্ছ, ক্লিক-থ্রু ও স্বয়ংক্রিয়ভাবে সরে যাওয়া PiP, যা কখনো আপনার স্ক্রিন ঢাকে না"},
-  "guideCheckingEngine": {"message":"ইঞ্জিন পরীক্ষা করা হচ্ছে…"},
-  "guideChecking": {"message":"পরীক্ষা করা হচ্ছে…"},
-  "guideEngineMissing": {"message":"ইঞ্জিন ইনস্টল করা নেই"},
-  "guideStep1Title": {"message":"১. ভিডিওর ওপর মাউস রাখুন"},
-  "guideStep1Body": {"message":"YouTube, Twitch, CHZZK, SOOP এবং Netflix, Disney+ ও Prime Video-র মতো OTT পরিষেবার ভিডিওর ওপরে দুটি বোতাম দেখা যায়।"},
-  "guideWebModeBody": {"message":"ব্রাউজার ট্যাবের ভেতরে একটি ভাসমান উইন্ডো। অন্য ট্যাবেও আপনার সঙ্গে যায়। কিছু ইনস্টল করতে হয় না।"},
-  "guideFullModeBody": {"message":"গেম ও অন্যান্য প্রোগ্রামের ওপর ভাসমান একটি উইন্ডো। অস্বচ্ছতা, ক্লিক-থ্রু ও স্বয়ংক্রিয় সরে যাওয়ার জন্য <b>GhostPiP Engine</b> প্রয়োজন।"},
-  "guideStep2Title": {"message":"২. GhostPiP Engine ইনস্টল করুন (ফুল মোড, Windows)"},
-  "guideStep2a": {"message":"<code>GhostPiP-Full-Package.zip</code> (অথবা <code>GhostPiP-Engine-win-x64.zip</code>) আনজিপ করুন।"},
-  "guideStep2b": {"message":"<code>engine\\install.bat</code>-এ ডাবল-ক্লিক করুন। অ্যাডমিনিস্ট্রেটর অধিকার লাগবে না।"},
-  "guideStep2c": {"message":"এই পৃষ্ঠার উপরের ডানদিকের স্ট্যাটাস <b>ইঞ্জিন সংযুক্ত</b> হয়ে গেলেই কাজ শেষ।"},
-  "guideRetry": {"message":"আবার সংযোগ পরীক্ষা করুন"},
-  "guideEngineNote": {"message":"ইঞ্জিনটি <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>-এ ইনস্টল হয়, শুধু Chrome-এ ফুল মোড খোলা থাকলে চলে এবং GhostPiP বন্ধ করলে বন্ধ হয়ে যায়। সরাতে <code>uninstall.bat</code> চালান।"},
-  "guideAvTitle": {"message":"অ্যান্টিভাইরাস ইঞ্জিন ব্লক করলে"},
-  "guideAvBody": {"message":"ইঞ্জিনটি অন্য উইন্ডোর ওপর একটি স্বচ্ছ উইন্ডো দেখায় এবং মাউস ইনপুট ফরোয়ার্ড করে, তাই কিছু অ্যান্টিভাইরাস (যেমন Avast <code>Win64:Evo-gen</code>) ভুল করে স্বাক্ষরবিহীন বিল্ডকে চিহ্নিত করতে পারে। এটি কখনো নেটওয়ার্ক ব্যবহার করে না বা ফাইল সংগ্রহ করে না।"},
-  "guideAv1": {"message":"অ্যান্টিভাইরাসের কোয়ারেন্টাইন থেকে <code>GhostPiP.Engine.exe</code> পুনরুদ্ধার করুন।"},
-  "guideAv2": {"message":"<code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> ফোল্ডারটি অ্যান্টিভাইরাসের ব্যতিক্রম তালিকায় যোগ করুন।"},
-  "guideAv3": {"message":"আবার <code>install.bat</code> চালান।"},
-  "guideControlsTitle": {"message":"নিয়ন্ত্রণ"},
-  "guideMoveResize": {"message":"সরানো · আকার বদল"},
-  "guideMoveResizeHow": {"message":"<kbd class=\"hold\">Ctrl+Alt</kbd> ধরে রেখে টানুন / প্রান্ত ধরে টানুন"},
-  "guideOpacityHow": {"message":"<kbd class=\"hold\">Ctrl+Alt</kbd> + মাউস হুইল"},
-  "guideToggleClickThrough": {"message":"ক্লিক-থ্রু চালু/বন্ধ"},
-  "guideToggleDodge": {"message":"স্বয়ংক্রিয় সরে যাওয়া চালু/বন্ধ"},
-  "guideHotkeyNote": {"message":"টুলবারের GhostPiP আইকন → হটকি ও নিয়ন্ত্রণ থেকে হটকি ও মডিফায়ার কী বদলান।"},
-  "engineTrayTip": {"message":"GhostPiP Engine"},
-  "engineTrayActive": {"message":"GhostPiP Engine (চলছে)"},
-  "engineTrayEmergency": {"message":"জরুরি: ক্লিক-থ্রু বন্ধ করুন"},
-  "engineTrayExit": {"message":"প্রস্থান"}
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "স্বচ্ছ PiP যা ক্লিক পার হতে দেয় এবং কার্সর থেকে সরে যায়। স্ট্রিমিং ও ভিডিও সাইটে কাজ করে।"
+  },
+  "cmdClickThrough": {
+    "message": "ক্লিক-থ্রু চালু/বন্ধ (ঘোস্ট মোড)"
+  },
+  "cmdDodge": {
+    "message": "স্মার্ট স্বয়ংক্রিয় সরে যাওয়া চালু/বন্ধ"
+  },
+  "cmdMute": {
+    "message": "ভিডিও ট্যাবের শব্দ বন্ধ/চালু"
+  },
+  "modeWeb": {
+    "message": "ওয়েব মোড"
+  },
+  "modeWebTitle": {
+    "message": "ওয়েব মোড (ব্রাউজার ট্যাবের ভেতরে ওভারলে)"
+  },
+  "modeFull": {
+    "message": "ফুল মোড"
+  },
+  "modeFullTitle": {
+    "message": "ফুল মোড (ডেস্কটপ PiP উইন্ডো)"
+  },
+  "chatShow": {
+    "message": "চ্যাট দেখান"
+  },
+  "chatHide": {
+    "message": "চ্যাট লুকান"
+  },
+  "chatResizeTitle": {
+    "message": "চ্যাটের আকার বদলাতে টেনে আনুন"
+  },
+  "chatSmaller": {
+    "message": "ছোট চ্যাট"
+  },
+  "chatBigger": {
+    "message": "বড় চ্যাট"
+  },
+  "skipAd": {
+    "message": "বিজ্ঞাপন এড়িয়ে যান ⏭"
+  },
+  "btnReturn": {
+    "message": "ফেরত"
+  },
+  "btnSourceTab": {
+    "message": "উৎস ট্যাব"
+  },
+  "hudOpacity": {
+    "message": "অস্বচ্ছতা $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "অস্বচ্ছতা $PCT$% (সামঞ্জস্য করতে স্ক্রল করুন) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "স্বচ্ছ PiP ওভারলে"
+  },
+  "badgeOff": {
+    "message": "বন্ধ"
+  },
+  "engineConnected": {
+    "message": "ইঞ্জিন সংযুক্ত"
+  },
+  "masterTitle": {
+    "message": "GhostPiP চালু করুন"
+  },
+  "masterHint": {
+    "message": "বন্ধ করলে ওভারলে ও ইঞ্জিন বন্ধ হয়ে যায়"
+  },
+  "sectionBasic": {
+    "message": "মৌলিক সেটিংস"
+  },
+  "clickThrough": {
+    "message": "ক্লিক-থ্রু"
+  },
+  "autoDodge": {
+    "message": "স্বয়ংক্রিয় সরে যাওয়া"
+  },
+  "showChatFull": {
+    "message": "ফুল মোডে চ্যাট দেখান"
+  },
+  "allSites": {
+    "message": "সব সাইটে ব্যবহার করুন"
+  },
+  "allSitesHint": {
+    "message": "বন্ধ থাকলে শুধু স্ট্রিমিং ও OTT সাইটে দেখা যায়"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "অস্বচ্ছতা"
+  },
+  "wheelHint": {
+    "message": "ভিডিওর ওপরেও স্ক্রল করতে পারেন · ক্লিক-থ্রু চালু থাকলে $HOLD$ + স্ক্রল ব্যবহার করুন",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "শব্দ বন্ধ/চালু"
+  },
+  "dodgeSettings": {
+    "message": "সরে যাওয়ার সেটিংস"
+  },
+  "dodgeCorners": {
+    "message": "যে কোণে সরতে পারবে"
+  },
+  "cornerTL": {
+    "message": "উপরে বামে"
+  },
+  "cornerTR": {
+    "message": "উপরে ডানে"
+  },
+  "cornerBL": {
+    "message": "নিচে বামে"
+  },
+  "cornerBR": {
+    "message": "নিচে ডানে"
+  },
+  "dodgeCornersHint": {
+    "message": "যে কোণগুলো দৃশ্যমান রাখতে হবে, যেমন গেমের মিনিম্যাপ, সেগুলো বন্ধ করুন। লক করা কোণগুলো হোম অবস্থান বা সরে যাওয়ার দিকের জন্য প্রয়োজন।"
+  },
+  "homePosition": {
+    "message": "হোম অবস্থান"
+  },
+  "dodgeAxis": {
+    "message": "সরে যাওয়ার দিক"
+  },
+  "axisFree": {
+    "message": "মুক্ত (৪ দিক)"
+  },
+  "axisVertical": {
+    "message": "উপরে / নিচে"
+  },
+  "axisHorizontal": {
+    "message": "বামে / ডানে"
+  },
+  "dodgeStyle": {
+    "message": "সরে যাওয়ার ধরন"
+  },
+  "styleMove": {
+    "message": "অন্য কোণে সরান"
+  },
+  "styleFade": {
+    "message": "মিলিয়ে যাওয়া"
+  },
+  "autoReturn": {
+    "message": "স্বয়ংক্রিয়ভাবে ফেরা"
+  },
+  "autoReturnHint": {
+    "message": "মাউস সরে গেলে হোম অবস্থানে ফিরে যায়"
+  },
+  "hotkeySettings": {
+    "message": "হটকি ও নিয়ন্ত্রণ"
+  },
+  "holdKey": {
+    "message": "মডিফায়ার কী"
+  },
+  "mute": {
+    "message": "নিঃশব্দ"
+  },
+  "hotkeyBtnTitle": {
+    "message": "ক্লিক করে নতুন শর্টকাট চাপুন"
+  },
+  "hotkeyRecording": {
+    "message": "কী চাপুন · বাতিল করতে Esc"
+  },
+  "tipHold": {
+    "message": "ক্লিক-থ্রু চালু থাকলেও $HOLD$ ধরে রেখে সরাতে, আকার বদলাতে বা স্ক্রল হুইল দিয়ে অস্বচ্ছতা বদলাতে পারেন।",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "সাইট বা ব্রাউজারের নিজস্ব PiP বোতাম দিয়ে খোলা উইন্ডোতেও অস্বচ্ছতা, ক্লিক-থ্রু ও স্বয়ংক্রিয় সরে যাওয়া কাজ করে।"
+  },
+  "resetHotkeys": {
+    "message": "ডিফল্টে রিসেট করুন"
+  },
+  "bannerTitle": {
+    "message": "পিসি গেমের ওপরেও ভাসান"
+  },
+  "bannerSub": {
+    "message": "GhostPiP Engine ইনস্টল করুন"
+  },
+  "warnProtocol": {
+    "message": "ইঞ্জিন প্রোটোকল সংস্করণ মেলেনি"
+  },
+  "warnHotkeyConflict": {
+    "message": "হটকি দ্বন্দ্ব: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "GhostPiP দিয়ে শুরু করুন"
+  },
+  "guideSub": {
+    "message": "স্বচ্ছ, ক্লিক-থ্রু ও স্বয়ংক্রিয়ভাবে সরে যাওয়া PiP, যা কখনো আপনার স্ক্রিন ঢাকে না"
+  },
+  "guideCheckingEngine": {
+    "message": "ইঞ্জিন পরীক্ষা করা হচ্ছে…"
+  },
+  "guideChecking": {
+    "message": "পরীক্ষা করা হচ্ছে…"
+  },
+  "guideEngineMissing": {
+    "message": "ইঞ্জিন ইনস্টল করা নেই"
+  },
+  "guideStep1Title": {
+    "message": "১. ভিডিওর ওপর মাউস রাখুন"
+  },
+  "guideStep1Body": {
+    "message": "YouTube, Twitch, CHZZK, SOOP এবং Netflix, Disney+ ও Prime Video-র মতো OTT পরিষেবার ভিডিওর ওপরে দুটি বোতাম দেখা যায়।"
+  },
+  "guideWebModeBody": {
+    "message": "ব্রাউজার ট্যাবের ভেতরে একটি ভাসমান উইন্ডো। অন্য ট্যাবেও আপনার সঙ্গে যায়। কিছু ইনস্টল করতে হয় না।"
+  },
+  "guideFullModeBody": {
+    "message": "গেম ও অন্যান্য প্রোগ্রামের ওপর ভাসমান একটি উইন্ডো। অস্বচ্ছতা, ক্লিক-থ্রু ও স্বয়ংক্রিয় সরে যাওয়ার জন্য <b>GhostPiP Engine</b> প্রয়োজন।"
+  },
+  "guideStep2Title": {
+    "message": "২. GhostPiP Engine ইনস্টল করুন (ফুল মোড, Windows)"
+  },
+  "guideStep2a": {
+    "message": "<code>GhostPiP-Full-Package.zip</code> (অথবা <code>GhostPiP-Engine-win-x64.zip</code>) আনজিপ করুন।"
+  },
+  "guideStep2b": {
+    "message": "<code>engine\\install.bat</code>-এ ডাবল-ক্লিক করুন। অ্যাডমিনিস্ট্রেটর অধিকার লাগবে না।"
+  },
+  "guideStep2c": {
+    "message": "এই পৃষ্ঠার উপরের ডানদিকের স্ট্যাটাস <b>ইঞ্জিন সংযুক্ত</b> হয়ে গেলেই কাজ শেষ।"
+  },
+  "guideRetry": {
+    "message": "আবার সংযোগ পরীক্ষা করুন"
+  },
+  "guideEngineNote": {
+    "message": "ইঞ্জিনটি <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>-এ ইনস্টল হয়, শুধু Chrome-এ ফুল মোড খোলা থাকলে চলে এবং GhostPiP বন্ধ করলে বন্ধ হয়ে যায়। সরাতে <code>uninstall.bat</code> চালান।"
+  },
+  "guideAvTitle": {
+    "message": "অ্যান্টিভাইরাস ইঞ্জিন ব্লক করলে"
+  },
+  "guideAvBody": {
+    "message": "ইঞ্জিনটি অন্য উইন্ডোর ওপর একটি স্বচ্ছ উইন্ডো দেখায় এবং মাউস ইনপুট ফরোয়ার্ড করে, তাই কিছু অ্যান্টিভাইরাস (যেমন Avast <code>Win64:Evo-gen</code>) ভুল করে স্বাক্ষরবিহীন বিল্ডকে চিহ্নিত করতে পারে। এটি কখনো নেটওয়ার্ক ব্যবহার করে না বা ফাইল সংগ্রহ করে না।"
+  },
+  "guideAv1": {
+    "message": "অ্যান্টিভাইরাসের কোয়ারেন্টাইন থেকে <code>GhostPiP.Engine.exe</code> পুনরুদ্ধার করুন।"
+  },
+  "guideAv2": {
+    "message": "<code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> ফোল্ডারটি অ্যান্টিভাইরাসের ব্যতিক্রম তালিকায় যোগ করুন।"
+  },
+  "guideAv3": {
+    "message": "আবার <code>install.bat</code> চালান।"
+  },
+  "guideControlsTitle": {
+    "message": "নিয়ন্ত্রণ"
+  },
+  "guideMoveResize": {
+    "message": "সরানো · আকার বদল"
+  },
+  "guideMoveResizeHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> ধরে রেখে টানুন / প্রান্ত ধরে টানুন"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + মাউস হুইল"
+  },
+  "guideToggleClickThrough": {
+    "message": "ক্লিক-থ্রু চালু/বন্ধ"
+  },
+  "guideToggleDodge": {
+    "message": "স্বয়ংক্রিয় সরে যাওয়া চালু/বন্ধ"
+  },
+  "guideHotkeyNote": {
+    "message": "টুলবারের GhostPiP আইকন → হটকি ও নিয়ন্ত্রণ থেকে হটকি ও মডিফায়ার কী বদলান।"
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (চলছে)"
+  },
+  "engineTrayEmergency": {
+    "message": "জরুরি: ক্লিক-থ্রু বন্ধ করুন"
+  },
+  "engineTrayExit": {
+    "message": "প্রস্থান"
+  }
 }

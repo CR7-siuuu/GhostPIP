@@ -1,96 +1,312 @@
 {
-  "extName": {"message":"GhostPiP"},
-  "extDescription": {"message":"Прозрачный PiP со сквозным кликом, уклоняющийся от курсора. Работает с YouTube, Twitch, CHZZK, SOOP и другими."},
-  "cmdClickThrough": {"message":"Вкл./выкл. сквозной клик (режим Ghost)"},
-  "cmdDodge": {"message":"Вкл./выкл. умное автоуклонение"},
-  "cmdMute": {"message":"Вкл./выкл. звук вкладки с видео"},
-  "modeWeb": {"message":"Веб-режим"},
-  "modeWebTitle": {"message":"Веб-режим (оверлей во вкладке браузера)"},
-  "modeFull": {"message":"Полный режим"},
-  "modeFullTitle": {"message":"Полный режим (окно PiP на рабочем столе)"},
-  "chatShow": {"message":"Показать чат"},
-  "chatHide": {"message":"Скрыть чат"},
-  "chatResizeTitle": {"message":"Перетащите, чтобы изменить размер чата"},
-  "chatSmaller": {"message":"Уменьшить чат"},
-  "chatBigger": {"message":"Увеличить чат"},
-  "skipAd": {"message":"Пропустить рекламу ⏭"},
-  "btnReturn": {"message":"Вернуть"},
-  "btnSourceTab": {"message":"Исходная вкладка"},
-  "hudOpacity": {"message":"Непрозрачность $PCT$%","placeholders":{"pct":{"content":"$1"}}},
-  "hudOpacityWheel": {"message":"Непрозрачность $PCT$% (колесо для настройки) · $SIZE$","placeholders":{"pct":{"content":"$1"},"size":{"content":"$2"}}},
-  "popupSubtitle": {"message":"Прозрачный оверлей PiP"},
-  "badgeOff": {"message":"Выкл"},
-  "engineConnected": {"message":"Движок подключён"},
-  "masterTitle": {"message":"Включить GhostPiP"},
-  "masterHint": {"message":"При отключении закрываются оверлей и движок"},
-  "sectionBasic": {"message":"Основные настройки"},
-  "clickThrough": {"message":"Сквозной клик"},
-  "autoDodge": {"message":"Автоуклонение"},
-  "showChatFull": {"message":"Показывать чат в полном режиме"},
-  "allSites": {"message":"Использовать на всех сайтах"},
-  "allSitesHint": {"message":"Если выключено, появляется только на стриминговых и OTT-сайтах"},
-  "allSitesList": {"message":"YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"},
-  "opacity": {"message":"Непрозрачность"},
-  "wheelHint": {"message":"Можно также прокручивать колесо над видео · при сквозном клике используйте $HOLD$ + колесо","placeholders":{"hold":{"content":"$1"}}},
-  "toggleMute": {"message":"Вкл./выкл. звук"},
-  "dodgeSettings": {"message":"Настройки уклонения"},
-  "dodgeCorners": {"message":"Допустимые углы"},
-  "cornerTL": {"message":"Слева вверху"},
-  "cornerTR": {"message":"Справа вверху"},
-  "cornerBL": {"message":"Слева внизу"},
-  "cornerBR": {"message":"Справа внизу"},
-  "dodgeCornersHint": {"message":"Отключите углы, которые должны оставаться видимыми, например мини-карту в игре. Заблокированные углы нужны для исходной позиции или направления уклонения."},
-  "homePosition": {"message":"Исходная позиция"},
-  "dodgeAxis": {"message":"Направление уклонения"},
-  "axisFree": {"message":"Свободно (4 направления)"},
-  "axisVertical": {"message":"Вверх / вниз"},
-  "axisHorizontal": {"message":"Влево / вправо"},
-  "dodgeStyle": {"message":"Способ уклонения"},
-  "styleMove": {"message":"Перемещение в другой угол"},
-  "styleFade": {"message":"Исчезание"},
-  "autoReturn": {"message":"Автовозврат"},
-  "autoReturnHint": {"message":"Возвращается в исходную позицию, когда мышь уходит"},
-  "hotkeySettings": {"message":"Горячие клавиши и управление"},
-  "holdKey": {"message":"Клавиша-модификатор"},
-  "mute": {"message":"Без звука"},
-  "hotkeyBtnTitle": {"message":"Нажмите, затем введите новое сочетание клавиш"},
-  "hotkeyRecording": {"message":"Нажмите клавиши · Esc для отмены"},
-  "tipHold": {"message":"Даже при сквозном клике удерживайте $HOLD$, чтобы перемещать окно, менять размер или регулировать непрозрачность колесом мыши.","placeholders":{"hold":{"content":"$1"}}},
-  "tipNativePip": {"message":"Непрозрачность, сквозной клик и автоуклонение работают и для окон, открытых собственной кнопкой PiP сайта или браузера."},
-  "resetHotkeys": {"message":"Сбросить по умолчанию"},
-  "bannerTitle": {"message":"Поверх игр на ПК тоже"},
-  "bannerSub": {"message":"Установить GhostPiP Engine"},
-  "warnProtocol": {"message":"Несовпадение версии протокола движка"},
-  "warnHotkeyConflict": {"message":"Конфликт горячих клавиш: $KEYS$","placeholders":{"keys":{"content":"$1"}}},
-  "guideTitle": {"message":"Начало работы с GhostPiP"},
-  "guideSub": {"message":"Прозрачный PiP со сквозным кликом и автоуклонением, который никогда не загораживает экран"},
-  "guideCheckingEngine": {"message":"Проверка движка…"},
-  "guideChecking": {"message":"Проверка…"},
-  "guideEngineMissing": {"message":"Движок не установлен"},
-  "guideStep1Title": {"message":"1. Наведите курсор на видео"},
-  "guideStep1Body": {"message":"Вверху видео на YouTube, Twitch, CHZZK, SOOP и OTT-сервисах, таких как Netflix, Disney+ и Prime Video, появляются две кнопки."},
-  "guideWebModeBody": {"message":"Плавающее окно внутри вкладки браузера. Оно следует за вами на другие вкладки. Ничего устанавливать не нужно."},
-  "guideFullModeBody": {"message":"Окно, которое отображается поверх игр и других программ. Для непрозрачности, сквозного клика и автоуклонения нужен <b>GhostPiP Engine</b>."},
-  "guideStep2Title": {"message":"2. Установите GhostPiP Engine (полный режим, Windows)"},
-  "guideStep2a": {"message":"Распакуйте <code>GhostPiP-Full-Package.zip</code> (или <code>GhostPiP-Engine-win-x64.zip</code>)."},
-  "guideStep2b": {"message":"Дважды щёлкните <code>engine\\install.bat</code>. Права администратора не нужны."},
-  "guideStep2c": {"message":"Готово, когда статус в правом верхнем углу этой страницы сменится на <b>Движок подключён</b>."},
-  "guideRetry": {"message":"Проверить подключение снова"},
-  "guideEngineNote": {"message":"Движок устанавливается в <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, работает только пока в Chrome открыт полный режим, и завершается при отключении GhostPiP. Чтобы удалить его, запустите <code>uninstall.bat</code>."},
-  "guideAvTitle": {"message":"Если антивирус блокирует движок"},
-  "guideAvBody": {"message":"Движок показывает прозрачное окно поверх других окон и передаёт ввод мыши, поэтому некоторые антивирусы (например, Avast <code>Win64:Evo-gen</code>) могут ошибочно помечать неподписанные сборки. Он никогда не использует сеть и не собирает файлы."},
-  "guideAv1": {"message":"Восстановите <code>GhostPiP.Engine.exe</code> из карантина антивируса."},
-  "guideAv2": {"message":"Добавьте папку <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> в исключения антивируса."},
-  "guideAv3": {"message":"Снова запустите <code>install.bat</code>."},
-  "guideControlsTitle": {"message":"Управление"},
-  "guideMoveResize": {"message":"Перемещение · размер"},
-  "guideMoveResizeHow": {"message":"Перетаскивайте, удерживая <kbd class=\"hold\">Ctrl+Alt</kbd> / тяните за край"},
-  "guideOpacityHow": {"message":"<kbd class=\"hold\">Ctrl+Alt</kbd> + колесо мыши"},
-  "guideToggleClickThrough": {"message":"Вкл./выкл. сквозной клик"},
-  "guideToggleDodge": {"message":"Вкл./выкл. автоуклонение"},
-  "guideHotkeyNote": {"message":"Горячие клавиши и клавишу-модификатор можно изменить через значок GhostPiP на панели инструментов → Горячие клавиши и управление."},
-  "engineTrayTip": {"message":"GhostPiP Engine"},
-  "engineTrayActive": {"message":"GhostPiP Engine (работает)"},
-  "engineTrayEmergency": {"message":"Экстренно: выключить сквозной клик"},
-  "engineTrayExit": {"message":"Выход"}
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "Прозрачный PiP со сквозным кликом, уклоняющийся от курсора. Работает на стриминговых и видеосайтах."
+  },
+  "cmdClickThrough": {
+    "message": "Вкл./выкл. сквозной клик (режим Ghost)"
+  },
+  "cmdDodge": {
+    "message": "Вкл./выкл. умное автоуклонение"
+  },
+  "cmdMute": {
+    "message": "Вкл./выкл. звук вкладки с видео"
+  },
+  "modeWeb": {
+    "message": "Веб-режим"
+  },
+  "modeWebTitle": {
+    "message": "Веб-режим (оверлей во вкладке браузера)"
+  },
+  "modeFull": {
+    "message": "Полный режим"
+  },
+  "modeFullTitle": {
+    "message": "Полный режим (окно PiP на рабочем столе)"
+  },
+  "chatShow": {
+    "message": "Показать чат"
+  },
+  "chatHide": {
+    "message": "Скрыть чат"
+  },
+  "chatResizeTitle": {
+    "message": "Перетащите, чтобы изменить размер чата"
+  },
+  "chatSmaller": {
+    "message": "Уменьшить чат"
+  },
+  "chatBigger": {
+    "message": "Увеличить чат"
+  },
+  "skipAd": {
+    "message": "Пропустить рекламу ⏭"
+  },
+  "btnReturn": {
+    "message": "Вернуть"
+  },
+  "btnSourceTab": {
+    "message": "Исходная вкладка"
+  },
+  "hudOpacity": {
+    "message": "Непрозрачность $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "Непрозрачность $PCT$% (колесо для настройки) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "Прозрачный оверлей PiP"
+  },
+  "badgeOff": {
+    "message": "Выкл"
+  },
+  "engineConnected": {
+    "message": "Движок подключён"
+  },
+  "masterTitle": {
+    "message": "Включить GhostPiP"
+  },
+  "masterHint": {
+    "message": "При отключении закрываются оверлей и движок"
+  },
+  "sectionBasic": {
+    "message": "Основные настройки"
+  },
+  "clickThrough": {
+    "message": "Сквозной клик"
+  },
+  "autoDodge": {
+    "message": "Автоуклонение"
+  },
+  "showChatFull": {
+    "message": "Показывать чат в полном режиме"
+  },
+  "allSites": {
+    "message": "Использовать на всех сайтах"
+  },
+  "allSitesHint": {
+    "message": "Если выключено, появляется только на стриминговых и OTT-сайтах"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Непрозрачность"
+  },
+  "wheelHint": {
+    "message": "Можно также прокручивать колесо над видео · при сквозном клике используйте $HOLD$ + колесо",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "Вкл./выкл. звук"
+  },
+  "dodgeSettings": {
+    "message": "Настройки уклонения"
+  },
+  "dodgeCorners": {
+    "message": "Допустимые углы"
+  },
+  "cornerTL": {
+    "message": "Слева вверху"
+  },
+  "cornerTR": {
+    "message": "Справа вверху"
+  },
+  "cornerBL": {
+    "message": "Слева внизу"
+  },
+  "cornerBR": {
+    "message": "Справа внизу"
+  },
+  "dodgeCornersHint": {
+    "message": "Отключите углы, которые должны оставаться видимыми, например мини-карту в игре. Заблокированные углы нужны для исходной позиции или направления уклонения."
+  },
+  "homePosition": {
+    "message": "Исходная позиция"
+  },
+  "dodgeAxis": {
+    "message": "Направление уклонения"
+  },
+  "axisFree": {
+    "message": "Свободно (4 направления)"
+  },
+  "axisVertical": {
+    "message": "Вверх / вниз"
+  },
+  "axisHorizontal": {
+    "message": "Влево / вправо"
+  },
+  "dodgeStyle": {
+    "message": "Способ уклонения"
+  },
+  "styleMove": {
+    "message": "Перемещение в другой угол"
+  },
+  "styleFade": {
+    "message": "Исчезание"
+  },
+  "autoReturn": {
+    "message": "Автовозврат"
+  },
+  "autoReturnHint": {
+    "message": "Возвращается в исходную позицию, когда мышь уходит"
+  },
+  "hotkeySettings": {
+    "message": "Горячие клавиши и управление"
+  },
+  "holdKey": {
+    "message": "Клавиша-модификатор"
+  },
+  "mute": {
+    "message": "Без звука"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Нажмите, затем введите новое сочетание клавиш"
+  },
+  "hotkeyRecording": {
+    "message": "Нажмите клавиши · Esc для отмены"
+  },
+  "tipHold": {
+    "message": "Даже при сквозном клике удерживайте $HOLD$, чтобы перемещать окно, менять размер или регулировать непрозрачность колесом мыши.",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "Непрозрачность, сквозной клик и автоуклонение работают и для окон, открытых собственной кнопкой PiP сайта или браузера."
+  },
+  "resetHotkeys": {
+    "message": "Сбросить по умолчанию"
+  },
+  "bannerTitle": {
+    "message": "Поверх игр на ПК тоже"
+  },
+  "bannerSub": {
+    "message": "Установить GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "Несовпадение версии протокола движка"
+  },
+  "warnHotkeyConflict": {
+    "message": "Конфликт горячих клавиш: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "Начало работы с GhostPiP"
+  },
+  "guideSub": {
+    "message": "Прозрачный PiP со сквозным кликом и автоуклонением, который никогда не загораживает экран"
+  },
+  "guideCheckingEngine": {
+    "message": "Проверка движка…"
+  },
+  "guideChecking": {
+    "message": "Проверка…"
+  },
+  "guideEngineMissing": {
+    "message": "Движок не установлен"
+  },
+  "guideStep1Title": {
+    "message": "1. Наведите курсор на видео"
+  },
+  "guideStep1Body": {
+    "message": "Вверху видео на YouTube, Twitch, CHZZK, SOOP и OTT-сервисах, таких как Netflix, Disney+ и Prime Video, появляются две кнопки."
+  },
+  "guideWebModeBody": {
+    "message": "Плавающее окно внутри вкладки браузера. Оно следует за вами на другие вкладки. Ничего устанавливать не нужно."
+  },
+  "guideFullModeBody": {
+    "message": "Окно, которое отображается поверх игр и других программ. Для непрозрачности, сквозного клика и автоуклонения нужен <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. Установите GhostPiP Engine (полный режим, Windows)"
+  },
+  "guideStep2a": {
+    "message": "Распакуйте <code>GhostPiP-Full-Package.zip</code> (или <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "Дважды щёлкните <code>engine\\install.bat</code>. Права администратора не нужны."
+  },
+  "guideStep2c": {
+    "message": "Готово, когда статус в правом верхнем углу этой страницы сменится на <b>Движок подключён</b>."
+  },
+  "guideRetry": {
+    "message": "Проверить подключение снова"
+  },
+  "guideEngineNote": {
+    "message": "Движок устанавливается в <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, работает только пока в Chrome открыт полный режим, и завершается при отключении GhostPiP. Чтобы удалить его, запустите <code>uninstall.bat</code>."
+  },
+  "guideAvTitle": {
+    "message": "Если антивирус блокирует движок"
+  },
+  "guideAvBody": {
+    "message": "Движок показывает прозрачное окно поверх других окон и передаёт ввод мыши, поэтому некоторые антивирусы (например, Avast <code>Win64:Evo-gen</code>) могут ошибочно помечать неподписанные сборки. Он никогда не использует сеть и не собирает файлы."
+  },
+  "guideAv1": {
+    "message": "Восстановите <code>GhostPiP.Engine.exe</code> из карантина антивируса."
+  },
+  "guideAv2": {
+    "message": "Добавьте папку <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> в исключения антивируса."
+  },
+  "guideAv3": {
+    "message": "Снова запустите <code>install.bat</code>."
+  },
+  "guideControlsTitle": {
+    "message": "Управление"
+  },
+  "guideMoveResize": {
+    "message": "Перемещение · размер"
+  },
+  "guideMoveResizeHow": {
+    "message": "Перетаскивайте, удерживая <kbd class=\"hold\">Ctrl+Alt</kbd> / тяните за край"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + колесо мыши"
+  },
+  "guideToggleClickThrough": {
+    "message": "Вкл./выкл. сквозной клик"
+  },
+  "guideToggleDodge": {
+    "message": "Вкл./выкл. автоуклонение"
+  },
+  "guideHotkeyNote": {
+    "message": "Горячие клавиши и клавишу-модификатор можно изменить через значок GhostPiP на панели инструментов → Горячие клавиши и управление."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (работает)"
+  },
+  "engineTrayEmergency": {
+    "message": "Экстренно: выключить сквозной клик"
+  },
+  "engineTrayExit": {
+    "message": "Выход"
+  }
 }

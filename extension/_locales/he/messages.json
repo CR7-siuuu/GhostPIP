@@ -1,96 +1,318 @@
 {
-  "extName": {"message":"GhostPiP"},
-  "extDescription": {"message":"PiP שקוף שמעביר לחיצות ומתחמק מהסמן. עובד עם YouTube, Twitch, CHZZK, SOOP ועוד."},
-  "cmdClickThrough": {"message":"הפעלה/כיבוי של העברת לחיצות (מצב רפאים)"},
-  "cmdDodge": {"message":"הפעלה/כיבוי של התחמקות אוטומטית חכמה"},
-  "cmdMute": {"message":"הפעלה/כיבוי של השתקה בכרטיסיית הסרטון"},
-  "modeWeb": {"message":"מצב אינטרנט"},
-  "modeWebTitle": {"message":"מצב אינטרנט (שכבת-על בתוך כרטיסיית הדפדפן)"},
-  "modeFull": {"message":"מצב מלא"},
-  "modeFullTitle": {"message":"מצב מלא (חלון PiP בשולחן העבודה)"},
-  "chatShow": {"message":"הצגת צ'אט"},
-  "chatHide": {"message":"הסתרת צ'אט"},
-  "chatResizeTitle": {"message":"גררו כדי לשנות את גודל הצ'אט"},
-  "chatSmaller": {"message":"צ'אט קטן יותר"},
-  "chatBigger": {"message":"צ'אט גדול יותר"},
-  "skipAd": {"message":"דילוג על מודעה ⏭"},
-  "btnReturn": {"message":"החזרה"},
-  "btnSourceTab": {"message":"כרטיסיית המקור"},
-  "hudOpacity": {"message":"אטימות $PCT$%","placeholders":{"pct":{"content":"$1","example":"70"}}},
-  "hudOpacityWheel": {"message":"אטימות $PCT$% (גללו לשינוי) · $SIZE$","placeholders":{"pct":{"content":"$1","example":"70"},"size":{"content":"$2","example":"480×270"}}},
-  "popupSubtitle": {"message":"שכבת-על PiP שקופה"},
-  "badgeOff": {"message":"כבוי"},
-  "engineConnected": {"message":"המנוע מחובר"},
-  "masterTitle": {"message":"הפעלת GhostPiP"},
-  "masterHint": {"message":"כיבוי סוגר את שכבת-העל ואת המנוע"},
-  "sectionBasic": {"message":"הגדרות בסיסיות"},
-  "clickThrough": {"message":"העברת לחיצות"},
-  "autoDodge": {"message":"התחמקות אוטומטית"},
-  "showChatFull": {"message":"הצגת צ'אט במצב מלא"},
-  "allSites": {"message":"שימוש בכל האתרים"},
-  "allSitesHint": {"message":"כשהאפשרות כבויה, מופיע רק באתרי סטרימינג ו-OTT"},
-  "allSitesList": {"message":"YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"},
-  "opacity": {"message":"אטימות"},
-  "wheelHint": {"message":"אפשר גם לגלול מעל הסרטון · בזמן העברת לחיצות השתמשו ב-$HOLD$ + גלילה","placeholders":{"hold":{"content":"$1","example":"Ctrl+Alt"}}},
-  "toggleMute": {"message":"הפעלה/כיבוי של השתקה"},
-  "dodgeSettings": {"message":"הגדרות התחמקות"},
-  "dodgeCorners": {"message":"פינות מותרות"},
-  "cornerTL": {"message":"למעלה משמאל"},
-  "cornerTR": {"message":"למעלה מימין"},
-  "cornerBL": {"message":"למטה משמאל"},
-  "cornerBR": {"message":"למטה מימין"},
-  "dodgeCornersHint": {"message":"כבו פינות שחייבות להישאר גלויות, כמו המפה המוקטנת במשחק. פינות נעולות נדרשות למיקום הבית או לכיוון ההתחמקות."},
-  "homePosition": {"message":"מיקום הבית"},
-  "dodgeAxis": {"message":"כיוון התחמקות"},
-  "axisFree": {"message":"חופשי (4 כיוונים)"},
-  "axisVertical": {"message":"למעלה / למטה"},
-  "axisHorizontal": {"message":"שמאלה / ימינה"},
-  "dodgeStyle": {"message":"סגנון התחמקות"},
-  "styleMove": {"message":"מעבר לפינה אחרת"},
-  "styleFade": {"message":"דהייה"},
-  "autoReturn": {"message":"חזרה אוטומטית"},
-  "autoReturnHint": {"message":"חוזר למיקום הבית כשהעכבר מתרחק"},
-  "hotkeySettings": {"message":"מקשי קיצור ופקדים"},
-  "holdKey": {"message":"מקש צירוף"},
-  "mute": {"message":"השתקה"},
-  "hotkeyBtnTitle": {"message":"לחצו ואז הקישו קיצור חדש"},
-  "hotkeyRecording": {"message":"הקישו מקשים · Esc לביטול"},
-  "tipHold": {"message":"גם בזמן העברת לחיצות, החזיקו את $HOLD$ כדי להזיז, לשנות גודל או לשנות את האטימות בגלגלת.","placeholders":{"hold":{"content":"$1","example":"Ctrl+Alt"}}},
-  "tipNativePip": {"message":"אטימות, העברת לחיצות והתחמקות אוטומטית חלות גם על חלונות שנפתחו בלחצן ה-PiP של האתר או של הדפדפן."},
-  "resetHotkeys": {"message":"איפוס לברירות המחדל"},
-  "bannerTitle": {"message":"צף גם מעל משחקי מחשב"},
-  "bannerSub": {"message":"התקנת GhostPiP Engine"},
-  "warnProtocol": {"message":"אי-התאמה בגרסת הפרוטוקול של המנוע"},
-  "warnHotkeyConflict": {"message":"התנגשות מקשי קיצור: $KEYS$","placeholders":{"keys":{"content":"$1","example":"Alt+G"}}},
-  "guideTitle": {"message":"תחילת העבודה עם GhostPiP"},
-  "guideSub": {"message":"PiP שקוף, מעביר לחיצות ומתחמק אוטומטית, שאף פעם לא מסתיר את המסך"},
-  "guideCheckingEngine": {"message":"בודק את המנוע…"},
-  "guideChecking": {"message":"בודק…"},
-  "guideEngineMissing": {"message":"המנוע לא מותקן"},
-  "guideStep1Title": {"message":"1. העבירו את העכבר מעל סרטון"},
-  "guideStep1Body": {"message":"שני לחצנים מופיעים בחלק העליון של סרטונים ב-YouTube, Twitch, CHZZK, SOOP ובשירותי OTT כמו Netflix, Disney+ ו-Prime Video."},
-  "guideWebModeBody": {"message":"חלון צף בתוך כרטיסיית הדפדפן. הוא עובר איתכם לכרטיסיות אחרות. אין צורך בהתקנה."},
-  "guideFullModeBody": {"message":"חלון שצף מעל משחקים ותוכנות אחרות. אטימות, העברת לחיצות והתחמקות אוטומטית דורשות את <b>GhostPiP Engine</b>."},
-  "guideStep2Title": {"message":"2. התקנת GhostPiP Engine (מצב מלא, Windows)"},
-  "guideStep2a": {"message":"חלצו את <code>GhostPiP-Full-Package.zip</code> (או <code>GhostPiP-Engine-win-x64.zip</code>)."},
-  "guideStep2b": {"message":"לחצו לחיצה כפולה על <code>engine\\install.bat</code>. אין צורך בהרשאות מנהל."},
-  "guideStep2c": {"message":"סיימתם כשהסטטוס בפינה השמאלית העליונה של הדף משתנה ל-<b>המנוע מחובר</b>."},
-  "guideRetry": {"message":"בדיקת החיבור שוב"},
-  "guideEngineNote": {"message":"המנוע מותקן ב-<code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, פועל רק כשמצב מלא פתוח ב-Chrome, ונסגר כשמכבים את GhostPiP. כדי להסיר אותו, הריצו את <code>uninstall.bat</code>."},
-  "guideAvTitle": {"message":"אם האנטי-וירוס חוסם את המנוע"},
-  "guideAvBody": {"message":"המנוע מציג חלון שקוף מעל חלונות אחרים ומעביר קלט עכבר, ולכן חלק מתוכנות האנטי-וירוס (למשל Avast <code>Win64:Evo-gen</code>) עלולות לסמן בטעות גרסאות לא חתומות. הוא אף פעם לא משתמש ברשת ולא אוסף קבצים."},
-  "guideAv1": {"message":"שחזרו את <code>GhostPiP.Engine.exe</code> מההסגר של האנטי-וירוס."},
-  "guideAv2": {"message":"הוסיפו את התיקייה <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> לחריגות של האנטי-וירוס."},
-  "guideAv3": {"message":"הריצו שוב את <code>install.bat</code>."},
-  "guideControlsTitle": {"message":"פקדים"},
-  "guideMoveResize": {"message":"הזזה · שינוי גודל"},
-  "guideMoveResizeHow": {"message":"גררו תוך החזקת <kbd class=\"hold\">Ctrl+Alt</kbd> / גררו קצה"},
-  "guideOpacityHow": {"message":"<kbd class=\"hold\">Ctrl+Alt</kbd> + גלגלת העכבר"},
-  "guideToggleClickThrough": {"message":"הפעלה/כיבוי של העברת לחיצות"},
-  "guideToggleDodge": {"message":"הפעלה/כיבוי של התחמקות אוטומטית"},
-  "guideHotkeyNote": {"message":"אפשר לשנות את מקשי הקיצור ואת מקש הצירוף דרך סמל GhostPiP בסרגל הכלים ← מקשי קיצור ופקדים."},
-  "engineTrayTip": {"message":"GhostPiP Engine"},
-  "engineTrayActive": {"message":"GhostPiP Engine (פועל)"},
-  "engineTrayEmergency": {"message":"חירום: כיבוי העברת לחיצות"},
-  "engineTrayExit": {"message":"יציאה"}
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "PiP שקוף שמעביר לחיצות ומתחמק מהסמן. פועל באתרי סטרימינג ווידאו."
+  },
+  "cmdClickThrough": {
+    "message": "הפעלה/כיבוי של העברת לחיצות (מצב רפאים)"
+  },
+  "cmdDodge": {
+    "message": "הפעלה/כיבוי של התחמקות אוטומטית חכמה"
+  },
+  "cmdMute": {
+    "message": "הפעלה/כיבוי של השתקה בכרטיסיית הסרטון"
+  },
+  "modeWeb": {
+    "message": "מצב אינטרנט"
+  },
+  "modeWebTitle": {
+    "message": "מצב אינטרנט (שכבת-על בתוך כרטיסיית הדפדפן)"
+  },
+  "modeFull": {
+    "message": "מצב מלא"
+  },
+  "modeFullTitle": {
+    "message": "מצב מלא (חלון PiP בשולחן העבודה)"
+  },
+  "chatShow": {
+    "message": "הצגת צ'אט"
+  },
+  "chatHide": {
+    "message": "הסתרת צ'אט"
+  },
+  "chatResizeTitle": {
+    "message": "גררו כדי לשנות את גודל הצ'אט"
+  },
+  "chatSmaller": {
+    "message": "צ'אט קטן יותר"
+  },
+  "chatBigger": {
+    "message": "צ'אט גדול יותר"
+  },
+  "skipAd": {
+    "message": "דילוג על מודעה ⏭"
+  },
+  "btnReturn": {
+    "message": "החזרה"
+  },
+  "btnSourceTab": {
+    "message": "כרטיסיית המקור"
+  },
+  "hudOpacity": {
+    "message": "אטימות $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "70"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "אטימות $PCT$% (גללו לשינוי) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "70"
+      },
+      "size": {
+        "content": "$2",
+        "example": "480×270"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "שכבת-על PiP שקופה"
+  },
+  "badgeOff": {
+    "message": "כבוי"
+  },
+  "engineConnected": {
+    "message": "המנוע מחובר"
+  },
+  "masterTitle": {
+    "message": "הפעלת GhostPiP"
+  },
+  "masterHint": {
+    "message": "כיבוי סוגר את שכבת-העל ואת המנוע"
+  },
+  "sectionBasic": {
+    "message": "הגדרות בסיסיות"
+  },
+  "clickThrough": {
+    "message": "העברת לחיצות"
+  },
+  "autoDodge": {
+    "message": "התחמקות אוטומטית"
+  },
+  "showChatFull": {
+    "message": "הצגת צ'אט במצב מלא"
+  },
+  "allSites": {
+    "message": "שימוש בכל האתרים"
+  },
+  "allSitesHint": {
+    "message": "כשהאפשרות כבויה, מופיע רק באתרי סטרימינג ו-OTT"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "אטימות"
+  },
+  "wheelHint": {
+    "message": "אפשר גם לגלול מעל הסרטון · בזמן העברת לחיצות השתמשו ב-$HOLD$ + גלילה",
+    "placeholders": {
+      "hold": {
+        "content": "$1",
+        "example": "Ctrl+Alt"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "הפעלה/כיבוי של השתקה"
+  },
+  "dodgeSettings": {
+    "message": "הגדרות התחמקות"
+  },
+  "dodgeCorners": {
+    "message": "פינות מותרות"
+  },
+  "cornerTL": {
+    "message": "למעלה משמאל"
+  },
+  "cornerTR": {
+    "message": "למעלה מימין"
+  },
+  "cornerBL": {
+    "message": "למטה משמאל"
+  },
+  "cornerBR": {
+    "message": "למטה מימין"
+  },
+  "dodgeCornersHint": {
+    "message": "כבו פינות שחייבות להישאר גלויות, כמו המפה המוקטנת במשחק. פינות נעולות נדרשות למיקום הבית או לכיוון ההתחמקות."
+  },
+  "homePosition": {
+    "message": "מיקום הבית"
+  },
+  "dodgeAxis": {
+    "message": "כיוון התחמקות"
+  },
+  "axisFree": {
+    "message": "חופשי (4 כיוונים)"
+  },
+  "axisVertical": {
+    "message": "למעלה / למטה"
+  },
+  "axisHorizontal": {
+    "message": "שמאלה / ימינה"
+  },
+  "dodgeStyle": {
+    "message": "סגנון התחמקות"
+  },
+  "styleMove": {
+    "message": "מעבר לפינה אחרת"
+  },
+  "styleFade": {
+    "message": "דהייה"
+  },
+  "autoReturn": {
+    "message": "חזרה אוטומטית"
+  },
+  "autoReturnHint": {
+    "message": "חוזר למיקום הבית כשהעכבר מתרחק"
+  },
+  "hotkeySettings": {
+    "message": "מקשי קיצור ופקדים"
+  },
+  "holdKey": {
+    "message": "מקש צירוף"
+  },
+  "mute": {
+    "message": "השתקה"
+  },
+  "hotkeyBtnTitle": {
+    "message": "לחצו ואז הקישו קיצור חדש"
+  },
+  "hotkeyRecording": {
+    "message": "הקישו מקשים · Esc לביטול"
+  },
+  "tipHold": {
+    "message": "גם בזמן העברת לחיצות, החזיקו את $HOLD$ כדי להזיז, לשנות גודל או לשנות את האטימות בגלגלת.",
+    "placeholders": {
+      "hold": {
+        "content": "$1",
+        "example": "Ctrl+Alt"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "אטימות, העברת לחיצות והתחמקות אוטומטית חלות גם על חלונות שנפתחו בלחצן ה-PiP של האתר או של הדפדפן."
+  },
+  "resetHotkeys": {
+    "message": "איפוס לברירות המחדל"
+  },
+  "bannerTitle": {
+    "message": "צף גם מעל משחקי מחשב"
+  },
+  "bannerSub": {
+    "message": "התקנת GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "אי-התאמה בגרסת הפרוטוקול של המנוע"
+  },
+  "warnHotkeyConflict": {
+    "message": "התנגשות מקשי קיצור: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1",
+        "example": "Alt+G"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "תחילת העבודה עם GhostPiP"
+  },
+  "guideSub": {
+    "message": "PiP שקוף, מעביר לחיצות ומתחמק אוטומטית, שאף פעם לא מסתיר את המסך"
+  },
+  "guideCheckingEngine": {
+    "message": "בודק את המנוע…"
+  },
+  "guideChecking": {
+    "message": "בודק…"
+  },
+  "guideEngineMissing": {
+    "message": "המנוע לא מותקן"
+  },
+  "guideStep1Title": {
+    "message": "1. העבירו את העכבר מעל סרטון"
+  },
+  "guideStep1Body": {
+    "message": "שני לחצנים מופיעים בחלק העליון של סרטונים ב-YouTube, Twitch, CHZZK, SOOP ובשירותי OTT כמו Netflix, Disney+ ו-Prime Video."
+  },
+  "guideWebModeBody": {
+    "message": "חלון צף בתוך כרטיסיית הדפדפן. הוא עובר איתכם לכרטיסיות אחרות. אין צורך בהתקנה."
+  },
+  "guideFullModeBody": {
+    "message": "חלון שצף מעל משחקים ותוכנות אחרות. אטימות, העברת לחיצות והתחמקות אוטומטית דורשות את <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. התקנת GhostPiP Engine (מצב מלא, Windows)"
+  },
+  "guideStep2a": {
+    "message": "חלצו את <code>GhostPiP-Full-Package.zip</code> (או <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "לחצו לחיצה כפולה על <code>engine\\install.bat</code>. אין צורך בהרשאות מנהל."
+  },
+  "guideStep2c": {
+    "message": "סיימתם כשהסטטוס בפינה השמאלית העליונה של הדף משתנה ל-<b>המנוע מחובר</b>."
+  },
+  "guideRetry": {
+    "message": "בדיקת החיבור שוב"
+  },
+  "guideEngineNote": {
+    "message": "המנוע מותקן ב-<code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, פועל רק כשמצב מלא פתוח ב-Chrome, ונסגר כשמכבים את GhostPiP. כדי להסיר אותו, הריצו את <code>uninstall.bat</code>."
+  },
+  "guideAvTitle": {
+    "message": "אם האנטי-וירוס חוסם את המנוע"
+  },
+  "guideAvBody": {
+    "message": "המנוע מציג חלון שקוף מעל חלונות אחרים ומעביר קלט עכבר, ולכן חלק מתוכנות האנטי-וירוס (למשל Avast <code>Win64:Evo-gen</code>) עלולות לסמן בטעות גרסאות לא חתומות. הוא אף פעם לא משתמש ברשת ולא אוסף קבצים."
+  },
+  "guideAv1": {
+    "message": "שחזרו את <code>GhostPiP.Engine.exe</code> מההסגר של האנטי-וירוס."
+  },
+  "guideAv2": {
+    "message": "הוסיפו את התיקייה <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> לחריגות של האנטי-וירוס."
+  },
+  "guideAv3": {
+    "message": "הריצו שוב את <code>install.bat</code>."
+  },
+  "guideControlsTitle": {
+    "message": "פקדים"
+  },
+  "guideMoveResize": {
+    "message": "הזזה · שינוי גודל"
+  },
+  "guideMoveResizeHow": {
+    "message": "גררו תוך החזקת <kbd class=\"hold\">Ctrl+Alt</kbd> / גררו קצה"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + גלגלת העכבר"
+  },
+  "guideToggleClickThrough": {
+    "message": "הפעלה/כיבוי של העברת לחיצות"
+  },
+  "guideToggleDodge": {
+    "message": "הפעלה/כיבוי של התחמקות אוטומטית"
+  },
+  "guideHotkeyNote": {
+    "message": "אפשר לשנות את מקשי הקיצור ואת מקש הצירוף דרך סמל GhostPiP בסרגל הכלים ← מקשי קיצור ופקדים."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (פועל)"
+  },
+  "engineTrayEmergency": {
+    "message": "חירום: כיבוי העברת לחיצות"
+  },
+  "engineTrayExit": {
+    "message": "יציאה"
+  }
 }

@@ -1,96 +1,312 @@
 {
-  "extName": {"message":"GhostPiP"},
-  "extDescription": {"message":"Gennemsigtig PiP, som klik går igennem, og som viger for markøren. Til YouTube, Twitch, CHZZK, SOOP m.fl."},
-  "cmdClickThrough": {"message":"Slå klik igennem til/fra (spøgelsestilstand)"},
-  "cmdDodge": {"message":"Slå smart automatisk undvigelse til/fra"},
-  "cmdMute": {"message":"Slå lyd til/fra på videofanen"},
-  "modeWeb": {"message":"Webtilstand"},
-  "modeWebTitle": {"message":"Webtilstand (overlay i browserfanen)"},
-  "modeFull": {"message":"Fuld tilstand"},
-  "modeFullTitle": {"message":"Fuld tilstand (PiP-vindue på skrivebordet)"},
-  "chatShow": {"message":"Vis chat"},
-  "chatHide": {"message":"Skjul chat"},
-  "chatResizeTitle": {"message":"Træk for at ændre chattens størrelse"},
-  "chatSmaller": {"message":"Mindre chat"},
-  "chatBigger": {"message":"Større chat"},
-  "skipAd": {"message":"Spring reklame over ⏭"},
-  "btnReturn": {"message":"Tilbage"},
-  "btnSourceTab": {"message":"Kildefane"},
-  "hudOpacity": {"message":"Opacitet $PCT$ %","placeholders":{"pct":{"content":"$1"}}},
-  "hudOpacityWheel": {"message":"Opacitet $PCT$ % (rul for at justere) · $SIZE$","placeholders":{"pct":{"content":"$1"},"size":{"content":"$2"}}},
-  "popupSubtitle": {"message":"Gennemsigtigt PiP-overlay"},
-  "badgeOff": {"message":"Fra"},
-  "engineConnected": {"message":"Motor forbundet"},
-  "masterTitle": {"message":"Aktivér GhostPiP"},
-  "masterHint": {"message":"Når den slås fra, lukkes overlay og motor"},
-  "sectionBasic": {"message":"Grundindstillinger"},
-  "clickThrough": {"message":"Klik igennem"},
-  "autoDodge": {"message":"Automatisk undvigelse"},
-  "showChatFull": {"message":"Vis chat i fuld tilstand"},
-  "allSites": {"message":"Brug på alle websteder"},
-  "allSitesHint": {"message":"Når den er slået fra, vises den kun på streaming- og OTT-websteder"},
-  "allSitesList": {"message":"YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"},
-  "opacity": {"message":"Opacitet"},
-  "wheelHint": {"message":"Du kan også rulle over videoen · ved klik igennem: $HOLD$ + rul","placeholders":{"hold":{"content":"$1"}}},
-  "toggleMute": {"message":"Slå lyd til/fra"},
-  "dodgeSettings": {"message":"Undvigelsesindstillinger"},
-  "dodgeCorners": {"message":"Hjørner, den må flytte til"},
-  "cornerTL": {"message":"Øverst til venstre"},
-  "cornerTR": {"message":"Øverst til højre"},
-  "cornerBL": {"message":"Nederst til venstre"},
-  "cornerBR": {"message":"Nederst til højre"},
-  "dodgeCornersHint": {"message":"Slå hjørner fra, der skal forblive synlige, f.eks. et minikort i et spil. Låste hjørner bruges af startpositionen eller undvigelsesretningen."},
-  "homePosition": {"message":"Startposition"},
-  "dodgeAxis": {"message":"Undvigelsesretning"},
-  "axisFree": {"message":"Fri (4 retninger)"},
-  "axisVertical": {"message":"Op / ned"},
-  "axisHorizontal": {"message":"Venstre / højre"},
-  "dodgeStyle": {"message":"Undvigelsesmåde"},
-  "styleMove": {"message":"Flyt til et andet hjørne"},
-  "styleFade": {"message":"Ton ud"},
-  "autoReturn": {"message":"Automatisk tilbagevenden"},
-  "autoReturnHint": {"message":"Vender tilbage til startpositionen, når musen bevæger sig væk"},
-  "hotkeySettings": {"message":"Genvejstaster og betjening"},
-  "holdKey": {"message":"Ændringstast"},
-  "mute": {"message":"Slå lyd fra"},
-  "hotkeyBtnTitle": {"message":"Klik, og tryk derefter på en ny genvej"},
-  "hotkeyRecording": {"message":"Tryk på taster · Esc for at annullere"},
-  "tipHold": {"message":"Selv ved klik igennem kan du holde $HOLD$ nede for at flytte, ændre størrelse eller justere opaciteten med rullehjulet.","placeholders":{"hold":{"content":"$1"}}},
-  "tipNativePip": {"message":"Opacitet, klik igennem og automatisk undvigelse gælder også for vinduer, der åbnes med et websteds eller browserens egen PiP-knap."},
-  "resetHotkeys": {"message":"Nulstil til standard"},
-  "bannerTitle": {"message":"Svæv også over pc-spil"},
-  "bannerSub": {"message":"Installer GhostPiP Engine"},
-  "warnProtocol": {"message":"Motorens protokolversion stemmer ikke overens"},
-  "warnHotkeyConflict": {"message":"Genvejskonflikt: $KEYS$","placeholders":{"keys":{"content":"$1"}}},
-  "guideTitle": {"message":"Kom godt i gang med GhostPiP"},
-  "guideSub": {"message":"Gennemsigtig PiP med klik igennem og automatisk undvigelse, der aldrig dækker din skærm"},
-  "guideCheckingEngine": {"message":"Tjekker motor…"},
-  "guideChecking": {"message":"Tjekker…"},
-  "guideEngineMissing": {"message":"Motor ikke installeret"},
-  "guideStep1Title": {"message":"1. Hold musen over en video"},
-  "guideStep1Body": {"message":"Der vises to knapper øverst på videoer på YouTube, Twitch, CHZZK, SOOP og OTT-tjenester som Netflix, Disney+ og Prime Video."},
-  "guideWebModeBody": {"message":"Et svævende vindue i browserfanen. Det følger med til andre faner. Intet at installere."},
-  "guideFullModeBody": {"message":"Et vindue, der svæver over spil og andre programmer. Opacitet, klik igennem og automatisk undvigelse kræver <b>GhostPiP Engine</b>."},
-  "guideStep2Title": {"message":"2. Installer GhostPiP Engine (fuld tilstand, Windows)"},
-  "guideStep2a": {"message":"Udpak <code>GhostPiP-Full-Package.zip</code> (eller <code>GhostPiP-Engine-win-x64.zip</code>)."},
-  "guideStep2b": {"message":"Dobbeltklik på <code>engine\\install.bat</code>. Kræver ikke administratorrettigheder."},
-  "guideStep2c": {"message":"Du er færdig, når status øverst til højre på denne side skifter til <b>Motor forbundet</b>."},
-  "guideRetry": {"message":"Tjek forbindelsen igen"},
-  "guideEngineNote": {"message":"Motoren installeres i <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, kører kun, mens Chrome har fuld tilstand åben, og lukker, når du slår GhostPiP fra. Kør <code>uninstall.bat</code> for at fjerne den."},
-  "guideAvTitle": {"message":"Hvis dit antivirus blokerer motoren"},
-  "guideAvBody": {"message":"Motoren viser et gennemsigtigt vindue over andre vinduer og videresender museinput, så nogle antivirusprogrammer (f.eks. Avast <code>Win64:Evo-gen</code>) kan fejlagtigt markere usignerede builds. Den bruger aldrig netværket og indsamler ingen filer."},
-  "guideAv1": {"message":"Gendan <code>GhostPiP.Engine.exe</code> fra dit antivirusprograms karantæne."},
-  "guideAv2": {"message":"Føj mappen <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> til dit antivirusprograms undtagelser."},
-  "guideAv3": {"message":"Kør <code>install.bat</code> igen."},
-  "guideControlsTitle": {"message":"Betjening"},
-  "guideMoveResize": {"message":"Flyt · tilpas størrelse"},
-  "guideMoveResizeHow": {"message":"Træk, mens du holder <kbd class=\"hold\">Ctrl+Alt</kbd> nede / træk i en kant"},
-  "guideOpacityHow": {"message":"<kbd class=\"hold\">Ctrl+Alt</kbd> + musehjul"},
-  "guideToggleClickThrough": {"message":"Slå klik igennem til/fra"},
-  "guideToggleDodge": {"message":"Slå automatisk undvigelse til/fra"},
-  "guideHotkeyNote": {"message":"Skift genvejstaster og ændringstast via GhostPiP-ikonet på værktøjslinjen → Genvejstaster og betjening."},
-  "engineTrayTip": {"message":"GhostPiP Engine"},
-  "engineTrayActive": {"message":"GhostPiP Engine (kører)"},
-  "engineTrayEmergency": {"message":"Nødstop: slå klik igennem fra"},
-  "engineTrayExit": {"message":"Afslut"}
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "Gennemsigtig PiP, som klik går igennem, og som viger for markøren. Til streaming- og videosider."
+  },
+  "cmdClickThrough": {
+    "message": "Slå klik igennem til/fra (spøgelsestilstand)"
+  },
+  "cmdDodge": {
+    "message": "Slå smart automatisk undvigelse til/fra"
+  },
+  "cmdMute": {
+    "message": "Slå lyd til/fra på videofanen"
+  },
+  "modeWeb": {
+    "message": "Webtilstand"
+  },
+  "modeWebTitle": {
+    "message": "Webtilstand (overlay i browserfanen)"
+  },
+  "modeFull": {
+    "message": "Fuld tilstand"
+  },
+  "modeFullTitle": {
+    "message": "Fuld tilstand (PiP-vindue på skrivebordet)"
+  },
+  "chatShow": {
+    "message": "Vis chat"
+  },
+  "chatHide": {
+    "message": "Skjul chat"
+  },
+  "chatResizeTitle": {
+    "message": "Træk for at ændre chattens størrelse"
+  },
+  "chatSmaller": {
+    "message": "Mindre chat"
+  },
+  "chatBigger": {
+    "message": "Større chat"
+  },
+  "skipAd": {
+    "message": "Spring reklame over ⏭"
+  },
+  "btnReturn": {
+    "message": "Tilbage"
+  },
+  "btnSourceTab": {
+    "message": "Kildefane"
+  },
+  "hudOpacity": {
+    "message": "Opacitet $PCT$ %",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "Opacitet $PCT$ % (rul for at justere) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "Gennemsigtigt PiP-overlay"
+  },
+  "badgeOff": {
+    "message": "Fra"
+  },
+  "engineConnected": {
+    "message": "Motor forbundet"
+  },
+  "masterTitle": {
+    "message": "Aktivér GhostPiP"
+  },
+  "masterHint": {
+    "message": "Når den slås fra, lukkes overlay og motor"
+  },
+  "sectionBasic": {
+    "message": "Grundindstillinger"
+  },
+  "clickThrough": {
+    "message": "Klik igennem"
+  },
+  "autoDodge": {
+    "message": "Automatisk undvigelse"
+  },
+  "showChatFull": {
+    "message": "Vis chat i fuld tilstand"
+  },
+  "allSites": {
+    "message": "Brug på alle websteder"
+  },
+  "allSitesHint": {
+    "message": "Når den er slået fra, vises den kun på streaming- og OTT-websteder"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Opacitet"
+  },
+  "wheelHint": {
+    "message": "Du kan også rulle over videoen · ved klik igennem: $HOLD$ + rul",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "Slå lyd til/fra"
+  },
+  "dodgeSettings": {
+    "message": "Undvigelsesindstillinger"
+  },
+  "dodgeCorners": {
+    "message": "Hjørner, den må flytte til"
+  },
+  "cornerTL": {
+    "message": "Øverst til venstre"
+  },
+  "cornerTR": {
+    "message": "Øverst til højre"
+  },
+  "cornerBL": {
+    "message": "Nederst til venstre"
+  },
+  "cornerBR": {
+    "message": "Nederst til højre"
+  },
+  "dodgeCornersHint": {
+    "message": "Slå hjørner fra, der skal forblive synlige, f.eks. et minikort i et spil. Låste hjørner bruges af startpositionen eller undvigelsesretningen."
+  },
+  "homePosition": {
+    "message": "Startposition"
+  },
+  "dodgeAxis": {
+    "message": "Undvigelsesretning"
+  },
+  "axisFree": {
+    "message": "Fri (4 retninger)"
+  },
+  "axisVertical": {
+    "message": "Op / ned"
+  },
+  "axisHorizontal": {
+    "message": "Venstre / højre"
+  },
+  "dodgeStyle": {
+    "message": "Undvigelsesmåde"
+  },
+  "styleMove": {
+    "message": "Flyt til et andet hjørne"
+  },
+  "styleFade": {
+    "message": "Ton ud"
+  },
+  "autoReturn": {
+    "message": "Automatisk tilbagevenden"
+  },
+  "autoReturnHint": {
+    "message": "Vender tilbage til startpositionen, når musen bevæger sig væk"
+  },
+  "hotkeySettings": {
+    "message": "Genvejstaster og betjening"
+  },
+  "holdKey": {
+    "message": "Ændringstast"
+  },
+  "mute": {
+    "message": "Slå lyd fra"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Klik, og tryk derefter på en ny genvej"
+  },
+  "hotkeyRecording": {
+    "message": "Tryk på taster · Esc for at annullere"
+  },
+  "tipHold": {
+    "message": "Selv ved klik igennem kan du holde $HOLD$ nede for at flytte, ændre størrelse eller justere opaciteten med rullehjulet.",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "Opacitet, klik igennem og automatisk undvigelse gælder også for vinduer, der åbnes med et websteds eller browserens egen PiP-knap."
+  },
+  "resetHotkeys": {
+    "message": "Nulstil til standard"
+  },
+  "bannerTitle": {
+    "message": "Svæv også over pc-spil"
+  },
+  "bannerSub": {
+    "message": "Installer GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "Motorens protokolversion stemmer ikke overens"
+  },
+  "warnHotkeyConflict": {
+    "message": "Genvejskonflikt: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "Kom godt i gang med GhostPiP"
+  },
+  "guideSub": {
+    "message": "Gennemsigtig PiP med klik igennem og automatisk undvigelse, der aldrig dækker din skærm"
+  },
+  "guideCheckingEngine": {
+    "message": "Tjekker motor…"
+  },
+  "guideChecking": {
+    "message": "Tjekker…"
+  },
+  "guideEngineMissing": {
+    "message": "Motor ikke installeret"
+  },
+  "guideStep1Title": {
+    "message": "1. Hold musen over en video"
+  },
+  "guideStep1Body": {
+    "message": "Der vises to knapper øverst på videoer på YouTube, Twitch, CHZZK, SOOP og OTT-tjenester som Netflix, Disney+ og Prime Video."
+  },
+  "guideWebModeBody": {
+    "message": "Et svævende vindue i browserfanen. Det følger med til andre faner. Intet at installere."
+  },
+  "guideFullModeBody": {
+    "message": "Et vindue, der svæver over spil og andre programmer. Opacitet, klik igennem og automatisk undvigelse kræver <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. Installer GhostPiP Engine (fuld tilstand, Windows)"
+  },
+  "guideStep2a": {
+    "message": "Udpak <code>GhostPiP-Full-Package.zip</code> (eller <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "Dobbeltklik på <code>engine\\install.bat</code>. Kræver ikke administratorrettigheder."
+  },
+  "guideStep2c": {
+    "message": "Du er færdig, når status øverst til højre på denne side skifter til <b>Motor forbundet</b>."
+  },
+  "guideRetry": {
+    "message": "Tjek forbindelsen igen"
+  },
+  "guideEngineNote": {
+    "message": "Motoren installeres i <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, kører kun, mens Chrome har fuld tilstand åben, og lukker, når du slår GhostPiP fra. Kør <code>uninstall.bat</code> for at fjerne den."
+  },
+  "guideAvTitle": {
+    "message": "Hvis dit antivirus blokerer motoren"
+  },
+  "guideAvBody": {
+    "message": "Motoren viser et gennemsigtigt vindue over andre vinduer og videresender museinput, så nogle antivirusprogrammer (f.eks. Avast <code>Win64:Evo-gen</code>) kan fejlagtigt markere usignerede builds. Den bruger aldrig netværket og indsamler ingen filer."
+  },
+  "guideAv1": {
+    "message": "Gendan <code>GhostPiP.Engine.exe</code> fra dit antivirusprograms karantæne."
+  },
+  "guideAv2": {
+    "message": "Føj mappen <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> til dit antivirusprograms undtagelser."
+  },
+  "guideAv3": {
+    "message": "Kør <code>install.bat</code> igen."
+  },
+  "guideControlsTitle": {
+    "message": "Betjening"
+  },
+  "guideMoveResize": {
+    "message": "Flyt · tilpas størrelse"
+  },
+  "guideMoveResizeHow": {
+    "message": "Træk, mens du holder <kbd class=\"hold\">Ctrl+Alt</kbd> nede / træk i en kant"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + musehjul"
+  },
+  "guideToggleClickThrough": {
+    "message": "Slå klik igennem til/fra"
+  },
+  "guideToggleDodge": {
+    "message": "Slå automatisk undvigelse til/fra"
+  },
+  "guideHotkeyNote": {
+    "message": "Skift genvejstaster og ændringstast via GhostPiP-ikonet på værktøjslinjen → Genvejstaster og betjening."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (kører)"
+  },
+  "engineTrayEmergency": {
+    "message": "Nødstop: slå klik igennem fra"
+  },
+  "engineTrayExit": {
+    "message": "Afslut"
+  }
 }

@@ -1,96 +1,312 @@
 {
-  "extName": {"message":"GhostPiP"},
-  "extDescription": {"message":"Провидни PiP са кликом кроз који избегава курсор. Ради са YouTube, Twitch, CHZZK, SOOP и другим сајтовима."},
-  "cmdClickThrough": {"message":"Укључи/искључи клик кроз (Ghost режим)"},
-  "cmdDodge": {"message":"Укључи/искључи паметно аутоматско измицање"},
-  "cmdMute": {"message":"Укључи/искључи звук картице са видеом"},
-  "modeWeb": {"message":"Веб режим"},
-  "modeWebTitle": {"message":"Веб режим (преклоп у картици прегледача)"},
-  "modeFull": {"message":"Пун режим"},
-  "modeFullTitle": {"message":"Пун режим (PiP прозор на радној површини)"},
-  "chatShow": {"message":"Прикажи ћаскање"},
-  "chatHide": {"message":"Сакриј ћаскање"},
-  "chatResizeTitle": {"message":"Превуците да промените величину ћаскања"},
-  "chatSmaller": {"message":"Мање ћаскање"},
-  "chatBigger": {"message":"Веће ћаскање"},
-  "skipAd": {"message":"Прескочи оглас ⏭"},
-  "btnReturn": {"message":"Врати"},
-  "btnSourceTab": {"message":"Изворна картица"},
-  "hudOpacity": {"message":"Непрозирност $PCT$%","placeholders":{"pct":{"content":"$1"}}},
-  "hudOpacityWheel": {"message":"Непрозирност $PCT$% (точкић за подешавање) · $SIZE$","placeholders":{"pct":{"content":"$1"},"size":{"content":"$2"}}},
-  "popupSubtitle": {"message":"Провидни PiP преклоп"},
-  "badgeOff": {"message":"Иск."},
-  "engineConnected": {"message":"Мотор повезан"},
-  "masterTitle": {"message":"Омогући GhostPiP"},
-  "masterHint": {"message":"Искључивање затвара преклоп и мотор"},
-  "sectionBasic": {"message":"Основна подешавања"},
-  "clickThrough": {"message":"Клик кроз"},
-  "autoDodge": {"message":"Аутоматско измицање"},
-  "showChatFull": {"message":"Прикажи ћаскање у пуном режиму"},
-  "allSites": {"message":"Користи на свим сајтовима"},
-  "allSitesHint": {"message":"Када је искључено, појављује се само на сајтовима за стримовање и OTT"},
-  "allSitesList": {"message":"YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"},
-  "opacity": {"message":"Непрозирност"},
-  "wheelHint": {"message":"Можете и да скролујете изнад видеа · током клика кроз користите $HOLD$ + скроловање","placeholders":{"hold":{"content":"$1"}}},
-  "toggleMute": {"message":"Укључи/искључи звук"},
-  "dodgeSettings": {"message":"Подешавања измицања"},
-  "dodgeCorners": {"message":"Дозвољени углови"},
-  "cornerTL": {"message":"Горе лево"},
-  "cornerTR": {"message":"Горе десно"},
-  "cornerBL": {"message":"Доле лево"},
-  "cornerBR": {"message":"Доле десно"},
-  "dodgeCornersHint": {"message":"Искључите углове који морају остати видљиви, попут мини-мапе у игри. Закључани углови су потребни за почетни положај или смер измицања."},
-  "homePosition": {"message":"Почетни положај"},
-  "dodgeAxis": {"message":"Смер измицања"},
-  "axisFree": {"message":"Слободно (4 смера)"},
-  "axisVertical": {"message":"Горе / доле"},
-  "axisHorizontal": {"message":"Лево / десно"},
-  "dodgeStyle": {"message":"Стил измицања"},
-  "styleMove": {"message":"Помери у други угао"},
-  "styleFade": {"message":"Избледи"},
-  "autoReturn": {"message":"Аутоматски повратак"},
-  "autoReturnHint": {"message":"Враћа се на почетни положај када се миш удаљи"},
-  "hotkeySettings": {"message":"Пречице и контроле"},
-  "holdKey": {"message":"Модификаторски тастер"},
-  "mute": {"message":"Искључи звук"},
-  "hotkeyBtnTitle": {"message":"Кликните, па притисните нову пречицу"},
-  "hotkeyRecording": {"message":"Притисните тастере · Esc за отказивање"},
-  "tipHold": {"message":"Чак и током клика кроз, држите $HOLD$ да померите прозор, промените величину или точкићем миша подесите непрозирност.","placeholders":{"hold":{"content":"$1"}}},
-  "tipNativePip": {"message":"Непрозирност, клик кроз и аутоматско измицање важе и за прозоре отворене сопственим PiP дугметом сајта или прегледача."},
-  "resetHotkeys": {"message":"Врати подразумевано"},
-  "bannerTitle": {"message":"Лебди и изнад PC игара"},
-  "bannerSub": {"message":"Инсталирај GhostPiP Engine"},
-  "warnProtocol": {"message":"Верзија протокола мотора се не подудара"},
-  "warnHotkeyConflict": {"message":"Сукоб пречица: $KEYS$","placeholders":{"keys":{"content":"$1"}}},
-  "guideTitle": {"message":"Први кораци са GhostPiP"},
-  "guideSub": {"message":"Провидни PiP са кликом кроз и аутоматским измицањем који никад не заклања екран"},
-  "guideCheckingEngine": {"message":"Провера мотора…"},
-  "guideChecking": {"message":"Провера…"},
-  "guideEngineMissing": {"message":"Мотор није инсталиран"},
-  "guideStep1Title": {"message":"1. Задржите показивач изнад видеа"},
-  "guideStep1Body": {"message":"На врху видео снимака на YouTube, Twitch, CHZZK, SOOP и OTT услугама као што су Netflix, Disney+ и Prime Video појављују се два дугмета."},
-  "guideWebModeBody": {"message":"Плутајући прозор унутар картице прегледача. Прати вас у друге картице. Ништа не треба инсталирати."},
-  "guideFullModeBody": {"message":"Прозор који лебди изнад игара и других програма. За непрозирност, клик кроз и аутоматско измицање потребан је <b>GhostPiP Engine</b>."},
-  "guideStep2Title": {"message":"2. Инсталирајте GhostPiP Engine (пун режим, Windows)"},
-  "guideStep2a": {"message":"Распакујте <code>GhostPiP-Full-Package.zip</code> (или <code>GhostPiP-Engine-win-x64.zip</code>)."},
-  "guideStep2b": {"message":"Двапут кликните на <code>engine\\install.bat</code>. Администраторска права нису потребна."},
-  "guideStep2c": {"message":"Готово је када се статус у горњем десном углу ове странице промени у <b>Мотор повезан</b>."},
-  "guideRetry": {"message":"Поново провери везу"},
-  "guideEngineNote": {"message":"Мотор се инсталира у <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, ради само док је у Chrome-у отворен пун режим и затвара се када искључите GhostPiP. Да бисте га уклонили, покрените <code>uninstall.bat</code>."},
-  "guideAvTitle": {"message":"Ако антивирус блокира мотор"},
-  "guideAvBody": {"message":"Мотор приказује провидни прозор изнад других прозора и прослеђује унос миша, па неки антивируси (нпр. Avast <code>Win64:Evo-gen</code>) могу грешком означити непотписане верзије. Никада не користи мрежу нити прикупља датотеке."},
-  "guideAv1": {"message":"Вратите <code>GhostPiP.Engine.exe</code> из карантина антивируса."},
-  "guideAv2": {"message":"Додајте фасциклу <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> у изузетке антивируса."},
-  "guideAv3": {"message":"Поново покрените <code>install.bat</code>."},
-  "guideControlsTitle": {"message":"Контроле"},
-  "guideMoveResize": {"message":"Померање · величина"},
-  "guideMoveResizeHow": {"message":"Превлачите држећи <kbd class=\"hold\">Ctrl+Alt</kbd> / превуците ивицу"},
-  "guideOpacityHow": {"message":"<kbd class=\"hold\">Ctrl+Alt</kbd> + точкић миша"},
-  "guideToggleClickThrough": {"message":"Укључи/искључи клик кроз"},
-  "guideToggleDodge": {"message":"Укључи/искључи аутоматско измицање"},
-  "guideHotkeyNote": {"message":"Пречице и модификаторски тастер мењате преко иконе GhostPiP на траци са алаткама → Пречице и контроле."},
-  "engineTrayTip": {"message":"GhostPiP Engine"},
-  "engineTrayActive": {"message":"GhostPiP Engine (ради)"},
-  "engineTrayEmergency": {"message":"Хитно: искључи клик кроз"},
-  "engineTrayExit": {"message":"Изађи"}
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "Провидни PiP са кликом кроз који избегава курсор. Ради на сајтовима за стриминг и видео."
+  },
+  "cmdClickThrough": {
+    "message": "Укључи/искључи клик кроз (Ghost режим)"
+  },
+  "cmdDodge": {
+    "message": "Укључи/искључи паметно аутоматско измицање"
+  },
+  "cmdMute": {
+    "message": "Укључи/искључи звук картице са видеом"
+  },
+  "modeWeb": {
+    "message": "Веб режим"
+  },
+  "modeWebTitle": {
+    "message": "Веб режим (преклоп у картици прегледача)"
+  },
+  "modeFull": {
+    "message": "Пун режим"
+  },
+  "modeFullTitle": {
+    "message": "Пун режим (PiP прозор на радној површини)"
+  },
+  "chatShow": {
+    "message": "Прикажи ћаскање"
+  },
+  "chatHide": {
+    "message": "Сакриј ћаскање"
+  },
+  "chatResizeTitle": {
+    "message": "Превуците да промените величину ћаскања"
+  },
+  "chatSmaller": {
+    "message": "Мање ћаскање"
+  },
+  "chatBigger": {
+    "message": "Веће ћаскање"
+  },
+  "skipAd": {
+    "message": "Прескочи оглас ⏭"
+  },
+  "btnReturn": {
+    "message": "Врати"
+  },
+  "btnSourceTab": {
+    "message": "Изворна картица"
+  },
+  "hudOpacity": {
+    "message": "Непрозирност $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "Непрозирност $PCT$% (точкић за подешавање) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "Провидни PiP преклоп"
+  },
+  "badgeOff": {
+    "message": "Иск."
+  },
+  "engineConnected": {
+    "message": "Мотор повезан"
+  },
+  "masterTitle": {
+    "message": "Омогући GhostPiP"
+  },
+  "masterHint": {
+    "message": "Искључивање затвара преклоп и мотор"
+  },
+  "sectionBasic": {
+    "message": "Основна подешавања"
+  },
+  "clickThrough": {
+    "message": "Клик кроз"
+  },
+  "autoDodge": {
+    "message": "Аутоматско измицање"
+  },
+  "showChatFull": {
+    "message": "Прикажи ћаскање у пуном режиму"
+  },
+  "allSites": {
+    "message": "Користи на свим сајтовима"
+  },
+  "allSitesHint": {
+    "message": "Када је искључено, појављује се само на сајтовима за стримовање и OTT"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Непрозирност"
+  },
+  "wheelHint": {
+    "message": "Можете и да скролујете изнад видеа · током клика кроз користите $HOLD$ + скроловање",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "Укључи/искључи звук"
+  },
+  "dodgeSettings": {
+    "message": "Подешавања измицања"
+  },
+  "dodgeCorners": {
+    "message": "Дозвољени углови"
+  },
+  "cornerTL": {
+    "message": "Горе лево"
+  },
+  "cornerTR": {
+    "message": "Горе десно"
+  },
+  "cornerBL": {
+    "message": "Доле лево"
+  },
+  "cornerBR": {
+    "message": "Доле десно"
+  },
+  "dodgeCornersHint": {
+    "message": "Искључите углове који морају остати видљиви, попут мини-мапе у игри. Закључани углови су потребни за почетни положај или смер измицања."
+  },
+  "homePosition": {
+    "message": "Почетни положај"
+  },
+  "dodgeAxis": {
+    "message": "Смер измицања"
+  },
+  "axisFree": {
+    "message": "Слободно (4 смера)"
+  },
+  "axisVertical": {
+    "message": "Горе / доле"
+  },
+  "axisHorizontal": {
+    "message": "Лево / десно"
+  },
+  "dodgeStyle": {
+    "message": "Стил измицања"
+  },
+  "styleMove": {
+    "message": "Помери у други угао"
+  },
+  "styleFade": {
+    "message": "Избледи"
+  },
+  "autoReturn": {
+    "message": "Аутоматски повратак"
+  },
+  "autoReturnHint": {
+    "message": "Враћа се на почетни положај када се миш удаљи"
+  },
+  "hotkeySettings": {
+    "message": "Пречице и контроле"
+  },
+  "holdKey": {
+    "message": "Модификаторски тастер"
+  },
+  "mute": {
+    "message": "Искључи звук"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Кликните, па притисните нову пречицу"
+  },
+  "hotkeyRecording": {
+    "message": "Притисните тастере · Esc за отказивање"
+  },
+  "tipHold": {
+    "message": "Чак и током клика кроз, држите $HOLD$ да померите прозор, промените величину или точкићем миша подесите непрозирност.",
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "Непрозирност, клик кроз и аутоматско измицање важе и за прозоре отворене сопственим PiP дугметом сајта или прегледача."
+  },
+  "resetHotkeys": {
+    "message": "Врати подразумевано"
+  },
+  "bannerTitle": {
+    "message": "Лебди и изнад PC игара"
+  },
+  "bannerSub": {
+    "message": "Инсталирај GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "Верзија протокола мотора се не подудара"
+  },
+  "warnHotkeyConflict": {
+    "message": "Сукоб пречица: $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "Први кораци са GhostPiP"
+  },
+  "guideSub": {
+    "message": "Провидни PiP са кликом кроз и аутоматским измицањем који никад не заклања екран"
+  },
+  "guideCheckingEngine": {
+    "message": "Провера мотора…"
+  },
+  "guideChecking": {
+    "message": "Провера…"
+  },
+  "guideEngineMissing": {
+    "message": "Мотор није инсталиран"
+  },
+  "guideStep1Title": {
+    "message": "1. Задржите показивач изнад видеа"
+  },
+  "guideStep1Body": {
+    "message": "На врху видео снимака на YouTube, Twitch, CHZZK, SOOP и OTT услугама као што су Netflix, Disney+ и Prime Video појављују се два дугмета."
+  },
+  "guideWebModeBody": {
+    "message": "Плутајући прозор унутар картице прегледача. Прати вас у друге картице. Ништа не треба инсталирати."
+  },
+  "guideFullModeBody": {
+    "message": "Прозор који лебди изнад игара и других програма. За непрозирност, клик кроз и аутоматско измицање потребан је <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. Инсталирајте GhostPiP Engine (пун режим, Windows)"
+  },
+  "guideStep2a": {
+    "message": "Распакујте <code>GhostPiP-Full-Package.zip</code> (или <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "Двапут кликните на <code>engine\\install.bat</code>. Администраторска права нису потребна."
+  },
+  "guideStep2c": {
+    "message": "Готово је када се статус у горњем десном углу ове странице промени у <b>Мотор повезан</b>."
+  },
+  "guideRetry": {
+    "message": "Поново провери везу"
+  },
+  "guideEngineNote": {
+    "message": "Мотор се инсталира у <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, ради само док је у Chrome-у отворен пун режим и затвара се када искључите GhostPiP. Да бисте га уклонили, покрените <code>uninstall.bat</code>."
+  },
+  "guideAvTitle": {
+    "message": "Ако антивирус блокира мотор"
+  },
+  "guideAvBody": {
+    "message": "Мотор приказује провидни прозор изнад других прозора и прослеђује унос миша, па неки антивируси (нпр. Avast <code>Win64:Evo-gen</code>) могу грешком означити непотписане верзије. Никада не користи мрежу нити прикупља датотеке."
+  },
+  "guideAv1": {
+    "message": "Вратите <code>GhostPiP.Engine.exe</code> из карантина антивируса."
+  },
+  "guideAv2": {
+    "message": "Додајте фасциклу <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> у изузетке антивируса."
+  },
+  "guideAv3": {
+    "message": "Поново покрените <code>install.bat</code>."
+  },
+  "guideControlsTitle": {
+    "message": "Контроле"
+  },
+  "guideMoveResize": {
+    "message": "Померање · величина"
+  },
+  "guideMoveResizeHow": {
+    "message": "Превлачите држећи <kbd class=\"hold\">Ctrl+Alt</kbd> / превуците ивицу"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + точкић миша"
+  },
+  "guideToggleClickThrough": {
+    "message": "Укључи/искључи клик кроз"
+  },
+  "guideToggleDodge": {
+    "message": "Укључи/искључи аутоматско измицање"
+  },
+  "guideHotkeyNote": {
+    "message": "Пречице и модификаторски тастер мењате преко иконе GhostPiP на траци са алаткама → Пречице и контроле."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (ради)"
+  },
+  "engineTrayEmergency": {
+    "message": "Хитно: искључи клик кроз"
+  },
+  "engineTrayExit": {
+    "message": "Изађи"
+  }
 }

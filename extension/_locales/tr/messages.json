@@ -3,7 +3,7 @@
     "message": "GhostPiP"
   },
   "extDescription": {
-    "message": "İmlecinizden kaçan, tıklamaları geçiren şeffaf PiP. YouTube, Twitch, CHZZK, SOOP ve daha fazlasıyla çalışır."
+    "message": "İmlecinizden kaçan, tıklamaları geçiren şeffaf PiP. Yayın ve video sitelerinde çalışır."
   },
   "cmdClickThrough": {
     "message": "Tıklama geçirmeyi aç/kapat (Hayalet Modu)"

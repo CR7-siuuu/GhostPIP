@@ -1,115 +1,312 @@
 {
-  "extName": { "message": "GhostPiP" },
-  "extDescription": { "message": "PiP lut sinar dengan klik tembus yang mengelak kursor. Berfungsi di YouTube, Twitch, CHZZK, SOOP dan banyak lagi." },
-  "cmdClickThrough": { "message": "Togol klik tembus (Mod Hantu)" },
-  "cmdDodge": { "message": "Togol elak automatik pintar" },
-  "cmdMute": { "message": "Togol redam pada tab video" },
-
-  "modeWeb": { "message": "Mod Web" },
-  "modeWebTitle": { "message": "Mod Web (tindanan di dalam tab penyemak imbas)" },
-  "modeFull": { "message": "Mod Penuh" },
-  "modeFullTitle": { "message": "Mod Penuh (tetingkap PiP desktop)" },
-  "chatShow": { "message": "Tunjukkan sembang" },
-  "chatHide": { "message": "Sembunyikan sembang" },
-  "chatResizeTitle": { "message": "Seret untuk mengubah saiz sembang" },
-  "chatSmaller": { "message": "Kecilkan sembang" },
-  "chatBigger": { "message": "Besarkan sembang" },
-  "skipAd": { "message": "Langkau iklan ⏭" },
-  "btnReturn": { "message": "Kembalikan" },
-  "btnSourceTab": { "message": "Tab sumber" },
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "PiP lut sinar dengan klik tembus yang mengelak kursor. Berfungsi di laman penstriman dan video."
+  },
+  "cmdClickThrough": {
+    "message": "Togol klik tembus (Mod Hantu)"
+  },
+  "cmdDodge": {
+    "message": "Togol elak automatik pintar"
+  },
+  "cmdMute": {
+    "message": "Togol redam pada tab video"
+  },
+  "modeWeb": {
+    "message": "Mod Web"
+  },
+  "modeWebTitle": {
+    "message": "Mod Web (tindanan di dalam tab penyemak imbas)"
+  },
+  "modeFull": {
+    "message": "Mod Penuh"
+  },
+  "modeFullTitle": {
+    "message": "Mod Penuh (tetingkap PiP desktop)"
+  },
+  "chatShow": {
+    "message": "Tunjukkan sembang"
+  },
+  "chatHide": {
+    "message": "Sembunyikan sembang"
+  },
+  "chatResizeTitle": {
+    "message": "Seret untuk mengubah saiz sembang"
+  },
+  "chatSmaller": {
+    "message": "Kecilkan sembang"
+  },
+  "chatBigger": {
+    "message": "Besarkan sembang"
+  },
+  "skipAd": {
+    "message": "Langkau iklan ⏭"
+  },
+  "btnReturn": {
+    "message": "Kembalikan"
+  },
+  "btnSourceTab": {
+    "message": "Tab sumber"
+  },
   "hudOpacity": {
     "message": "Kelegapan $PCT$%",
-    "placeholders": { "pct": { "content": "$1" } }
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   },
   "hudOpacityWheel": {
     "message": "Kelegapan $PCT$% (tatal untuk melaraskan) · $SIZE$",
-    "placeholders": { "pct": { "content": "$1" }, "size": { "content": "$2" } }
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
   },
-
-  "popupSubtitle": { "message": "Tindanan PiP lut sinar" },
-  "badgeOff": { "message": "Mati" },
-  "engineConnected": { "message": "Enjin disambungkan" },
-  "masterTitle": { "message": "Dayakan GhostPiP" },
-  "masterHint": { "message": "Mematikan pilihan ini akan menutup tindanan dan enjin" },
-  "sectionBasic": { "message": "Tetapan asas" },
-  "clickThrough": { "message": "Klik tembus" },
-  "autoDodge": { "message": "Elak automatik" },
-  "showChatFull": { "message": "Tunjukkan sembang dalam Mod Penuh" },
-  "allSites": { "message": "Guna pada semua tapak" },
-  "allSitesHint": { "message": "Apabila dimatikan, ia hanya muncul pada tapak penstriman dan OTT" },
-  "allSitesList": { "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll" },
-  "opacity": { "message": "Kelegapan" },
+  "popupSubtitle": {
+    "message": "Tindanan PiP lut sinar"
+  },
+  "badgeOff": {
+    "message": "Mati"
+  },
+  "engineConnected": {
+    "message": "Enjin disambungkan"
+  },
+  "masterTitle": {
+    "message": "Dayakan GhostPiP"
+  },
+  "masterHint": {
+    "message": "Mematikan pilihan ini akan menutup tindanan dan enjin"
+  },
+  "sectionBasic": {
+    "message": "Tetapan asas"
+  },
+  "clickThrough": {
+    "message": "Klik tembus"
+  },
+  "autoDodge": {
+    "message": "Elak automatik"
+  },
+  "showChatFull": {
+    "message": "Tunjukkan sembang dalam Mod Penuh"
+  },
+  "allSites": {
+    "message": "Guna pada semua tapak"
+  },
+  "allSitesHint": {
+    "message": "Apabila dimatikan, ia hanya muncul pada tapak penstriman dan OTT"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Kelegapan"
+  },
   "wheelHint": {
     "message": "Anda juga boleh menatal di atas video · semasa klik tembus, gunakan $HOLD$ + tatal",
-    "placeholders": { "hold": { "content": "$1" } }
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
   },
-  "toggleMute": { "message": "Togol redam" },
-  "dodgeSettings": { "message": "Tetapan elak" },
-  "dodgeCorners": { "message": "Sudut yang dibenarkan" },
-  "cornerTL": { "message": "Atas kiri" },
-  "cornerTR": { "message": "Atas kanan" },
-  "cornerBL": { "message": "Bawah kiri" },
-  "cornerBR": { "message": "Bawah kanan" },
-  "dodgeCornersHint": { "message": "Matikan sudut yang mesti kekal kelihatan, seperti peta mini permainan. Sudut yang dikunci diperlukan oleh kedudukan asal atau arah elak." },
-  "homePosition": { "message": "Kedudukan asal" },
-  "dodgeAxis": { "message": "Arah elak" },
-  "axisFree": { "message": "Bebas (4 arah)" },
-  "axisVertical": { "message": "Atas / bawah" },
-  "axisHorizontal": { "message": "Kiri / kanan" },
-  "dodgeStyle": { "message": "Gaya elak" },
-  "styleMove": { "message": "Pindah ke sudut lain" },
-  "styleFade": { "message": "Pudar" },
-  "autoReturn": { "message": "Kembali automatik" },
-  "autoReturnHint": { "message": "Kembali ke kedudukan asal apabila tetikus beralih pergi" },
-  "hotkeySettings": { "message": "Kekunci pintas & kawalan" },
-  "holdKey": { "message": "Kekunci pengubah suai" },
-  "mute": { "message": "Redam" },
-  "hotkeyBtnTitle": { "message": "Klik, kemudian tekan pintasan baharu" },
-  "hotkeyRecording": { "message": "Tekan kekunci · Esc untuk batal" },
+  "toggleMute": {
+    "message": "Togol redam"
+  },
+  "dodgeSettings": {
+    "message": "Tetapan elak"
+  },
+  "dodgeCorners": {
+    "message": "Sudut yang dibenarkan"
+  },
+  "cornerTL": {
+    "message": "Atas kiri"
+  },
+  "cornerTR": {
+    "message": "Atas kanan"
+  },
+  "cornerBL": {
+    "message": "Bawah kiri"
+  },
+  "cornerBR": {
+    "message": "Bawah kanan"
+  },
+  "dodgeCornersHint": {
+    "message": "Matikan sudut yang mesti kekal kelihatan, seperti peta mini permainan. Sudut yang dikunci diperlukan oleh kedudukan asal atau arah elak."
+  },
+  "homePosition": {
+    "message": "Kedudukan asal"
+  },
+  "dodgeAxis": {
+    "message": "Arah elak"
+  },
+  "axisFree": {
+    "message": "Bebas (4 arah)"
+  },
+  "axisVertical": {
+    "message": "Atas / bawah"
+  },
+  "axisHorizontal": {
+    "message": "Kiri / kanan"
+  },
+  "dodgeStyle": {
+    "message": "Gaya elak"
+  },
+  "styleMove": {
+    "message": "Pindah ke sudut lain"
+  },
+  "styleFade": {
+    "message": "Pudar"
+  },
+  "autoReturn": {
+    "message": "Kembali automatik"
+  },
+  "autoReturnHint": {
+    "message": "Kembali ke kedudukan asal apabila tetikus beralih pergi"
+  },
+  "hotkeySettings": {
+    "message": "Kekunci pintas & kawalan"
+  },
+  "holdKey": {
+    "message": "Kekunci pengubah suai"
+  },
+  "mute": {
+    "message": "Redam"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Klik, kemudian tekan pintasan baharu"
+  },
+  "hotkeyRecording": {
+    "message": "Tekan kekunci · Esc untuk batal"
+  },
   "tipHold": {
     "message": "Walaupun semasa klik tembus, tahan $HOLD$ untuk mengalih, mengubah saiz atau menukar kelegapan dengan roda tatal.",
-    "placeholders": { "hold": { "content": "$1" } }
+    "placeholders": {
+      "hold": {
+        "content": "$1"
+      }
+    }
   },
-  "tipNativePip": { "message": "Kelegapan, klik tembus dan elak automatik juga digunakan pada tetingkap yang dibuka dengan butang PiP tapak atau penyemak imbas sendiri." },
-  "resetHotkeys": { "message": "Tetapkan semula ke lalai" },
-  "bannerTitle": { "message": "Terapung di atas permainan PC juga" },
-  "bannerSub": { "message": "Pasang GhostPiP Engine" },
-  "warnProtocol": { "message": "Versi protokol enjin tidak sepadan" },
+  "tipNativePip": {
+    "message": "Kelegapan, klik tembus dan elak automatik juga digunakan pada tetingkap yang dibuka dengan butang PiP tapak atau penyemak imbas sendiri."
+  },
+  "resetHotkeys": {
+    "message": "Tetapkan semula ke lalai"
+  },
+  "bannerTitle": {
+    "message": "Terapung di atas permainan PC juga"
+  },
+  "bannerSub": {
+    "message": "Pasang GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "Versi protokol enjin tidak sepadan"
+  },
   "warnHotkeyConflict": {
     "message": "Konflik kekunci pintas: $KEYS$",
-    "placeholders": { "keys": { "content": "$1" } }
+    "placeholders": {
+      "keys": {
+        "content": "$1"
+      }
+    }
   },
-
-  "guideTitle": { "message": "Bermula dengan GhostPiP" },
-  "guideSub": { "message": "PiP lut sinar dengan klik tembus dan elak automatik yang tidak pernah menghalang skrin anda" },
-  "guideCheckingEngine": { "message": "Menyemak enjin…" },
-  "guideChecking": { "message": "Menyemak…" },
-  "guideEngineMissing": { "message": "Enjin belum dipasang" },
-  "guideStep1Title": { "message": "1. Halakan tetikus pada video" },
-  "guideStep1Body": { "message": "Dua butang muncul di bahagian atas video di YouTube, Twitch, CHZZK, SOOP dan perkhidmatan OTT seperti Netflix, Disney+ dan Prime Video." },
-  "guideWebModeBody": { "message": "Tetingkap terapung di dalam tab penyemak imbas. Ia mengikut anda ke tab lain. Tiada apa-apa untuk dipasang." },
-  "guideFullModeBody": { "message": "Tetingkap yang terapung di atas permainan dan program lain. Kelegapan, klik tembus dan elak automatik memerlukan <b>GhostPiP Engine</b>." },
-  "guideStep2Title": { "message": "2. Pasang GhostPiP Engine (Mod Penuh, Windows)" },
-  "guideStep2a": { "message": "Nyahzip <code>GhostPiP-Full-Package.zip</code> (atau <code>GhostPiP-Engine-win-x64.zip</code>)." },
-  "guideStep2b": { "message": "Klik dua kali <code>engine\\install.bat</code>. Hak pentadbir tidak diperlukan." },
-  "guideStep2c": { "message": "Selesai apabila status di bahagian atas kanan halaman ini bertukar kepada <b>Enjin disambungkan</b>." },
-  "guideRetry": { "message": "Semak sambungan semula" },
-  "guideEngineNote": { "message": "Enjin dipasang ke <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, hanya berjalan semasa Mod Penuh dibuka dalam Chrome dan keluar apabila anda mematikan GhostPiP. Untuk membuangnya, jalankan <code>uninstall.bat</code>." },
-  "guideAvTitle": { "message": "Jika antivirus anda menyekat enjin" },
-  "guideAvBody": { "message": "Enjin memaparkan tetingkap lut sinar di atas tetingkap lain dan memajukan input tetikus, jadi sesetengah antivirus (cth. Avast <code>Win64:Evo-gen</code>) mungkin tersilap menandakan binaan yang tidak ditandatangani. Ia tidak pernah menggunakan rangkaian atau mengumpul fail." },
-  "guideAv1": { "message": "Pulihkan <code>GhostPiP.Engine.exe</code> daripada kuarantin antivirus anda." },
-  "guideAv2": { "message": "Tambahkan folder <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> pada pengecualian antivirus anda." },
-  "guideAv3": { "message": "Jalankan <code>install.bat</code> sekali lagi." },
-  "guideControlsTitle": { "message": "Kawalan" },
-  "guideMoveResize": { "message": "Alih · ubah saiz" },
-  "guideMoveResizeHow": { "message": "Seret sambil menahan <kbd class=\"hold\">Ctrl+Alt</kbd> / seret tepi" },
-  "guideOpacityHow": { "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + roda tetikus" },
-  "guideToggleClickThrough": { "message": "Togol klik tembus" },
-  "guideToggleDodge": { "message": "Togol elak automatik" },
-  "guideHotkeyNote": { "message": "Tukar kekunci pintas dan kekunci pengubah suai daripada ikon GhostPiP pada bar alat → Kekunci pintas & kawalan." },
-
-  "engineTrayTip": { "message": "GhostPiP Engine" },
-  "engineTrayActive": { "message": "GhostPiP Engine (sedang berjalan)" },
-  "engineTrayEmergency": { "message": "Kecemasan: matikan klik tembus" },
-  "engineTrayExit": { "message": "Keluar" }
+  "guideTitle": {
+    "message": "Bermula dengan GhostPiP"
+  },
+  "guideSub": {
+    "message": "PiP lut sinar dengan klik tembus dan elak automatik yang tidak pernah menghalang skrin anda"
+  },
+  "guideCheckingEngine": {
+    "message": "Menyemak enjin…"
+  },
+  "guideChecking": {
+    "message": "Menyemak…"
+  },
+  "guideEngineMissing": {
+    "message": "Enjin belum dipasang"
+  },
+  "guideStep1Title": {
+    "message": "1. Halakan tetikus pada video"
+  },
+  "guideStep1Body": {
+    "message": "Dua butang muncul di bahagian atas video di YouTube, Twitch, CHZZK, SOOP dan perkhidmatan OTT seperti Netflix, Disney+ dan Prime Video."
+  },
+  "guideWebModeBody": {
+    "message": "Tetingkap terapung di dalam tab penyemak imbas. Ia mengikut anda ke tab lain. Tiada apa-apa untuk dipasang."
+  },
+  "guideFullModeBody": {
+    "message": "Tetingkap yang terapung di atas permainan dan program lain. Kelegapan, klik tembus dan elak automatik memerlukan <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. Pasang GhostPiP Engine (Mod Penuh, Windows)"
+  },
+  "guideStep2a": {
+    "message": "Nyahzip <code>GhostPiP-Full-Package.zip</code> (atau <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "Klik dua kali <code>engine\\install.bat</code>. Hak pentadbir tidak diperlukan."
+  },
+  "guideStep2c": {
+    "message": "Selesai apabila status di bahagian atas kanan halaman ini bertukar kepada <b>Enjin disambungkan</b>."
+  },
+  "guideRetry": {
+    "message": "Semak sambungan semula"
+  },
+  "guideEngineNote": {
+    "message": "Enjin dipasang ke <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, hanya berjalan semasa Mod Penuh dibuka dalam Chrome dan keluar apabila anda mematikan GhostPiP. Untuk membuangnya, jalankan <code>uninstall.bat</code>."
+  },
+  "guideAvTitle": {
+    "message": "Jika antivirus anda menyekat enjin"
+  },
+  "guideAvBody": {
+    "message": "Enjin memaparkan tetingkap lut sinar di atas tetingkap lain dan memajukan input tetikus, jadi sesetengah antivirus (cth. Avast <code>Win64:Evo-gen</code>) mungkin tersilap menandakan binaan yang tidak ditandatangani. Ia tidak pernah menggunakan rangkaian atau mengumpul fail."
+  },
+  "guideAv1": {
+    "message": "Pulihkan <code>GhostPiP.Engine.exe</code> daripada kuarantin antivirus anda."
+  },
+  "guideAv2": {
+    "message": "Tambahkan folder <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> pada pengecualian antivirus anda."
+  },
+  "guideAv3": {
+    "message": "Jalankan <code>install.bat</code> sekali lagi."
+  },
+  "guideControlsTitle": {
+    "message": "Kawalan"
+  },
+  "guideMoveResize": {
+    "message": "Alih · ubah saiz"
+  },
+  "guideMoveResizeHow": {
+    "message": "Seret sambil menahan <kbd class=\"hold\">Ctrl+Alt</kbd> / seret tepi"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + roda tetikus"
+  },
+  "guideToggleClickThrough": {
+    "message": "Togol klik tembus"
+  },
+  "guideToggleDodge": {
+    "message": "Togol elak automatik"
+  },
+  "guideHotkeyNote": {
+    "message": "Tukar kekunci pintas dan kekunci pengubah suai daripada ikon GhostPiP pada bar alat → Kekunci pintas & kawalan."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (sedang berjalan)"
+  },
+  "engineTrayEmergency": {
+    "message": "Kecemasan: matikan klik tembus"
+  },
+  "engineTrayExit": {
+    "message": "Keluar"
+  }
 }

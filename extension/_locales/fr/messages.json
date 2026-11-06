@@ -1,96 +1,318 @@
 {
-  "extName": {"message":"GhostPiP"},
-  "extDescription": {"message":"PiP transparent, traversable par les clics, qui esquive votre curseur. Compatible YouTube, Twitch, CHZZK, SOOP et plus."},
-  "cmdClickThrough": {"message":"Activer/désactiver le clic traversant (mode fantôme)"},
-  "cmdDodge": {"message":"Activer/désactiver l'esquive auto intelligente"},
-  "cmdMute": {"message":"Couper/rétablir le son de l'onglet vidéo"},
-  "modeWeb": {"message":"Mode Web"},
-  "modeWebTitle": {"message":"Mode Web (superposition dans l'onglet du navigateur)"},
-  "modeFull": {"message":"Mode complet"},
-  "modeFullTitle": {"message":"Mode complet (fenêtre PiP sur le bureau)"},
-  "chatShow": {"message":"Afficher le chat"},
-  "chatHide": {"message":"Masquer le chat"},
-  "chatResizeTitle": {"message":"Faites glisser pour redimensionner le chat"},
-  "chatSmaller": {"message":"Chat plus petit"},
-  "chatBigger": {"message":"Chat plus grand"},
-  "skipAd": {"message":"Passer la pub ⏭"},
-  "btnReturn": {"message":"Revenir"},
-  "btnSourceTab": {"message":"Onglet source"},
-  "hudOpacity": {"message":"Opacité $PCT$%","placeholders":{"pct":{"content":"$1","example":"70"}}},
-  "hudOpacityWheel": {"message":"Opacité $PCT$% (molette pour régler) · $SIZE$","placeholders":{"pct":{"content":"$1","example":"70"},"size":{"content":"$2","example":"480×270"}}},
-  "popupSubtitle": {"message":"Superposition PiP transparente"},
-  "badgeOff": {"message":"Désactivé"},
-  "engineConnected": {"message":"Moteur connecté"},
-  "masterTitle": {"message":"Activer GhostPiP"},
-  "masterHint": {"message":"Le désactiver ferme la superposition et le moteur"},
-  "sectionBasic": {"message":"Paramètres de base"},
-  "clickThrough": {"message":"Clic traversant"},
-  "autoDodge": {"message":"Esquive auto"},
-  "showChatFull": {"message":"Afficher le chat en mode complet"},
-  "allSites": {"message":"Utiliser sur tous les sites"},
-  "allSitesHint": {"message":"Si désactivé, n'apparaît que sur les sites de streaming et OTT"},
-  "allSitesList": {"message":"YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"},
-  "opacity": {"message":"Opacité"},
-  "wheelHint": {"message":"Vous pouvez aussi utiliser la molette sur la vidéo · en clic traversant, utilisez $HOLD$ + molette","placeholders":{"hold":{"content":"$1","example":"Ctrl+Alt"}}},
-  "toggleMute": {"message":"Couper/rétablir le son"},
-  "dodgeSettings": {"message":"Paramètres d'esquive"},
-  "dodgeCorners": {"message":"Coins autorisés"},
-  "cornerTL": {"message":"En haut à gauche"},
-  "cornerTR": {"message":"En haut à droite"},
-  "cornerBL": {"message":"En bas à gauche"},
-  "cornerBR": {"message":"En bas à droite"},
-  "dodgeCornersHint": {"message":"Désactivez les coins qui doivent rester visibles, comme la mini-carte d'un jeu. Les coins verrouillés sont requis par la position d'origine ou la direction d'esquive."},
-  "homePosition": {"message":"Position d'origine"},
-  "dodgeAxis": {"message":"Direction d'esquive"},
-  "axisFree": {"message":"Libre (4 directions)"},
-  "axisVertical": {"message":"Haut / bas"},
-  "axisHorizontal": {"message":"Gauche / droite"},
-  "dodgeStyle": {"message":"Style d'esquive"},
-  "styleMove": {"message":"Aller dans un autre coin"},
-  "styleFade": {"message":"Fondu"},
-  "autoReturn": {"message":"Retour auto"},
-  "autoReturnHint": {"message":"Revient à la position d'origine quand la souris s'éloigne"},
-  "hotkeySettings": {"message":"Raccourcis et commandes"},
-  "holdKey": {"message":"Touche de modification"},
-  "mute": {"message":"Couper le son"},
-  "hotkeyBtnTitle": {"message":"Cliquez, puis appuyez sur un nouveau raccourci"},
-  "hotkeyRecording": {"message":"Appuyez sur les touches · Esc pour annuler"},
-  "tipHold": {"message":"Même en clic traversant, maintenez $HOLD$ pour déplacer, redimensionner ou régler l'opacité avec la molette.","placeholders":{"hold":{"content":"$1","example":"Ctrl+Alt"}}},
-  "tipNativePip": {"message":"L'opacité, le clic traversant et l'esquive auto s'appliquent aussi aux fenêtres ouvertes avec le bouton PiP du site ou du navigateur."},
-  "resetHotkeys": {"message":"Rétablir les valeurs par défaut"},
-  "bannerTitle": {"message":"Flotte aussi par-dessus les jeux PC"},
-  "bannerSub": {"message":"Installer GhostPiP Engine"},
-  "warnProtocol": {"message":"Version du protocole du moteur incompatible"},
-  "warnHotkeyConflict": {"message":"Conflit de raccourci : $KEYS$","placeholders":{"keys":{"content":"$1","example":"Alt+G"}}},
-  "guideTitle": {"message":"Bien démarrer avec GhostPiP"},
-  "guideSub": {"message":"Un PiP transparent, à clic traversant et esquive auto, qui ne masque jamais votre écran"},
-  "guideCheckingEngine": {"message":"Vérification du moteur…"},
-  "guideChecking": {"message":"Vérification…"},
-  "guideEngineMissing": {"message":"Moteur non installé"},
-  "guideStep1Title": {"message":"1. Survolez une vidéo"},
-  "guideStep1Body": {"message":"Deux boutons apparaissent en haut des vidéos sur YouTube, Twitch, CHZZK, SOOP et les services OTT comme Netflix, Disney+ et Prime Video."},
-  "guideWebModeBody": {"message":"Une fenêtre flottante dans l'onglet du navigateur. Elle vous suit dans les autres onglets. Rien à installer."},
-  "guideFullModeBody": {"message":"Une fenêtre qui flotte par-dessus les jeux et les autres programmes. L'opacité, le clic traversant et l'esquive auto nécessitent <b>GhostPiP Engine</b>."},
-  "guideStep2Title": {"message":"2. Installer GhostPiP Engine (mode complet, Windows)"},
-  "guideStep2a": {"message":"Décompressez <code>GhostPiP-Full-Package.zip</code> (ou <code>GhostPiP-Engine-win-x64.zip</code>)."},
-  "guideStep2b": {"message":"Double-cliquez sur <code>engine\\install.bat</code>. Aucun droit d'administrateur requis."},
-  "guideStep2c": {"message":"C'est terminé lorsque l'état en haut à droite de cette page passe à <b>Moteur connecté</b>."},
-  "guideRetry": {"message":"Revérifier la connexion"},
-  "guideEngineNote": {"message":"Le moteur s'installe dans <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, ne s'exécute que lorsque le mode complet est ouvert dans Chrome et se ferme quand vous désactivez GhostPiP. Pour le supprimer, exécutez <code>uninstall.bat</code>."},
-  "guideAvTitle": {"message":"Si votre antivirus bloque le moteur"},
-  "guideAvBody": {"message":"Le moteur affiche une fenêtre transparente par-dessus les autres et transmet les entrées de la souris : certains antivirus (p. ex. Avast <code>Win64:Evo-gen</code>) peuvent donc signaler à tort les versions non signées. Il n'utilise jamais le réseau et ne collecte aucun fichier."},
-  "guideAv1": {"message":"Restaurez <code>GhostPiP.Engine.exe</code> depuis la quarantaine de votre antivirus."},
-  "guideAv2": {"message":"Ajoutez le dossier <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> aux exclusions de votre antivirus."},
-  "guideAv3": {"message":"Exécutez de nouveau <code>install.bat</code>."},
-  "guideControlsTitle": {"message":"Commandes"},
-  "guideMoveResize": {"message":"Déplacer · redimensionner"},
-  "guideMoveResizeHow": {"message":"Faites glisser en maintenant <kbd class=\"hold\">Ctrl+Alt</kbd> / faites glisser un bord"},
-  "guideOpacityHow": {"message":"<kbd class=\"hold\">Ctrl+Alt</kbd> + molette"},
-  "guideToggleClickThrough": {"message":"Activer/désactiver le clic traversant"},
-  "guideToggleDodge": {"message":"Activer/désactiver l'esquive auto"},
-  "guideHotkeyNote": {"message":"Modifiez les raccourcis et la touche de modification via l'icône GhostPiP de la barre d'outils → Raccourcis et commandes."},
-  "engineTrayTip": {"message":"GhostPiP Engine"},
-  "engineTrayActive": {"message":"GhostPiP Engine (en cours d'exécution)"},
-  "engineTrayEmergency": {"message":"Urgence : désactiver le clic traversant"},
-  "engineTrayExit": {"message":"Quitter"}
+  "extName": {
+    "message": "GhostPiP"
+  },
+  "extDescription": {
+    "message": "PiP transparent, traversable par les clics, qui esquive votre curseur. Pour sites de streaming et vidéo."
+  },
+  "cmdClickThrough": {
+    "message": "Activer/désactiver le clic traversant (mode fantôme)"
+  },
+  "cmdDodge": {
+    "message": "Activer/désactiver l'esquive auto intelligente"
+  },
+  "cmdMute": {
+    "message": "Couper/rétablir le son de l'onglet vidéo"
+  },
+  "modeWeb": {
+    "message": "Mode Web"
+  },
+  "modeWebTitle": {
+    "message": "Mode Web (superposition dans l'onglet du navigateur)"
+  },
+  "modeFull": {
+    "message": "Mode complet"
+  },
+  "modeFullTitle": {
+    "message": "Mode complet (fenêtre PiP sur le bureau)"
+  },
+  "chatShow": {
+    "message": "Afficher le chat"
+  },
+  "chatHide": {
+    "message": "Masquer le chat"
+  },
+  "chatResizeTitle": {
+    "message": "Faites glisser pour redimensionner le chat"
+  },
+  "chatSmaller": {
+    "message": "Chat plus petit"
+  },
+  "chatBigger": {
+    "message": "Chat plus grand"
+  },
+  "skipAd": {
+    "message": "Passer la pub ⏭"
+  },
+  "btnReturn": {
+    "message": "Revenir"
+  },
+  "btnSourceTab": {
+    "message": "Onglet source"
+  },
+  "hudOpacity": {
+    "message": "Opacité $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "70"
+      }
+    }
+  },
+  "hudOpacityWheel": {
+    "message": "Opacité $PCT$% (molette pour régler) · $SIZE$",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "70"
+      },
+      "size": {
+        "content": "$2",
+        "example": "480×270"
+      }
+    }
+  },
+  "popupSubtitle": {
+    "message": "Superposition PiP transparente"
+  },
+  "badgeOff": {
+    "message": "Désactivé"
+  },
+  "engineConnected": {
+    "message": "Moteur connecté"
+  },
+  "masterTitle": {
+    "message": "Activer GhostPiP"
+  },
+  "masterHint": {
+    "message": "Le désactiver ferme la superposition et le moteur"
+  },
+  "sectionBasic": {
+    "message": "Paramètres de base"
+  },
+  "clickThrough": {
+    "message": "Clic traversant"
+  },
+  "autoDodge": {
+    "message": "Esquive auto"
+  },
+  "showChatFull": {
+    "message": "Afficher le chat en mode complet"
+  },
+  "allSites": {
+    "message": "Utiliser sur tous les sites"
+  },
+  "allSitesHint": {
+    "message": "Si désactivé, n'apparaît que sur les sites de streaming et OTT"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll"
+  },
+  "opacity": {
+    "message": "Opacité"
+  },
+  "wheelHint": {
+    "message": "Vous pouvez aussi utiliser la molette sur la vidéo · en clic traversant, utilisez $HOLD$ + molette",
+    "placeholders": {
+      "hold": {
+        "content": "$1",
+        "example": "Ctrl+Alt"
+      }
+    }
+  },
+  "toggleMute": {
+    "message": "Couper/rétablir le son"
+  },
+  "dodgeSettings": {
+    "message": "Paramètres d'esquive"
+  },
+  "dodgeCorners": {
+    "message": "Coins autorisés"
+  },
+  "cornerTL": {
+    "message": "En haut à gauche"
+  },
+  "cornerTR": {
+    "message": "En haut à droite"
+  },
+  "cornerBL": {
+    "message": "En bas à gauche"
+  },
+  "cornerBR": {
+    "message": "En bas à droite"
+  },
+  "dodgeCornersHint": {
+    "message": "Désactivez les coins qui doivent rester visibles, comme la mini-carte d'un jeu. Les coins verrouillés sont requis par la position d'origine ou la direction d'esquive."
+  },
+  "homePosition": {
+    "message": "Position d'origine"
+  },
+  "dodgeAxis": {
+    "message": "Direction d'esquive"
+  },
+  "axisFree": {
+    "message": "Libre (4 directions)"
+  },
+  "axisVertical": {
+    "message": "Haut / bas"
+  },
+  "axisHorizontal": {
+    "message": "Gauche / droite"
+  },
+  "dodgeStyle": {
+    "message": "Style d'esquive"
+  },
+  "styleMove": {
+    "message": "Aller dans un autre coin"
+  },
+  "styleFade": {
+    "message": "Fondu"
+  },
+  "autoReturn": {
+    "message": "Retour auto"
+  },
+  "autoReturnHint": {
+    "message": "Revient à la position d'origine quand la souris s'éloigne"
+  },
+  "hotkeySettings": {
+    "message": "Raccourcis et commandes"
+  },
+  "holdKey": {
+    "message": "Touche de modification"
+  },
+  "mute": {
+    "message": "Couper le son"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Cliquez, puis appuyez sur un nouveau raccourci"
+  },
+  "hotkeyRecording": {
+    "message": "Appuyez sur les touches · Esc pour annuler"
+  },
+  "tipHold": {
+    "message": "Même en clic traversant, maintenez $HOLD$ pour déplacer, redimensionner ou régler l'opacité avec la molette.",
+    "placeholders": {
+      "hold": {
+        "content": "$1",
+        "example": "Ctrl+Alt"
+      }
+    }
+  },
+  "tipNativePip": {
+    "message": "L'opacité, le clic traversant et l'esquive auto s'appliquent aussi aux fenêtres ouvertes avec le bouton PiP du site ou du navigateur."
+  },
+  "resetHotkeys": {
+    "message": "Rétablir les valeurs par défaut"
+  },
+  "bannerTitle": {
+    "message": "Flotte aussi par-dessus les jeux PC"
+  },
+  "bannerSub": {
+    "message": "Installer GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "Version du protocole du moteur incompatible"
+  },
+  "warnHotkeyConflict": {
+    "message": "Conflit de raccourci : $KEYS$",
+    "placeholders": {
+      "keys": {
+        "content": "$1",
+        "example": "Alt+G"
+      }
+    }
+  },
+  "guideTitle": {
+    "message": "Bien démarrer avec GhostPiP"
+  },
+  "guideSub": {
+    "message": "Un PiP transparent, à clic traversant et esquive auto, qui ne masque jamais votre écran"
+  },
+  "guideCheckingEngine": {
+    "message": "Vérification du moteur…"
+  },
+  "guideChecking": {
+    "message": "Vérification…"
+  },
+  "guideEngineMissing": {
+    "message": "Moteur non installé"
+  },
+  "guideStep1Title": {
+    "message": "1. Survolez une vidéo"
+  },
+  "guideStep1Body": {
+    "message": "Deux boutons apparaissent en haut des vidéos sur YouTube, Twitch, CHZZK, SOOP et les services OTT comme Netflix, Disney+ et Prime Video."
+  },
+  "guideWebModeBody": {
+    "message": "Une fenêtre flottante dans l'onglet du navigateur. Elle vous suit dans les autres onglets. Rien à installer."
+  },
+  "guideFullModeBody": {
+    "message": "Une fenêtre qui flotte par-dessus les jeux et les autres programmes. L'opacité, le clic traversant et l'esquive auto nécessitent <b>GhostPiP Engine</b>."
+  },
+  "guideStep2Title": {
+    "message": "2. Installer GhostPiP Engine (mode complet, Windows)"
+  },
+  "guideStep2a": {
+    "message": "Décompressez <code>GhostPiP-Full-Package.zip</code> (ou <code>GhostPiP-Engine-win-x64.zip</code>)."
+  },
+  "guideStep2b": {
+    "message": "Double-cliquez sur <code>engine\\install.bat</code>. Aucun droit d'administrateur requis."
+  },
+  "guideStep2c": {
+    "message": "C'est terminé lorsque l'état en haut à droite de cette page passe à <b>Moteur connecté</b>."
+  },
+  "guideRetry": {
+    "message": "Revérifier la connexion"
+  },
+  "guideEngineNote": {
+    "message": "Le moteur s'installe dans <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, ne s'exécute que lorsque le mode complet est ouvert dans Chrome et se ferme quand vous désactivez GhostPiP. Pour le supprimer, exécutez <code>uninstall.bat</code>."
+  },
+  "guideAvTitle": {
+    "message": "Si votre antivirus bloque le moteur"
+  },
+  "guideAvBody": {
+    "message": "Le moteur affiche une fenêtre transparente par-dessus les autres et transmet les entrées de la souris : certains antivirus (p. ex. Avast <code>Win64:Evo-gen</code>) peuvent donc signaler à tort les versions non signées. Il n'utilise jamais le réseau et ne collecte aucun fichier."
+  },
+  "guideAv1": {
+    "message": "Restaurez <code>GhostPiP.Engine.exe</code> depuis la quarantaine de votre antivirus."
+  },
+  "guideAv2": {
+    "message": "Ajoutez le dossier <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> aux exclusions de votre antivirus."
+  },
+  "guideAv3": {
+    "message": "Exécutez de nouveau <code>install.bat</code>."
+  },
+  "guideControlsTitle": {
+    "message": "Commandes"
+  },
+  "guideMoveResize": {
+    "message": "Déplacer · redimensionner"
+  },
+  "guideMoveResizeHow": {
+    "message": "Faites glisser en maintenant <kbd class=\"hold\">Ctrl+Alt</kbd> / faites glisser un bord"
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + molette"
+  },
+  "guideToggleClickThrough": {
+    "message": "Activer/désactiver le clic traversant"
+  },
+  "guideToggleDodge": {
+    "message": "Activer/désactiver l'esquive auto"
+  },
+  "guideHotkeyNote": {
+    "message": "Modifiez les raccourcis et la touche de modification via l'icône GhostPiP de la barre d'outils → Raccourcis et commandes."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine"
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (en cours d'exécution)"
+  },
+  "engineTrayEmergency": {
+    "message": "Urgence : désactiver le clic traversant"
+  },
+  "engineTrayExit": {
+    "message": "Quitter"
+  }
 }

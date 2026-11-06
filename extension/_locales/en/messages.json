@@ -1,115 +1,341 @@
 {
-  "extName": { "message": "GhostPiP", "description": "Product name. Do not translate." },
-  "extDescription": { "message": "Transparent, click-through PiP that dodges your cursor. Works with YouTube, Twitch, CHZZK, SOOP and more.", "description": "Store summary. Must stay under 132 characters." },
-  "cmdClickThrough": { "message": "Toggle click-through (Ghost Mode)" },
-  "cmdDodge": { "message": "Toggle smart auto-dodge" },
-  "cmdMute": { "message": "Toggle mute on the video tab" },
-
-  "modeWeb": { "message": "Web mode", "description": "Floating video inside the browser tab." },
-  "modeWebTitle": { "message": "Web mode (overlay inside the browser tab)" },
-  "modeFull": { "message": "Full mode", "description": "Floating video window on the desktop, outside the browser." },
-  "modeFullTitle": { "message": "Full mode (desktop PiP window)" },
-  "chatShow": { "message": "Show chat" },
-  "chatHide": { "message": "Hide chat" },
-  "chatResizeTitle": { "message": "Drag to resize the chat" },
-  "chatSmaller": { "message": "Smaller chat" },
-  "chatBigger": { "message": "Larger chat" },
-  "skipAd": { "message": "Skip ad ⏭" },
-  "btnReturn": { "message": "Return", "description": "Closes the floating video and returns it to the page." },
-  "btnSourceTab": { "message": "Source tab", "description": "Switches to the tab the video comes from." },
+  "extName": {
+    "message": "GhostPiP",
+    "description": "Product name. Do not translate."
+  },
+  "extDescription": {
+    "message": "Transparent, click-through PiP that dodges your cursor. Works across streaming and video sites.",
+    "description": "Store summary. Must stay under 132 characters."
+  },
+  "cmdClickThrough": {
+    "message": "Toggle click-through (Ghost Mode)"
+  },
+  "cmdDodge": {
+    "message": "Toggle smart auto-dodge"
+  },
+  "cmdMute": {
+    "message": "Toggle mute on the video tab"
+  },
+  "modeWeb": {
+    "message": "Web mode",
+    "description": "Floating video inside the browser tab."
+  },
+  "modeWebTitle": {
+    "message": "Web mode (overlay inside the browser tab)"
+  },
+  "modeFull": {
+    "message": "Full mode",
+    "description": "Floating video window on the desktop, outside the browser."
+  },
+  "modeFullTitle": {
+    "message": "Full mode (desktop PiP window)"
+  },
+  "chatShow": {
+    "message": "Show chat"
+  },
+  "chatHide": {
+    "message": "Hide chat"
+  },
+  "chatResizeTitle": {
+    "message": "Drag to resize the chat"
+  },
+  "chatSmaller": {
+    "message": "Smaller chat"
+  },
+  "chatBigger": {
+    "message": "Larger chat"
+  },
+  "skipAd": {
+    "message": "Skip ad ⏭"
+  },
+  "btnReturn": {
+    "message": "Return",
+    "description": "Closes the floating video and returns it to the page."
+  },
+  "btnSourceTab": {
+    "message": "Source tab",
+    "description": "Switches to the tab the video comes from."
+  },
   "hudOpacity": {
     "message": "Opacity $PCT$%",
-    "placeholders": { "pct": { "content": "$1", "example": "70" } }
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "70"
+      }
+    }
   },
   "hudOpacityWheel": {
     "message": "Opacity $PCT$% (scroll to adjust) · $SIZE$",
-    "placeholders": { "pct": { "content": "$1", "example": "70" }, "size": { "content": "$2", "example": "480×270" } }
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "70"
+      },
+      "size": {
+        "content": "$2",
+        "example": "480×270"
+      }
+    }
   },
-
-  "popupSubtitle": { "message": "Transparent PiP overlay" },
-  "badgeOff": { "message": "Off" },
-  "engineConnected": { "message": "Engine connected" },
-  "masterTitle": { "message": "Enable GhostPiP" },
-  "masterHint": { "message": "Turning this off closes the overlay and the engine" },
-  "sectionBasic": { "message": "Basic settings" },
-  "clickThrough": { "message": "Click-through", "description": "Mouse clicks pass through the video window to what is behind it." },
-  "autoDodge": { "message": "Auto-dodge", "description": "The video window moves away when the mouse comes near." },
-  "showChatFull": { "message": "Show chat in Full mode" },
-  "allSites": { "message": "Use on all sites" },
-  "allSitesHint": { "message": "When off, it only appears on streaming and OTT sites" },
-  "allSitesList": { "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll", "description": "Brand names. Keep them as they are." },
-  "opacity": { "message": "Opacity" },
+  "popupSubtitle": {
+    "message": "Transparent PiP overlay"
+  },
+  "badgeOff": {
+    "message": "Off"
+  },
+  "engineConnected": {
+    "message": "Engine connected"
+  },
+  "masterTitle": {
+    "message": "Enable GhostPiP"
+  },
+  "masterHint": {
+    "message": "Turning this off closes the overlay and the engine"
+  },
+  "sectionBasic": {
+    "message": "Basic settings"
+  },
+  "clickThrough": {
+    "message": "Click-through",
+    "description": "Mouse clicks pass through the video window to what is behind it."
+  },
+  "autoDodge": {
+    "message": "Auto-dodge",
+    "description": "The video window moves away when the mouse comes near."
+  },
+  "showChatFull": {
+    "message": "Show chat in Full mode"
+  },
+  "allSites": {
+    "message": "Use on all sites"
+  },
+  "allSitesHint": {
+    "message": "When off, it only appears on streaming and OTT sites"
+  },
+  "allSitesList": {
+    "message": "YouTube, CHZZK, SOOP, Twitch, Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, Series On, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll",
+    "description": "Brand names. Keep them as they are."
+  },
+  "opacity": {
+    "message": "Opacity"
+  },
   "wheelHint": {
     "message": "You can also scroll over the video · during click-through use $HOLD$ + scroll",
-    "placeholders": { "hold": { "content": "$1", "example": "Ctrl+Alt" } }
+    "placeholders": {
+      "hold": {
+        "content": "$1",
+        "example": "Ctrl+Alt"
+      }
+    }
   },
-  "toggleMute": { "message": "Toggle mute" },
-  "dodgeSettings": { "message": "Dodge settings" },
-  "dodgeCorners": { "message": "Corners it may move to" },
-  "cornerTL": { "message": "Top left" },
-  "cornerTR": { "message": "Top right" },
-  "cornerBL": { "message": "Bottom left" },
-  "cornerBR": { "message": "Bottom right" },
-  "dodgeCornersHint": { "message": "Turn off corners that must stay visible, like a game minimap. Locked corners are needed by the home position or dodge direction." },
-  "homePosition": { "message": "Home position" },
-  "dodgeAxis": { "message": "Dodge direction" },
-  "axisFree": { "message": "Free (4 directions)" },
-  "axisVertical": { "message": "Up / down" },
-  "axisHorizontal": { "message": "Left / right" },
-  "dodgeStyle": { "message": "Dodge style" },
-  "styleMove": { "message": "Move to another corner" },
-  "styleFade": { "message": "Fade out" },
-  "autoReturn": { "message": "Auto-return" },
-  "autoReturnHint": { "message": "Goes back to the home position when the mouse leaves" },
-  "hotkeySettings": { "message": "Hotkeys & controls" },
-  "holdKey": { "message": "Modifier key", "description": "Key held down to interact with the video window while click-through is on." },
-  "mute": { "message": "Mute" },
-  "hotkeyBtnTitle": { "message": "Click, then press a new shortcut" },
-  "hotkeyRecording": { "message": "Press keys · Esc to cancel" },
+  "toggleMute": {
+    "message": "Toggle mute"
+  },
+  "dodgeSettings": {
+    "message": "Dodge settings"
+  },
+  "dodgeCorners": {
+    "message": "Corners it may move to"
+  },
+  "cornerTL": {
+    "message": "Top left"
+  },
+  "cornerTR": {
+    "message": "Top right"
+  },
+  "cornerBL": {
+    "message": "Bottom left"
+  },
+  "cornerBR": {
+    "message": "Bottom right"
+  },
+  "dodgeCornersHint": {
+    "message": "Turn off corners that must stay visible, like a game minimap. Locked corners are needed by the home position or dodge direction."
+  },
+  "homePosition": {
+    "message": "Home position"
+  },
+  "dodgeAxis": {
+    "message": "Dodge direction"
+  },
+  "axisFree": {
+    "message": "Free (4 directions)"
+  },
+  "axisVertical": {
+    "message": "Up / down"
+  },
+  "axisHorizontal": {
+    "message": "Left / right"
+  },
+  "dodgeStyle": {
+    "message": "Dodge style"
+  },
+  "styleMove": {
+    "message": "Move to another corner"
+  },
+  "styleFade": {
+    "message": "Fade out"
+  },
+  "autoReturn": {
+    "message": "Auto-return"
+  },
+  "autoReturnHint": {
+    "message": "Goes back to the home position when the mouse leaves"
+  },
+  "hotkeySettings": {
+    "message": "Hotkeys & controls"
+  },
+  "holdKey": {
+    "message": "Modifier key",
+    "description": "Key held down to interact with the video window while click-through is on."
+  },
+  "mute": {
+    "message": "Mute"
+  },
+  "hotkeyBtnTitle": {
+    "message": "Click, then press a new shortcut"
+  },
+  "hotkeyRecording": {
+    "message": "Press keys · Esc to cancel"
+  },
   "tipHold": {
     "message": "Even during click-through, hold $HOLD$ to move, resize, or change the opacity with the scroll wheel.",
-    "placeholders": { "hold": { "content": "$1", "example": "Ctrl+Alt" } }
+    "placeholders": {
+      "hold": {
+        "content": "$1",
+        "example": "Ctrl+Alt"
+      }
+    }
   },
-  "tipNativePip": { "message": "Opacity, click-through and auto-dodge also apply to windows opened with a site's or the browser's own PiP button." },
-  "resetHotkeys": { "message": "Reset to defaults" },
-  "bannerTitle": { "message": "Float over PC games too" },
-  "bannerSub": { "message": "Install GhostPiP Engine" },
-  "warnProtocol": { "message": "Engine protocol version mismatch" },
+  "tipNativePip": {
+    "message": "Opacity, click-through and auto-dodge also apply to windows opened with a site's or the browser's own PiP button."
+  },
+  "resetHotkeys": {
+    "message": "Reset to defaults"
+  },
+  "bannerTitle": {
+    "message": "Float over PC games too"
+  },
+  "bannerSub": {
+    "message": "Install GhostPiP Engine"
+  },
+  "warnProtocol": {
+    "message": "Engine protocol version mismatch"
+  },
   "warnHotkeyConflict": {
     "message": "Hotkey conflict: $KEYS$",
-    "placeholders": { "keys": { "content": "$1", "example": "Alt+G" } }
+    "placeholders": {
+      "keys": {
+        "content": "$1",
+        "example": "Alt+G"
+      }
+    }
   },
-
-  "guideTitle": { "message": "Getting started with GhostPiP" },
-  "guideSub": { "message": "Transparent, click-through, auto-dodging PiP that never blocks your screen" },
-  "guideCheckingEngine": { "message": "Checking engine…" },
-  "guideChecking": { "message": "Checking…" },
-  "guideEngineMissing": { "message": "Engine not installed" },
-  "guideStep1Title": { "message": "1. Hover over a video" },
-  "guideStep1Body": { "message": "Two buttons appear at the top of videos on YouTube, Twitch, CHZZK, SOOP and OTT services such as Netflix, Disney+ and Prime Video." },
-  "guideWebModeBody": { "message": "A floating window inside the browser tab. It follows you to other tabs. Nothing to install." },
-  "guideFullModeBody": { "message": "A window that floats over games and other programs. Opacity, click-through and auto-dodge need <b>GhostPiP Engine</b>.", "description": "Keep the HTML tags." },
-  "guideStep2Title": { "message": "2. Install GhostPiP Engine (Full mode, Windows)" },
-  "guideStep2a": { "message": "Unzip <code>GhostPiP-Full-Package.zip</code> (or <code>GhostPiP-Engine-win-x64.zip</code>).", "description": "Keep the HTML tags and file names." },
-  "guideStep2b": { "message": "Double-click <code>engine\\install.bat</code>. No administrator rights needed.", "description": "Keep the HTML tags and file names." },
-  "guideStep2c": { "message": "You're done when the status at the top right of this page changes to <b>Engine connected</b>.", "description": "Keep the HTML tags. Use the same wording as engineConnected." },
-  "guideRetry": { "message": "Check connection again" },
-  "guideEngineNote": { "message": "The engine installs to <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, runs only while Chrome has Full mode open, and exits when you turn GhostPiP off. To remove it, run <code>uninstall.bat</code>.", "description": "Keep the HTML tags and paths." },
-  "guideAvTitle": { "message": "If your antivirus blocks the engine" },
-  "guideAvBody": { "message": "The engine shows a transparent window over other windows and forwards mouse input, so some antivirus products (e.g. Avast <code>Win64:Evo-gen</code>) may flag unsigned builds by mistake. It never uses the network or collects files.", "description": "Keep the HTML tags." },
-  "guideAv1": { "message": "Restore <code>GhostPiP.Engine.exe</code> from your antivirus quarantine.", "description": "Keep the HTML tags." },
-  "guideAv2": { "message": "Add the <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> folder to your antivirus exclusions.", "description": "Keep the HTML tags." },
-  "guideAv3": { "message": "Run <code>install.bat</code> again.", "description": "Keep the HTML tags." },
-  "guideControlsTitle": { "message": "Controls" },
-  "guideMoveResize": { "message": "Move · resize" },
-  "guideMoveResizeHow": { "message": "Drag while holding <kbd class=\"hold\">Ctrl+Alt</kbd> / drag an edge", "description": "Keep the HTML tags." },
-  "guideOpacityHow": { "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + mouse wheel", "description": "Keep the HTML tags." },
-  "guideToggleClickThrough": { "message": "Toggle click-through" },
-  "guideToggleDodge": { "message": "Toggle auto-dodge" },
-  "guideHotkeyNote": { "message": "Change hotkeys and the modifier key from the GhostPiP toolbar icon → Hotkeys & controls." },
-
-  "engineTrayTip": { "message": "GhostPiP Engine", "description": "Windows tray icon tooltip. Keep the product name." },
-  "engineTrayActive": { "message": "GhostPiP Engine (running)" },
-  "engineTrayEmergency": { "message": "Emergency: turn off click-through", "description": "Tray menu item. The hotkey is appended in parentheses." },
-  "engineTrayExit": { "message": "Exit" }
+  "guideTitle": {
+    "message": "Getting started with GhostPiP"
+  },
+  "guideSub": {
+    "message": "Transparent, click-through, auto-dodging PiP that never blocks your screen"
+  },
+  "guideCheckingEngine": {
+    "message": "Checking engine…"
+  },
+  "guideChecking": {
+    "message": "Checking…"
+  },
+  "guideEngineMissing": {
+    "message": "Engine not installed"
+  },
+  "guideStep1Title": {
+    "message": "1. Hover over a video"
+  },
+  "guideStep1Body": {
+    "message": "Two buttons appear at the top of videos on YouTube, Twitch, CHZZK, SOOP and OTT services such as Netflix, Disney+ and Prime Video."
+  },
+  "guideWebModeBody": {
+    "message": "A floating window inside the browser tab. It follows you to other tabs. Nothing to install."
+  },
+  "guideFullModeBody": {
+    "message": "A window that floats over games and other programs. Opacity, click-through and auto-dodge need <b>GhostPiP Engine</b>.",
+    "description": "Keep the HTML tags."
+  },
+  "guideStep2Title": {
+    "message": "2. Install GhostPiP Engine (Full mode, Windows)"
+  },
+  "guideStep2a": {
+    "message": "Unzip <code>GhostPiP-Full-Package.zip</code> (or <code>GhostPiP-Engine-win-x64.zip</code>).",
+    "description": "Keep the HTML tags and file names."
+  },
+  "guideStep2b": {
+    "message": "Double-click <code>engine\\install.bat</code>. No administrator rights needed.",
+    "description": "Keep the HTML tags and file names."
+  },
+  "guideStep2c": {
+    "message": "You're done when the status at the top right of this page changes to <b>Engine connected</b>.",
+    "description": "Keep the HTML tags. Use the same wording as engineConnected."
+  },
+  "guideRetry": {
+    "message": "Check connection again"
+  },
+  "guideEngineNote": {
+    "message": "The engine installs to <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code>, runs only while Chrome has Full mode open, and exits when you turn GhostPiP off. To remove it, run <code>uninstall.bat</code>.",
+    "description": "Keep the HTML tags and paths."
+  },
+  "guideAvTitle": {
+    "message": "If your antivirus blocks the engine"
+  },
+  "guideAvBody": {
+    "message": "The engine shows a transparent window over other windows and forwards mouse input, so some antivirus products (e.g. Avast <code>Win64:Evo-gen</code>) may flag unsigned builds by mistake. It never uses the network or collects files.",
+    "description": "Keep the HTML tags."
+  },
+  "guideAv1": {
+    "message": "Restore <code>GhostPiP.Engine.exe</code> from your antivirus quarantine.",
+    "description": "Keep the HTML tags."
+  },
+  "guideAv2": {
+    "message": "Add the <code>%LOCALAPPDATA%\\Programs\\GhostPiP</code> folder to your antivirus exclusions.",
+    "description": "Keep the HTML tags."
+  },
+  "guideAv3": {
+    "message": "Run <code>install.bat</code> again.",
+    "description": "Keep the HTML tags."
+  },
+  "guideControlsTitle": {
+    "message": "Controls"
+  },
+  "guideMoveResize": {
+    "message": "Move · resize"
+  },
+  "guideMoveResizeHow": {
+    "message": "Drag while holding <kbd class=\"hold\">Ctrl+Alt</kbd> / drag an edge",
+    "description": "Keep the HTML tags."
+  },
+  "guideOpacityHow": {
+    "message": "<kbd class=\"hold\">Ctrl+Alt</kbd> + mouse wheel",
+    "description": "Keep the HTML tags."
+  },
+  "guideToggleClickThrough": {
+    "message": "Toggle click-through"
+  },
+  "guideToggleDodge": {
+    "message": "Toggle auto-dodge"
+  },
+  "guideHotkeyNote": {
+    "message": "Change hotkeys and the modifier key from the GhostPiP toolbar icon → Hotkeys & controls."
+  },
+  "engineTrayTip": {
+    "message": "GhostPiP Engine",
+    "description": "Windows tray icon tooltip. Keep the product name."
+  },
+  "engineTrayActive": {
+    "message": "GhostPiP Engine (running)"
+  },
+  "engineTrayEmergency": {
+    "message": "Emergency: turn off click-through",
+    "description": "Tray menu item. The hotkey is appended in parentheses."
+  },
+  "engineTrayExit": {
+    "message": "Exit"
+  }
 }
