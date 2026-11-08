@@ -5,8 +5,8 @@ import zlib from "node:zlib";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const DIST = path.join(ROOT, "dist");
-const PUBLISH_DIR = path.join(ROOT, "engine/bin/Release/net8.0-windows/win-x64/publish");
-const STAGE_DIR = path.join(ROOT, "engine/bin/Release/net8.0-windows/win-x64/stage");
+const PUBLISH_DIR = path.join(ROOT, "engine/bin/Release/net10.0-windows/win-x64/publish");
+const STAGE_DIR = path.join(ROOT, "engine/bin/Release/net10.0-windows/win-x64/stage");
 const EXE_NAME = "GhostPiP.Engine.exe";
 const INSTALLER_FILES = ["install.ps1", "install.bat", "uninstall.ps1", "uninstall.bat"];
 const sleep = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
@@ -138,7 +138,7 @@ const killEngine = () => {
     sleep(300);
   } catch {}
 };
-fs.mkdirSync(path.join(ROOT, "engine/bin/Release/net8.0-windows/win-x64/native"), { recursive: true });
+fs.mkdirSync(path.join(ROOT, "engine/bin/Release/net10.0-windows/win-x64/native"), { recursive: true });
 const NO_BUILD = process.argv.includes("--no-build");
 let exe;
 if (NO_BUILD) {
