@@ -8,7 +8,24 @@ public sealed record HotkeyConfig(
     string ClickThrough,
     string Dodge,
     string Mute,
-    string Hold
+    string Hold,
+    string PlayPause = "Alt+Space",
+    string SeekBack = "Alt+Left",
+    string SeekForward = "Alt+Right",
+    string Peek = "Alt+P"
+);
+
+public sealed record MediaConfig(
+    bool Enabled,
+    int SeekSec,
+    bool WheelVolume
+);
+
+public sealed record PeekConfig(
+    bool Enabled,
+    string Key,
+    double IdleOpacity,
+    double ActiveOpacity
 );
 
 public sealed record Settings(
@@ -17,9 +34,24 @@ public sealed record Settings(
     DodgeConfig Dodge,
     HotkeyConfig Hotkeys,
     bool Enabled = true,
-    bool ShowChat = true
+    bool ShowChat = true,
+    MediaConfig? Media = null,
+    PeekConfig? Peek = null
 )
 {
+    public static readonly MediaConfig DefaultMedia = new(
+        Enabled: true,
+        SeekSec: 5,
+        WheelVolume: true
+    );
+
+    public static readonly PeekConfig DefaultPeek = new(
+        Enabled: false,
+        Key: "Alt",
+        IdleOpacity: 0.0,
+        ActiveOpacity: 0.8
+    );
+
     public static readonly Settings Defaults = new(
         ClickThrough: false,
         Opacity: 0.7,
@@ -41,20 +73,31 @@ public sealed record Settings(
             ClickThrough: "Alt+G",
             Dodge: "Alt+Shift+D",
             Mute: "Alt+M",
-            Hold: "Ctrl+Alt"
+            Hold: "Ctrl+Alt",
+            PlayPause: "Alt+Space",
+            SeekBack: "Alt+Left",
+            SeekForward: "Alt+Right",
+            Peek: "Alt+P"
         ),
         Enabled: true,
-        ShowChat: true
+        ShowChat: true,
+        Media: DefaultMedia,
+        Peek: DefaultPeek
     );
+
+    public MediaConfig EffectiveMedia => Media ?? DefaultMedia;
+    public PeekConfig EffectivePeek => Peek ?? DefaultPeek;
 }
 
 public readonly record struct PipRect(double X, double Y, double W, double H);
 
 public abstract record IncomingMessage(string Type);
 public sealed record StateMessage(Settings Settings) : IncomingMessage("STATE");
-public sealed record PipOpenedMessage(int TabId, string Kind, PipRect Rect, double Dpr) : IncomingMessage("PIP_OPENED");
+public sealed record PipOpenedMessage(int TabId, string Kind, PipRect Rect, double Dpr, PipRect? SavedBounds = null) : IncomingMessage("PIP_OPENED");
 public sealed record PipClosedMessage(int TabId) : IncomingMessage("PIP_CLOSED");
-public sealed record PipResizeMessage(int DeltaH, double Dpr) : IncomingMessage("PIP_RESIZE");
+public sealed record PipResizeMessage(int DeltaH, double Dpr, int TabId = -1) : IncomingMessage("PIP_RESIZE");
+public sealed record PipSubtitleMessage(int TabId, string Text) : IncomingMessage("PIP_SUBTITLE");
+public sealed record SessionStateMessage(bool Active) : IncomingMessage("SESSION_STATE");
 public sealed record PingMessage() : IncomingMessage("PING");
 public sealed record TrayStrings(string Tip, string Active, string Emergency, string Exit)
 {
@@ -62,21 +105,26 @@ public sealed record TrayStrings(string Tip, string Active, string Emergency, st
 }
 public sealed record LocaleMessage(TrayStrings Tray) : IncomingMessage("LOCALE");
 public sealed record TestCursorMessage(DodgePoint? Cursor) : IncomingMessage("TEST_CURSOR");
-public sealed record TestWheelMessage(int X, int Y, int Delta, bool Hold = true) : IncomingMessage("TEST_WHEEL");
+public sealed record TestWheelMessage(int X, int Y, int Delta, bool Hold = true, bool AltOnly = false) : IncomingMessage("TEST_WHEEL");
 public sealed record TestHoldMessage(bool? Hold) : IncomingMessage("TEST_HOLD");
+public sealed record TestPeekMessage(bool? Peek) : IncomingMessage("TEST_PEEK");
+public sealed record TestHotkeyMessage(string Action) : IncomingMessage("TEST_HOTKEY");
+public sealed record TestMouseMessage(string Event, int X, int Y) : IncomingMessage("TEST_MOUSE");
 
 public abstract record OutgoingMessage(string Type);
 public sealed record HelloMessage(string EngineVersion, string[] HotkeyErrors) : OutgoingMessage("HELLO");
-public sealed record IntentMessage(string Intent, string? Corner = null, double? Opacity = null) : OutgoingMessage("INTENT");
+public sealed record IntentMessage(string Intent, string? Corner = null, double? Opacity = null, double? Delta = null, int? TabId = null) : OutgoingMessage("INTENT");
+public sealed record PeekStateMessage(bool Active) : OutgoingMessage("PEEK_STATE");
 public sealed record PipBoundMessage(int TabId) : OutgoingMessage("PIP_BOUND");
 public sealed record PipLostMessage(int TabId, string Reason) : OutgoingMessage("PIP_LOST");
 public sealed record PipHoverMessage(int TabId, bool Hovered) : OutgoingMessage("PIP_HOVER");
+public sealed record PipBoundsMessage(int TabId, string Kind, int X, int Y, int W, int H) : OutgoingMessage("PIP_BOUNDS");
 public sealed record PongMessage() : OutgoingMessage("PONG");
 
 public static class Protocol
 {
     public const int ProtocolVersion = 1;
-    public const string EngineVersion = "1.0.0";
+    public const string EngineVersion = "1.1.0";
 
     public static bool TryParseIncoming(string json, out IncomingMessage? message) =>
         TryParseIncoming(Encoding.UTF8.GetBytes(json), out message);
@@ -107,6 +155,8 @@ public static class Protocol
                 "PIP_OPENED" => TryParsePipOpened(root, out message),
                 "PIP_CLOSED" => TryParsePipClosed(root, out message),
                 "PIP_RESIZE" => TryParsePipResize(root, out message),
+                "PIP_SUBTITLE" => TryParsePipSubtitle(root, out message),
+                "SESSION_STATE" => TryParseSessionState(root, out message),
                 "PING" => SetResult(new PingMessage(), out message),
                 "LOCALE" => TryParseLocale(root, out message),
                 "TEST_CURSOR" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
@@ -115,6 +165,12 @@ public static class Protocol
                     TryParseTestWheel(root, out message),
                 "TEST_HOLD" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
                     TryParseTestHold(root, out message),
+                "TEST_PEEK" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
+                    TryParseTestPeek(root, out message),
+                "TEST_HOTKEY" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
+                    TryParseTestHotkey(root, out message),
+                "TEST_MOUSE" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
+                    TryParseTestMouse(root, out message),
                 _ => false
             };
         }
@@ -192,7 +248,42 @@ public static class Protocol
             string hkHold = GetStringOrDefault(hkEl, "hold", def.Hotkeys.Hold);
             if (hkHold is not ("Ctrl+Alt" or "Ctrl+Shift" or "Alt+Shift" or "Ctrl" or "Alt" or "Shift"))
                 return false;
-            hotkeys = new HotkeyConfig(hkClick, hkDodge, hkMute, hkHold);
+            string hkPlayPause = GetStringOrDefault(hkEl, "playPause", def.Hotkeys.PlayPause);
+            string hkSeekBack = GetStringOrDefault(hkEl, "seekBack", def.Hotkeys.SeekBack);
+            string hkSeekForward = GetStringOrDefault(hkEl, "seekForward", def.Hotkeys.SeekForward);
+            string hkPeek = GetStringOrDefault(hkEl, "peek", def.Hotkeys.Peek);
+            hotkeys = new HotkeyConfig(hkClick, hkDodge, hkMute, hkHold, hkPlayPause, hkSeekBack, hkSeekForward, hkPeek);
+        }
+
+        var media = Settings.DefaultMedia;
+        if (settingsEl.TryGetProperty("media", out var mediaEl) && mediaEl.ValueKind == JsonValueKind.Object)
+        {
+            bool mediaEnabled = GetBoolOrDefault(mediaEl, "enabled", Settings.DefaultMedia.Enabled);
+            int rawSeekSec = GetIntOrDefault(mediaEl, "seekSec", Settings.DefaultMedia.SeekSec);
+            int seekSec = rawSeekSec == 10 ? 10 : 5;
+            bool wheelVolume = GetBoolOrDefault(mediaEl, "wheelVolume", Settings.DefaultMedia.WheelVolume);
+            media = new MediaConfig(mediaEnabled, seekSec, wheelVolume);
+        }
+
+        var peek = Settings.DefaultPeek;
+        if (settingsEl.TryGetProperty("peek", out var peekEl) && peekEl.ValueKind == JsonValueKind.Object)
+        {
+            bool peekEnabled = GetBoolOrDefault(peekEl, "enabled", Settings.DefaultPeek.Enabled);
+            string peekKey = GetStringOrDefault(peekEl, "key", Settings.DefaultPeek.Key);
+            if (peekKey is not ("Alt" or "Mouse4" or "Mouse5" or "Backquote" or "Ctrl" or "Shift" or "Ctrl+Alt"))
+                return false;
+
+            double rawIdle = GetDoubleOrDefault(peekEl, "idleOpacity", Settings.DefaultPeek.IdleOpacity);
+            if (!double.IsFinite(rawIdle))
+                rawIdle = Settings.DefaultPeek.IdleOpacity;
+            double idleOpacity = Math.Clamp(rawIdle, 0.0, 0.2);
+
+            double rawActive = GetDoubleOrDefault(peekEl, "activeOpacity", Settings.DefaultPeek.ActiveOpacity);
+            if (!double.IsFinite(rawActive))
+                rawActive = Settings.DefaultPeek.ActiveOpacity;
+            double activeOpacity = Math.Clamp(rawActive, 0.1, 1.0);
+
+            peek = new PeekConfig(peekEnabled, peekKey, idleOpacity, activeOpacity);
         }
 
         var dodge = new DodgeConfig(
@@ -210,7 +301,7 @@ public static class Protocol
             IgnoreScreenEdgePx: ignoreScreenEdgePx
         );
 
-        message = new StateMessage(new Settings(clickThrough, opacity, dodge, hotkeys, enabled, showChat));
+        message = new StateMessage(new Settings(clickThrough, opacity, dodge, hotkeys, enabled, showChat, media, peek));
         return true;
     }
 
@@ -221,7 +312,7 @@ public static class Protocol
             return false;
 
         string kind = GetStringOrDefault(root, "kind", "");
-        if (kind is not ("native" or "document"))
+        if (kind is not ("native" or "document" or "popup"))
             return false;
 
         if (!root.TryGetProperty("rect", out var rectEl) || rectEl.ValueKind != JsonValueKind.Object)
@@ -238,7 +329,18 @@ public static class Protocol
         if (!double.IsFinite(dpr) || dpr <= 0)
             dpr = 1.0;
 
-        message = new PipOpenedMessage(tabId, kind, new PipRect(x, y, w, h), dpr);
+        PipRect? savedBounds = null;
+        if (root.TryGetProperty("savedBounds", out var sbEl) && sbEl.ValueKind == JsonValueKind.Object)
+        {
+            double sx = GetDoubleOrDefault(sbEl, "x", double.NaN);
+            double sy = GetDoubleOrDefault(sbEl, "y", double.NaN);
+            double sw = GetDoubleOrDefault(sbEl, "w", 0.0);
+            double sh = GetDoubleOrDefault(sbEl, "h", 0.0);
+            if (double.IsFinite(sx) && double.IsFinite(sy) && double.IsFinite(sw) && double.IsFinite(sh) && sw >= 0 && sh >= 0)
+                savedBounds = new PipRect(sx, sy, sw, sh);
+        }
+
+        message = new PipOpenedMessage(tabId, kind, new PipRect(x, y, w, h), dpr, savedBounds);
         return true;
     }
 
@@ -258,8 +360,33 @@ public static class Protocol
         double dpr = GetDoubleOrDefault(root, "dpr", 1.0);
         if (!double.IsFinite(dpr) || dpr <= 0)
             dpr = 1.0;
+        int tabId = GetIntOrDefault(root, "tabId", -1);
 
-        message = new PipResizeMessage(deltaH, dpr);
+        message = new PipResizeMessage(deltaH, dpr, tabId);
+        return true;
+    }
+
+    private static bool TryParsePipSubtitle(JsonElement root, out IncomingMessage? message)
+    {
+        message = null;
+        if (!root.TryGetProperty("tabId", out var tabEl) || tabEl.ValueKind != JsonValueKind.Number || !tabEl.TryGetInt32(out int tabId) || tabId < -1)
+            return false;
+
+        string text = GetStringOrDefault(root, "text", "");
+        if (text.Length > 1000)
+            text = text[..1000];
+
+        message = new PipSubtitleMessage(tabId, text);
+        return true;
+    }
+
+    private static bool TryParseSessionState(JsonElement root, out IncomingMessage? message)
+    {
+        message = null;
+        if (!root.TryGetProperty("active", out var actEl) || actEl.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+            return false;
+
+        message = new SessionStateMessage(actEl.GetBoolean());
         return true;
     }
 
@@ -292,7 +419,8 @@ public static class Protocol
             return false;
         }
         bool hold = GetBoolOrDefault(root, "hold", true);
-        message = new TestWheelMessage(x, y, delta, hold);
+        bool altOnly = GetBoolOrDefault(root, "altOnly", false);
+        message = new TestWheelMessage(x, y, delta, hold, altOnly);
         return true;
     }
 
@@ -304,6 +432,45 @@ public static class Protocol
             return true;
         }
         message = new TestHoldMessage(null);
+        return true;
+    }
+
+    private static bool TryParseTestPeek(JsonElement root, out IncomingMessage? message)
+    {
+        if (root.TryGetProperty("peek", out var pEl) && pEl.ValueKind is JsonValueKind.True or JsonValueKind.False)
+        {
+            message = new TestPeekMessage(pEl.GetBoolean());
+            return true;
+        }
+        message = new TestPeekMessage(null);
+        return true;
+    }
+
+    private static bool TryParseTestHotkey(JsonElement root, out IncomingMessage? message)
+    {
+        message = null;
+        string id = GetStringOrDefault(root, "id", "");
+        if (string.IsNullOrEmpty(id))
+            id = GetStringOrDefault(root, "action", "");
+        if (id is not ("playPause" or "seekBack" or "seekForward" or "peek" or "clickThrough" or "dodge" or "mute"))
+            return false;
+
+        message = new TestHotkeyMessage(id);
+        return true;
+    }
+
+    private static bool TryParseTestMouse(JsonElement root, out IncomingMessage? message)
+    {
+        message = null;
+        string ev = GetStringOrDefault(root, "event", "");
+        if (ev is not ("down" or "move" or "up"))
+            return false;
+        if (!root.TryGetProperty("x", out var xEl) || xEl.ValueKind != JsonValueKind.Number || !xEl.TryGetInt32(out int x) ||
+            !root.TryGetProperty("y", out var yEl) || yEl.ValueKind != JsonValueKind.Number || !yEl.TryGetInt32(out int y))
+        {
+            return false;
+        }
+        message = new TestMouseMessage(ev, x, y);
         return true;
     }
 
@@ -368,6 +535,14 @@ public static class Protocol
                         writer.WriteString("corner", intent.Corner);
                     if (intent.Opacity is double op && double.IsFinite(op))
                         writer.WriteNumber("opacity", Math.Round(Math.Clamp(op, 0.1, 1.0), 2, MidpointRounding.AwayFromZero));
+                    if (intent.Delta is double d && double.IsFinite(d))
+                        writer.WriteNumber("delta", Math.Round(d, 2, MidpointRounding.AwayFromZero));
+                    if (intent.TabId is int tid && tid >= 0)
+                        writer.WriteNumber("tabId", tid);
+                    break;
+
+                case PeekStateMessage peekState:
+                    writer.WriteBoolean("active", peekState.Active);
                     break;
 
                 case PipBoundMessage bound:
@@ -382,6 +557,15 @@ public static class Protocol
                 case PipHoverMessage hover:
                     writer.WriteNumber("tabId", hover.TabId);
                     writer.WriteBoolean("hovered", hover.Hovered);
+                    break;
+
+                case PipBoundsMessage bounds:
+                    writer.WriteNumber("tabId", bounds.TabId);
+                    writer.WriteString("kind", bounds.Kind);
+                    writer.WriteNumber("x", bounds.X);
+                    writer.WriteNumber("y", bounds.Y);
+                    writer.WriteNumber("w", bounds.W);
+                    writer.WriteNumber("h", bounds.H);
                     break;
 
                 case PongMessage:

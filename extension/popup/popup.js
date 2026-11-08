@@ -17,6 +17,8 @@
     enabled: document.getElementById("enabled"),
     clickThrough: document.getElementById("clickThrough"),
     dodgeEnabled: document.getElementById("dodgeEnabled"),
+    peekEnabled: document.getElementById("peekEnabled"),
+    mediaEnabled: document.getElementById("mediaEnabled"),
     showChat: document.getElementById("showChat"),
     allSites: document.getElementById("allSites"),
     opacity: document.getElementById("opacity"),
@@ -25,6 +27,7 @@
     toggleMute: document.getElementById("toggleMute"),
     kbdClickThrough: document.getElementById("kbdClickThrough"),
     kbdDodge: document.getElementById("kbdDodge"),
+    kbdPeek: document.getElementById("kbdPeek"),
     kbdMute: document.getElementById("kbdMute"),
     tipHold: document.getElementById("tipHold"),
     hotkeyBtns: [...document.querySelectorAll("button[data-hotkey]")],
@@ -34,9 +37,20 @@
     axis: document.getElementById("axis"),
     style: document.getElementById("style"),
     autoReturn: document.getElementById("autoReturn"),
+    peekKey: document.getElementById("peekKey"),
+    peekIdleOpacity: document.getElementById("peekIdleOpacity"),
+    peekActiveOpacity: document.getElementById("peekActiveOpacity"),
+    seekSec: document.getElementById("seekSec"),
+    wheelVolume: document.getElementById("wheelVolume"),
     hold: document.getElementById("hold"),
     engineBanner: document.getElementById("engineBanner"),
   };
+
+  if (els.seekSec) {
+    for (const opt of els.seekSec.options) {
+      opt.textContent = t("mediaSeekSec", [opt.value]);
+    }
+  }
 
   let recordingTarget = null;
 
@@ -49,9 +63,28 @@
     return chrome.runtime.sendMessage({ v: 1, ...msg });
   }
 
+  function selectNearestOption(selectEl, targetNum) {
+    if (!selectEl) return;
+    const exact = String(targetNum);
+    if ([...selectEl.options].some((o) => o.value === exact)) {
+      selectEl.value = exact;
+      return;
+    }
+    let bestVal = selectEl.options[0]?.value ?? exact;
+    let bestDist = Infinity;
+    for (const opt of selectEl.options) {
+      const dist = Math.abs(Number(opt.value) - targetNum);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestVal = opt.value;
+      }
+    }
+    selectEl.value = bestVal;
+  }
+
   function render() {
     const { settings, engine } = state;
-    const { dodge, hotkeys } = settings;
+    const { dodge, media, peek, hotkeys } = settings;
     const isEnabled = Boolean(settings.enabled);
 
     document.body.toggleAttribute("data-disabled", !isEnabled);
@@ -73,6 +106,8 @@
     if (els.enabled) els.enabled.checked = isEnabled;
     els.clickThrough.checked = settings.clickThrough;
     els.dodgeEnabled.checked = dodge.enabled;
+    if (els.peekEnabled) els.peekEnabled.checked = Boolean(peek.enabled);
+    if (els.mediaEnabled) els.mediaEnabled.checked = Boolean(media.enabled);
     if (els.showChat) els.showChat.checked = Boolean(settings.showChat);
     els.allSites.checked = settings.allSites;
 
@@ -98,6 +133,11 @@
 
     els.style.value = dodge.style;
     els.autoReturn.checked = dodge.autoReturn;
+    if (els.peekKey) els.peekKey.value = peek.key;
+    selectNearestOption(els.peekIdleOpacity, peek.idleOpacity);
+    selectNearestOption(els.peekActiveOpacity, peek.activeOpacity);
+    if (els.seekSec) els.seekSec.value = String(media.seekSec);
+    if (els.wheelVolume) els.wheelVolume.checked = Boolean(media.wheelVolume);
     els.hold.value = hotkeys.hold;
     if (els.wheelSubHint) {
       els.wheelSubHint.textContent = t("wheelHint", [hotkeys.hold]);
@@ -107,6 +147,7 @@
     }
     if (els.kbdClickThrough) els.kbdClickThrough.textContent = hotkeys.clickThrough;
     if (els.kbdDodge) els.kbdDodge.textContent = hotkeys.dodge;
+    if (els.kbdPeek) els.kbdPeek.textContent = hotkeys.peek;
     if (els.kbdMute) els.kbdMute.textContent = hotkeys.mute;
     for (const btn of els.hotkeyBtns) {
       const key = btn.dataset.hotkey;
@@ -146,6 +187,8 @@
   els.enabled?.addEventListener("change", () => applyPatch({ enabled: els.enabled.checked }));
   els.clickThrough.addEventListener("change", () => applyIntent("TOGGLE_CLICK_THROUGH"));
   els.dodgeEnabled.addEventListener("change", () => applyIntent("TOGGLE_DODGE"));
+  els.peekEnabled?.addEventListener("change", () => applyPatch({ peek: { enabled: els.peekEnabled.checked } }));
+  els.mediaEnabled?.addEventListener("change", () => applyPatch({ media: { enabled: els.mediaEnabled.checked } }));
   els.showChat?.addEventListener("change", () => applyPatch({ showChat: els.showChat.checked }));
   els.allSites.addEventListener("change", () => applyPatch({ allSites: els.allSites.checked }));
 
@@ -172,6 +215,17 @@
   els.axis.addEventListener("change", () => applyPatch({ dodge: { axis: els.axis.value } }));
   els.style.addEventListener("change", () => applyPatch({ dodge: { style: els.style.value } }));
   els.autoReturn.addEventListener("change", () => applyPatch({ dodge: { autoReturn: els.autoReturn.checked } }));
+  els.peekKey?.addEventListener("change", () => applyPatch({ peek: { key: els.peekKey.value } }));
+  els.peekIdleOpacity?.addEventListener("change", () =>
+    applyPatch({ peek: { idleOpacity: Number(els.peekIdleOpacity.value) } }),
+  );
+  els.peekActiveOpacity?.addEventListener("change", () =>
+    applyPatch({ peek: { activeOpacity: Number(els.peekActiveOpacity.value) } }),
+  );
+  els.seekSec?.addEventListener("change", () => applyPatch({ media: { seekSec: Number(els.seekSec.value) } }));
+  els.wheelVolume?.addEventListener("change", () =>
+    applyPatch({ media: { wheelVolume: els.wheelVolume.checked } }),
+  );
   els.hold.addEventListener("change", () => applyPatch({ hotkeys: { hold: els.hold.value } }));
 
   for (const btn of els.hotkeyBtns) {

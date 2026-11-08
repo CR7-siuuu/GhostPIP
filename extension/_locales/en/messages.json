@@ -337,5 +337,77 @@
   },
   "engineTrayExit": {
     "message": "Exit"
+  },
+  "peekMode": {
+    "message": "Peek Mode"
+  },
+  "peekModeHint": {
+    "message": "Hide until you hold the peek key"
+  },
+  "peekSettings": {
+    "message": "Peek Mode settings"
+  },
+  "peekKey": {
+    "message": "Hold-to-peek key"
+  },
+  "peekKeyMouse4": {
+    "message": "Mouse Side 1 (Back)"
+  },
+  "peekKeyMouse5": {
+    "message": "Mouse Side 2 (Forward)"
+  },
+  "peekIdleOpacity": {
+    "message": "Idle visibility"
+  },
+  "peekIdleZero": {
+    "message": "0% (Hidden)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Faint)"
+  },
+  "peekActiveOpacity": {
+    "message": "Peek opacity"
+  },
+  "mediaRemote": {
+    "message": "In-game Remote"
+  },
+  "mediaRemoteHint": {
+    "message": "Focus-free play, seek & volume"
+  },
+  "mediaSettings": {
+    "message": "In-game Remote settings"
+  },
+  "mediaSeekStep": {
+    "message": "Seek step"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$s",
+    "placeholders": {
+      "sec": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Alt + Wheel volume"
+  },
+  "mediaPlayPause": {
+    "message": "Play / Pause"
+  },
+  "mediaSeekBack": {
+    "message": "Seek backward"
+  },
+  "mediaSeekForward": {
+    "message": "Seek forward"
+  },
+  "hudVolume": {
+    "message": "Volume $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "80"
+      }
+    }
   }
 }

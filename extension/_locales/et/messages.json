@@ -314,5 +314,75 @@
   },
   "engineTrayExit": {
     "message": "Välju"
+  },
+  "peekMode": {
+    "message": "Piilumisrežiim"
+  },
+  "peekModeHint": {
+    "message": "Peida, kuni hoiad piilumisklahvi all"
+  },
+  "peekSettings": {
+    "message": "Piilumisrežiimi seaded"
+  },
+  "peekKey": {
+    "message": "Allhoitav klahv"
+  },
+  "peekKeyMouse4": {
+    "message": "Hiire külgklahv 1 (Tagasi)"
+  },
+  "peekKeyMouse5": {
+    "message": "Hiire külgklahv 2 (Edasi)"
+  },
+  "peekIdleOpacity": {
+    "message": "Nähtavus jõudeolekus"
+  },
+  "peekIdleZero": {
+    "message": "0% (Peidetud)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Õrn)"
+  },
+  "peekActiveOpacity": {
+    "message": "Läbipaistmatus hoidmisel"
+  },
+  "mediaRemote": {
+    "message": "Mängusisene pult"
+  },
+  "mediaRemoteHint": {
+    "message": "Esitus, kerimine ja helitugevus fookust kaotamata"
+  },
+  "mediaSettings": {
+    "message": "Mängusisese puldi seaded"
+  },
+  "mediaSeekStep": {
+    "message": "Kerimissamm"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Helitugevus Alt + rullikuga"
+  },
+  "mediaPlayPause": {
+    "message": "Esita / Peata"
+  },
+  "mediaSeekBack": {
+    "message": "Keri tagasi"
+  },
+  "mediaSeekForward": {
+    "message": "Keri edasi"
+  },
+  "hudVolume": {
+    "message": "Helitugevus $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

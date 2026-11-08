@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Ondoka"
+  },
+  "peekMode": {
+    "message": "Hali ya Kuchungulia"
+  },
+  "peekModeHint": {
+    "message": "Ficha hadi ushikilie kitufe cha kuchungulia"
+  },
+  "peekSettings": {
+    "message": "Mipangilio ya Hali ya Kuchungulia"
+  },
+  "peekKey": {
+    "message": "Kitufe cha kushikilia ili kuona"
+  },
+  "peekKeyMouse4": {
+    "message": "Kitufe cha Pembeni cha Kipanya 1 (Nyuma)"
+  },
+  "peekKeyMouse5": {
+    "message": "Kitufe cha Pembeni cha Kipanya 2 (Mbele)"
+  },
+  "peekIdleOpacity": {
+    "message": "Mwonekano wa kawaida"
+  },
+  "peekIdleZero": {
+    "message": "0% (Imefichwa)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Hafifu)"
+  },
+  "peekActiveOpacity": {
+    "message": "Uwazi unaposhikilia"
+  },
+  "mediaRemote": {
+    "message": "Kidhibiti Ndani ya Mchezo"
+  },
+  "mediaRemoteHint": {
+    "message": "Cheza, sogeza na sauti bila kupoteza umakini"
+  },
+  "mediaSettings": {
+    "message": "Mipangilio ya Kidhibiti cha Mchezo"
+  },
+  "mediaSeekStep": {
+    "message": "Hatua ya kusogeza"
+  },
+  "mediaSeekSec": {
+    "message": "Sek $SEC$",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Sauti kwa Alt + Gurudumu"
+  },
+  "mediaPlayPause": {
+    "message": "Cheza / Sitisha"
+  },
+  "mediaSeekBack": {
+    "message": "Rudisha nyuma"
+  },
+  "mediaSeekForward": {
+    "message": "Sogeza mbele"
+  },
+  "hudVolume": {
+    "message": "Sauti $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

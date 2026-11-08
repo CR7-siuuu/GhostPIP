@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Έξοδος"
+  },
+  "peekMode": {
+    "message": "Λειτουργία γρήγορης ματιάς"
+  },
+  "peekModeHint": {
+    "message": "Απόκρυψη μέχρι να κρατήσετε πατημένο το πλήκτρο"
+  },
+  "peekSettings": {
+    "message": "Ρυθμίσεις γρήγορης ματιάς"
+  },
+  "peekKey": {
+    "message": "Πλήκτρο παρατεταμένης εμφάνισης"
+  },
+  "peekKeyMouse4": {
+    "message": "Πλαϊνό κουμπί ποντικιού 1 (Πίσω)"
+  },
+  "peekKeyMouse5": {
+    "message": "Πλαϊνό κουμπί ποντικιού 2 (Εμπρός)"
+  },
+  "peekIdleOpacity": {
+    "message": "Ορατότητα σε αδράνεια"
+  },
+  "peekIdleZero": {
+    "message": "0% (Κρυφό)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Αχνό)"
+  },
+  "peekActiveOpacity": {
+    "message": "Αδιαφάνεια κατά το πάτημα"
+  },
+  "mediaRemote": {
+    "message": "Τηλεχειριστήριο εντός παιχνιδιού"
+  },
+  "mediaRemoteHint": {
+    "message": "Αναπαραγωγή, μετακίνηση & ένταση χωρίς απώλεια εστίασης"
+  },
+  "mediaSettings": {
+    "message": "Ρυθμίσεις τηλεχειριστηρίου"
+  },
+  "mediaSeekStep": {
+    "message": "Βήμα μετακίνησης"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ δευτ.",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Ένταση με Alt + ροδέλα"
+  },
+  "mediaPlayPause": {
+    "message": "Αναπαραγωγή / Παύση"
+  },
+  "mediaSeekBack": {
+    "message": "Μετακίνηση πίσω"
+  },
+  "mediaSeekForward": {
+    "message": "Μετακίνηση εμπρός"
+  },
+  "hudVolume": {
+    "message": "Ένταση $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

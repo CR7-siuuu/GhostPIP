@@ -35,8 +35,14 @@
     transition: left 0.15s ease-out, top 0.15s ease-out, opacity 0.15s ease-out !important;
   }
 
-  .ghostpip-inpage-target:popover-open[data-gp-pass] {
+  .ghostpip-inpage-target:popover-open[data-gp-pass],
+  .ghostpip-inpage-target:popover-open[data-click-through] {
     pointer-events: none !important;
+  }
+
+  .ghostpip-inpage-target:popover-open[data-gp-peek-outline] {
+    outline: 1px solid rgba(56, 189, 248, 0.35) !important;
+    outline-offset: -1px !important;
   }
 
   .ghostpip-inpage-target:popover-open[data-gp-drag] {
@@ -50,7 +56,11 @@
 
   #ghostpip-launcher:popover-open,
   #ghostpip-controller:popover-open,
-  #ghostpip-chat:popover-open {
+  .ghostpip-controller:popover-open,
+  #ghostpip-chat:popover-open,
+  .ghostpip-chat:popover-open,
+  #ghostpip-subtitles:popover-open,
+  .ghostpip-subtitles:popover-open {
     position: fixed !important;
     inset: auto !important;
     left: var(--gp-x) !important;
@@ -58,6 +68,8 @@
     margin: 0 !important;
     padding: 0 !important;
     border: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
     background: transparent !important;
     overflow: visible !important;
     display: block !important;
@@ -67,7 +79,8 @@
     pointer-events: auto !important;
   }
 
-  #ghostpip-chat:popover-open {
+  #ghostpip-chat:popover-open,
+  .ghostpip-chat:popover-open {
     width: var(--gp-w) !important;
     height: var(--gp-h) !important;
     opacity: var(--gp-opacity, 1) !important;
@@ -76,15 +89,20 @@
     transition: none !important;
   }
 
-  #ghostpip-chat:popover-open[data-gp-anim]:not([data-gp-drag]) {
+  #ghostpip-chat:popover-open[data-gp-anim]:not([data-gp-drag]),
+  .ghostpip-chat:popover-open[data-gp-anim]:not([data-gp-drag]) {
     transition: left 0.15s ease-out, top 0.15s ease-out, opacity 0.15s ease-out !important;
   }
 
-  #ghostpip-chat:popover-open[data-gp-pass] {
+  #ghostpip-chat:popover-open[data-gp-pass],
+  .ghostpip-chat:popover-open[data-gp-pass],
+  #ghostpip-chat:popover-open[data-click-through],
+  .ghostpip-chat:popover-open[data-click-through] {
     pointer-events: none !important;
   }
 
-  #ghostpip-chat:popover-open[data-gp-drag] {
+  #ghostpip-chat:popover-open[data-gp-drag],
+  .ghostpip-chat:popover-open[data-gp-drag] {
     transition: none !important;
   }
 
@@ -94,20 +112,43 @@
     transform: translateX(-50%) !important;
   }
 
-  #ghostpip-controller:popover-open {
+  #ghostpip-controller:popover-open,
+  .ghostpip-controller:popover-open {
     width: var(--gp-w) !important;
     height: var(--gp-h) !important;
     transform: none !important;
     pointer-events: none !important;
   }
 
-  #ghostpip-controller:popover-open[data-bar-only] {
+  #ghostpip-controller:popover-open[data-bar-only],
+  .ghostpip-controller:popover-open[data-bar-only],
+  #ghostpip-controller:popover-open[data-click-through],
+  .ghostpip-controller:popover-open[data-click-through] {
     pointer-events: none !important;
+  }
+
+  #ghostpip-subtitles:popover-open,
+  .ghostpip-subtitles:popover-open {
+    width: var(--gp-w) !important;
+    height: var(--gp-h) !important;
+    opacity: var(--gp-opacity, 1) !important;
+    transform: none !important;
+    pointer-events: none !important;
+    transition: none !important;
+  }
+
+  #ghostpip-subtitles:popover-open[data-gp-anim]:not([data-gp-drag]),
+  .ghostpip-subtitles:popover-open[data-gp-anim]:not([data-gp-drag]) {
+    transition: left 0.15s ease-out, top 0.15s ease-out, opacity 0.15s ease-out !important;
   }
 
   html[data-gp-disabled] #ghostpip-launcher:popover-open,
   html[data-gp-disabled] #ghostpip-controller:popover-open,
-  html[data-gp-disabled] #ghostpip-chat:popover-open {
+  html[data-gp-disabled] .ghostpip-controller:popover-open,
+  html[data-gp-disabled] #ghostpip-chat:popover-open,
+  html[data-gp-disabled] .ghostpip-chat:popover-open,
+  html[data-gp-disabled] #ghostpip-subtitles:popover-open,
+  html[data-gp-disabled] .ghostpip-subtitles:popover-open {
     display: none !important;
     visibility: hidden !important;
     pointer-events: none !important;

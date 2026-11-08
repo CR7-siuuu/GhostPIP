@@ -13,6 +13,10 @@ public sealed class Hotkeys : IDisposable
     public const int ID_CLICK_THROUGH = 1;
     public const int ID_DODGE = 2;
     public const int ID_MUTE = 3;
+    public const int ID_PEEK = 4;
+    public const int ID_PLAY_PAUSE = 5;
+    public const int ID_SEEK_BACK = 6;
+    public const int ID_SEEK_FORWARD = 7;
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool RegisterHotKey(nint hWnd, int id, uint fsModifiers, uint vk);
@@ -23,46 +27,116 @@ public sealed class Hotkeys : IDisposable
     private readonly nint _hwnd;
     private readonly HashSet<int> _registeredIds = new();
     private HotkeyConfig? _currentConfig;
+    private bool _mediaActive;
+    private bool _lastApplyHadErrors;
+    private string? _mediaPlayPause;
+    private string? _mediaSeekBack;
+    private string? _mediaSeekForward;
 
     public Hotkeys(nint hwnd)
     {
         _hwnd = hwnd;
     }
 
-    public string[] Apply(HotkeyConfig config)
+    public string[] Apply(HotkeyConfig config, bool registerMedia = false)
     {
-        if (_currentConfig is not null && _currentConfig == config && _registeredIds.Count == 3)
+        if (_currentConfig is not null &&
+            _currentConfig == config &&
+            _mediaActive == registerMedia &&
+            !_lastApplyHadErrors)
+        {
             return [];
+        }
 
         UnregisterAll();
         _currentConfig = config;
+        _mediaActive = registerMedia;
+        _mediaPlayPause = registerMedia ? config.PlayPause : null;
+        _mediaSeekBack = registerMedia ? config.SeekBack : null;
+        _mediaSeekForward = registerMedia ? config.SeekForward : null;
 
         var errors = new List<string>();
-        TryRegisterOne(ID_CLICK_THROUGH, config.ClickThrough, errors);
-        TryRegisterOne(ID_DODGE, config.Dodge, errors);
-        TryRegisterOne(ID_MUTE, config.Mute, errors);
+        TryRegisterOne(ID_CLICK_THROUGH, config.ClickThrough, noRepeat: true, errors);
+        TryRegisterOne(ID_DODGE, config.Dodge, noRepeat: true, errors);
+        TryRegisterOne(ID_MUTE, config.Mute, noRepeat: true, errors);
+        TryRegisterOne(ID_PEEK, config.Peek, noRepeat: true, errors);
+
+        if (registerMedia)
+        {
+            TryRegisterOne(ID_PLAY_PAUSE, config.PlayPause, noRepeat: true, errors);
+            TryRegisterOne(ID_SEEK_BACK, config.SeekBack, noRepeat: false, errors);
+            TryRegisterOne(ID_SEEK_FORWARD, config.SeekForward, noRepeat: false, errors);
+        }
+
+        _lastApplyHadErrors = errors.Count > 0;
         return errors.ToArray();
     }
 
-    private void TryRegisterOne(int id, string spec, List<string> errors)
+    public void SetMediaActive(HotkeyConfig config, bool active)
+    {
+        if (!active)
+        {
+            UnregisterOne(ID_PLAY_PAUSE);
+            UnregisterOne(ID_SEEK_BACK);
+            UnregisterOne(ID_SEEK_FORWARD);
+            _mediaActive = false;
+            _mediaPlayPause = null;
+            _mediaSeekBack = null;
+            _mediaSeekForward = null;
+            return;
+        }
+
+        if (_mediaActive &&
+            string.Equals(_mediaPlayPause, config.PlayPause, StringComparison.Ordinal) &&
+            string.Equals(_mediaSeekBack, config.SeekBack, StringComparison.Ordinal) &&
+            string.Equals(_mediaSeekForward, config.SeekForward, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        UnregisterOne(ID_PLAY_PAUSE);
+        UnregisterOne(ID_SEEK_BACK);
+        UnregisterOne(ID_SEEK_FORWARD);
+
+        TryRegisterOne(ID_PLAY_PAUSE, config.PlayPause, noRepeat: true, errors: null);
+        TryRegisterOne(ID_SEEK_BACK, config.SeekBack, noRepeat: false, errors: null);
+        TryRegisterOne(ID_SEEK_FORWARD, config.SeekForward, noRepeat: false, errors: null);
+
+        _mediaActive = true;
+        _mediaPlayPause = config.PlayPause;
+        _mediaSeekBack = config.SeekBack;
+        _mediaSeekForward = config.SeekForward;
+    }
+
+    private void TryRegisterOne(int id, string spec, bool noRepeat, List<string>? errors)
     {
         if (string.IsNullOrWhiteSpace(spec))
             return;
 
         if (!TryParseHotkey(spec, out uint mods, out uint vk))
         {
-            errors.Add(spec);
+            errors?.Add(spec);
             return;
         }
 
-        if (_hwnd != IntPtr.Zero && RegisterHotKey(_hwnd, id, mods | MOD_NOREPEAT, vk))
+        uint flags = noRepeat ? (mods | MOD_NOREPEAT) : mods;
+        if (_hwnd != IntPtr.Zero && RegisterHotKey(_hwnd, id, flags, vk))
         {
             _registeredIds.Add(id);
         }
         else
         {
-            errors.Add(spec);
+            errors?.Add(spec);
         }
+    }
+
+    private void UnregisterOne(int id)
+    {
+        if (!_registeredIds.Remove(id))
+            return;
+
+        if (_hwnd != IntPtr.Zero)
+            UnregisterHotKey(_hwnd, id);
     }
 
     public void UnregisterAll()
@@ -73,6 +147,10 @@ public sealed class Hotkeys : IDisposable
                 UnregisterHotKey(_hwnd, id);
         }
         _registeredIds.Clear();
+        _mediaActive = false;
+        _mediaPlayPause = null;
+        _mediaSeekBack = null;
+        _mediaSeekForward = null;
     }
 
     public void Dispose() => UnregisterAll();
@@ -168,6 +246,9 @@ public sealed class Hotkeys : IDisposable
         {
             "SPACE" => 0x20,
             "TAB" => 0x09,
+            "ENTER" => 0x0D,
+            "BACKSPACE" => 0x08,
+            "BACKQUOTE" => 0xC0,
             "ESC" or "ESCAPE" => 0x1B,
             "LEFT" => 0x25,
             "UP" => 0x26,

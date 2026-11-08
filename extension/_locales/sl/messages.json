@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Izhod"
+  },
+  "peekMode": {
+    "message": "Način pokuka"
+  },
+  "peekModeHint": {
+    "message": "Skrij, dokler ne držiš tipke za prikaz"
+  },
+  "peekSettings": {
+    "message": "Nastavitve načina pokuka"
+  },
+  "peekKey": {
+    "message": "Tipka za držanje"
+  },
+  "peekKeyMouse4": {
+    "message": "Stranski gumb miške 1 (Nazaj)"
+  },
+  "peekKeyMouse5": {
+    "message": "Stranski gumb miške 2 (Naprej)"
+  },
+  "peekIdleOpacity": {
+    "message": "Vidnost v mirovanju"
+  },
+  "peekIdleZero": {
+    "message": "0% (Skrito)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Rahlo)"
+  },
+  "peekActiveOpacity": {
+    "message": "Neprosojnost ob držanju"
+  },
+  "mediaRemote": {
+    "message": "Upravljalnik v igri"
+  },
+  "mediaRemoteHint": {
+    "message": "Predvajanje, previjanje in glasnost brez izgube fokusa"
+  },
+  "mediaSettings": {
+    "message": "Nastavitve upravljalnika v igri"
+  },
+  "mediaSeekStep": {
+    "message": "Korak previjanja"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Glasnost z Alt + koleščkom"
+  },
+  "mediaPlayPause": {
+    "message": "Predvajaj / Premor"
+  },
+  "mediaSeekBack": {
+    "message": "Previj nazaj"
+  },
+  "mediaSeekForward": {
+    "message": "Previj naprej"
+  },
+  "hudVolume": {
+    "message": "Glasnost $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

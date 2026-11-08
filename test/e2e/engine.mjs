@@ -191,7 +191,7 @@ try {
       st.badge === "엔진 연결됨" &&
       st.bannerHidden === true &&
       engineState?.connected === true &&
-      engineState?.engineVersion === "1.0.0" &&
+      engineState?.engineVersion === "1.1.0" &&
       spawnedPids.length >= 1;
     return {
       ok,

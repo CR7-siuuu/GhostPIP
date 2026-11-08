@@ -38,6 +38,22 @@
         </label>
 
         <label class="row">
+          <span class="label-stack">
+            <span class="row-title"><span data-i18n="peekMode"></span> <kbd id="kbdPeek">Alt+P</kbd></span>
+            <small data-i18n="peekModeHint"></small>
+          </span>
+          <input id="peekEnabled" class="switch" type="checkbox" role="switch" />
+        </label>
+
+        <label class="row">
+          <span class="label-stack">
+            <span class="row-title" data-i18n="mediaRemote"></span>
+            <small data-i18n="mediaRemoteHint"></small>
+          </span>
+          <input id="mediaEnabled" class="switch" type="checkbox" role="switch" />
+        </label>
+
+        <label class="row">
           <span class="row-title" data-i18n="showChatFull"></span>
           <input id="showChat" class="switch" type="checkbox" role="switch" />
         </label>
@@ -117,6 +133,80 @@
               </span>
               <input id="autoReturn" class="switch" type="checkbox" role="switch" />
             </label>
+          </div>
+        </details>
+
+        <details id="peekDetails">
+          <summary data-i18n="peekSettings"></summary>
+          <div class="details-body">
+            <div class="row">
+              <label for="peekKey" class="row-title" data-i18n="peekKey"></label>
+              <select id="peekKey">
+                <option value="Alt">Alt</option>
+                <option value="Mouse4" data-i18n="peekKeyMouse4"></option>
+                <option value="Mouse5" data-i18n="peekKeyMouse5"></option>
+                <option value="Backquote">`</option>
+                <option value="Ctrl">Ctrl</option>
+                <option value="Shift">Shift</option>
+                <option value="Ctrl+Alt">Ctrl + Alt</option>
+              </select>
+            </div>
+
+            <div class="row">
+              <label for="peekIdleOpacity" class="row-title" data-i18n="peekIdleOpacity"></label>
+              <select id="peekIdleOpacity">
+                <option value="0" data-i18n="peekIdleZero"></option>
+                <option value="0.05" data-i18n="peekIdleOutline"></option>
+              </select>
+            </div>
+
+            <div class="row">
+              <label for="peekActiveOpacity" class="row-title" data-i18n="peekActiveOpacity"></label>
+              <select id="peekActiveOpacity">
+                <option value="0.6">60%</option>
+                <option value="0.8">80%</option>
+                <option value="0.9">90%</option>
+                <option value="1">100%</option>
+              </select>
+            </div>
+
+            <div class="row">
+              <span class="row-title" id="hkPeekLabel" data-i18n="peekMode"></span>
+              <button type="button" class="hotkey-btn" data-hotkey="peek" id="hkPeek" aria-describedby="hkPeekLabel" data-i18n-title="hotkeyBtnTitle">Alt+P</button>
+            </div>
+          </div>
+        </details>
+
+        <details id="mediaDetails">
+          <summary data-i18n="mediaSettings"></summary>
+          <div class="details-body">
+            <div class="row">
+              <label for="seekSec" class="row-title" data-i18n="mediaSeekStep"></label>
+              <select id="seekSec">
+                <option value="5">5s</option>
+                <option value="10">10s</option>
+              </select>
+            </div>
+
+            <label class="row">
+              <span class="row-title" data-i18n="mediaWheelVolume"></span>
+              <input id="wheelVolume" class="switch" type="checkbox" role="switch" />
+            </label>
+
+            <div class="row">
+              <span class="row-title" id="hkPlayPauseLabel" data-i18n="mediaPlayPause"></span>
+              <button type="button" class="hotkey-btn" data-hotkey="playPause" id="hkPlayPause" aria-describedby="hkPlayPauseLabel" data-i18n-title="hotkeyBtnTitle">Alt+Space</button>
+            </div>
+
+            <div class="row">
+              <span class="row-title" id="hkSeekBackLabel" data-i18n="mediaSeekBack"></span>
+              <button type="button" class="hotkey-btn" data-hotkey="seekBack" id="hkSeekBack" aria-describedby="hkSeekBackLabel" data-i18n-title="hotkeyBtnTitle">Alt+Left</button>
+            </div>
+
+            <div class="row">
+              <span class="row-title" id="hkSeekForwardLabel" data-i18n="mediaSeekForward"></span>
+              <button type="button" class="hotkey-btn" data-hotkey="seekForward" id="hkSeekForward" aria-describedby="hkSeekForwardLabel" data-i18n-title="hotkeyBtnTitle">Alt+Right</button>
+            </div>
           </div>
         </details>
 

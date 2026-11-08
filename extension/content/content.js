@@ -22,6 +22,7 @@
   }
 
   const Dodge = globalThis.GhostPiPDodge;
+  const Subtitles = globalThis.GhostPiPSubtitles;
   const t = (key, subs) => {
     try {
       return chrome.i18n.getMessage(key, subs) || key;
@@ -46,6 +47,7 @@
   const PIP_CHAT_HEIGHT = 420;
   const MIN_CHAT_HEIGHT = 120;
   const CHAT_SIZE_STEP = 80;
+  const MULTI_CORNER_ORDER = ["BR", "TR", "BL", "TL"];
   const GP_VARS = ["--gp-x", "--gp-y", "--gp-w", "--gp-h", "--gp-opacity"];
   const RESIZE_DIRS = ["nw", "ne", "sw", "se", "n", "s", "e", "w"];
   const HOLD = {
@@ -56,16 +58,61 @@
     Alt: (e) => e.altKey,
     Shift: (e) => e.shiftKey,
   };
+  const PEEK_MATCH = {
+    Alt: (s) => s.alt,
+    Ctrl: (s) => s.ctrl,
+    Shift: (s) => s.shift,
+    "Ctrl+Alt": (s) => s.ctrl && s.alt,
+    Backquote: (s) => s.backquote,
+    Mouse4: (s) => (s.buttons & 8) !== 0,
+    Mouse5: (s) => (s.buttons & 16) !== 0,
+  };
+  const peekInput = {
+    alt: false,
+    ctrl: false,
+    shift: false,
+    backquote: false,
+    buttons: 0,
+  };
+  let localPeekActive = false;
 
   const ctx = {
     settings: { ...Settings.merge(undefined), enabled: false },
-    layout: { width: DEFAULT_FLOAT_WIDTH, height: null, pos: null, chatOpen: false },
+    layout: {
+      width: DEFAULT_FLOAT_WIDTH,
+      height: null,
+      aspectRatio: null,
+      pos: null,
+      chatOpen: false,
+      chatHeight: null,
+      pipChatHeight: null,
+      pipWidth: null,
+      pipPos: null,
+    },
     siteId: "generic",
     site: { video: null, chatPopoutUrl: null },
     video: null,
     url: location.href,
+    myTabId: null,
+    activeDocPipTabId: null,
+    engineConnected: false,
+    enginePeekActive: false,
   };
   document.documentElement?.setAttribute("data-gp-disabled", "");
+
+  function isEditableTarget(tgt) {
+    return Boolean(
+      tgt &&
+        (tgt.tagName === "INPUT" ||
+          tgt.tagName === "TEXTAREA" ||
+          tgt.tagName === "SELECT" ||
+          tgt.isContentEditable),
+    );
+  }
+
+  function isPeeking() {
+    return Boolean(ctx.settings.peek?.enabled && (ctx.enginePeekActive || localPeekActive));
+  }
 
   async function send(msg) {
     try {
@@ -98,8 +145,8 @@
     const clampedW = Math.min(Math.max(MIN_FLOAT_WIDTH, targetWidth), Math.max(MIN_FLOAT_WIDTH, maxWidth));
     const height = Math.round(clampedW * ratio);
     if (height <= maxHeight) return { w: Math.round(clampedW), h: height };
-    const h = Math.round(Math.max(120, maxHeight));
-    return { w: Math.round(h / ratio), h };
+    const clampedH = Math.round(Math.max(120, maxHeight));
+    return { w: Math.round(clampedH / ratio), h: clampedH };
   }
 
   function sanitizeLayout(raw) {
@@ -111,6 +158,10 @@
       Number.isFinite(raw?.height) && raw.height >= MIN_FLOAT_HEIGHT && raw.height <= MAX_FLOAT_HEIGHT
         ? Math.round(raw.height)
         : null;
+    const aspectRatio =
+      Number.isFinite(raw?.aspectRatio) && raw.aspectRatio > 0.05 && raw.aspectRatio < 20
+        ? Number(raw.aspectRatio)
+        : null;
     const pos =
       raw?.pos &&
       typeof raw.pos === "object" &&
@@ -120,15 +171,36 @@
         : null;
     const chatOpen = Boolean(raw?.chatOpen);
     const sizeOrNull = (v) => (Number.isFinite(v) && v >= MIN_CHAT_HEIGHT && v <= MAX_FLOAT_HEIGHT ? Math.round(v) : null);
-    return { width, height, pos, chatOpen, chatHeight: sizeOrNull(raw?.chatHeight), pipChatHeight: sizeOrNull(raw?.pipChatHeight) };
+    const pipWidth =
+      Number.isFinite(raw?.pipWidth) && raw.pipWidth >= MIN_FLOAT_WIDTH && raw.pipWidth <= MAX_FLOAT_WIDTH
+        ? Math.round(raw.pipWidth)
+        : null;
+    const pipPos =
+      raw?.pipPos &&
+      typeof raw.pipPos === "object" &&
+      Number.isFinite(raw.pipPos.x) &&
+      Number.isFinite(raw.pipPos.y)
+        ? { x: Math.round(raw.pipPos.x), y: Math.round(raw.pipPos.y) }
+        : null;
+    return {
+      width,
+      height,
+      aspectRatio,
+      pos,
+      chatOpen,
+      chatHeight: sizeOrNull(raw?.chatHeight),
+      pipChatHeight: sizeOrNull(raw?.pipChatHeight),
+      pipWidth,
+      pipPos,
+    };
   }
 
-  function toRelPos(l, t, s, vp) {
+  function toRelPos(l, topY, s, vp) {
     const maxL = Math.max(1, vp.r - s.w);
     const maxT = Math.max(1, vp.b - s.h);
     return {
       rx: Math.min(1, Math.max(0, l / maxL)),
-      ry: Math.min(1, Math.max(0, t / maxT)),
+      ry: Math.min(1, Math.max(0, topY / maxT)),
     };
   }
 
@@ -136,8 +208,8 @@
     const maxL = Math.max(0, vp.r - s.w);
     const maxT = Math.max(0, vp.b - s.h);
     const l = Math.round(Math.min(1, Math.max(0, pos.rx)) * maxL);
-    const t = Math.round(Math.min(1, Math.max(0, pos.ry)) * maxT);
-    return { l, t, r: l + s.w, b: t + s.h };
+    const topY = Math.round(Math.min(1, Math.max(0, pos.ry)) * maxT);
+    return { l, t: topY, r: l + s.w, b: topY + s.h };
   }
 
   function persistLayout(next) {
@@ -227,23 +299,72 @@
       font: 700 11.5px/1 "Pretendard", system-ui, "Malgun Gothic", sans-serif;
       box-shadow: 0 4px 12px rgba(2, 6, 23, 0.55); backdrop-filter: blur(8px); }
     :host([data-bar-only]) .surface,
-    :host([data-bar-only]) .handle,
-    :host([data-bar-only]) .hud { display: none; }
+    :host([data-bar-only]) .handle { display: none; }
+    :host([data-bar-only]:not([data-has-toast])) .hud { display: none; }
+    :host([data-toast-only]) .surface,
+    :host([data-toast-only]) .handle,
+    :host([data-toast-only]) .bar,
+    :host([data-toast-only]) .skip-ad { display: none !important; }
+    :host([data-peek-silhouette]) .surface { border: 1px solid rgba(56, 189, 248, 0.35); background: none; box-shadow: none; }
+    :host([data-peek-silhouette]) .handle,
+    :host([data-peek-silhouette]) .bar,
+    :host([data-peek-silhouette]) .skip-ad { display: none !important; }
+    :host([data-peek-silhouette]:not([data-has-toast])) .hud { display: none; }
+    :host([data-click-through]) *,
+    :host([data-click-through]) .bar,
+    :host([data-click-through]) .handle,
+    :host([data-click-through]) .skip-ad { pointer-events: none !important; }
     :host([data-remote]) button[data-mode="local"],
     :host(:not([data-remote])) button[data-mode="remote"] { display: none; }`;
 
+  const WEB_CHAT_CSS = `
+    :host { box-sizing: border-box; background: #0f172a; box-shadow: 0 8px 24px rgba(2, 6, 23, 0.55); }
+    iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+    .chat-resize { position: absolute; left: 14px; right: 14px; bottom: 0; height: 12px; z-index: 2; cursor: ns-resize; touch-action: none; }
+    .chat-resize::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 4px; border-radius: 4px;
+      transform: translate(-50%, -50%); background: rgba(125, 211, 252, 0.9); box-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
+      opacity: 0; transition: opacity 0.14s ease; }
+    :host(:hover) .chat-resize::after, :host([data-interactive]) .chat-resize::after, .chat-resize[data-active]::after { opacity: 1; }
+    :host([data-resizing]) iframe,
+    :host([data-click-through]) iframe,
+    :host([data-click-through]) .chat-resize { pointer-events: none !important; }`;
+
+  const SUBTITLES_CSS = `
+    :host { pointer-events: none !important; }
+    .gp-sub-box { position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%); max-width: 92%;
+      padding: 2px 6px; background: transparent; border: 0; outline: none; color: #fff;
+      font: 700 clamp(12px, calc(var(--gp-w, 480px) * 0.04), 26px)/1.36 "Pretendard", system-ui, "Malgun Gothic", sans-serif;
+      text-align: center; white-space: pre-line; word-break: keep-all; overflow-wrap: break-word;
+      text-shadow: -1.5px -1.5px 0 rgba(0, 0, 0, 0.96), 1.5px -1.5px 0 rgba(0, 0, 0, 0.96), -1.5px 1.5px 0 rgba(0, 0, 0, 0.96), 1.5px 1.5px 0 rgba(0, 0, 0, 0.96), 0 -1.5px 0 rgba(0, 0, 0, 0.96), 0 1.5px 0 rgba(0, 0, 0, 0.96), -1.5px 0 0 rgba(0, 0, 0, 0.96), 1.5px 0 0 rgba(0, 0, 0, 0.96), 0 2px 6px rgba(0, 0, 0, 0.85);
+      pointer-events: none; box-sizing: border-box; }`;
+
+  const activeOverlayHosts = new Set();
+  const activeFloatings = new Set();
+  let overlaySeq = 0;
+
   // Open shadow root so tests can pierce it; popover so it renders in the top layer above site overlays.
-  function overlayHost(id, css, ...content) {
-    document.getElementById(id)?.remove();
-    const host = h("div", { id, popover: "manual" });
+  function overlayHost({ id, className = "", css, onAction, blockPointer = true }, ...content) {
+    if (id) document.getElementById(id)?.remove();
+    const attrs = { popover: "manual" };
+    if (id) attrs.id = id;
+    if (className) attrs.class = className;
+    const host = h("div", attrs);
     const root = host.attachShadow({ mode: "open" });
     const style = document.createElement("style");
     style.textContent = css;
     root.append(style, ...content);
-    for (const type of ["pointerdown", "pointerup", "mousedown", "mouseup", "click", "dblclick", "contextmenu"]) {
-      host.addEventListener(type, (e) => e.stopPropagation());
+    if (blockPointer) {
+      for (const type of ["pointerdown", "pointerup", "mousedown", "mouseup", "click", "dblclick", "contextmenu"]) {
+        host.addEventListener(type, (e) => e.stopPropagation());
+      }
     }
-    root.addEventListener("click", (e) => ACTIONS[e.target.closest?.("[data-action]")?.dataset.action]?.());
+    if (onAction) {
+      root.addEventListener("click", (e) => {
+        const act = e.target.closest?.("[data-action]")?.dataset.action;
+        if (act) onAction(act);
+      });
+    }
+    activeOverlayHosts.add(host);
     return {
       host,
       root,
@@ -263,93 +384,32 @@
           } catch {}
         }
       },
+      destroy() {
+        this.hide();
+        activeOverlayHosts.delete(host);
+        host.remove();
+      },
     };
   }
 
+  const LAUNCHER_ACTIONS = {
+    inTab: () => go("inTab"),
+    docPip: () => startPip(),
+  };
+
   const launcher = overlayHost(
-    "ghostpip-launcher",
-    BASE_CSS,
-    h("div", { class: "bar" },
-      h("button", { "data-action": "inTab", title: t("modeWebTitle") },
-        svgIcon(ICON_WEB_MODE),
-        t("modeWeb")),
-      h("button", { "data-action": "docPip", title: t("modeFullTitle") },
-        svgIcon(ICON_FULL_MODE),
-        t("modeFull"))),
+    {
+      id: "ghostpip-launcher",
+      css: BASE_CSS,
+      onAction: (act) => LAUNCHER_ACTIONS[act]?.(),
+    },
+    h(
+      "div",
+      { class: "bar" },
+      h("button", { "data-action": "inTab", title: t("modeWebTitle") }, svgIcon(ICON_WEB_MODE), t("modeWeb")),
+      h("button", { "data-action": "docPip", title: t("modeFullTitle") }, svgIcon(ICON_FULL_MODE), t("modeFull")),
+    ),
   );
-
-  const hudEl = h("div", { class: "hud" }, "");
-  const webChatLabel = h("span", {}, t("chatShow"));
-  const webChatBtn = h(
-    "button",
-    { "data-action": "toggleWebChat" },
-    svgIcon(ICON_CHAT),
-    webChatLabel,
-  );
-  const skipAdBtn = h(
-    "button",
-    { class: "skip-ad", "data-action": "skipAd", hidden: "" },
-    t("skipAd"),
-  );
-  const WEB_CHAT_CSS = `
-    :host { box-sizing: border-box; background: #0f172a; box-shadow: 0 8px 24px rgba(2, 6, 23, 0.55); }
-    iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
-    .chat-resize { position: absolute; left: 14px; right: 14px; bottom: 0; height: 12px; z-index: 2; cursor: ns-resize; touch-action: none; }
-    .chat-resize::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 4px; border-radius: 4px;
-      transform: translate(-50%, -50%); background: rgba(125, 211, 252, 0.9); box-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
-      opacity: 0; transition: opacity 0.14s ease; }
-    :host(:hover) .chat-resize::after, :host([data-interactive]) .chat-resize::after, .chat-resize[data-active]::after { opacity: 1; }
-    :host([data-resizing]) iframe { pointer-events: none; }`;
-  const webChatFrame = h("iframe", {});
-  const webChatResize = h("div", { class: "chat-resize", title: t("chatResizeTitle") });
-  const webChat = overlayHost("ghostpip-chat", WEB_CHAT_CSS, webChatFrame, webChatResize);
-
-  const controller = overlayHost(
-    "ghostpip-controller",
-    BASE_CSS + CONTROLLER_CSS,
-    h("div", { class: "surface" }),
-    ...RESIZE_DIRS.map((dir) => h("div", { class: `handle ${dir}`, "data-resize": dir })),
-    hudEl,
-    skipAdBtn,
-    h("div", { class: "bar" },
-      h("button", { "data-action": "idle" }, t("btnReturn")),
-      h("button", { "data-action": "docPip", "data-mode": "local" },
-        svgIcon(ICON_FULL_MODE),
-        t("modeFull")),
-      h("button", { "data-action": "focusSource", "data-mode": "remote" }, t("btnSourceTab")),
-      webChatBtn),
-  );
-
-  let dragSink = null;
-  let toggleWebChatSink = null;
-  let skipAdSink = null;
-  controller.root.addEventListener("pointerdown", (e) => {
-    if (!dragSink || e.button !== 0 || e.target.closest?.(".bar") || e.target.closest?.(".skip-ad")) return;
-    const target = e.target;
-    const resizeDir = target.dataset?.resize || null;
-    if (!resizeDir) return;
-    try {
-      target.setPointerCapture?.(e.pointerId);
-    } catch {}
-    dragSink.start(e, resizeDir);
-  });
-  window.addEventListener("pointermove", (e) => {
-    dragSink?.pointerMove?.(e);
-    if (!dragSink?.active()) return;
-    if (e.isTrusted && (e.buttons & 1) === 0) {
-      dragSink.end();
-      return;
-    }
-    dragSink.move(e);
-  }, true);
-  window.addEventListener("pointerup", () => {
-    dragSink?.pointerUp?.();
-    if (dragSink?.active()) dragSink.end();
-  }, true);
-  window.addEventListener("pointercancel", () => {
-    dragSink?.pointerUp?.();
-    if (dragSink?.active()) dragSink.end();
-  }, true);
 
   const AD_SKIP_SELECTORS = [
     ".ytp-skip-ad-button",
@@ -449,7 +509,7 @@
     const r = v.getBoundingClientRect();
     if (r.width < minW || r.height < minH) return false;
     const cs = getComputedStyle(v);
-    return cs.visibility !== "hidden" && cs.display !== "none" && Number(cs.opacity) > 0.05;
+    return cs.visibility !== "hidden" && cs.display !== "none" && (v.classList.contains(FLOAT_CLASS) || Number(cs.opacity) > 0.05);
   }
 
   function findVideo() {
@@ -470,9 +530,21 @@
     return pick(document.querySelectorAll("video"), (v) => isRenderedVideo(v, 280, 158) && !isGifLike(v));
   }
 
+  function findFloatingUnderPointer(e) {
+    for (const fl of activeFloatings) {
+      if (fl.containsPoint(e.clientX, e.clientY)) return fl;
+    }
+    return null;
+  }
+
+  function isPointerOnAnyFloating(e) {
+    return findFloatingUnderPointer(e) !== null;
+  }
+
   // The pointer must be on the player itself, not on an image or card that merely overlaps the
   // video's rect: some element on the composed path has to be the video or a tight wrapper of it.
   function isPointerOnPlayer(video, e) {
+    if (isPointerOnAnyFloating(e)) return false;
     const vr = video.getBoundingClientRect();
     if (!inside(vr, e.clientX, e.clientY)) return false;
     const maxArea = vr.width * vr.height * 1.6;
@@ -501,9 +573,10 @@
       return null;
     }
     if (site?.chatPopoutUrl && site?.idFrom) {
-      const id = "param" in site.idFrom
-        ? new URLSearchParams(location.search).get(site.idFrom.param)
-        : location.pathname.split("/")[site.idFrom.pathIndex];
+      const id =
+        "param" in site.idFrom
+          ? new URLSearchParams(location.search).get(site.idFrom.param)
+          : location.pathname.split("/")[site.idFrom.pathIndex];
       if (id) {
         return site.chatPopoutUrl.replace(/\{(?:videoId|channelId|channel)\}/g, encodeURIComponent(id));
       }
@@ -560,36 +633,52 @@
       }, 2000);
     }
 
-    launcher.host.addEventListener("pointerenter", () => {
-      if (!ensureAlive() || !ctx.settings.enabled) return;
-      launcherOver = true;
-      clearTimeout(idleTimer);
-      update();
-    }, on);
-    launcher.host.addEventListener("pointerleave", () => {
-      launcherOver = false;
-      armIdleHide();
-      update();
-    }, on);
+    launcher.host.addEventListener(
+      "pointerenter",
+      () => {
+        if (!ensureAlive() || !ctx.settings.enabled) return;
+        launcherOver = true;
+        clearTimeout(idleTimer);
+        update();
+      },
+      on,
+    );
+    launcher.host.addEventListener(
+      "pointerleave",
+      () => {
+        launcherOver = false;
+        armIdleHide();
+        update();
+      },
+      on,
+    );
 
-    window.addEventListener("pointermove", (e) => {
-      if (!e.isTrusted || !ensureAlive()) return;
-      if (!ctx.settings.enabled) {
-        if (pointerOver || launcherOver || launcher.open) update();
-        return;
-      }
-      pointerOver = Boolean(ctx.video) && isPointerOnPlayer(ctx.video, e);
-      if (pointerOver) armIdleHide();
-      else clearTimeout(idleTimer);
-      update();
-    }, { capture: true, ...on });
+    window.addEventListener(
+      "pointermove",
+      (e) => {
+        if (!e.isTrusted || !ensureAlive()) return;
+        if (!ctx.settings.enabled) {
+          if (pointerOver || launcherOver || launcher.open) update();
+          return;
+        }
+        pointerOver = Boolean(ctx.video) && isPointerOnPlayer(ctx.video, e);
+        if (pointerOver) armIdleHide();
+        else clearTimeout(idleTimer);
+        update();
+      },
+      { capture: true, ...on },
+    );
 
-    document.documentElement.addEventListener("mouseleave", () => {
-      pointerOver = false;
-      launcherOver = false;
-      clearTimeout(idleTimer);
-      update();
-    }, on);
+    document.documentElement.addEventListener(
+      "mouseleave",
+      () => {
+        pointerOver = false;
+        launcherOver = false;
+        clearTimeout(idleTimer);
+        update();
+      },
+      on,
+    );
 
     const timer = setInterval(update, 500);
 
@@ -604,7 +693,25 @@
     };
   }
 
-  function enterFloating({ video, ratioFallback = 9 / 16, isRemote = false, chatUrl = null }, leave) {
+  function pickUnoccupiedCorner(preferredHome) {
+    const used = new Set();
+    for (const fl of activeFloatings) {
+      used.add(fl.getCorner());
+    }
+    const candidates = [preferredHome, ...MULTI_CORNER_ORDER.filter((c) => c !== preferredHome)];
+    for (const c of candidates) {
+      if (!used.has(c)) return c;
+    }
+    return MULTI_CORNER_ORDER[activeFloatings.size % MULTI_CORNER_ORDER.length];
+  }
+
+  function promotePrimaryOverlayIds() {
+    if (document.getElementById("ghostpip-controller")) return;
+    const first = activeFloatings.values().next().value;
+    first?.promoteToPrimary?.();
+  }
+
+  function enterFloating({ video, ratioFallback = 9 / 16, isRemote = false, chatUrl = null, sourceTabId = null, initialSubtitle = "" }, leave) {
     const ac = new AbortController();
     const on = { signal: ac.signal };
     const viewport = () => ({
@@ -615,13 +722,22 @@
     });
     const cfg = () => ctx.settings.dodge;
 
+    const slotIndex = activeFloatings.size;
+    const isPrimaryDom = !document.getElementById("ghostpip-controller");
+    const suffix = Number.isFinite(sourceTabId) ? String(sourceTabId) : String(++overlaySeq);
+    const ctrlId = isPrimaryDom ? "ghostpip-controller" : `ghostpip-controller-${suffix}`;
+    const chatId = isPrimaryDom ? "ghostpip-chat" : `ghostpip-chat-${suffix}`;
+    const subId = isPrimaryDom ? "ghostpip-subtitles" : `ghostpip-subtitles-${suffix}`;
+
     let floatWidth = ctx.layout.width || DEFAULT_FLOAT_WIDTH;
     let floatHeight = ctx.layout.height || null;
-    let customPos = ctx.layout.pos ? { ...ctx.layout.pos } : null;
+    let savedAspectRatio = ctx.layout.aspectRatio;
+    let resizedInSession = false;
     let lastHome = cfg().home;
-    let corner = lastHome;
+    let corner = slotIndex > 0 ? pickUnoccupiedCorner(lastHome) : lastHome;
+    let customPos = slotIndex > 0 ? null : ctx.layout.pos ? { ...ctx.layout.pos } : null;
+    let hasIndependentSlotPos = slotIndex > 0;
     let dodge = Dodge.initialState(corner);
-    let faded = false;
     let held = false;
     let wheelPreview = false;
     let waitCursorLeave = false;
@@ -630,38 +746,104 @@
     let cursor = null;
     let remoteChatUrl = chatUrl;
     let remoteHasAd = false;
-    let webChatOpen = Boolean(ctx.layout.chatOpen);
+    let webChatOpen = slotIndex === 0 ? Boolean(ctx.layout.chatOpen) : false;
     let chatHeight = ctx.layout.chatHeight;
     let chatResize = null;
+    let subtitleText = typeof initialSubtitle === "string" ? initialSubtitle.trim() : "";
 
     const resolveChatUrl = () =>
       ctx.settings.showChat ? (remoteChatUrl || (!isRemote ? chatUrlFor(ctx.site) : null)) : null;
 
-    toggleWebChatSink = () => {
-      if (!resolveChatUrl()) return;
-      webChatOpen = !webChatOpen;
-      persistLayout({ width: floatWidth, height: floatHeight, pos: customPos, chatOpen: webChatOpen });
-      render();
+    const hudEl = h("div", { class: "hud" }, "");
+    const webChatLabel = h("span", {}, t("chatShow"));
+    const webChatBtn = h("button", { "data-action": "toggleWebChat" }, svgIcon(ICON_CHAT), webChatLabel);
+    const skipAdBtn = h("button", { class: "skip-ad", "data-action": "skipAd", hidden: "" }, t("skipAd"));
+    const webChatFrame = h("iframe", {});
+    const webChatResize = h("div", { class: "chat-resize", title: t("chatResizeTitle") });
+    const subtitleBox = h("div", { class: "gp-sub-box" }, "");
+
+    const instanceActions = {
+      idle: () => {
+        if (isRemote) {
+          send({ type: "INTAB_STOP_SINGLE", sourceTabId });
+          leave();
+        } else {
+          go("idle");
+        }
+      },
+      docPip: () => startPip(),
+      focusSource: () => {
+        send({ type: "FOCUS_SOURCE_TAB", sourceTabId });
+      },
+      toggleWebChat: () => {
+        if (!resolveChatUrl()) return;
+        webChatOpen = !webChatOpen;
+        if (activeFloatings.size <= 1) {
+          persistLayout({ width: floatWidth, height: floatHeight, aspectRatio: savedAspectRatio, pos: customPos, chatOpen: webChatOpen });
+        }
+        render();
+      },
+      skipAd: () => {
+        if (isRemote) {
+          send({ type: "SKIP_AD", sourceTabId });
+          remoteHasAd = false;
+          render();
+        } else {
+          triggerSkipAd(video);
+          render();
+        }
+      },
     };
 
-    skipAdSink = () => {
-      if (isRemote) {
-        send({ type: "SKIP_AD" });
-        remoteHasAd = false;
-        render();
-      } else {
-        triggerSkipAd(video);
-        render();
-      }
-    };
+    const webChat = overlayHost(
+      { id: chatId, className: "ghostpip-chat", css: WEB_CHAT_CSS },
+      webChatFrame,
+      webChatResize,
+    );
+    const subtitleHost = overlayHost(
+      { id: subId, className: "ghostpip-subtitles", css: SUBTITLES_CSS, blockPointer: false },
+      subtitleBox,
+    );
+    const controller = overlayHost(
+      {
+        id: ctrlId,
+        className: "ghostpip-controller",
+        css: BASE_CSS + CONTROLLER_CSS,
+        onAction: (act) => instanceActions[act]?.(),
+      },
+      h("div", { class: "surface" }),
+      ...RESIZE_DIRS.map((dir) => h("div", { class: `handle ${dir}`, "data-resize": dir })),
+      hudEl,
+      skipAdBtn,
+      h(
+        "div",
+        { class: "bar" },
+        h("button", { "data-action": "idle" }, t("btnReturn")),
+        h("button", { "data-action": "docPip", "data-mode": "local" }, svgIcon(ICON_FULL_MODE), t("modeFull")),
+        h("button", { "data-action": "focusSource", "data-mode": "remote" }, t("btnSourceTab")),
+        webChatBtn,
+      ),
+    );
 
     controller.host.toggleAttribute("data-remote", Boolean(isRemote));
+
+    function shouldUseSavedHeight() {
+      if (!(Number.isFinite(floatHeight) && floatHeight > 0)) return false;
+      if (resizedInSession || drag?.mode === "resize") return true;
+      if (Number.isFinite(savedAspectRatio) && savedAspectRatio > 0) {
+        const curRatio = videoRatio(video, ratioFallback);
+        if (Number.isFinite(curRatio) && curRatio > 0 && Math.abs(curRatio - savedAspectRatio) > 0.08) {
+          return false;
+        }
+      }
+      return true;
+    }
 
     function size() {
       const vp = viewport();
       const maxW = Math.max(MIN_FLOAT_WIDTH, vp.r);
       const maxH = Math.max(MIN_FLOAT_HEIGHT, vp.b);
-      if (Number.isFinite(floatHeight) && floatHeight > 0) {
+      if (shouldUseSavedHeight()) {
         return {
           w: Math.round(Math.min(Math.max(MIN_FLOAT_WIDTH, floatWidth), maxW)),
           h: Math.round(Math.min(Math.max(MIN_FLOAT_HEIGHT, floatHeight), maxH)),
@@ -685,52 +867,83 @@
         return { l: r.l, t: r.t, r: r.r, b: r.b, videoT: r.t, chatT: r.b, chatH: 0, chatUrl: curChatUrl };
       }
       const vp = viewport();
-      const h = Math.round(r.b - r.t);
+      const hPx = Math.round(r.b - r.t);
       const wanted = chatHeight ?? Math.min(320, Math.max(160, Math.round(vp.b * 0.36)));
-      const chatH = Math.round(Math.max(MIN_CHAT_HEIGHT, Math.min(wanted, vp.b - h - 16)));
+      const chatH = Math.round(Math.max(MIN_CHAT_HEIGHT, Math.min(wanted, vp.b - hPx - 16)));
       const fitsBelow = r.b + chatH <= vp.b - 8;
-      const videoT = fitsBelow ? r.t : Math.max(8, r.b - h - chatH);
-      const chatT = videoT + h;
+      const videoT = fitsBelow ? r.t : Math.max(8, r.b - hPx - chatH);
+      const chatT = videoT + hPx;
       return { l: r.l, t: videoT, r: r.r, b: chatT + chatH, videoT, chatT, chatH, chatUrl: curChatUrl };
     }
 
-    webChatResize.addEventListener("pointerdown", (e) => {
-      if (e.button !== 0) return;
-      e.preventDefault();
-      const r = rect();
-      const b = boundsWithChat(r);
-      const vp = viewport();
-      const w = Math.round(r.r - r.l);
-      const h = Math.round(r.b - r.t);
-      customPos = toRelPos(r.l, b.videoT, { w, h }, vp);
-      const maxH = Math.max(MIN_CHAT_HEIGHT, vp.b - h - 16);
-      chatResize = { startY: e.clientY, startH: b.chatH, maxH };
-      try {
-        webChatResize.setPointerCapture(e.pointerId);
-      } catch {}
-      webChatResize.toggleAttribute("data-active", true);
-      webChat.host.toggleAttribute("data-resizing", true);
-    }, on);
-    webChatResize.addEventListener("pointermove", (e) => {
-      if (!chatResize) return;
-      const dy = e.clientY - chatResize.startY;
-      chatHeight = Math.round(Math.min(chatResize.maxH, Math.max(MIN_CHAT_HEIGHT, chatResize.startH + dy)));
-      render();
-    }, on);
+    webChatResize.addEventListener(
+      "pointerdown",
+      (e) => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        const r = rect();
+        const b = boundsWithChat(r);
+        const vp = viewport();
+        const w = Math.round(r.r - r.l);
+        const hPx = Math.round(r.b - r.t);
+        customPos = toRelPos(r.l, b.videoT, { w, h: hPx }, vp);
+        const maxH = Math.max(MIN_CHAT_HEIGHT, vp.b - hPx - 16);
+        chatResize = { startY: e.clientY, startH: b.chatH, maxH };
+        try {
+          webChatResize.setPointerCapture(e.pointerId);
+        } catch {}
+        webChatResize.toggleAttribute("data-active", true);
+        webChat.host.toggleAttribute("data-resizing", true);
+      },
+      on,
+    );
+    webChatResize.addEventListener(
+      "pointermove",
+      (e) => {
+        if (!chatResize) return;
+        const dy = e.clientY - chatResize.startY;
+        chatHeight = Math.round(Math.min(chatResize.maxH, Math.max(MIN_CHAT_HEIGHT, chatResize.startH + dy)));
+        render();
+      },
+      on,
+    );
     const endChatResize = () => {
       if (!chatResize) return;
       chatResize = null;
       webChatResize.removeAttribute("data-active");
       webChat.host.removeAttribute("data-resizing");
-      persistLayout({ pos: customPos, chatHeight });
+      if (activeFloatings.size <= 1) {
+        persistLayout({ pos: customPos, chatHeight });
+      } else {
+        persistLayout({ chatHeight });
+      }
       render();
     };
     webChatResize.addEventListener("pointerup", endChatResize, on);
     webChatResize.addEventListener("pointercancel", endChatResize, on);
 
+    let toastText = "";
+    let toastTimer = null;
+
+    function effectiveClickThrough() {
+      return Boolean(ctx.settings.clickThrough || ctx.settings.peek?.enabled);
+    }
+
+    function showToast(text) {
+      if (!text) return;
+      if (ctx.settings.peek?.enabled && !isPeeking() && ctx.settings.peek.idleOpacity === 0) return;
+      toastText = String(text);
+      clearTimeout(toastTimer);
+      render();
+      toastTimer = setTimeout(() => {
+        toastText = "";
+        render();
+      }, 900);
+    }
+
     function isInteractive() {
       if (held || drag !== null || chatResize !== null) return true;
-      if (!ctx.settings.clickThrough && !cfg().enabled && cursor) {
+      if (!effectiveClickThrough() && !cfg().enabled && cursor) {
         const b = boundsWithChat(rect());
         return cursor.x >= b.l && cursor.x <= b.r && cursor.y >= b.t && cursor.y <= b.b;
       }
@@ -741,26 +954,43 @@
       const r = rect();
       const b = boundsWithChat(r);
       const w = Math.round(r.r - r.l);
-      const h = Math.round(r.b - r.t);
+      const hPx = Math.round(r.b - r.t);
       const canShowChat = Boolean(b.chatUrl);
       const showChatNow = Boolean(webChatOpen && canShowChat);
       webChatBtn.style.display = canShowChat ? "inline-flex" : "none";
       webChatLabel.textContent = showChatNow ? t("chatHide") : t("chatShow");
 
+      const peekOn = Boolean(ctx.settings.peek?.enabled);
+      const peeking = isPeeking();
+      const peekHidden = peekOn && !peeking;
+      const forcePass = effectiveClickThrough();
       const interactive = isInteractive();
       const hovered =
         drag !== null ||
         (cursor !== null && cursor.x >= b.l && cursor.x <= b.r && cursor.y >= b.t && cursor.y <= b.b);
       const hasSkipAd = isRemote ? Boolean(remoteHasAd) : canSkipAd(video);
       skipAdBtn.hidden = !hasSkipAd;
-      const showBarOnly = !interactive && !ctx.settings.clickThrough && (hovered || hasSkipAd);
-      const videoGeo = { x: px(r.l), y: px(b.videoT), w: px(w), h: px(h) };
+      const showBarOnly = !interactive && !forcePass && (hovered || hasSkipAd);
+      const videoGeo = { x: px(r.l), y: px(b.videoT), w: px(w), h: px(hPx) };
       const ctrlGeo = videoGeo;
-      const opacity = interactive && !wheelPreview ? 1 : faded ? FADED_OPACITY : ctx.settings.opacity;
+      let opacity;
+      if (interactive && !wheelPreview) {
+        opacity = 1;
+      } else if (peekOn) {
+        opacity = peeking
+          ? (dodge.faded ? Math.min(FADED_OPACITY, ctx.settings.peek.activeOpacity) : ctx.settings.peek.activeOpacity)
+          : ctx.settings.peek.idleOpacity;
+      } else {
+        opacity = dodge.faded ? FADED_OPACITY : ctx.settings.opacity;
+      }
+      const passNow = !interactive && forcePass;
+      const peekOutline = !interactive && peekHidden && ctx.settings.peek.idleOpacity > 0;
       const shouldAnim = Boolean(anim && !document.hidden && drag === null);
       video.toggleAttribute("data-gp-anim", shouldAnim);
       setVars(video, { ...videoGeo, opacity: String(opacity) });
-      video.toggleAttribute("data-gp-pass", !interactive && ctx.settings.clickThrough);
+      video.toggleAttribute("data-gp-pass", passNow);
+      video.toggleAttribute("data-click-through", passNow);
+      video.toggleAttribute("data-gp-peek-outline", peekOutline);
       video.toggleAttribute("data-gp-drag", drag !== null);
 
       if (canShowChat) {
@@ -769,9 +999,10 @@
           webChatFrame.setAttribute("src", b.chatUrl);
         }
       }
-      if (showChatNow && b.chatH > 0) {
+      if (showChatNow && b.chatH > 0 && !(peekHidden && ctx.settings.peek.idleOpacity === 0)) {
         webChat.host.toggleAttribute("data-gp-anim", shouldAnim && !chatResize);
-        webChat.host.toggleAttribute("data-gp-pass", !interactive && ctx.settings.clickThrough);
+        webChat.host.toggleAttribute("data-gp-pass", passNow);
+        webChat.host.toggleAttribute("data-click-through", passNow);
         webChat.host.toggleAttribute("data-gp-drag", drag !== null);
         webChat.host.toggleAttribute("data-interactive", interactive);
         webChat.show({
@@ -785,20 +1016,41 @@
         webChat.hide();
       }
 
-      hudEl.textContent = t("hudOpacityWheel", [String(Math.round(ctx.settings.opacity * 100)), `${w}×${h}`]);
-      controller.host.toggleAttribute("data-hovered", hovered);
+      if (subtitleText && !(peekHidden && ctx.settings.peek.idleOpacity === 0)) {
+        subtitleBox.textContent = subtitleText;
+        subtitleHost.host.toggleAttribute("data-gp-anim", shouldAnim);
+        subtitleHost.host.toggleAttribute("data-gp-drag", drag !== null);
+        subtitleHost.show({ ...videoGeo, opacity: String(opacity) });
+      } else {
+        subtitleHost.hide();
+      }
+
+      const hasToast = Boolean(toastText) && !(peekHidden && ctx.settings.peek.idleOpacity === 0);
+      hudEl.textContent = hasToast
+        ? toastText
+        : t("hudOpacityWheel", [String(Math.round(ctx.settings.opacity * 100)), `${w}×${hPx}`]);
+      const toastOnly = hasToast && !interactive && !showBarOnly && !peekOutline;
+      controller.host.toggleAttribute("data-hovered", hovered && !passNow);
       controller.host.toggleAttribute("data-bar-only", showBarOnly);
-      if (interactive || showBarOnly) controller.show(ctrlGeo);
+      controller.host.toggleAttribute("data-has-toast", hasToast);
+      controller.host.toggleAttribute("data-toast-only", toastOnly);
+      controller.host.toggleAttribute("data-peek-silhouette", peekOutline);
+      controller.host.toggleAttribute("data-click-through", passNow);
+      if (interactive || showBarOnly || peekOutline || toastOnly) controller.show(ctrlGeo);
       else controller.hide();
     }
 
     function settingsChanged() {
       if (cfg().home !== lastHome) {
         lastHome = cfg().home;
-        corner = lastHome;
-        customPos = ctx.layout.pos ? { ...ctx.layout.pos } : null;
-        dodge = Dodge.initialState(corner);
-        faded = false;
+        if (!hasIndependentSlotPos || activeFloatings.size <= 1) {
+          corner = lastHome;
+          customPos = ctx.layout.pos ? { ...ctx.layout.pos } : null;
+          dodge = Dodge.initialState(corner);
+        }
+      }
+      if (!cfg().enabled || cfg().style !== "fade") {
+        dodge = { ...dodge, hoverSince: null, faded: false };
       }
       render();
     }
@@ -807,10 +1059,20 @@
       if (drag) return;
       floatWidth = ctx.layout.width || DEFAULT_FLOAT_WIDTH;
       floatHeight = ctx.layout.height || null;
-      customPos = ctx.layout.pos ? { ...ctx.layout.pos } : null;
-      webChatOpen = Boolean(ctx.layout.chatOpen);
+      savedAspectRatio = ctx.layout.aspectRatio;
+      if (!hasIndependentSlotPos || activeFloatings.size <= 1) {
+        customPos = ctx.layout.pos ? { ...ctx.layout.pos } : null;
+        webChatOpen = Boolean(ctx.layout.chatOpen);
+      }
       if (!chatResize) chatHeight = ctx.layout.chatHeight;
       render();
+    }
+
+    function clearFadeIfActive() {
+      if (!dodge.faded && dodge.hoverSince === null) return;
+      const wasFaded = dodge.faded;
+      dodge = { ...dodge, hoverSince: null, faded: false };
+      if (wasFaded) render(true);
     }
 
     function tick() {
@@ -818,13 +1080,21 @@
         const nowHasAd = canSkipAd(video);
         if (nowHasAd !== !skipAdBtn.hidden) render();
       }
-      if (isInteractive()) return;
+      if (isInteractive()) {
+        clearFadeIfActive();
+        return;
+      }
+      if (ctx.settings.peek?.enabled && !isPeeking() && ctx.settings.peek.idleOpacity <= 0.05) {
+        clearFadeIfActive();
+        return;
+      }
       const vp = viewport();
       const s = size();
       const r = rect();
-      if (!ctx.settings.clickThrough && cursor !== null) {
+      if (!effectiveClickThrough() && cursor !== null) {
         const b = boundsWithChat(r);
         if (webChatOpen && b.chatH > 0 && cursor.x >= r.l && cursor.x <= r.r && cursor.y >= b.chatT && cursor.y <= b.chatT + b.chatH) {
+          clearFadeIfActive();
           return;
         }
       }
@@ -838,30 +1108,19 @@
 
       if (waitCursorLeave) {
         if (cursorInCurrent) {
-          dodge = { ...dodge, hoverSince: null };
+          clearFadeIfActive();
           return;
         }
         waitCursorLeave = false;
       }
 
-      let stepCursor = cursor;
-      if (customPos !== null) {
-        if (cursorInCurrent) {
-          const cr = Dodge.cornerRect(dodge.corner, s, vp, cfg().edgeInsetPx);
-          stepCursor = { x: (cr.l + cr.r) / 2, y: (cr.t + cr.b) / 2 };
-        } else {
-          stepCursor = null;
-        }
-      }
-
-      const out = Dodge.step(dodge, { now: performance.now(), cursor: stepCursor, size: s, area: vp }, cfg());
+      const stepCfg = customPos !== null && cfg().autoReturn ? { ...cfg(), autoReturn: false } : cfg();
+      const out = Dodge.step(dodge, { now: performance.now(), cursor, size: s, area: vp, rect: r }, stepCfg);
       dodge = out.state;
       if (out.action.type === "move") {
         customPos = null;
         corner = out.action.corner;
-      } else if (out.action.type === "fade") {
-        faded = out.action.on;
-      } else {
+      } else if (out.action.type !== "fade") {
         return;
       }
       render(true);
@@ -871,12 +1130,12 @@
       if (next === held) return;
       if (held && !next) {
         wheelPreview = false;
+        dodge = { ...dodge, hoverSince: null, faded: false };
         if (cursor) {
           const r = rect();
           const m = cfg().marginPx;
           if (cursor.x >= r.l - m && cursor.x < r.r + m && cursor.y >= r.t - m && cursor.y < r.b + m) {
             waitCursorLeave = true;
-            dodge = { ...dodge, hoverSince: null };
           }
         }
       }
@@ -885,62 +1144,7 @@
     }
     const holdFrom = (e) => e.isTrusted && setHeld(HOLD[ctx.settings.hotkeys.hold](e));
 
-    window.addEventListener("pointerdown", (e) => {
-      if (e.button !== 0 || drag !== null) return;
-      if (e.target === controller.host || controller.host.contains(e.target)) return;
-      if (webChat.open && (e.target === webChat.host || webChat.host.contains(e.target))) return;
-      const modHeld = held || HOLD[ctx.settings.hotkeys.hold](e);
-      if (!modHeld && ctx.settings.clickThrough) return;
-      const r = rect();
-      const b = boundsWithChat(r);
-      const h = Math.round(r.b - r.t);
-      if (e.clientX >= r.l && e.clientX <= r.r && e.clientY >= b.videoT && e.clientY <= b.videoT + h) {
-        pendingMove = { startX: e.clientX, startY: e.clientY };
-      }
-    }, { capture: true, ...on });
-
-    window.addEventListener("pointermove", (e) => {
-      if (!e.isTrusted) return;
-      const prevInteractive = isInteractive();
-      const prevHovered = controller.host.hasAttribute("data-hovered");
-      cursor = { x: e.clientX, y: e.clientY };
-      holdFrom(e);
-      const b = boundsWithChat(rect());
-      const nowHovered =
-        drag !== null || (cursor.x >= b.l && cursor.x <= b.r && cursor.y >= b.t && cursor.y <= b.b);
-      if (prevInteractive !== isInteractive() || prevHovered !== nowHovered) render();
-      tick();
-    }, { capture: true, ...on });
-
-    window.addEventListener("wheel", (e) => {
-      const r = rect();
-      const overRect = e.clientX >= r.l && e.clientX <= r.r && e.clientY >= r.t && e.clientY <= r.b;
-      if (!overRect && e.target !== video && e.target !== controller.host) return;
-      const modHeld = held || HOLD[ctx.settings.hotkeys.hold](e);
-      if (!modHeld && ctx.settings.clickThrough) return;
-      e.preventDefault();
-      e.stopPropagation();
-      if (!e.deltaY) return;
-      wheelPreview = true;
-      waitCursorLeave = true;
-      dodge = { ...dodge, hoverSince: null };
-      stepOpacity(e.deltaY < 0 ? WHEEL_OPACITY_STEP : -WHEEL_OPACITY_STEP);
-      render();
-    }, { capture: true, passive: false, ...on });
-
-    document.documentElement.addEventListener("mouseleave", () => {
-      cursor = null;
-      render();
-    }, on);
-    window.addEventListener("keydown", holdFrom, { capture: true, ...on });
-    window.addEventListener("keyup", holdFrom, { capture: true, ...on });
-    window.addEventListener("blur", () => setHeld(false), on);
-    document.addEventListener("visibilitychange", () => setHeld(false), on);
-    window.addEventListener("resize", render, on);
-    video.addEventListener("resize", render, on);
-    const timer = setInterval(tick, DODGE_TICK_MS);
-
-    dragSink = {
+    const dragController = {
       active() {
         return drag !== null;
       },
@@ -1026,6 +1230,7 @@
 
           floatWidth = nextW;
           floatHeight = nextH;
+          resizedInSession = true;
           drag.x = Math.max(0, nextX);
           drag.y = Math.max(0, nextY);
           drag.w = nextW;
@@ -1035,6 +1240,7 @@
       },
       end() {
         if (!drag) return;
+        const wasResize = drag.mode === "resize";
         const vp = viewport();
         const r = { l: drag.x, t: drag.y, r: drag.x + drag.w, b: drag.y + drag.h };
         const s = { w: drag.w, h: drag.h };
@@ -1047,30 +1253,230 @@
 
         corner = nearest;
         dodge = Dodge.initialState(corner);
-        faded = false;
         customPos = nearCorner ? null : toRelPos(r.l, r.t, s, vp);
+        if (wasResize) {
+          savedAspectRatio = videoRatio(video, ratioFallback);
+        }
 
-        persistLayout({ width: floatWidth, height: floatHeight, pos: customPos, chatOpen: webChatOpen });
-        if (cfg().allowed.includes(nearest) && nearest !== cfg().home) {
-          lastHome = nearest;
-          persistHome(nearest, true);
+        if (activeFloatings.size <= 1) {
+          persistLayout({
+            width: floatWidth,
+            height: floatHeight,
+            aspectRatio: savedAspectRatio,
+            pos: customPos,
+            chatOpen: webChatOpen,
+          });
+          if (cfg().allowed.includes(nearest) && nearest !== cfg().home) {
+            lastHome = nearest;
+            persistHome(nearest, true);
+          }
+        } else {
+          hasIndependentSlotPos = true;
+          if (wasResize) {
+            persistLayout({
+              width: floatWidth,
+              height: floatHeight,
+              aspectRatio: savedAspectRatio,
+            });
+          }
         }
         render();
       },
     };
 
+    controller.root.addEventListener(
+      "pointerdown",
+      (e) => {
+        if (e.button !== 0 || e.target.closest?.(".bar") || e.target.closest?.(".skip-ad")) return;
+        const target = e.target;
+        const resizeDir = target.dataset?.resize || null;
+        if (!resizeDir) return;
+        try {
+          target.setPointerCapture?.(e.pointerId);
+        } catch {}
+        dragController.start(e, resizeDir);
+      },
+      on,
+    );
+
+    window.addEventListener(
+      "pointerdown",
+      (e) => {
+        if (e.button !== 0 || drag !== null) return;
+        if (e.target === controller.host || controller.host.contains(e.target)) return;
+        if (webChat.open && (e.target === webChat.host || webChat.host.contains(e.target))) return;
+        const modHeld = held || HOLD[ctx.settings.hotkeys.hold](e);
+        if (!modHeld && effectiveClickThrough()) return;
+        const r = rect();
+        const b = boundsWithChat(r);
+        const hPx = Math.round(r.b - r.t);
+        if (e.clientX >= r.l && e.clientX <= r.r && e.clientY >= b.videoT && e.clientY <= b.videoT + hPx) {
+          pendingMove = { startX: e.clientX, startY: e.clientY };
+        }
+      },
+      { capture: true, ...on },
+    );
+
+    window.addEventListener(
+      "pointermove",
+      (e) => {
+        dragController.pointerMove(e);
+        if (dragController.active()) {
+          if (e.isTrusted && (e.buttons & 1) === 0) {
+            dragController.end();
+            return;
+          }
+          dragController.move(e);
+        }
+        if (!e.isTrusted) return;
+        const prevInteractive = isInteractive();
+        const prevHovered = controller.host.hasAttribute("data-hovered");
+        cursor = { x: e.clientX, y: e.clientY };
+        holdFrom(e);
+        const b = boundsWithChat(rect());
+        const nowHovered =
+          drag !== null || (cursor.x >= b.l && cursor.x <= b.r && cursor.y >= b.t && cursor.y <= b.b);
+        if (prevInteractive !== isInteractive() || prevHovered !== nowHovered) render();
+        tick();
+      },
+      { capture: true, ...on },
+    );
+
+    window.addEventListener(
+      "pointerup",
+      () => {
+        dragController.pointerUp();
+        if (dragController.active()) dragController.end();
+      },
+      { capture: true, ...on },
+    );
+
+    window.addEventListener(
+      "pointercancel",
+      () => {
+        dragController.pointerUp();
+        if (dragController.active()) dragController.end();
+      },
+      { capture: true, ...on },
+    );
+
+    window.addEventListener(
+      "wheel",
+      (e) => {
+        const b = boundsWithChat(rect());
+        const overRect = e.clientX >= b.l && e.clientX <= b.r && e.clientY >= b.t && e.clientY <= b.b;
+        if (!overRect && e.target !== video && e.target !== controller.host) return;
+        const modHeld = held || HOLD[ctx.settings.hotkeys.hold](e);
+        if (!modHeld && effectiveClickThrough()) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (!e.deltaY) return;
+        wheelPreview = true;
+        waitCursorLeave = true;
+        dodge = { ...dodge, hoverSince: null, faded: false };
+        stepOpacity(e.deltaY < 0 ? WHEEL_OPACITY_STEP : -WHEEL_OPACITY_STEP);
+        render();
+      },
+      { capture: true, passive: false, ...on },
+    );
+
+    const clearCursor = () => {
+      const wasFaded = dodge.faded;
+      cursor = null;
+      waitCursorLeave = false;
+      tick();
+      if (!wasFaded) render();
+    };
+
+    document.documentElement.addEventListener("mouseleave", clearCursor, on);
+    window.addEventListener(
+      "pointerout",
+      (e) => {
+        if (e.isTrusted && !e.relatedTarget) clearCursor();
+      },
+      { capture: true, ...on },
+    );
+    window.addEventListener(
+      "pointerover",
+      (e) => {
+        if (!e.isTrusted) return;
+        const rawTarget = e.composedPath?.()?.[0] || e.target;
+        if (rawTarget?.tagName === "IFRAME") {
+          clearCursor();
+          return;
+        }
+        const prevInteractive = isInteractive();
+        const prevHovered = controller.host.hasAttribute("data-hovered");
+        cursor = { x: e.clientX, y: e.clientY };
+        holdFrom(e);
+        const b = boundsWithChat(rect());
+        const nowHovered =
+          drag !== null || (cursor.x >= b.l && cursor.x <= b.r && cursor.y >= b.t && cursor.y <= b.b);
+        if (prevInteractive !== isInteractive() || prevHovered !== nowHovered) render();
+        tick();
+      },
+      { capture: true, ...on },
+    );
+    window.addEventListener("keydown", holdFrom, { capture: true, ...on });
+    window.addEventListener("keyup", holdFrom, { capture: true, ...on });
+    window.addEventListener(
+      "blur",
+      () => {
+        setHeld(false);
+        clearCursor();
+      },
+      on,
+    );
+    document.addEventListener(
+      "visibilitychange",
+      () => {
+        setHeld(false);
+        if (document.hidden) clearCursor();
+      },
+      on,
+    );
+    window.addEventListener("resize", render, on);
+    video.addEventListener("resize", render, on);
+    const timer = setInterval(tick, DODGE_TICK_MS);
+
+    const floatingHandle = {
+      getSourceTabId() {
+        return Number.isFinite(sourceTabId) ? sourceTabId : ctx.myTabId;
+      },
+      getCorner() {
+        return corner;
+      },
+      containsPoint(x, y) {
+        const b = boundsWithChat(rect());
+        return x >= b.l && x <= b.r && y >= b.t && y <= b.b;
+      },
+      promoteToPrimary() {
+        controller.host.id = "ghostpip-controller";
+        webChat.host.id = "ghostpip-chat";
+        subtitleHost.host.id = "ghostpip-subtitles";
+      },
+    };
+    activeFloatings.add(floatingHandle);
+
     function exit() {
       ac.abort();
       clearInterval(timer);
-      dragSink = null;
-      toggleWebChatSink = null;
-      skipAdSink = null;
+      clearTimeout(toastTimer);
       pendingMove = null;
-      webChat.hide();
+      activeFloatings.delete(floatingHandle);
       webChatFrame.removeAttribute("src");
-      controller.hide();
+      webChat.destroy();
+      subtitleHost.destroy();
+      controller.destroy();
+      promotePrimaryOverlayIds();
       video.removeAttribute("data-gp-anim");
-      if (video.matches(":popover-open")) video.hidePopover();
+      video.removeAttribute("data-gp-peek-outline");
+      video.removeAttribute("data-click-through");
+      if (video.matches(":popover-open")) {
+        try {
+          video.hidePopover();
+        } catch {}
+      }
     }
 
     function setChatUrl(nextUrl) {
@@ -1088,16 +1494,33 @@
       }
     }
 
+    function setSubtitle(nextText) {
+      const clean = typeof nextText === "string" ? nextText.trim() : "";
+      if (clean !== subtitleText) {
+        subtitleText = clean;
+        render();
+      }
+    }
+
     video.setAttribute("popover", "manual");
     video.classList.add(FLOAT_CLASS);
-    render();
     try {
       video.showPopover();
     } catch {
       queueMicrotask(leave);
     }
+    render();
 
-    return { exit, settingsChanged, layoutChanged, setChatUrl, setHasAd };
+    return {
+      exit,
+      settingsChanged,
+      layoutChanged,
+      peekChanged: () => render(true),
+      showHud: showToast,
+      setChatUrl,
+      setHasAd,
+      setSubtitle,
+    };
   }
 
   function boostVideoSdp(sdp) {
@@ -1111,14 +1534,7 @@
     return out;
   }
 
-  function enterInTab(_arg, leave) {
-    const video = ctx.video;
-    const original = {
-      popover: video.getAttribute("popover"),
-      class: video.hasAttribute("class"),
-      style: video.hasAttribute("style"),
-    };
-    const floating = enterFloating({ video, isRemote: false }, leave);
+  function createMediaSender(video, { onSubtitle } = {}) {
     const capCanvas = document.createElement("canvas");
     const capCtx = capCanvas.getContext("2d", { alpha: false });
     let alive = true;
@@ -1127,6 +1543,7 @@
     let keepAlivePc2 = null;
     let keepAliveSink = null;
     let keepAliveTracks = [];
+    let currentSubtitle = "";
     const rtcPeers = new Map();
 
     function stopRtcPeer(portId) {
@@ -1159,7 +1576,7 @@
         keepAliveSink.srcObject = null;
         keepAliveSink = null;
       }
-      for (const t of keepAliveTracks) t.stop();
+      for (const tr of keepAliveTracks) tr.stop();
       keepAliveTracks = [];
     }
 
@@ -1172,7 +1589,7 @@
         const stream = video.captureStream();
         keepAliveTracks = stream.getVideoTracks();
         if (!keepAliveTracks.length) return;
-        for (const t of keepAliveTracks) t.contentHint = "detail";
+        for (const tr of keepAliveTracks) tr.contentHint = "detail";
         const pc1 = new RTCPeerConnection();
         const pc2 = new RTCPeerConnection();
         keepAlivePc1 = pc1;
@@ -1187,7 +1604,7 @@
           sink.srcObject = e.streams[0] ?? new MediaStream([e.track]);
           sink.play().catch(() => {});
         };
-        for (const t of keepAliveTracks) pc1.addTrack(t, stream);
+        for (const tr of keepAliveTracks) pc1.addTrack(tr, stream);
         const offer = await pc1.createOffer();
         await pc1.setLocalDescription(offer);
         await pc2.setRemoteDescription(offer);
@@ -1229,6 +1646,9 @@
         } catch {}
         if (rtcPeers.get(portId)?.pc === pc && senderPort) {
           senderPort.postMessage({ type: "RTC_OFFER", sdp: boostVideoSdp(pc.localDescription.sdp), portId });
+          if (currentSubtitle) {
+            senderPort.postMessage({ type: "SUBTITLE", text: currentSubtitle, portId });
+          }
         }
       } catch {}
     }
@@ -1289,8 +1709,26 @@
           void chrome.runtime.lastError;
           if (senderPort === port) senderPort = null;
         });
+        if (currentSubtitle) {
+          try {
+            port.postMessage({ type: "SUBTITLE", text: currentSubtitle });
+          } catch {}
+        }
       } catch {}
     }
+
+    const subObs = Subtitles?.observe?.(
+      () => video,
+      (text) => {
+        currentSubtitle = text;
+        onSubtitle?.(text);
+        if (alive && senderPort) {
+          try {
+            senderPort.postMessage({ type: "SUBTITLE", text });
+          } catch {}
+        }
+      },
+    );
 
     const onLoadedData = () => {
       if (!alive) return;
@@ -1305,21 +1743,31 @@
     startKeepAlive();
     connectSender();
 
+    const frameWarmTimer = setInterval(() => {
+      if (alive && senderPort) captureFrame(640);
+    }, 220);
+
     function querySource() {
       connectSender();
       const vw = video.videoWidth || 0;
       const vh = video.videoHeight || 0;
       const ratio = vw > 0 && vh > 0 ? vh / vw : 9 / 16;
-      return { ok: true, ratio, vw, vh, chatUrl: chatUrlFor(ctx.site), frame: snapshotFrame(640) };
+      return {
+        ok: true,
+        ratio,
+        vw,
+        vh,
+        chatUrl: chatUrlFor(ctx.site),
+        frame: snapshotFrame(640),
+        subtitle: currentSubtitle,
+      };
     }
 
-    const frameWarmTimer = setInterval(() => {
-      if (alive && senderPort) captureFrame(640);
-    }, 220);
-
-    function exit() {
+    function stop() {
+      if (!alive) return;
       alive = false;
       clearInterval(frameWarmTimer);
+      subObs?.stop?.();
       video.removeEventListener("loadeddata", onLoadedData);
       if (senderPort) {
         try {
@@ -1328,12 +1776,40 @@
         senderPort = null;
       }
       stopKeepAlive();
+    }
+
+    return {
+      connectSender,
+      querySource,
+      snapshotFrame,
+      getSubtitle: () => currentSubtitle,
+      stop,
+    };
+  }
+
+  function enterInTab(_arg, leave) {
+    const video = ctx.video;
+    const original = {
+      popover: video.getAttribute("popover"),
+      class: video.hasAttribute("class"),
+      style: video.hasAttribute("style"),
+    };
+    const floating = enterFloating({ video, isRemote: false }, leave);
+    const mediaSender = createMediaSender(video, {
+      onSubtitle: (text) => floating.setSubtitle(text),
+    });
+    floating.setSubtitle(mediaSender.getSubtitle());
+
+    function exit() {
+      mediaSender.stop();
       send({ type: "INTAB_CLOSED" });
       floating.exit();
       if (original.popover === null) video.removeAttribute("popover");
       else video.setAttribute("popover", original.popover);
       video.classList.remove(FLOAT_CLASS);
       video.removeAttribute("data-gp-pass");
+      video.removeAttribute("data-click-through");
+      video.removeAttribute("data-gp-peek-outline");
       video.removeAttribute("data-gp-drag");
       video.removeAttribute("data-gp-anim");
       for (const name of GP_VARS) video.style.removeProperty(name);
@@ -1351,18 +1827,22 @@
       vw: initVw,
       vh: initVh,
       chatUrl: chatUrlFor(ctx.site),
-      frame: snapshotFrame(640),
+      frame: mediaSender.snapshotFrame(640),
+      subtitle: mediaSender.getSubtitle(),
     });
     return {
+      video,
       exit,
       settingsChanged: floating.settingsChanged,
       layoutChanged: floating.layoutChanged,
-      querySource,
-      connectSender,
+      peekChanged: floating.peekChanged,
+      showHud: floating.showHud,
+      querySource: mediaSender.querySource,
+      connectSender: mediaSender.connectSender,
     };
   }
 
-  function enterRemoteInTab({ ratio, vw: initVw, vh: initVh, chatUrl, initialFrame } = {}, leave) {
+  function enterRemoteInTab({ ratio, vw: initVw, vh: initVh, chatUrl, initialFrame, initialSubtitle = "", sourceTabId = null } = {}, leave) {
     const initRatio = ratio || (initVw > 0 && initVh > 0 ? initVh / initVw : 9 / 16);
     const startW = initVw > 0 ? initVw : initialFrame?.vw > 0 ? initialFrame.vw : DEFAULT_FLOAT_WIDTH;
     const startH =
@@ -1371,11 +1851,13 @@
         : initialFrame?.vh > 0
           ? initialFrame.vh
           : Math.max(1, Math.round(startW * initRatio));
-    const canvas = h("canvas", {
+    const canvasAttrs = {
       class: FLOAT_CLASS,
       "data-gp-remote": "",
       popover: "manual",
-    });
+    };
+    if (Number.isFinite(sourceTabId)) canvasAttrs["data-gp-source-tab"] = String(sourceTabId);
+    const canvas = h("canvas", canvasAttrs);
     canvas.width = startW;
     canvas.height = startH;
     canvas.videoWidth = startW;
@@ -1385,7 +1867,17 @@
     const ctx2d = canvas.getContext("2d", { alpha: false });
     document.documentElement.append(canvas);
 
-    const floating = enterFloating({ video: canvas, ratioFallback: initRatio, isRemote: true, chatUrl }, leave);
+    const floating = enterFloating(
+      {
+        video: canvas,
+        ratioFallback: initRatio,
+        isRemote: true,
+        chatUrl,
+        sourceTabId,
+        initialSubtitle,
+      },
+      leave,
+    );
 
     let alive = true;
     let receiverPort = null;
@@ -1452,7 +1944,7 @@
         pc.onicecandidate = (e) => {
           if (e.candidate && receiverPort && rtcPeer === pc) {
             try {
-              receiverPort.postMessage({ type: "RTC_CANDIDATE", candidate: e.candidate.toJSON() });
+              receiverPort.postMessage({ type: "RTC_CANDIDATE", candidate: e.candidate.toJSON(), sourceTabId });
             } catch {}
           }
         };
@@ -1472,7 +1964,7 @@
         const boostedAnswer = boostVideoSdp(answer.sdp);
         await pc.setLocalDescription({ type: "answer", sdp: boostedAnswer });
         if (rtcPeer === pc && receiverPort) {
-          receiverPort.postMessage({ type: "RTC_ANSWER", sdp: boostedAnswer });
+          receiverPort.postMessage({ type: "RTC_ANSWER", sdp: boostedAnswer, sourceTabId });
         }
       } catch {}
     }
@@ -1488,7 +1980,7 @@
       lastPullAt = now;
       const targetW = Math.round((ctx.layout.width || DEFAULT_FLOAT_WIDTH) * (window.devicePixelRatio || 1) * 1.5);
       try {
-        receiverPort.postMessage({ type: "PULL_FRAME", targetW });
+        receiverPort.postMessage({ type: "PULL_FRAME", targetW, sourceTabId });
       } catch {
         pulling = false;
       }
@@ -1532,11 +2024,17 @@
     function connectReceiver() {
       if (!alive || receiverPort) return;
       try {
-        const port = chrome.runtime.connect({ name: "ghostpip-receiver" });
+        const portName = Number.isFinite(sourceTabId) ? `ghostpip-receiver:${sourceTabId}` : "ghostpip-receiver";
+        const port = chrome.runtime.connect({ name: portName });
         receiverPort = port;
         port.onMessage.addListener((msg) => {
+          if (Number.isFinite(sourceTabId) && Number.isFinite(msg?.sourceTabId) && msg.sourceTabId !== sourceTabId) {
+            return;
+          }
           if (msg?.type === "FRAME") {
             handleFrame(msg);
+          } else if (msg?.type === "SUBTITLE") {
+            floating.setSubtitle?.(msg.text || "");
           } else if (msg?.type === "RTC_OFFER" && msg.sdp) {
             handleRtcOffer(msg.sdp);
           } else if (msg?.type === "RTC_CANDIDATE" && rtcPeer && msg.candidate) {
@@ -1550,7 +2048,7 @@
             pulling = false;
           }
         });
-        port.postMessage({ type: "RTC_INIT" });
+        port.postMessage({ type: "RTC_INIT", sourceTabId });
       } catch {}
     }
 
@@ -1589,11 +2087,15 @@
 
     return {
       video: canvas,
+      sourceTabId,
       exit,
       settingsChanged: floating.settingsChanged,
       layoutChanged: floating.layoutChanged,
+      peekChanged: floating.peekChanged,
+      showHud: floating.showHud,
       kick: (msg) => {
         if (msg?.chatUrl) floating.setChatUrl?.(msg.chatUrl);
+        if (typeof msg?.initialSubtitle === "string") floating.setSubtitle?.(msg.initialSubtitle);
         if (msg?.initialFrame?.dataUrl && (!rtcActive || performance.now() - lastRtcDrawAt >= 140)) {
           handleFrame(msg.initialFrame);
         }
@@ -1604,13 +2106,52 @@
           rtcPeer.connectionState === "disconnected";
         if (peerDead && receiverPort) {
           try {
-            receiverPort.postMessage({ type: "RTC_INIT" });
+            receiverPort.postMessage({ type: "RTC_INIT", sourceTabId });
           } catch {}
         }
         if (!drawRtcFrame()) requestFrame();
       },
       ready: Promise.resolve({ ok: true }),
     };
+  }
+
+  const remoteOverlays = new Map();
+
+  function remoteKeyOf(msg) {
+    return Number.isFinite(msg?.sourceTabId) ? msg.sourceTabId : "default";
+  }
+
+  function closeRemoteOverlay(key) {
+    const inst = remoteOverlays.get(key);
+    if (!inst) return;
+    remoteOverlays.delete(key);
+    inst.exit();
+  }
+
+  function stopAllRemoteOverlays() {
+    for (const key of [...remoteOverlays.keys()]) {
+      closeRemoteOverlay(key);
+    }
+  }
+
+  function upsertRemoteOverlay(msg) {
+    if (!ctx.settings.enabled) return null;
+    if (Number.isFinite(msg?.sourceTabId) && ctx.myTabId != null && msg.sourceTabId === ctx.myTabId) {
+      return null;
+    }
+    if (!Number.isFinite(msg?.sourceTabId) && current.name === "inTab") {
+      return null;
+    }
+    const key = remoteKeyOf(msg);
+    const existing = remoteOverlays.get(key);
+    if (existing && existing.video?.isConnected) {
+      existing.kick(msg);
+      return existing;
+    }
+    if (existing) closeRemoteOverlay(key);
+    const created = enterRemoteInTab(msg, () => closeRemoteOverlay(key));
+    remoteOverlays.set(key, created);
+    return created;
   }
 
   const PIP_CSS = `
@@ -1621,6 +2162,13 @@
     video { width: 100%; height: 100%; display: block; object-fit: fill; background: #000; }
     iframe { flex: 0 0 var(--gp-chat-h, ${PIP_CHAT_HEIGHT}px); height: var(--gp-chat-h, ${PIP_CHAT_HEIGHT}px); min-height: 0; max-height: calc(100% - ${MIN_FLOAT_HEIGHT}px); width: 100%; border: 0; background: #fff; }
     body[data-chat-resizing] iframe { pointer-events: none; }
+    .pip-subtitles { position: absolute; left: 50%; bottom: 8%; transform: translateX(-50%); max-width: 92%; pointer-events: none;
+      z-index: 2; padding: 2px 6px; background: transparent; border: 0; outline: none; color: #fff;
+      font: 700 clamp(12px, 4vw, 26px)/1.36 "Pretendard", system-ui, "Malgun Gothic", sans-serif;
+      text-align: center; white-space: pre-line; word-break: keep-all; overflow-wrap: break-word;
+      text-shadow: -1.5px -1.5px 0 rgba(0, 0, 0, 0.96), 1.5px -1.5px 0 rgba(0, 0, 0, 0.96), -1.5px 1.5px 0 rgba(0, 0, 0, 0.96), 1.5px 1.5px 0 rgba(0, 0, 0, 0.96), 0 -1.5px 0 rgba(0, 0, 0, 0.96), 0 1.5px 0 rgba(0, 0, 0, 0.96), -1.5px 0 0 rgba(0, 0, 0, 0.96), 1.5px 0 0 rgba(0, 0, 0, 0.96), 0 2px 6px rgba(0, 0, 0, 0.85);
+      box-sizing: border-box; }
+    .pip-subtitles[hidden] { display: none !important; }
     .pip-bar { position: absolute; bottom: 14px; left: 50%; z-index: 12; opacity: 0; pointer-events: auto;
       transform: translateX(-50%); transition: opacity 0.14s ease; }
     .pip-bar button { padding: 7px 14px; font-size: 12.5px; pointer-events: auto; }
@@ -1699,6 +2247,9 @@
     mirror.autoplay = true;
     mirror.playsInline = true;
     mirror.srcObject = stream;
+    const pipSubtitles = doc.createElement("div");
+    pipSubtitles.className = "pip-subtitles";
+    pipSubtitles.hidden = true;
     const pipHud = doc.createElement("div");
     pipHud.className = "pip-hud";
     const pipSkipAd = doc.createElement("button");
@@ -1748,7 +2299,10 @@
       pipBar.append(chatBtn);
       // Click buttons still work under click-through (the engine replays hold+click), and they can
       // grow the chat by shrinking the video once Chrome's PiP size cap stops the window growing.
-      for (const [label, delta, title] of [["−", -CHAT_SIZE_STEP, t("chatSmaller")], ["+", CHAT_SIZE_STEP, t("chatBigger")]]) {
+      for (const [label, delta, title] of [
+        ["−", -CHAT_SIZE_STEP, t("chatSmaller")],
+        ["+", CHAT_SIZE_STEP, t("chatBigger")],
+      ]) {
         const btn = doc.createElement("button");
         btn.type = "button";
         btn.dataset.action = delta > 0 ? "chatBigger" : "chatSmaller";
@@ -1763,7 +2317,7 @@
         pipBar.append(btn);
       }
     }
-    stage.append(mirror, pipHud, pipSkipAd, pipBar);
+    stage.append(mirror, pipSubtitles, pipHud, pipSkipAd, pipBar);
     doc.body.append(stage, ...handles);
 
     let engineHovered = false;
@@ -1795,8 +2349,8 @@
     let chatH = Number.isFinite(ctx.layout.pipChatHeight) ? ctx.layout.pipChatHeight : PIP_CHAT_HEIGHT;
     let activeChatH = chatH;
     let togglingUntil = 0;
-    const applyChatH = (h = activeChatH) => {
-      activeChatH = Math.max(MIN_CHAT_HEIGHT, Math.round(h));
+    const applyChatH = (hVal = activeChatH) => {
+      activeChatH = Math.max(MIN_CHAT_HEIGHT, Math.round(hVal));
       doc.body.style.setProperty("--gp-chat-h", `${activeChatH}px`);
     };
     applyChatH(chatH);
@@ -1868,6 +2422,7 @@
     let lastResizeAt = 0;
     let resizeMode = "window";
     let gestureStartChatH = chatH;
+    let persistWidthTimer = null;
     const openedAt = performance.now();
     win.addEventListener("resize", () => {
       const now = performance.now();
@@ -1919,6 +2474,14 @@
 
       // Window resizes never touch the chat height; the video takes all of the change.
       lockedVideoH = Math.max(MIN_FLOAT_HEIGHT, win.innerHeight - (chatShown && frame?.isConnected ? activeChatH : 0));
+      if (win.innerWidth >= MIN_FLOAT_WIDTH && win.innerWidth <= MAX_FLOAT_WIDTH) {
+        clearTimeout(persistWidthTimer);
+        persistWidthTimer = setTimeout(() => {
+          if (!win.closed && win.innerWidth >= MIN_FLOAT_WIDTH && win.innerWidth <= MAX_FLOAT_WIDTH) {
+            persistLayout({ pipWidth: Math.round(win.innerWidth) });
+          }
+        }, 220);
+      }
     });
 
     function syncChat(enabled, resizeWin = false) {
@@ -1984,9 +2547,31 @@
       pipSkipAd.hidden = !Boolean(visible);
     }
 
+    function setSubtitle(text) {
+      const clean = typeof text === "string" ? text.trim() : "";
+      pipSubtitles.textContent = clean;
+      pipSubtitles.hidden = !clean;
+    }
+
+    function setChatOpacity(opStr) {
+      if (frame) frame.style.opacity = opStr;
+    }
+
     syncChat(showChat, false);
     mirror.play().catch(() => {});
-    return { mirror, pipHud, syncChat, setFeatureEnabled, toggleChatOpen, setHovered, setClickThrough, setSkipAdVisible };
+    return {
+      mirror,
+      pipHud,
+      pipSubtitles,
+      syncChat,
+      setFeatureEnabled,
+      toggleChatOpen,
+      setHovered,
+      setClickThrough,
+      setSkipAdVisible,
+      setSubtitle,
+      setChatOpacity,
+    };
   }
 
   function enterDocPip({ stream: firstStream, chatUrl, win: winPromise }, leave) {
@@ -1998,24 +2583,53 @@
     let win = null;
     let mirror = null;
     let pipHud = null;
+    let pipSubtitles = null;
     let setFeatureEnabled = null;
     let toggleChatOpen = null;
     let setHovered = null;
     let setClickThrough = null;
     let setSkipAdVisible = null;
+    let setSubtitle = null;
+    let setChatOpacity = null;
     let hudTimer = null;
     let rectSyncTimer = null;
     let adPollTimer = null;
-    let engineConnected = true;
+    let engineConnected = Boolean(ctx.engineConnected);
+    let latestSubtitle = "";
+
+    const subObs = Subtitles?.observe?.(
+      () => video,
+      (text) => {
+        latestSubtitle = text;
+        setSubtitle?.(text);
+      },
+    );
+
+    function showHud(text) {
+      if (!text || !pipHud) return;
+      if (ctx.settings.peek?.enabled && !isPeeking() && ctx.settings.peek.idleOpacity === 0) return;
+      pipHud.textContent = text;
+      pipHud.setAttribute("data-show", "");
+      clearTimeout(hudTimer);
+      hudTimer = setTimeout(() => pipHud?.removeAttribute("data-show"), 900);
+    }
 
     function syncPipOpacity(showToast = false) {
       if (!mirror) return;
-      mirror.style.opacity = engineConnected ? "1" : String(ctx.settings.opacity);
-      if (showToast && pipHud) {
-        pipHud.textContent = t("hudOpacity", [String(Math.round(ctx.settings.opacity * 100))]);
-        pipHud.setAttribute("data-show", "");
-        clearTimeout(hudTimer);
-        hudTimer = setTimeout(() => pipHud?.removeAttribute("data-show"), 900);
+      let op = 1;
+      if (!engineConnected) {
+        if (ctx.settings.peek?.enabled) {
+          op = isPeeking() ? ctx.settings.peek.activeOpacity : ctx.settings.peek.idleOpacity;
+        } else {
+          op = ctx.settings.opacity;
+        }
+      }
+      const opStr = String(op);
+      mirror.style.opacity = opStr;
+      if (pipSubtitles) pipSubtitles.style.opacity = opStr;
+      setChatOpacity?.(opStr);
+      if (showToast) {
+        showHud(t("hudOpacity", [String(Math.round(ctx.settings.opacity * 100))]));
       }
     }
 
@@ -2036,6 +2650,7 @@
 
     function handleToggleChat() {
       toggleChatOpen?.();
+      syncPipOpacity(false);
     }
 
     winPromise.then((w) => {
@@ -2043,7 +2658,7 @@
       win = w;
       const built = buildPipDocument(w, stream, chatUrl, Boolean(ctx.settings.showChat), {
         onClosePip: () => {
-          send({ type: "FOCUS_SOURCE_TAB" });
+          send({ type: "FOCUS_SOURCE_TAB", sourceTabId: ctx.myTabId });
           leave();
         },
         onToggleChat: handleToggleChat,
@@ -2057,33 +2672,77 @@
       });
       mirror = built.mirror;
       pipHud = built.pipHud;
+      pipSubtitles = built.pipSubtitles;
       setFeatureEnabled = built.setFeatureEnabled;
       toggleChatOpen = built.toggleChatOpen;
       setHovered = built.setHovered;
       setClickThrough = built.setClickThrough;
       setSkipAdVisible = built.setSkipAdVisible;
+      setSubtitle = built.setSubtitle;
+      setChatOpacity = built.setChatOpacity;
+      setSubtitle(latestSubtitle);
       setSkipAdVisible(canSkipAd(video));
+      syncPipOpacity(false);
       adPollTimer = setInterval(() => {
         if (!ac.signal.aborted && !w.closed) setSkipAdVisible?.(canSkipAd(video));
       }, 400);
       w.addEventListener("pagehide", leave, { signal: ac.signal });
-      w.addEventListener("keydown", (e) => {
-        if (HOLD[ctx.settings.hotkeys.hold]?.(e)) setHovered?.(true);
-      }, { capture: true, signal: ac.signal });
-      w.addEventListener("keyup", (e) => {
-        if (ctx.settings.clickThrough && !HOLD[ctx.settings.hotkeys.hold]?.(e)) setHovered?.(false);
-      }, { capture: true, signal: ac.signal });
-      w.addEventListener("blur", () => {
-        if (ctx.settings.clickThrough) setHovered?.(false);
-      }, { signal: ac.signal });
-      w.addEventListener("wheel", (e) => {
-        if (e.target !== mirror && !HOLD[ctx.settings.hotkeys.hold](e)) return;
-        e.preventDefault();
-        e.stopPropagation();
-        if (!e.deltaY) return;
-        stepOpacity(e.deltaY < 0 ? WHEEL_OPACITY_STEP : -WHEEL_OPACITY_STEP);
-        syncPipOpacity(true);
-      }, { capture: true, passive: false, signal: ac.signal });
+      attachPeekAndShortcutListeners(w, ac.signal, ctx.myTabId);
+      w.addEventListener(
+        "keydown",
+        (e) => {
+          if (HOLD[ctx.settings.hotkeys.hold]?.(e)) setHovered?.(true);
+        },
+        { capture: true, signal: ac.signal },
+      );
+      w.addEventListener(
+        "keyup",
+        (e) => {
+          if (ctx.settings.clickThrough && !HOLD[ctx.settings.hotkeys.hold]?.(e)) setHovered?.(false);
+        },
+        { capture: true, signal: ac.signal },
+      );
+      w.addEventListener(
+        "blur",
+        () => {
+          if (ctx.settings.clickThrough) setHovered?.(false);
+        },
+        { signal: ac.signal },
+      );
+      w.addEventListener(
+        "wheel",
+        (e) => {
+          if (
+            !engineConnected &&
+            ctx.settings.enabled &&
+            ctx.settings.media?.enabled &&
+            ctx.settings.media.wheelVolume &&
+            e.altKey &&
+            !e.ctrlKey &&
+            !e.shiftKey &&
+            ctx.settings.hotkeys.hold !== "Alt"
+          ) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!e.deltaY) return;
+            send({
+              type: "MEDIA_ACTION",
+              action: "VOLUME",
+              deltaVolume: e.deltaY < 0 ? 0.05 : -0.05,
+              sourceTabId: ctx.myTabId,
+            });
+            return;
+          }
+          if (e.target !== mirror && !HOLD[ctx.settings.hotkeys.hold](e)) return;
+          e.preventDefault();
+          e.stopPropagation();
+          if (!e.deltaY) return;
+          stepOpacity(e.deltaY < 0 ? WHEEL_OPACITY_STEP : -WHEEL_OPACITY_STEP);
+          syncPipOpacity(true);
+        },
+        { capture: true, passive: false, signal: ac.signal },
+      );
+      const openedAt = performance.now();
       // Until its first resize the PiP window reports the opener's placeholder geometry, so the
       // rect handshake waits for it, with a timeout in case the platform never resizes.
       new Promise((placed) => {
@@ -2092,6 +2751,7 @@
       }).then(() => {
         if (ac.signal.aborted) return;
         const readRect = () => ({ x: w.screenX, y: w.screenY, w: w.outerWidth, h: w.outerHeight });
+        let lastRectPos = { x: w.screenX, y: w.screenY };
         send({
           type: "PIP_OPENED",
           kind: "document",
@@ -2099,56 +2759,132 @@
           dpr: w.devicePixelRatio,
         }).then((res) => {
           engineConnected = Boolean(res?.engineConnected);
+          ctx.engineConnected = engineConnected;
+          if (typeof res?.peekActive === "boolean") {
+            ctx.enginePeekActive = res.peekActive;
+          }
           syncPipOpacity(false);
+          if (!engineConnected && !res?.multiPip && ctx.layout.pipPos) {
+            try {
+              const availL = w.screen?.availLeft ?? 0;
+              const availT = w.screen?.availTop ?? 0;
+              const availW = w.screen?.availWidth ?? 1920;
+              const availH = w.screen?.availHeight ?? 1080;
+              const cx = Math.min(Math.max(availL, ctx.layout.pipPos.x), Math.max(availL, availL + availW - w.outerWidth));
+              const cy = Math.min(Math.max(availT, ctx.layout.pipPos.y), Math.max(availT, availT + availH - w.outerHeight));
+              w.moveTo(cx, cy);
+              lastRectPos = { x: w.screenX, y: w.screenY };
+            } catch {}
+          }
         });
         for (const delay of [400, 900]) {
           setTimeout(() => {
-            if (!ac.signal.aborted) send({ type: "PIP_RECT_UPDATED", rect: readRect() });
+            if (!ac.signal.aborted && !w.closed) send({ type: "PIP_RECT_UPDATED", rect: readRect() });
           }, delay);
         }
         rectSyncTimer = setInterval(() => {
           if (!ac.signal.aborted && !w.closed) {
-            send({ type: "PIP_RECT_UPDATED", rect: readRect() });
+            const cur = readRect();
+            send({ type: "PIP_RECT_UPDATED", rect: cur });
+            if (
+              !engineConnected &&
+              performance.now() - openedAt >= 1200 &&
+              (Math.abs(cur.x - lastRectPos.x) >= 2 || Math.abs(cur.y - lastRectPos.y) >= 2)
+            ) {
+              lastRectPos = { x: cur.x, y: cur.y };
+              persistLayout({ pipPos: { x: Math.round(cur.x), y: Math.round(cur.y) } });
+            }
           }
         }, 2000);
       });
     }, leave);
 
-    video.addEventListener("loadeddata", () => {
-      for (const t of stream.getTracks()) t.stop();
-      stream = video.captureStream();
-      if (mirror) mirror.srcObject = stream;
-    }, { signal: ac.signal });
+    video.addEventListener(
+      "loadeddata",
+      () => {
+        for (const tr of stream.getTracks()) tr.stop();
+        stream = video.captureStream();
+        if (mirror) mirror.srcObject = stream;
+      },
+      { signal: ac.signal },
+    );
 
     let lastShowChat = Boolean(ctx.settings.showChat);
 
     return {
+      video,
       settingsChanged: () => {
-        syncPipOpacity(false);
         const showChat = Boolean(ctx.settings.showChat);
         if (showChat !== lastShowChat) {
           lastShowChat = showChat;
           setFeatureEnabled?.(showChat);
         }
+        syncPipOpacity(false);
         setClickThrough?.(Boolean(ctx.settings.clickThrough));
       },
+      peekChanged: () => {
+        syncPipOpacity(false);
+      },
+      engineStateChanged: (connected) => {
+        engineConnected = Boolean(connected);
+        syncPipOpacity(false);
+      },
+      showHud,
       toggleChat: () => {
         toggleChatOpen?.();
+        syncPipOpacity(false);
       },
       setHovered: (hovered) => {
         setHovered?.(hovered);
       },
       exit() {
         ac.abort();
+        subObs?.stop?.();
         clearTimeout(hudTimer);
         clearInterval(rectSyncTimer);
         clearInterval(adPollTimer);
         video.classList.remove(DOCPIP_SOURCE_CLASS);
         if (!originalHasClass && !video.getAttribute("class")) video.removeAttribute("class");
-        for (const t of stream.getTracks()) t.stop();
+        for (const tr of stream.getTracks()) tr.stop();
         if (!win) return;
         send({ type: "PIP_CLOSED" });
         win.close();
+      },
+    };
+  }
+
+  function enterPopupPip({ width, height, ratio, chatUrl, showChat }, leave) {
+    const video = ctx.video;
+    const originalHasClass = video.hasAttribute("class");
+    video.classList.add(DOCPIP_SOURCE_CLASS);
+    let closed = false;
+    const mediaSender = createMediaSender(video);
+
+    send({
+      type: "OPEN_POPUP_PIP",
+      width,
+      height,
+      ratio,
+      chatUrl,
+      showChat,
+      subtitle: mediaSender.getSubtitle(),
+    }).then((res) => {
+      if (!closed && !res?.ok) {
+        leave();
+      }
+    });
+
+    return {
+      video,
+      connectSender: mediaSender.connectSender,
+      querySource: mediaSender.querySource,
+      exit() {
+        if (closed) return;
+        closed = true;
+        mediaSender.stop();
+        video.classList.remove(DOCPIP_SOURCE_CLASS);
+        if (!originalHasClass && !video.getAttribute("class")) video.removeAttribute("class");
+        send({ type: "CLOSE_POPUP_PIP" });
       },
     };
   }
@@ -2157,40 +2893,83 @@
     const video = ctx.video;
     const ac = new AbortController();
     let opened = false;
+    let currentSubtitle = "";
+
+    const subObs = Subtitles?.observe?.(
+      () => video,
+      (text) => {
+        currentSubtitle = text;
+        if (opened) {
+          send({ type: "PIP_SUBTITLE", text });
+        }
+      },
+    );
+
+    function readNativeRect(pw) {
+      const fallbackH = Math.max(120, Math.round(DEFAULT_FLOAT_WIDTH * videoRatio(video)));
+      const w = pw?.width > 0 ? pw.width : DEFAULT_FLOAT_WIDTH;
+      const h = pw?.height > 0 ? pw.height : fallbackH;
+      return { x: window.screenX, y: window.screenY, w, h };
+    }
+
     function reportOpened(pw) {
       if (opened || !pw) return;
       opened = true;
+      pw.addEventListener?.(
+        "resize",
+        () => {
+          if (!ac.signal.aborted && pw.width > 0 && pw.height > 0) {
+            send({ type: "PIP_RECT_UPDATED", rect: readNativeRect(pw) });
+          }
+        },
+        { signal: ac.signal },
+      );
       // The native PiP window's screen position is not exposed to pages; the opener's position is a
       // placeholder and the engine matches on size.
       send({
         type: "PIP_OPENED",
         kind: "native",
-        rect: { x: window.screenX, y: window.screenY, w: pw.width, h: pw.height },
-        dpr: devicePixelRatio,
+        rect: readNativeRect(pw),
+        dpr: devicePixelRatio || 1,
+      }).then(() => {
+        const sub = currentSubtitle || subObs?.refresh?.() || "";
+        if (sub && !ac.signal.aborted) {
+          send({ type: "PIP_SUBTITLE", text: sub });
+        }
       });
     }
     video.addEventListener("enterpictureinpicture", (e) => reportOpened(e.pictureInPictureWindow), { signal: ac.signal });
     video.addEventListener("leavepictureinpicture", leave, { signal: ac.signal });
     Promise.resolve(request).then(reportOpened, leave);
     return {
+      video,
       exit() {
         ac.abort();
-        if (opened) send({ type: "PIP_CLOSED" });
+        subObs?.stop?.();
+        if (opened) {
+          send({ type: "PIP_SUBTITLE", text: "" });
+          send({ type: "PIP_CLOSED" });
+        }
         if (document.pictureInPictureElement === video) document.exitPictureInPicture().catch(() => {});
       },
     };
   }
 
-  document.addEventListener("enterpictureinpicture", (e) => {
-    if (!ctx.settings.enabled || current.name !== "idle" || !(e.target instanceof HTMLVideoElement)) return;
-    ctx.video = e.target;
-    go("nativePip", Promise.resolve(e.pictureInPictureWindow));
-  }, true);
+  document.addEventListener(
+    "enterpictureinpicture",
+    (e) => {
+      if (!ctx.settings.enabled || current.name !== "idle" || !(e.target instanceof HTMLVideoElement)) return;
+      ctx.video = e.target;
+      go("nativePip", Promise.resolve(e.pictureInPictureWindow));
+    },
+    true,
+  );
 
   // DRM or an uncapturable element falls back to native PiP. Both checks are synchronous so the
   // click's user activation is still unspent when requestWindow/requestPictureInPicture runs.
   function startPip() {
     const video = ctx.video;
+    if (!video) return;
     let stream = null;
     if (!video.mediaKeys) {
       try {
@@ -2205,41 +2984,28 @@
     }
     const chatUrl = chatUrlFor(ctx.site);
     const showChat = Boolean(ctx.settings.showChat && chatUrl);
-    const size = floatSize(video, DEFAULT_FLOAT_WIDTH, DEFAULT_FLOAT_WIDTH);
+    const prefW = ctx.layout.pipWidth ?? DEFAULT_FLOAT_WIDTH;
+    const size = floatSize(video, prefW, Math.max(prefW, MAX_FLOAT_HEIGHT));
     const height = size.h + (showChat ? (ctx.layout.pipChatHeight ?? PIP_CHAT_HEIGHT) : 0);
+    if (ctx.activeDocPipTabId != null && ctx.activeDocPipTabId !== ctx.myTabId) {
+      for (const tr of stream.getTracks()) tr.stop();
+      return go("popupPip", { width: size.w, height, ratio: videoRatio(video), chatUrl, showChat });
+    }
     go("docPip", { stream, chatUrl, win: documentPictureInPicture.requestWindow({ width: size.w, height }) });
   }
-
-  const ACTIONS = {
-    inTab: () => go("inTab"),
-    docPip: startPip,
-    idle: () => {
-      send({ type: "INTAB_STOP_ALL" });
-      go("idle");
-    },
-    focusSource: () => {
-      send({ type: "FOCUS_SOURCE_TAB" });
-    },
-    toggleWebChat: () => {
-      toggleWebChatSink?.();
-    },
-    skipAd: () => {
-      skipAdSink?.();
-    },
-  };
 
   const ENTER = {
     idle: enterIdle,
     inTab: enterInTab,
-    remoteInTab: enterRemoteInTab,
     docPip: enterDocPip,
+    popupPip: enterPopupPip,
     nativePip: enterNativePip,
   };
   const TRANSITIONS = {
-    idle: ["idle", "inTab", "remoteInTab", "docPip", "nativePip"],
-    inTab: ["idle", "docPip", "nativePip"],
-    remoteInTab: ["idle", "remoteInTab"],
+    idle: ["idle", "inTab", "docPip", "popupPip", "nativePip"],
+    inTab: ["idle", "docPip", "popupPip", "nativePip"],
     docPip: ["idle"],
+    popupPip: ["idle"],
     nativePip: ["idle"],
   };
   const noop = () => {};
@@ -2248,7 +3014,7 @@
   function go(next, arg) {
     if (!TRANSITIONS[current.name].includes(next)) return;
     if (next !== "idle" && !ctx.settings.enabled) return;
-    if (next !== "idle" && next !== "remoteInTab" && !ctx.video) return;
+    if (next !== "idle" && !ctx.video) return;
     current.exit();
     const inst = { name: next, video: ctx.video, exit: noop, settingsChanged: noop, layoutChanged: noop };
     current = inst;
@@ -2256,14 +3022,10 @@
   }
 
   function removeStrayOverlays() {
-    for (const [id, activeHost] of [
-      ["ghostpip-launcher", launcher.host],
-      ["ghostpip-controller", controller.host],
-      ["ghostpip-chat", webChat.host],
-    ]) {
-      for (const el of document.querySelectorAll(`#${id}`)) {
-        if (el !== activeHost) el.remove();
-      }
+    for (const el of document.querySelectorAll(
+      "#ghostpip-launcher, #ghostpip-controller, .ghostpip-controller, #ghostpip-chat, .ghostpip-chat, .ghostpip-subtitles",
+    )) {
+      if (!activeOverlayHosts.has(el)) el.remove();
     }
   }
 
@@ -2285,6 +3047,7 @@
     if (!ctx.settings.enabled) {
       ctx.video = null;
       if (current.name !== "idle") go("idle");
+      stopAllRemoteOverlays();
       launcher.hide();
       return;
     }
@@ -2292,27 +3055,213 @@
     else if (current.video && !current.video.isConnected) go("idle");
   }
 
+  function hasActiveOverlayOnPage() {
+    return current.name !== "idle" || remoteOverlays.size > 0;
+  }
+
+  function preferredSourceTabId() {
+    if (current.name !== "idle" && Number.isFinite(ctx.myTabId)) return ctx.myTabId;
+    for (const inst of [...remoteOverlays.values()].reverse()) {
+      if (Number.isFinite(inst?.sourceTabId)) return inst.sourceTabId;
+    }
+    return null;
+  }
+
+  function notifyPeekChanged() {
+    current.peekChanged?.();
+    for (const inst of remoteOverlays.values()) {
+      inst.peekChanged?.();
+    }
+  }
+
+  function recomputeLocalPeek() {
+    const matcher = PEEK_MATCH[ctx.settings.peek?.key];
+    const next = Boolean(ctx.settings.enabled && ctx.settings.peek?.enabled && matcher?.(peekInput));
+    if (next === localPeekActive) return;
+    localPeekActive = next;
+    notifyPeekChanged();
+  }
+
+  function resetLocalPeekInput() {
+    peekInput.alt = false;
+    peekInput.ctrl = false;
+    peekInput.shift = false;
+    peekInput.backquote = false;
+    peekInput.buttons = 0;
+    recomputeLocalPeek();
+  }
+
+  function shouldSuppressMousePeekNav(button) {
+    if (!ctx.settings.enabled || !ctx.settings.peek?.enabled || !hasActiveOverlayOnPage()) return false;
+    return (
+      (ctx.settings.peek.key === "Mouse4" && button === 3) ||
+      (ctx.settings.peek.key === "Mouse5" && button === 4)
+    );
+  }
+
+  function handleShortcutKeydown(e, sourceTabIdOverride = null) {
+    if (!ctx.settings.enabled || e.repeat || isEditableTarget(e.target)) return;
+    const combo = Settings.formatKeyEvent?.(e);
+    if (!combo) return;
+    const upper = combo.toUpperCase();
+    const hk = ctx.settings.hotkeys;
+    if (e.isTrusted) {
+      let intent = null;
+      if (hk.clickThrough && hk.clickThrough.toUpperCase() === upper && upper !== "ALT+G") {
+        intent = "TOGGLE_CLICK_THROUGH";
+      } else if (hk.dodge && hk.dodge.toUpperCase() === upper && upper !== "ALT+SHIFT+D") {
+        intent = "TOGGLE_DODGE";
+      } else if (hk.mute && hk.mute.toUpperCase() === upper && upper !== "ALT+M") {
+        intent = "TOGGLE_MUTE";
+      }
+      if (intent) {
+        e.preventDefault();
+        send({ type: "INTENT", intent });
+        return;
+      }
+    }
+    if (ctx.engineConnected || !hasActiveOverlayOnPage()) return;
+    if (hk.peek && hk.peek.toUpperCase() === upper) {
+      e.preventDefault();
+      send({ type: "INTENT", intent: "TOGGLE_PEEK" });
+      return;
+    }
+    if (!ctx.settings.media?.enabled) return;
+    const targetTabId = Number.isFinite(sourceTabIdOverride) ? sourceTabIdOverride : preferredSourceTabId();
+    if (hk.playPause && hk.playPause.toUpperCase() === upper) {
+      e.preventDefault();
+      send({ type: "MEDIA_ACTION", action: "PLAY_PAUSE", sourceTabId: targetTabId });
+    } else if (hk.seekBack && hk.seekBack.toUpperCase() === upper) {
+      e.preventDefault();
+      send({
+        type: "MEDIA_ACTION",
+        action: "SEEK",
+        deltaSec: -ctx.settings.media.seekSec,
+        sourceTabId: targetTabId,
+      });
+    } else if (hk.seekForward && hk.seekForward.toUpperCase() === upper) {
+      e.preventDefault();
+      send({
+        type: "MEDIA_ACTION",
+        action: "SEEK",
+        deltaSec: ctx.settings.media.seekSec,
+        sourceTabId: targetTabId,
+      });
+    }
+  }
+
+  function attachPeekAndShortcutListeners(targetWin, signal, sourceTabIdOverride = null) {
+    targetWin.addEventListener(
+      "keydown",
+      (e) => {
+        peekInput.alt = Boolean(e.altKey || e.key === "Alt");
+        peekInput.ctrl = Boolean(e.ctrlKey || e.key === "Control");
+        peekInput.shift = Boolean(e.shiftKey || e.key === "Shift");
+        if (e.code === "Backquote" || e.key === "`" || e.key === "~") peekInput.backquote = true;
+        recomputeLocalPeek();
+        handleShortcutKeydown(e, sourceTabIdOverride);
+      },
+      { capture: true, signal },
+    );
+    targetWin.addEventListener(
+      "keyup",
+      (e) => {
+        peekInput.alt = e.key === "Alt" ? false : Boolean(e.altKey);
+        peekInput.ctrl = e.key === "Control" ? false : Boolean(e.ctrlKey);
+        peekInput.shift = e.key === "Shift" ? false : Boolean(e.shiftKey);
+        if (e.code === "Backquote" || e.key === "`" || e.key === "~") peekInput.backquote = false;
+        recomputeLocalPeek();
+      },
+      { capture: true, signal },
+    );
+    const onButtonDown = (e) => {
+      if (typeof e.altKey === "boolean") peekInput.alt = e.altKey;
+      if (typeof e.ctrlKey === "boolean") peekInput.ctrl = e.ctrlKey;
+      if (typeof e.shiftKey === "boolean") peekInput.shift = e.shiftKey;
+      if (typeof e.buttons === "number" && e.buttons !== 0) {
+        peekInput.buttons = e.buttons;
+      } else if (e.button === 3) {
+        peekInput.buttons |= 8;
+      } else if (e.button === 4) {
+        peekInput.buttons |= 16;
+      }
+      recomputeLocalPeek();
+      if (shouldSuppressMousePeekNav(e.button)) e.preventDefault();
+    };
+    const onButtonUp = (e) => {
+      if (typeof e.altKey === "boolean") peekInput.alt = e.altKey;
+      if (typeof e.ctrlKey === "boolean") peekInput.ctrl = e.ctrlKey;
+      if (typeof e.shiftKey === "boolean") peekInput.shift = e.shiftKey;
+      if (e.button === 3) {
+        peekInput.buttons &= ~8;
+      } else if (e.button === 4) {
+        peekInput.buttons &= ~16;
+      } else if (typeof e.buttons === "number") {
+        peekInput.buttons = e.buttons;
+      }
+      recomputeLocalPeek();
+      if (shouldSuppressMousePeekNav(e.button)) e.preventDefault();
+    };
+    targetWin.addEventListener("pointerdown", onButtonDown, { capture: true, signal });
+    targetWin.addEventListener("mousedown", onButtonDown, { capture: true, signal });
+    targetWin.addEventListener("pointerup", onButtonUp, { capture: true, signal });
+    targetWin.addEventListener("mouseup", onButtonUp, { capture: true, signal });
+    targetWin.addEventListener(
+      "auxclick",
+      (e) => {
+        if (shouldSuppressMousePeekNav(e.button)) e.preventDefault();
+      },
+      { capture: true, signal },
+    );
+    targetWin.addEventListener(
+      "mousemove",
+      (e) => {
+        if (typeof e.altKey === "boolean") peekInput.alt = e.altKey;
+        if (typeof e.ctrlKey === "boolean") peekInput.ctrl = e.ctrlKey;
+        if (typeof e.shiftKey === "boolean") peekInput.shift = e.shiftKey;
+        if (typeof e.buttons === "number") peekInput.buttons = e.buttons;
+        recomputeLocalPeek();
+      },
+      { capture: true, signal },
+    );
+    targetWin.addEventListener("blur", resetLocalPeekInput, { signal });
+    targetWin.document?.addEventListener(
+      "visibilitychange",
+      () => {
+        if (targetWin.document.hidden) resetLocalPeekInput();
+      },
+      { signal },
+    );
+  }
+
   function applySettings(stored) {
     ctx.settings = Settings.merge(stored);
     document.documentElement?.toggleAttribute("data-gp-disabled", !ctx.settings.enabled);
+    if (!ctx.settings.peek?.enabled) ctx.enginePeekActive = false;
+    recomputeLocalPeek();
     if (!ctx.settings.enabled) {
       ctx.video = null;
+      stopAllRemoteOverlays();
       if (current.name !== "idle") {
         go("idle");
         return;
       }
       launcher.hide();
-      controller.hide();
-      webChat.hide();
     } else if (current.name === "idle") {
       ctx.video = findVideo();
     }
     current.settingsChanged();
+    for (const inst of remoteOverlays.values()) {
+      inst.settingsChanged?.();
+    }
   }
 
   function applyLayout(stored) {
     ctx.layout = sanitizeLayout(stored);
     current.layoutChanged?.();
+    for (const inst of remoteOverlays.values()) {
+      inst.layoutChanged?.();
+    }
   }
 
   const settingsReady = chrome.storage.local
@@ -2334,39 +3283,72 @@
     if (!res?.site || url !== location.href) return;
     ctx.siteId = res.siteId;
     ctx.site = res.site;
+    if (Number.isFinite(res.tabId)) ctx.myTabId = res.tabId;
+    ctx.activeDocPipTabId = res.hasActiveDocPip ? (res.docPipTabId ?? null) : null;
+    ctx.engineConnected = Boolean(res.engineConnected);
+    ctx.enginePeekActive = Boolean(res.peekActive);
+    current.engineStateChanged?.(ctx.engineConnected);
+    recomputeLocalPeek();
+    notifyPeekChanged();
     scan();
   }
 
   const MSG_HANDLERS = {
     async INTAB_QUERY_SOURCE() {
-      if (current.name !== "inTab" || !current.querySource) return { ok: false };
+      if ((current.name !== "inTab" && current.name !== "popupPip") || !current.querySource) return { ok: false };
       return current.querySource();
     },
     async INTAB_RECONNECT_SENDER() {
-      if (current.name === "inTab") current.connectSender?.();
+      if (current.name === "inTab" || current.name === "popupPip") current.connectSender?.();
       return { ok: true };
     },
     async INTAB_FORCE_IDLE() {
-      if (current.name === "inTab" || current.name === "remoteInTab") go("idle");
+      if (current.name === "inTab") go("idle");
       return { ok: true };
     },
     async INTAB_SKIP_AD() {
-      triggerSkipAd(ctx.video);
+      triggerSkipAd(current.video || ctx.video);
+      return { ok: true };
+    },
+    async REMOTE_INTAB_SYNC(msg) {
+      await settingsReady;
+      if (!ctx.settings.enabled) {
+        stopAllRemoteOverlays();
+        return { ok: false };
+      }
+      const sessions = Array.isArray(msg?.sessions) ? msg.sessions : [];
+      const wantedKeys = new Set();
+      for (const s of sessions) {
+        if (Number.isFinite(s?.sourceTabId) && ctx.myTabId != null && s.sourceTabId === ctx.myTabId) continue;
+        const key = remoteKeyOf(s);
+        wantedKeys.add(key);
+        upsertRemoteOverlay(s);
+      }
+      for (const key of [...remoteOverlays.keys()]) {
+        if (!wantedKeys.has(key)) closeRemoteOverlay(key);
+      }
       return { ok: true };
     },
     async REMOTE_INTAB_START(msg) {
       await settingsReady;
       if (!ctx.settings.enabled) return { ok: false };
-      if (current.name === "remoteInTab" && current.video?.isConnected) {
-        current.kick?.(msg);
-        return { ok: true };
-      }
-      if (current.name !== "idle") return { ok: false };
-      go("remoteInTab", msg);
-      return current.name === "remoteInTab" && current.ready ? current.ready : { ok: false };
+      const inst = upsertRemoteOverlay(msg);
+      return inst ? inst.ready : { ok: false };
     },
-    async REMOTE_INTAB_STOP() {
-      if (current.name === "remoteInTab") go("idle");
+    async REMOTE_INTAB_STOP(msg) {
+      if (Number.isFinite(msg?.sourceTabId)) {
+        closeRemoteOverlay(msg.sourceTabId);
+      } else {
+        stopAllRemoteOverlays();
+      }
+      return { ok: true };
+    },
+    async PIP_SESSIONS_CHANGED(msg) {
+      ctx.activeDocPipTabId = msg?.hasActiveDocPip ? (msg.docPipTabId ?? null) : null;
+      return { ok: true };
+    },
+    async POPUP_PIP_CLOSED() {
+      if (current.name === "popupPip") go("idle");
       return { ok: true };
     },
     async PIP_HOVER(msg) {
@@ -2379,6 +3361,68 @@
     },
     async SETTINGS_CHANGED(msg) {
       if (msg?.settings) applySettings(msg.settings);
+      return { ok: true };
+    },
+    async PEEK_STATE(msg) {
+      ctx.enginePeekActive = Boolean(msg?.active);
+      notifyPeekChanged();
+      return { ok: true };
+    },
+    async ENGINE_STATE(msg) {
+      ctx.engineConnected = Boolean(msg?.connected);
+      current.engineStateChanged?.(ctx.engineConnected);
+      return { ok: true };
+    },
+    async MEDIA_CONTROL(msg) {
+      const video = current.video || findVideo();
+      if (!video) return { ok: false };
+      let hudText = "";
+      if (msg?.action === "PLAY_PAUSE") {
+        if (video.paused) {
+          await video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+        hudText = video.paused ? "⏸" : "▶";
+      } else if (msg?.action === "SEEK") {
+        const deltaSec = Number(msg.deltaSec) || 0;
+        if (!msg.handledSeekInMain) {
+          let minT = 0;
+          let maxT = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : Infinity;
+          if (video.seekable?.length > 0) {
+            const endT = video.seekable.end(video.seekable.length - 1);
+            if (endT > 0) {
+              minT = video.seekable.start(0);
+              maxT = endT;
+            }
+          }
+          video.currentTime = Math.max(minT, Math.min(maxT, (video.currentTime || 0) + deltaSec));
+        }
+        const signed = `${deltaSec > 0 ? "+" : ""}${deltaSec}`;
+        hudText = t("mediaSeekSec", [signed]);
+      } else if (msg?.action === "VOLUME") {
+        const deltaVolume = Number(msg.deltaVolume) || 0;
+        if (deltaVolume > 0 && video.muted) video.muted = false;
+        const nextVol = Math.max(0, Math.min(1, Math.round(((video.volume ?? 1) + deltaVolume) * 100) / 100));
+        video.volume = nextVol;
+        hudText = t("hudVolume", [String(Math.round(nextVol * 100))]);
+      } else {
+        return { ok: false };
+      }
+      current.showHud?.(hudText);
+      return {
+        ok: true,
+        paused: video.paused,
+        currentTime: video.currentTime,
+        volume: video.volume,
+        hudText,
+      };
+    },
+    async MEDIA_HUD(msg) {
+      if (msg?.text) {
+        const key = remoteKeyOf(msg);
+        remoteOverlays.get(key)?.showHud?.(msg.text);
+      }
       return { ok: true };
     },
   };
@@ -2400,33 +3444,49 @@
     { signal: globalAc.signal },
   );
 
-  document.addEventListener("fullscreenchange", () => {
-    if (document.fullscreenElement && (current.name === "inTab" || current.name === "remoteInTab")) go("idle");
-  }, { signal: globalAc.signal });
+  document.addEventListener(
+    "fullscreenchange",
+    () => {
+      if (document.fullscreenElement) {
+        if (current.name === "inTab") go("idle");
+        stopAllRemoteOverlays();
+      }
+    },
+    { signal: globalAc.signal },
+  );
 
-  window.addEventListener("keydown", (e) => {
-    if (!ctx.settings.enabled || !e.isTrusted || e.repeat) return;
-    const t = e.target;
-    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) {
-      return;
-    }
-    const combo = Settings.formatKeyEvent?.(e);
-    if (!combo) return;
-    const upper = combo.toUpperCase();
-    const hk = ctx.settings.hotkeys;
-    let intent = null;
-    if (hk.clickThrough && hk.clickThrough.toUpperCase() === upper && upper !== "ALT+G") {
-      intent = "TOGGLE_CLICK_THROUGH";
-    } else if (hk.dodge && hk.dodge.toUpperCase() === upper && upper !== "ALT+SHIFT+D") {
-      intent = "TOGGLE_DODGE";
-    } else if (hk.mute && hk.mute.toUpperCase() === upper && upper !== "ALT+M") {
-      intent = "TOGGLE_MUTE";
-    }
-    if (intent) {
+  attachPeekAndShortcutListeners(window, globalAc.signal);
+
+  window.addEventListener(
+    "wheel",
+    (e) => {
+      if (
+        ctx.engineConnected ||
+        !ctx.settings.enabled ||
+        !ctx.settings.media?.enabled ||
+        !ctx.settings.media.wheelVolume ||
+        !hasActiveOverlayOnPage() ||
+        !e.altKey ||
+        e.ctrlKey ||
+        e.shiftKey
+      ) {
+        return;
+      }
+      const fl = findFloatingUnderPointer(e);
+      if (fl && ctx.settings.hotkeys.hold === "Alt") return;
       e.preventDefault();
-      send({ type: "INTENT", intent });
-    }
-  }, { capture: true, signal: globalAc.signal });
+      e.stopPropagation();
+      if (!e.deltaY) return;
+      const targetTabId = fl?.getSourceTabId?.() ?? preferredSourceTabId();
+      send({
+        type: "MEDIA_ACTION",
+        action: "VOLUME",
+        deltaVolume: e.deltaY < 0 ? 0.05 : -0.05,
+        sourceTabId: targetTabId,
+      });
+    },
+    { capture: true, passive: false, signal: globalAc.signal },
+  );
 
   let scanQueued = false;
   const mutObs = new MutationObserver(() => {
@@ -2440,6 +3500,8 @@
     }, SCAN_THROTTLE_MS);
   });
   mutObs.observe(document.documentElement, { childList: true, subtree: true });
+  document.addEventListener("loadedmetadata", () => scan(), { capture: true, signal: globalAc.signal });
+  document.addEventListener("durationchange", () => scan(), { capture: true, signal: globalAc.signal });
   const scanTimer = setInterval(scan, 1000);
 
   globalThis.__ghostpipCleanup = () => {
@@ -2449,14 +3511,14 @@
       globalAc.abort();
       mutObs.disconnect();
       clearInterval(scanTimer);
+      stopAllRemoteOverlays();
       current.exit();
-      launcher.hide();
-      controller.hide();
-      webChat.hide();
-      launcher.host.remove();
-      controller.host.remove();
-      webChat.host.remove();
-      document.querySelectorAll("#ghostpip-launcher, #ghostpip-controller, #ghostpip-chat, canvas[data-gp-remote]").forEach((el) => el.remove());
+      launcher.destroy();
+      document
+        .querySelectorAll(
+          "#ghostpip-launcher, #ghostpip-controller, .ghostpip-controller, #ghostpip-chat, .ghostpip-chat, .ghostpip-subtitles, canvas[data-gp-remote]",
+        )
+        .forEach((el) => el.remove());
     } catch {}
   };
 

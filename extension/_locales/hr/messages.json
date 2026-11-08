@@ -314,5 +314,75 @@
   },
   "engineTrayExit": {
     "message": "Izlaz"
+  },
+  "peekMode": {
+    "message": "Način zavirivanja"
+  },
+  "peekModeHint": {
+    "message": "Sakrij dok ne držiš tipku za prikaz"
+  },
+  "peekSettings": {
+    "message": "Postavke načina zavirivanja"
+  },
+  "peekKey": {
+    "message": "Tipka za držanje"
+  },
+  "peekKeyMouse4": {
+    "message": "Bočna tipka miša 1 (Natrag)"
+  },
+  "peekKeyMouse5": {
+    "message": "Bočna tipka miša 2 (Naprijed)"
+  },
+  "peekIdleOpacity": {
+    "message": "Vidljivost u mirovanju"
+  },
+  "peekIdleZero": {
+    "message": "0% (Skriveno)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Blijedo)"
+  },
+  "peekActiveOpacity": {
+    "message": "Neprozirnost pri držanju"
+  },
+  "mediaRemote": {
+    "message": "Daljinski u igri"
+  },
+  "mediaRemoteHint": {
+    "message": "Reprodukcija, premotavanje i glasnoća bez gubitka fokusa"
+  },
+  "mediaSettings": {
+    "message": "Postavke daljinskog u igri"
+  },
+  "mediaSeekStep": {
+    "message": "Korak premotavanja"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Glasnoća uz Alt + kotačić"
+  },
+  "mediaPlayPause": {
+    "message": "Reproduciraj / Pauziraj"
+  },
+  "mediaSeekBack": {
+    "message": "Premotaj unatrag"
+  },
+  "mediaSeekForward": {
+    "message": "Premotaj unaprijed"
+  },
+  "hudVolume": {
+    "message": "Glasnoća $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Выход"
+  },
+  "peekMode": {
+    "message": "Режим подглядывания"
+  },
+  "peekModeHint": {
+    "message": "Скрывать окно, пока не зажата клавиша"
+  },
+  "peekSettings": {
+    "message": "Настройки режима подглядывания"
+  },
+  "peekKey": {
+    "message": "Клавиша удержания"
+  },
+  "peekKeyMouse4": {
+    "message": "Боковая кнопка мыши 1 (Назад)"
+  },
+  "peekKeyMouse5": {
+    "message": "Боковая кнопка мыши 2 (Вперёд)"
+  },
+  "peekIdleOpacity": {
+    "message": "Видимость в покое"
+  },
+  "peekIdleZero": {
+    "message": "0% (Скрыто)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Едва заметно)"
+  },
+  "peekActiveOpacity": {
+    "message": "Непрозрачность при нажатии"
+  },
+  "mediaRemote": {
+    "message": "Игровой пульт"
+  },
+  "mediaRemoteHint": {
+    "message": "Пауза, перемотка и громкость без потери фокуса"
+  },
+  "mediaSettings": {
+    "message": "Настройки игрового пульта"
+  },
+  "mediaSeekStep": {
+    "message": "Шаг перемотки"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ с",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Громкость через Alt + колесо"
+  },
+  "mediaPlayPause": {
+    "message": "Воспроизведение / Пауза"
+  },
+  "mediaSeekBack": {
+    "message": "Перемотать назад"
+  },
+  "mediaSeekForward": {
+    "message": "Перемотать вперёд"
+  },
+  "hudVolume": {
+    "message": "Громкость $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

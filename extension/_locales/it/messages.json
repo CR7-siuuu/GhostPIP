@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Esci"
+  },
+  "peekMode": {
+    "message": "Modalità sbirciata"
+  },
+  "peekModeHint": {
+    "message": "Nascondi finché non tieni premuto il tasto"
+  },
+  "peekSettings": {
+    "message": "Impostazioni modalità sbirciata"
+  },
+  "peekKey": {
+    "message": "Tasto per mostrare"
+  },
+  "peekKeyMouse4": {
+    "message": "Tasto laterale mouse 1 (Indietro)"
+  },
+  "peekKeyMouse5": {
+    "message": "Tasto laterale mouse 2 (Avanti)"
+  },
+  "peekIdleOpacity": {
+    "message": "Visibilità a riposo"
+  },
+  "peekIdleZero": {
+    "message": "0% (Nascosto)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Lievemente visibile)"
+  },
+  "peekActiveOpacity": {
+    "message": "Opacità alla pressione"
+  },
+  "mediaRemote": {
+    "message": "Telecomando in gioco"
+  },
+  "mediaRemoteHint": {
+    "message": "Riproduzione, salto e volume senza perdere il focus"
+  },
+  "mediaSettings": {
+    "message": "Impostazioni telecomando in gioco"
+  },
+  "mediaSeekStep": {
+    "message": "Intervallo di salto"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Volume con Alt + rotella"
+  },
+  "mediaPlayPause": {
+    "message": "Riproduci / Pausa"
+  },
+  "mediaSeekBack": {
+    "message": "Indietro"
+  },
+  "mediaSeekForward": {
+    "message": "Avanti"
+  },
+  "hudVolume": {
+    "message": "Volume $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

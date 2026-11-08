@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Avslutt"
+  },
+  "peekMode": {
+    "message": "Sniktitt-modus"
+  },
+  "peekModeHint": {
+    "message": "Skjul til du holder inne sniktitt-tasten"
+  },
+  "peekSettings": {
+    "message": "Innstillinger for sniktitt"
+  },
+  "peekKey": {
+    "message": "Hold-for-å-se-tast"
+  },
+  "peekKeyMouse4": {
+    "message": "Sideknapp på mus 1 (Tilbake)"
+  },
+  "peekKeyMouse5": {
+    "message": "Sideknapp på mus 2 (Fram)"
+  },
+  "peekIdleOpacity": {
+    "message": "Synlighet i hvile"
+  },
+  "peekIdleZero": {
+    "message": "0% (Skjult)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Svak)"
+  },
+  "peekActiveOpacity": {
+    "message": "Synlighet ved trykk"
+  },
+  "mediaRemote": {
+    "message": "Fjernkontroll i spill"
+  },
+  "mediaRemoteHint": {
+    "message": "Spill av, spol og juster volum uten å miste fokus"
+  },
+  "mediaSettings": {
+    "message": "Innstillinger for fjernkontroll"
+  },
+  "mediaSeekStep": {
+    "message": "Spoltrinn"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Volum med Alt + hjul"
+  },
+  "mediaPlayPause": {
+    "message": "Spill av / Pause"
+  },
+  "mediaSeekBack": {
+    "message": "Spol tilbake"
+  },
+  "mediaSeekForward": {
+    "message": "Spol fram"
+  },
+  "hudVolume": {
+    "message": "Volum $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

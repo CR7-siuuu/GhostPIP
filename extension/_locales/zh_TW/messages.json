@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "結束"
+  },
+  "peekMode": {
+    "message": "按住速覽模式"
+  },
+  "peekModeHint": {
+    "message": "平時隱藏，僅在按住快捷鍵時顯示"
+  },
+  "peekSettings": {
+    "message": "按住速覽設定"
+  },
+  "peekKey": {
+    "message": "按住顯示按鍵"
+  },
+  "peekKeyMouse4": {
+    "message": "滑鼠側鍵 1 (上一頁)"
+  },
+  "peekKeyMouse5": {
+    "message": "滑鼠側鍵 2 (下一頁)"
+  },
+  "peekIdleOpacity": {
+    "message": "平時可見度"
+  },
+  "peekIdleZero": {
+    "message": "0% (完全隱藏)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (微弱輪廓)"
+  },
+  "peekActiveOpacity": {
+    "message": "按住時不透明度"
+  },
+  "mediaRemote": {
+    "message": "遊戲內遙控"
+  },
+  "mediaRemoteHint": {
+    "message": "不搶焦點的播放、快轉倒轉與音量控制"
+  },
+  "mediaSettings": {
+    "message": "遊戲內遙控設定"
+  },
+  "mediaSeekStep": {
+    "message": "跳轉秒數"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$秒",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Alt + 滾輪調整音量"
+  },
+  "mediaPlayPause": {
+    "message": "播放 / 暫停"
+  },
+  "mediaSeekBack": {
+    "message": "倒轉"
+  },
+  "mediaSeekForward": {
+    "message": "快轉"
+  },
+  "hudVolume": {
+    "message": "音量 $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

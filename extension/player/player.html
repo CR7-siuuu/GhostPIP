@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="extName">GhostPiP</title>
+  <link rel="stylesheet" href="player.css" />
+</head>
+<body>
+  <div class="pip-stage" id="pipStage">
+    <canvas id="stageCanvas"></canvas>
+    <video id="stageVideo" muted autoplay playsinline hidden></video>
+    <div class="pip-subtitles" id="pipSubtitles" hidden></div>
+    <div class="pip-hud" id="pipHud"></div>
+    <button type="button" class="pip-skip-ad" id="pipSkipAd" data-action="skipAd" hidden></button>
+    <div class="bar pip-bar" id="pipBar"></div>
+  </div>
+  <script src="../shared/i18n.js"></script>
+  <script src="../shared/settings.js"></script>
+  <script src="player.js"></script>
+</body>
+</html>

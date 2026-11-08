@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Afslut"
+  },
+  "peekMode": {
+    "message": "Smugkig-tilstand"
+  },
+  "peekModeHint": {
+    "message": "Skjul indtil du holder smugkig-tasten nede"
+  },
+  "peekSettings": {
+    "message": "Indstillinger for smugkig"
+  },
+  "peekKey": {
+    "message": "Hold-for-at-se-tast"
+  },
+  "peekKeyMouse4": {
+    "message": "Sideknap på mus 1 (Tilbage)"
+  },
+  "peekKeyMouse5": {
+    "message": "Sideknap på mus 2 (Frem)"
+  },
+  "peekIdleOpacity": {
+    "message": "Synlighed i hvile"
+  },
+  "peekIdleZero": {
+    "message": "0% (Skjult)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Svag)"
+  },
+  "peekActiveOpacity": {
+    "message": "Synlighed ved tryk"
+  },
+  "mediaRemote": {
+    "message": "In-game fjernbetjening"
+  },
+  "mediaRemoteHint": {
+    "message": "Afspil, spol og juster lyd uden at miste fokus"
+  },
+  "mediaSettings": {
+    "message": "Indstillinger for fjernbetjening"
+  },
+  "mediaSeekStep": {
+    "message": "Spoltrin"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ sek.",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Lydstyrke med Alt + hjul"
+  },
+  "mediaPlayPause": {
+    "message": "Afspil / Pause"
+  },
+  "mediaSeekBack": {
+    "message": "Spol tilbage"
+  },
+  "mediaSeekForward": {
+    "message": "Spol frem"
+  },
+  "hudVolume": {
+    "message": "Lydstyrke $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

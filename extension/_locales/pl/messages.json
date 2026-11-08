@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Zakończ"
+  },
+  "peekMode": {
+    "message": "Tryb podglądu"
+  },
+  "peekModeHint": {
+    "message": "Ukryj, dopóki nie przytrzymasz klawisza"
+  },
+  "peekSettings": {
+    "message": "Ustawienia trybu podglądu"
+  },
+  "peekKey": {
+    "message": "Klawisz podglądu"
+  },
+  "peekKeyMouse4": {
+    "message": "Boczny przycisk myszy 1 (Wstecz)"
+  },
+  "peekKeyMouse5": {
+    "message": "Boczny przycisk myszy 2 (Dalej)"
+  },
+  "peekIdleOpacity": {
+    "message": "Widoczność w spoczynku"
+  },
+  "peekIdleZero": {
+    "message": "0% (Ukryte)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Delikatne)"
+  },
+  "peekActiveOpacity": {
+    "message": "Krycie podczas podglądu"
+  },
+  "mediaRemote": {
+    "message": "Pilot w grze"
+  },
+  "mediaRemoteHint": {
+    "message": "Odtwarzanie, przewijanie i głośność bez utraty fokusu"
+  },
+  "mediaSettings": {
+    "message": "Ustawienia pilota w grze"
+  },
+  "mediaSeekStep": {
+    "message": "Krok przewijania"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Głośność przez Alt + kółko"
+  },
+  "mediaPlayPause": {
+    "message": "Odtwórz / Pauza"
+  },
+  "mediaSeekBack": {
+    "message": "Przewiń w tył"
+  },
+  "mediaSeekForward": {
+    "message": "Przewiń w przód"
+  },
+  "hudVolume": {
+    "message": "Głośność $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

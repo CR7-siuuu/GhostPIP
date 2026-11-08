@@ -37,7 +37,8 @@ public readonly record struct DodgeInput(
     double Now,
     DodgePoint? Cursor,
     DodgeSize Size,
-    DodgeRect Area
+    DodgeRect Area,
+    DodgeRect? Rect = null
 );
 
 public readonly record struct DodgeAction(
@@ -166,7 +167,9 @@ public static class DodgeSolver
         var s = state;
 
         DodgeRect RectOf(string corner) => CornerRect(corner, size, area, cfg.EdgeInsetPx);
+        DodgeRect activeRect = input.Rect ?? RectOf(s.Corner);
         bool Covers(string corner) => cursor.HasValue && ContainsWithMargin(RectOf(corner), cfg.MarginPx, cursor.Value);
+        bool CoversActive() => cursor.HasValue && ContainsWithMargin(activeRect, cfg.MarginPx, cursor.Value);
 
         DodgeStepResult Stay() => new(s, new DodgeAction("stay"));
         DodgeStepResult Fade(bool on)
@@ -181,7 +184,8 @@ public static class DodgeSolver
                 Corner = corner,
                 LastMoveAt = now,
                 HoverSince = null,
-                OutsideHomeSince = null
+                OutsideHomeSince = null,
+                Faded = false
             };
             return new(s, new DodgeAction("move", Corner: corner));
         }
@@ -192,15 +196,21 @@ public static class DodgeSolver
             return s.Faded ? Fade(false) : Stay();
         }
 
-        if (!cursor.HasValue || (cfg.IgnoreScreenEdgePx > 0 && NearAreaEdge(cursor.Value, area, cfg.IgnoreScreenEdgePx)))
+        if (!cursor.HasValue)
         {
             s = s with { HoverSince = null };
-            return Stay();
+            return s.Faded ? Fade(false) : Stay();
+        }
+
+        if (cfg.IgnoreScreenEdgePx > 0 && NearAreaEdge(cursor.Value, area, cfg.IgnoreScreenEdgePx))
+        {
+            s = s with { HoverSince = null };
+            return s.Faded && !CoversActive() ? Fade(false) : Stay();
         }
 
         bool cooledDown = now - s.LastMoveAt >= cfg.CooldownMs;
 
-        if (Covers(s.Corner))
+        if (CoversActive())
         {
             s = s with { HoverSince = s.HoverSince ?? now };
             if (now - s.HoverSince.Value < cfg.HoverDelayMs || !cooledDown)

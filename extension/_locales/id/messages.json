@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Keluar"
+  },
+  "peekMode": {
+    "message": "Mode Intip"
+  },
+  "peekModeHint": {
+    "message": "Sembunyikan sampai tombol intip ditahan"
+  },
+  "peekSettings": {
+    "message": "Pengaturan Mode Intip"
+  },
+  "peekKey": {
+    "message": "Tombol tahan untuk intip"
+  },
+  "peekKeyMouse4": {
+    "message": "Tombol Samping Mouse 1 (Kembali)"
+  },
+  "peekKeyMouse5": {
+    "message": "Tombol Samping Mouse 2 (Maju)"
+  },
+  "peekIdleOpacity": {
+    "message": "Visibilitas saat diam"
+  },
+  "peekIdleZero": {
+    "message": "0% (Tersembunyi)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Samar)"
+  },
+  "peekActiveOpacity": {
+    "message": "Opasitas saat ditahan"
+  },
+  "mediaRemote": {
+    "message": "Remot Dalam Game"
+  },
+  "mediaRemoteHint": {
+    "message": "Putar, geser waktu & volume tanpa lepas fokus"
+  },
+  "mediaSettings": {
+    "message": "Pengaturan Remot Dalam Game"
+  },
+  "mediaSeekStep": {
+    "message": "Langkah geser"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ dtk",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Volume Alt + Roda"
+  },
+  "mediaPlayPause": {
+    "message": "Putar / Jeda"
+  },
+  "mediaSeekBack": {
+    "message": "Mundurkan"
+  },
+  "mediaSeekForward": {
+    "message": "Majukan"
+  },
+  "hudVolume": {
+    "message": "Volume $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

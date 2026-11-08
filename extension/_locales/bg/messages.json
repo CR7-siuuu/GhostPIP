@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Изход"
+  },
+  "peekMode": {
+    "message": "Режим надникване"
+  },
+  "peekModeHint": {
+    "message": "Скриване, докато не задържите клавиша"
+  },
+  "peekSettings": {
+    "message": "Настройки за надникване"
+  },
+  "peekKey": {
+    "message": "Клавиш за задържане"
+  },
+  "peekKeyMouse4": {
+    "message": "Страничен бутон на мишката 1 (Назад)"
+  },
+  "peekKeyMouse5": {
+    "message": "Страничен бутон на мишката 2 (Напред)"
+  },
+  "peekIdleOpacity": {
+    "message": "Видимост в покой"
+  },
+  "peekIdleZero": {
+    "message": "0% (Скрито)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Бледо)"
+  },
+  "peekActiveOpacity": {
+    "message": "Плътност при задържане"
+  },
+  "mediaRemote": {
+    "message": "Дистанционно в играта"
+  },
+  "mediaRemoteHint": {
+    "message": "Пускане, превъртане и звук без загуба на фокус"
+  },
+  "mediaSettings": {
+    "message": "Настройки на дистанционното"
+  },
+  "mediaSeekStep": {
+    "message": "Стъпка на превъртане"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ сек",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Звук с Alt + колелце"
+  },
+  "mediaPlayPause": {
+    "message": "Пускане / Пауза"
+  },
+  "mediaSeekBack": {
+    "message": "Превъртане назад"
+  },
+  "mediaSeekForward": {
+    "message": "Превъртане напред"
+  },
+  "hudVolume": {
+    "message": "Звук $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

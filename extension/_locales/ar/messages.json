@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "خروج"
+  },
+  "peekMode": {
+    "message": "وضع النظرة السريعة"
+  },
+  "peekModeHint": {
+    "message": "إخفاء النافذة حتى تضغط مطولاً على المفتاح"
+  },
+  "peekSettings": {
+    "message": "إعدادات وضع النظرة السريعة"
+  },
+  "peekKey": {
+    "message": "مفتاح الإظهار عند الضغط"
+  },
+  "peekKeyMouse4": {
+    "message": "زر الفأرة الجانبي 1 (رجوع)"
+  },
+  "peekKeyMouse5": {
+    "message": "زر الفأرة الجانبي 2 (تقدم)"
+  },
+  "peekIdleOpacity": {
+    "message": "الظهور أثناء السكون"
+  },
+  "peekIdleZero": {
+    "message": "0% (مخفي)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (خافت)"
+  },
+  "peekActiveOpacity": {
+    "message": "الشفافية عند الضغط"
+  },
+  "mediaRemote": {
+    "message": "تحكم داخل اللعبة"
+  },
+  "mediaRemoteHint": {
+    "message": "تشغيل وتقديم ومستوى الصوت دون فقدان التركيز"
+  },
+  "mediaSettings": {
+    "message": "إعدادات التحكم داخل اللعبة"
+  },
+  "mediaSeekStep": {
+    "message": "مقدار التقديم"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ ث",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "الصوت عبر Alt + عجلة الفأرة"
+  },
+  "mediaPlayPause": {
+    "message": "تشغيل / إيقاف مؤقت"
+  },
+  "mediaSeekBack": {
+    "message": "إرجاع"
+  },
+  "mediaSeekForward": {
+    "message": "تقديم"
+  },
+  "hudVolume": {
+    "message": "الصوت $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

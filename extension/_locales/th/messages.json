@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "ออก"
+  },
+  "peekMode": {
+    "message": "โหมดแอบดู"
+  },
+  "peekModeHint": {
+    "message": "ซ่อนไว้จนกว่าจะกดปุ่มค้างเพื่อดู"
+  },
+  "peekSettings": {
+    "message": "ตั้งค่าโหมดแอบดู"
+  },
+  "peekKey": {
+    "message": "ปุ่มกดค้างเพื่อดู"
+  },
+  "peekKeyMouse4": {
+    "message": "ปุ่มข้างเมาส์ 1 (ย้อนกลับ)"
+  },
+  "peekKeyMouse5": {
+    "message": "ปุ่มข้างเมาส์ 2 (ไปข้างหน้า)"
+  },
+  "peekIdleOpacity": {
+    "message": "ความชัดเจนขณะปกติ"
+  },
+  "peekIdleZero": {
+    "message": "0% (ซ่อนสนิท)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (จางมาก)"
+  },
+  "peekActiveOpacity": {
+    "message": "ความทึบขณะกดดู"
+  },
+  "mediaRemote": {
+    "message": "รีโมตในเกม"
+  },
+  "mediaRemoteHint": {
+    "message": "เล่น กรอ และปรับเสียงโดยไม่เสียโฟกัสเกม"
+  },
+  "mediaSettings": {
+    "message": "ตั้งค่ารีโมตในเกม"
+  },
+  "mediaSeekStep": {
+    "message": "ระยะการกรอ"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ วินาที",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "ปรับเสียงด้วย Alt + ลูกกลิ้ง"
+  },
+  "mediaPlayPause": {
+    "message": "เล่น / หยุดชั่วคราว"
+  },
+  "mediaSeekBack": {
+    "message": "กรอกลับ"
+  },
+  "mediaSeekForward": {
+    "message": "กรอไปข้างหน้า"
+  },
+  "hudVolume": {
+    "message": "ระดับเสียง $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

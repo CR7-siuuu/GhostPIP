@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Çıkış"
+  },
+  "peekMode": {
+    "message": "Göz Atma Modu"
+  },
+  "peekModeHint": {
+    "message": "Tuşa basılı tutana kadar gizle"
+  },
+  "peekSettings": {
+    "message": "Göz Atma Modu ayarları"
+  },
+  "peekKey": {
+    "message": "Basılı tutma tuşu"
+  },
+  "peekKeyMouse4": {
+    "message": "Fare Yan Tuş 1 (Geri)"
+  },
+  "peekKeyMouse5": {
+    "message": "Fare Yan Tuş 2 (İleri)"
+  },
+  "peekIdleOpacity": {
+    "message": "Boşta görünürlük"
+  },
+  "peekIdleZero": {
+    "message": "0% (Gizli)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Belirsiz)"
+  },
+  "peekActiveOpacity": {
+    "message": "Basılıyken opaklık"
+  },
+  "mediaRemote": {
+    "message": "Oyun İçi Kumanda"
+  },
+  "mediaRemoteHint": {
+    "message": "Odak kaybetmeden oynat, sar ve ses ayarla"
+  },
+  "mediaSettings": {
+    "message": "Oyun İçi Kumanda ayarları"
+  },
+  "mediaSeekStep": {
+    "message": "Sarma aralığı"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ sn",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Alt + Tekerlek ile ses"
+  },
+  "mediaPlayPause": {
+    "message": "Oynat / Duraklat"
+  },
+  "mediaSeekBack": {
+    "message": "Geri sar"
+  },
+  "mediaSeekForward": {
+    "message": "İleri sar"
+  },
+  "hudVolume": {
+    "message": "Ses $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

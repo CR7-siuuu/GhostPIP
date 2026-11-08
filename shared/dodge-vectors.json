@@ -202,6 +202,36 @@
         {"input":{"now":9000,"cursor":{"x":960,"y":540},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"TL"}}
       ]
     },
+    {
+      "name": "hidden cursor while faded unfades once, then stays",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"fade","ignoreScreenEdgePx":0},
+      "start": {"corner":"BR","faded":true,"hoverSince":900},
+      "steps": [
+        {"input":{"now":1100,"cursor":null,"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"fade","on":false},"corner":"BR","faded":false}},
+        {"input":{"now":1200,"cursor":null,"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"stay"},"corner":"BR","faded":false}}
+      ]
+    },
+    {
+      "name": "screen-edge cursor outside corner while faded unfades",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"fade","ignoreScreenEdgePx":8},
+      "start": {"corner":"BR","faded":true,"hoverSince":900},
+      "steps": [
+        {"input":{"now":1100,"cursor":{"x":200,"y":1078},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080}},"expect":{"action":{"type":"fade","on":false},"corner":"BR","faded":false}}
+      ]
+    },
+    {
+      "name": "custom rect fades on hover and unfades on leave",
+      "fn": "step",
+      "cfg": {"enabled":true,"axis":"free","allowed":["TL","TR","BL","BR"],"home":"BR","autoReturn":false,"returnDelayMs":2500,"marginPx":20,"edgeInsetPx":16,"hoverDelayMs":100,"cooldownMs":300,"style":"fade","ignoreScreenEdgePx":0},
+      "start": {"corner":"BR"},
+      "steps": [
+        {"input":{"now":1000,"cursor":{"x":500,"y":400},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080},"rect":{"l":400,"t":300,"r":880,"b":570}},"expect":{"action":{"type":"stay"},"corner":"BR","faded":false}},
+        {"input":{"now":1100,"cursor":{"x":500,"y":400},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080},"rect":{"l":400,"t":300,"r":880,"b":570}},"expect":{"action":{"type":"fade","on":true},"corner":"BR","faded":true}},
+        {"input":{"now":1200,"cursor":{"x":100,"y":100},"size":{"w":480,"h":270},"area":{"l":0,"t":0,"r":1920,"b":1080},"rect":{"l":400,"t":300,"r":880,"b":570}},"expect":{"action":{"type":"fade","on":false},"corner":"BR","faded":false}}
+      ]
+    },
 
     {"name":"isValidDodge all corners free","fn":"isValidDodge","args":[["TL","TR","BL","BR"],"free","BR"],"expect":true},
     {"name":"isValidDodge diagonal only under free","fn":"isValidDodge","args":[["TL","BR"],"free","BR"],"expect":true},

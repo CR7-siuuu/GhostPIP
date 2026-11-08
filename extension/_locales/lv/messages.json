@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Iziet"
+  },
+  "peekMode": {
+    "message": "Ieskata režīms"
+  },
+  "peekModeHint": {
+    "message": "Paslēpt, līdz turat nospiestu taustiņu"
+  },
+  "peekSettings": {
+    "message": "Ieskata režīma iestatījumi"
+  },
+  "peekKey": {
+    "message": "Turēšanas taustiņš"
+  },
+  "peekKeyMouse4": {
+    "message": "Peles sānu poga 1 (Atpakaļ)"
+  },
+  "peekKeyMouse5": {
+    "message": "Peles sānu poga 2 (Uz priekšu)"
+  },
+  "peekIdleOpacity": {
+    "message": "Redzamība dīkstāvē"
+  },
+  "peekIdleZero": {
+    "message": "0% (Paslēpts)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Blāvs)"
+  },
+  "peekActiveOpacity": {
+    "message": "Necaurredzamība turot"
+  },
+  "mediaRemote": {
+    "message": "Vadība spēlē"
+  },
+  "mediaRemoteHint": {
+    "message": "Atskaņošana, pārtīšana un skaļums nezaudējot fokusu"
+  },
+  "mediaSettings": {
+    "message": "Vadības spēlē iestatījumi"
+  },
+  "mediaSeekStep": {
+    "message": "Pārtīšanas solis"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Skaļums ar Alt + ritentiņu"
+  },
+  "mediaPlayPause": {
+    "message": "Atskaņot / Pauze"
+  },
+  "mediaSeekBack": {
+    "message": "Pārtīt atpakaļ"
+  },
+  "mediaSeekForward": {
+    "message": "Pārtīt uz priekšu"
+  },
+  "hudVolume": {
+    "message": "Skaļums $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

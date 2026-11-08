@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "வெளியேறு"
+  },
+  "peekMode": {
+    "message": "பீக் பயன்முறை"
+  },
+  "peekModeHint": {
+    "message": "விசையை அழுத்திப் பிடிக்கும் வரை மறை"
+  },
+  "peekSettings": {
+    "message": "பீக் பயன்முறை அமைப்புகள்"
+  },
+  "peekKey": {
+    "message": "பிடித்துப் பார்க்கும் விசை"
+  },
+  "peekKeyMouse4": {
+    "message": "மவுஸ் பக்க பொத்தான் 1 (பின்)"
+  },
+  "peekKeyMouse5": {
+    "message": "மவுஸ் பக்க பொத்தான் 2 (முன்)"
+  },
+  "peekIdleOpacity": {
+    "message": "சாதாரண தெரிவுநிலை"
+  },
+  "peekIdleZero": {
+    "message": "0% (மறைந்தது)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (மெல்லியது)"
+  },
+  "peekActiveOpacity": {
+    "message": "பிடிக்கும்போது ஒளிபுகாநிலை"
+  },
+  "mediaRemote": {
+    "message": "கேம் ரிமோட்"
+  },
+  "mediaRemoteHint": {
+    "message": "கவனம் மாறாமல் இயக்கு, நகர்த்து & ஒலியளவு"
+  },
+  "mediaSettings": {
+    "message": "கேம் ரிமோட் அமைப்புகள்"
+  },
+  "mediaSeekStep": {
+    "message": "நகர்த்தும் இடைவெளி"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ வி",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Alt + சக்கர ஒலியளவு"
+  },
+  "mediaPlayPause": {
+    "message": "இயக்கு / இடைநிறுத்து"
+  },
+  "mediaSeekBack": {
+    "message": "பின்னால் நகர்த்து"
+  },
+  "mediaSeekForward": {
+    "message": "முன்னால் நகர்த்து"
+  },
+  "hudVolume": {
+    "message": "ஒலியளவு $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Изађи"
+  },
+  "peekMode": {
+    "message": "Режим завиривања"
+  },
+  "peekModeHint": {
+    "message": "Сакриј док не држиш тастер за приказ"
+  },
+  "peekSettings": {
+    "message": "Подешавања режима завиривања"
+  },
+  "peekKey": {
+    "message": "Тастер за држање"
+  },
+  "peekKeyMouse4": {
+    "message": "Бочно дугме миша 1 (Назад)"
+  },
+  "peekKeyMouse5": {
+    "message": "Бочно дугме миша 2 (Напред)"
+  },
+  "peekIdleOpacity": {
+    "message": "Видљивост у мировању"
+  },
+  "peekIdleZero": {
+    "message": "0% (Скривено)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Бледо)"
+  },
+  "peekActiveOpacity": {
+    "message": "Непровидност при држању"
+  },
+  "mediaRemote": {
+    "message": "Даљински у игри"
+  },
+  "mediaRemoteHint": {
+    "message": "Пуштање, премотавање и јачина без губитка фокуса"
+  },
+  "mediaSettings": {
+    "message": "Подешавања даљинског у игри"
+  },
+  "mediaSeekStep": {
+    "message": "Корак премотавања"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ с",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Јачина уз Alt + точкић"
+  },
+  "mediaPlayPause": {
+    "message": "Пусти / Паузирај"
+  },
+  "mediaSeekBack": {
+    "message": "Премотај уназад"
+  },
+  "mediaSeekForward": {
+    "message": "Премотај унапред"
+  },
+  "hudVolume": {
+    "message": "Јачина $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

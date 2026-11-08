@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Ieșire"
+  },
+  "peekMode": {
+    "message": "Mod privire rapidă"
+  },
+  "peekModeHint": {
+    "message": "Ascunde până ții apăsată tasta"
+  },
+  "peekSettings": {
+    "message": "Setări privire rapidă"
+  },
+  "peekKey": {
+    "message": "Tastă menținută pentru afișare"
+  },
+  "peekKeyMouse4": {
+    "message": "Buton lateral mouse 1 (Înapoi)"
+  },
+  "peekKeyMouse5": {
+    "message": "Buton lateral mouse 2 (Înainte)"
+  },
+  "peekIdleOpacity": {
+    "message": "Vizibilitate în repaus"
+  },
+  "peekIdleZero": {
+    "message": "0% (Ascuns)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Discret)"
+  },
+  "peekActiveOpacity": {
+    "message": "Opacitate la apăsare"
+  },
+  "mediaRemote": {
+    "message": "Telecomandă în joc"
+  },
+  "mediaRemoteHint": {
+    "message": "Redare, derulare și volum fără pierderea focalizării"
+  },
+  "mediaSettings": {
+    "message": "Setări telecomandă în joc"
+  },
+  "mediaSeekStep": {
+    "message": "Pas de derulare"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Volum cu Alt + rotiță"
+  },
+  "mediaPlayPause": {
+    "message": "Redare / Pauză"
+  },
+  "mediaSeekBack": {
+    "message": "Derulează înapoi"
+  },
+  "mediaSeekForward": {
+    "message": "Derulează înainte"
+  },
+  "hudVolume": {
+    "message": "Volum $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

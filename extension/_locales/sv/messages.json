@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Avsluta"
+  },
+  "peekMode": {
+    "message": "Kikläge"
+  },
+  "peekModeHint": {
+    "message": "Dölj tills du håller ned kiktangenten"
+  },
+  "peekSettings": {
+    "message": "Inställningar för kikläge"
+  },
+  "peekKey": {
+    "message": "Håll-för-att-visa-tangent"
+  },
+  "peekKeyMouse4": {
+    "message": "Sidoknapp på mus 1 (Bakåt)"
+  },
+  "peekKeyMouse5": {
+    "message": "Sidoknapp på mus 2 (Framåt)"
+  },
+  "peekIdleOpacity": {
+    "message": "Synlighet i vila"
+  },
+  "peekIdleZero": {
+    "message": "0% (Dold)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Svag)"
+  },
+  "peekActiveOpacity": {
+    "message": "Opacitet vid nedtryckning"
+  },
+  "mediaRemote": {
+    "message": "Fjärrkontroll i spel"
+  },
+  "mediaRemoteHint": {
+    "message": "Spela, spola och ändra volym utan att tappa fokus"
+  },
+  "mediaSettings": {
+    "message": "Inställningar för fjärrkontroll"
+  },
+  "mediaSeekStep": {
+    "message": "Spolningssteg"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Volym med Alt + mushjul"
+  },
+  "mediaPlayPause": {
+    "message": "Spela / Pausa"
+  },
+  "mediaSeekBack": {
+    "message": "Spola bakåt"
+  },
+  "mediaSeekForward": {
+    "message": "Spola framåt"
+  },
+  "hudVolume": {
+    "message": "Volym $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

@@ -314,5 +314,75 @@
   },
   "engineTrayExit": {
     "message": "خروج"
+  },
+  "peekMode": {
+    "message": "حالت نگاه سریع"
+  },
+  "peekModeHint": {
+    "message": "پنهان‌کردن تا زمانی که کلید را نگه دارید"
+  },
+  "peekSettings": {
+    "message": "تنظیمات حالت نگاه سریع"
+  },
+  "peekKey": {
+    "message": "کلید نگه‌داشتن برای نمایش"
+  },
+  "peekKeyMouse4": {
+    "message": "دکمه کناری ماوس ۱ (عقب)"
+  },
+  "peekKeyMouse5": {
+    "message": "دکمه کناری ماوس ۲ (جلو)"
+  },
+  "peekIdleOpacity": {
+    "message": "نمایانی در حالت عادی"
+  },
+  "peekIdleZero": {
+    "message": "0% (پنهان)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (کم‌رنگ)"
+  },
+  "peekActiveOpacity": {
+    "message": "شفافیت هنگام نگه‌داشتن"
+  },
+  "mediaRemote": {
+    "message": "کنترل داخل بازی"
+  },
+  "mediaRemoteHint": {
+    "message": "پخش، جابه‌جایی و صدا بدون خروج از بازی"
+  },
+  "mediaSettings": {
+    "message": "تنظیمات کنترل داخل بازی"
+  },
+  "mediaSeekStep": {
+    "message": "گام جابه‌جایی"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ ثانیه",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "تنظیم صدا با Alt + چرخ ماوس"
+  },
+  "mediaPlayPause": {
+    "message": "پخش / مکث"
+  },
+  "mediaSeekBack": {
+    "message": "عقب‌زدن"
+  },
+  "mediaSeekForward": {
+    "message": "جلوزدن"
+  },
+  "hudVolume": {
+    "message": "صدا $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

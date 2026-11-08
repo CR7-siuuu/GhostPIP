@@ -5,7 +5,18 @@ import vm from "node:vm";
 
 const sandbox = {};
 vm.runInNewContext(fs.readFileSync(new URL("../../extension/shared/settings.js", import.meta.url), "utf8"), sandbox);
-const { CORNERS, DEFAULTS, HOLD_KEYS, isValidDodge, isValidHotkey, formatKeyEvent, merge, patch } = sandbox.GhostPiPSettings;
+const {
+  CORNERS,
+  DEFAULTS,
+  HOLD_KEYS,
+  PEEK_KEYS,
+  SEEK_STEPS,
+  isValidDodge,
+  isValidHotkey,
+  formatKeyEvent,
+  merge,
+  patch,
+} = sandbox.GhostPiPSettings;
 const plain = (v) => JSON.parse(JSON.stringify(v));
 
 test("missing or garbage storage yields defaults", () => {
@@ -102,10 +113,109 @@ test("custom hotkeys and hold key validation and formatting", () => {
   assert.equal(formatKeyEvent({ ctrlKey: false, altKey: false, shiftKey: false, code: "KeyG", key: "g" }), null);
 
   const custom = merge({
-    hotkeys: { clickThrough: "Ctrl+Shift+X", dodge: "F8", mute: "Alt+`", hold: "Alt" },
+    hotkeys: {
+      clickThrough: "Ctrl+Shift+X",
+      dodge: "F8",
+      mute: "Alt+`",
+      playPause: "Ctrl+Space",
+      seekBack: "Ctrl+Left",
+      seekForward: "Ctrl+Right",
+      peek: "Ctrl+Shift+P",
+      hold: "Alt",
+    },
   });
   assert.equal(custom.hotkeys.clickThrough, "Ctrl+Shift+X");
   assert.equal(custom.hotkeys.dodge, "F8");
   assert.equal(custom.hotkeys.mute, "Alt+`");
+  assert.equal(custom.hotkeys.playPause, "Ctrl+Space");
+  assert.equal(custom.hotkeys.seekBack, "Ctrl+Left");
+  assert.equal(custom.hotkeys.seekForward, "Ctrl+Right");
+  assert.equal(custom.hotkeys.peek, "Ctrl+Shift+P");
   assert.equal(custom.hotkeys.hold, "Alt");
+
+  assert.equal(formatKeyEvent({ ctrlKey: false, altKey: true, shiftKey: false, code: "Space", key: " " }), "Alt+Space");
+  assert.equal(formatKeyEvent({ ctrlKey: false, altKey: true, shiftKey: false, code: "ArrowLeft", key: "ArrowLeft" }), "Alt+Left");
+  assert.equal(formatKeyEvent({ ctrlKey: false, altKey: true, shiftKey: false, code: "ArrowRight", key: "ArrowRight" }), "Alt+Right");
+  assert.equal(formatKeyEvent({ ctrlKey: false, altKey: true, shiftKey: false, code: "KeyP", key: "p" }), "Alt+P");
+});
+
+test("media and peek defaults, constants, clamping, and per-field fallback", () => {
+  assert.equal(DEFAULTS.opacity, 0.7);
+  assert.deepEqual(plain(PEEK_KEYS), ["Alt", "Mouse4", "Mouse5", "Backquote", "Ctrl", "Shift", "Ctrl+Alt"]);
+  assert.deepEqual(plain(SEEK_STEPS), [5, 10]);
+  assert.deepEqual(plain(DEFAULTS.media), { enabled: true, seekSec: 5, wheelVolume: true });
+  assert.deepEqual(plain(DEFAULTS.peek), { enabled: false, key: "Alt", idleOpacity: 0, activeOpacity: 0.8 });
+  assert.equal(DEFAULTS.hotkeys.playPause, "Alt+Space");
+  assert.equal(DEFAULTS.hotkeys.seekBack, "Alt+Left");
+  assert.equal(DEFAULTS.hotkeys.seekForward, "Alt+Right");
+  assert.equal(DEFAULTS.hotkeys.peek, "Alt+P");
+
+  const clamped = merge({
+    media: { enabled: false, seekSec: 99, wheelVolume: "bad" },
+    peek: { enabled: true, key: "Mouse4", idleOpacity: 0.8, activeOpacity: 0.01 },
+    hotkeys: { playPause: "Space", seekBack: "Alt+Left", seekForward: "", peek: "P" },
+  });
+  assert.equal(clamped.media.enabled, false);
+  assert.equal(clamped.media.seekSec, 5);
+  assert.equal(clamped.media.wheelVolume, true);
+  assert.equal(clamped.peek.enabled, true);
+  assert.equal(clamped.peek.key, "Mouse4");
+  assert.equal(clamped.peek.idleOpacity, 0.2);
+  assert.equal(clamped.peek.activeOpacity, 0.1);
+  assert.equal(clamped.hotkeys.playPause, "Alt+Space");
+  assert.equal(clamped.hotkeys.seekBack, "Alt+Left");
+  assert.equal(clamped.hotkeys.seekForward, "Alt+Right");
+  assert.equal(clamped.hotkeys.peek, "Alt+P");
+
+  const badPeekKey = merge({ peek: { enabled: true, key: "Space", idleOpacity: -0.5, activeOpacity: 2 } });
+  assert.equal(badPeekKey.peek.enabled, true);
+  assert.equal(badPeekKey.peek.key, "Alt");
+  assert.equal(badPeekKey.peek.idleOpacity, 0);
+  assert.equal(badPeekKey.peek.activeOpacity, 1);
+});
+
+test("patch deep-merges media, peek, and hotkeys and rejects invalid updates cleanly", () => {
+  const base = merge({
+    media: { enabled: true, seekSec: 10, wheelVolume: false },
+    peek: { enabled: true, key: "Mouse5", idleOpacity: 0.05, activeOpacity: 0.9 },
+  });
+
+  const okMedia = patch(base, { media: { wheelVolume: true } });
+  assert.equal(okMedia.ok, true);
+  assert.deepEqual(plain(okMedia.settings.media), { enabled: true, seekSec: 10, wheelVolume: true });
+  assert.deepEqual(plain(okMedia.settings.peek), plain(base.peek));
+
+  const okPeek = patch(okMedia.settings, { peek: { key: "Backquote", idleOpacity: 0.5, activeOpacity: 1.5 } });
+  assert.equal(okPeek.ok, true);
+  assert.equal(okPeek.settings.peek.key, "Backquote");
+  assert.equal(okPeek.settings.peek.idleOpacity, 0.2);
+  assert.equal(okPeek.settings.peek.activeOpacity, 1);
+  assert.equal(okPeek.settings.peek.enabled, true);
+
+  const okHk = patch(okPeek.settings, { hotkeys: { playPause: "Ctrl+Space", peek: "F9" } });
+  assert.equal(okHk.ok, true);
+  assert.equal(okHk.settings.hotkeys.playPause, "Ctrl+Space");
+  assert.equal(okHk.settings.hotkeys.peek, "F9");
+  assert.equal(okHk.settings.hotkeys.seekBack, "Alt+Left");
+
+  for (const invalid of [
+    { media: { seekSec: 7 } },
+    { media: { enabled: "yes" } },
+    { media: null },
+    { peek: { key: "Enter" } },
+    { peek: { idleOpacity: NaN } },
+    { peek: [] },
+    { hotkeys: { playPause: "Space" } },
+    { hotkeys: { peek: "" } },
+  ]) {
+    const res = patch(okHk.settings, invalid);
+    assert.equal(res.ok, false);
+    assert.deepEqual(plain(res.settings), plain(okHk.settings));
+  }
+
+  assert.equal(formatKeyEvent({ code: "Space", key: " ", altKey: true }), "Alt+Space");
+  assert.equal(formatKeyEvent({ key: " ", altKey: true }), "Alt+Space");
+  assert.equal(formatKeyEvent({ code: "ArrowLeft", key: "ArrowLeft", altKey: true }), "Alt+Left");
+  assert.equal(formatKeyEvent({ key: "ArrowRight", altKey: true }), "Alt+Right");
+  assert.equal(formatKeyEvent({ code: "KeyP", key: "p", altKey: true }), "Alt+P");
 });

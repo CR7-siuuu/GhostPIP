@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Sair"
+  },
+  "peekMode": {
+    "message": "Modo espreitar"
+  },
+  "peekModeHint": {
+    "message": "Ocultar até manter premida a tecla"
+  },
+  "peekSettings": {
+    "message": "Definições do modo espreitar"
+  },
+  "peekKey": {
+    "message": "Tecla para manter e ver"
+  },
+  "peekKeyMouse4": {
+    "message": "Botão lateral do rato 1 (Recuar)"
+  },
+  "peekKeyMouse5": {
+    "message": "Botão lateral do rato 2 (Avançar)"
+  },
+  "peekIdleOpacity": {
+    "message": "Visibilidade em repouso"
+  },
+  "peekIdleZero": {
+    "message": "0% (Oculto)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Ténue)"
+  },
+  "peekActiveOpacity": {
+    "message": "Opacidade ao premir"
+  },
+  "mediaRemote": {
+    "message": "Comando em jogo"
+  },
+  "mediaRemoteHint": {
+    "message": "Reproduzir, avançar e volume sem perder o foco"
+  },
+  "mediaSettings": {
+    "message": "Definições do comando em jogo"
+  },
+  "mediaSeekStep": {
+    "message": "Intervalo de salto"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Volume com Alt + roda"
+  },
+  "mediaPlayPause": {
+    "message": "Reproduzir / Pausar"
+  },
+  "mediaSeekBack": {
+    "message": "Recuar"
+  },
+  "mediaSeekForward": {
+    "message": "Avançar"
+  },
+  "hudVolume": {
+    "message": "Volume $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

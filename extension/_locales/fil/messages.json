@@ -314,5 +314,75 @@
   },
   "engineTrayExit": {
     "message": "Lumabas"
+  },
+  "peekMode": {
+    "message": "Peek Mode"
+  },
+  "peekModeHint": {
+    "message": "Itago hangga't hindi pinipindot nang matagal ang key"
+  },
+  "peekSettings": {
+    "message": "Mga setting ng Peek Mode"
+  },
+  "peekKey": {
+    "message": "Key na pipindutin para sumilip"
+  },
+  "peekKeyMouse4": {
+    "message": "Side Button ng Mouse 1 (Bumalik)"
+  },
+  "peekKeyMouse5": {
+    "message": "Side Button ng Mouse 2 (abante)"
+  },
+  "peekIdleOpacity": {
+    "message": "Visibility kapag idle"
+  },
+  "peekIdleZero": {
+    "message": "0% (Nakatago)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Malabo)"
+  },
+  "peekActiveOpacity": {
+    "message": "Opacity habang nakapindot"
+  },
+  "mediaRemote": {
+    "message": "In-game Remote"
+  },
+  "mediaRemoteHint": {
+    "message": "Play, seek at volume nang hindi nawawala ang focus"
+  },
+  "mediaSettings": {
+    "message": "Mga setting ng In-game Remote"
+  },
+  "mediaSeekStep": {
+    "message": "Hakbang sa pag-seek"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Volume gamit ang Alt + Wheel"
+  },
+  "mediaPlayPause": {
+    "message": "I-play / I-pause"
+  },
+  "mediaSeekBack": {
+    "message": "umatras"
+  },
+  "mediaSeekForward": {
+    "message": "umabante"
+  },
+  "hudVolume": {
+    "message": "Volume $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Surt"
+  },
+  "peekMode": {
+    "message": "Mode ullada"
+  },
+  "peekModeHint": {
+    "message": "Amaga fins que mantinguis premuda la tecla"
+  },
+  "peekSettings": {
+    "message": "Opcions del mode ullada"
+  },
+  "peekKey": {
+    "message": "Tecla per mantenir i veure"
+  },
+  "peekKeyMouse4": {
+    "message": "Botó lateral del ratolí 1 (Enrere)"
+  },
+  "peekKeyMouse5": {
+    "message": "Botó lateral del ratolí 2 (Endavant)"
+  },
+  "peekIdleOpacity": {
+    "message": "Visibilitat en repòs"
+  },
+  "peekIdleZero": {
+    "message": "0% (Amagat)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Tènue)"
+  },
+  "peekActiveOpacity": {
+    "message": "Opacitat en prémer"
+  },
+  "mediaRemote": {
+    "message": "Comandament en joc"
+  },
+  "mediaRemoteHint": {
+    "message": "Reproducció, salt i volum sense perdre el focus"
+  },
+  "mediaSettings": {
+    "message": "Opcions del comandament en joc"
+  },
+  "mediaSeekStep": {
+    "message": "Pas de salt"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Volum amb Alt + roda"
+  },
+  "mediaPlayPause": {
+    "message": "Reprodueix / Pausa"
+  },
+  "mediaSeekBack": {
+    "message": "Retrocedeix"
+  },
+  "mediaSeekForward": {
+    "message": "Avança"
+  },
+  "hudVolume": {
+    "message": "Volum $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

@@ -314,5 +314,75 @@
   },
   "engineTrayExit": {
     "message": "יציאה"
+  },
+  "peekMode": {
+    "message": "מצב הצצה"
+  },
+  "peekModeHint": {
+    "message": "הסתרה עד ללחיצה ממושכת על מקש ההצצה"
+  },
+  "peekSettings": {
+    "message": "הגדרות מצב הצצה"
+  },
+  "peekKey": {
+    "message": "מקש החזקה להצצה"
+  },
+  "peekKeyMouse4": {
+    "message": "לחצן צד בעכבר 1 (אחורה)"
+  },
+  "peekKeyMouse5": {
+    "message": "לחצן צד בעכבר 2 (קדימה)"
+  },
+  "peekIdleOpacity": {
+    "message": "נראות במצב רגיל"
+  },
+  "peekIdleZero": {
+    "message": "0% (מוסתר)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (עמום)"
+  },
+  "peekActiveOpacity": {
+    "message": "אטימות בעת הצצה"
+  },
+  "mediaRemote": {
+    "message": "שלט במשחק"
+  },
+  "mediaRemoteHint": {
+    "message": "ניגון, דילוג ועוצמת שמע בלי לאבד מיקוד"
+  },
+  "mediaSettings": {
+    "message": "הגדרות שלט במשחק"
+  },
+  "mediaSeekStep": {
+    "message": "מרווח דילוג"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ שנ׳",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "עוצמת שמע עם Alt + גלגלת"
+  },
+  "mediaPlayPause": {
+    "message": "ניגון / השהיה"
+  },
+  "mediaSeekBack": {
+    "message": "דילוג אחורה"
+  },
+  "mediaSeekForward": {
+    "message": "דילוג קדימה"
+  },
+  "hudVolume": {
+    "message": "עוצמת שמע $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "ውጣ"
+  },
+  "peekMode": {
+    "message": "የአጭር እይታ ሁነታ"
+  },
+  "peekModeHint": {
+    "message": "ቁልፉን ተጭነው እስኪይዙ ድረስ ደብቅ"
+  },
+  "peekSettings": {
+    "message": "የአጭር እይታ ቅንብሮች"
+  },
+  "peekKey": {
+    "message": "ተጭኖ የማሳያ ቁልፍ"
+  },
+  "peekKeyMouse4": {
+    "message": "የማውዝ ጎን 1 (ወደ ኋላ)"
+  },
+  "peekKeyMouse5": {
+    "message": "የማውዝ ጎን 2 (ወደ ፊት)"
+  },
+  "peekIdleOpacity": {
+    "message": "መደበኛ ታይነት"
+  },
+  "peekIdleZero": {
+    "message": "0% (የተደበቀ)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (ደብዛዛ)"
+  },
+  "peekActiveOpacity": {
+    "message": "ሲጫኑ ግልጽነት"
+  },
+  "mediaRemote": {
+    "message": "የጨዋታ ውስጥ መቆጣጠሪያ"
+  },
+  "mediaRemoteHint": {
+    "message": "ትኩረት ሳይለቁ ማጫወቻ፣ መፈለጊያ እና ድምጽ"
+  },
+  "mediaSettings": {
+    "message": "የጨዋታ ውስጥ መቆጣጠሪያ ቅንብሮች"
+  },
+  "mediaSeekStep": {
+    "message": "የመዝለያ እርምጃ"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ ሴኮንድ",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Alt + ዊል ድምጽ"
+  },
+  "mediaPlayPause": {
+    "message": "አጫውት / አቁም"
+  },
+  "mediaSeekBack": {
+    "message": "ወደ ኋላ መልስ"
+  },
+  "mediaSeekForward": {
+    "message": "ወደ ፊት አሳልፍ"
+  },
+  "hudVolume": {
+    "message": "ድምጽ $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

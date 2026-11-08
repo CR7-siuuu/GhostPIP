@@ -410,6 +410,7 @@ label.row {
 
 select {
   min-width: 112px;
+  max-width: 168px;
   padding: 5px 8px;
   border-radius: 7px;
   border: 1px solid rgba(148, 163, 184, 0.24);
@@ -418,6 +419,7 @@ select {
   font: inherit;
   font-size: 12px;
   font-weight: 600;
+  text-overflow: ellipsis;
   cursor: pointer;
   transition: border-color 0.14s ease;
 }
@@ -482,6 +484,7 @@ details[open] > summary::after {
 
 .details-body {
   padding-top: 2px;
+  padding-bottom: 4px;
   border-top: 1px solid var(--divider);
 }
 

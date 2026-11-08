@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Išeiti"
+  },
+  "peekMode": {
+    "message": "Žvilgtelėjimo režimas"
+  },
+  "peekModeHint": {
+    "message": "Slėpti, kol laikote nuspaudę klavišą"
+  },
+  "peekSettings": {
+    "message": "Žvilgtelėjimo nustatymai"
+  },
+  "peekKey": {
+    "message": "Laikomas klavišas"
+  },
+  "peekKeyMouse4": {
+    "message": "Pelės šoninis mygtukas 1 (Atgal)"
+  },
+  "peekKeyMouse5": {
+    "message": "Pelės šoninis mygtukas 2 (Pirmyn)"
+  },
+  "peekIdleOpacity": {
+    "message": "Matomumas ramybės būsenoje"
+  },
+  "peekIdleZero": {
+    "message": "0% (Paslėpta)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Blankus)"
+  },
+  "peekActiveOpacity": {
+    "message": "Nepermatomumas laikant"
+  },
+  "mediaRemote": {
+    "message": "Valdymas žaidime"
+  },
+  "mediaRemoteHint": {
+    "message": "Atkūrimas, prasukimas ir garsas neprarandant fokuso"
+  },
+  "mediaSettings": {
+    "message": "Valdymo žaidime nustatymai"
+  },
+  "mediaSeekStep": {
+    "message": "Prasukimo žingsnis"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ sek.",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Garsas su Alt + ratuku"
+  },
+  "mediaPlayPause": {
+    "message": "Leisti / Pristabdyti"
+  },
+  "mediaSeekBack": {
+    "message": "Prasukti atgal"
+  },
+  "mediaSeekForward": {
+    "message": "Prasukti pirmyn"
+  },
+  "hudVolume": {
+    "message": "Garsas $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

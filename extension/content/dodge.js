@@ -51,10 +51,12 @@
   };
 
   function step(state, input, cfg) {
-    const { now, cursor, size, area } = input;
+    const { now, cursor, size, area, rect } = input;
     const s = { ...state };
     const rectOf = (corner) => cornerRect(corner, size, area, cfg.edgeInsetPx);
+    const activeRect = rect ?? rectOf(s.corner);
     const covers = (corner) => containsWithMargin(rectOf(corner), cfg.marginPx, cursor);
+    const coversActive = () => containsWithMargin(activeRect, cfg.marginPx, cursor);
 
     const stay = () => ({ state: s, action: { type: "stay" } });
     const fade = (on) => {
@@ -66,6 +68,7 @@
       s.lastMoveAt = now;
       s.hoverSince = null;
       s.outsideHomeSince = null;
+      s.faded = false;
       return { state: s, action: { type: "move", corner } };
     };
 
@@ -73,14 +76,18 @@
       s.hoverSince = null;
       return s.faded ? fade(false) : stay();
     }
-    if (cursor === null || (cfg.ignoreScreenEdgePx > 0 && nearAreaEdge(cursor, area, cfg.ignoreScreenEdgePx))) {
+    if (cursor === null) {
       s.hoverSince = null;
-      return stay();
+      return s.faded ? fade(false) : stay();
+    }
+    if (cfg.ignoreScreenEdgePx > 0 && nearAreaEdge(cursor, area, cfg.ignoreScreenEdgePx)) {
+      s.hoverSince = null;
+      return s.faded && !coversActive() ? fade(false) : stay();
     }
 
     const cooledDown = now - s.lastMoveAt >= cfg.cooldownMs;
 
-    if (covers(s.corner)) {
+    if (coversActive()) {
       s.hoverSince ??= now;
       if (now - s.hoverSince < cfg.hoverDelayMs || !cooledDown) return stay();
       if (cfg.style === "move") {

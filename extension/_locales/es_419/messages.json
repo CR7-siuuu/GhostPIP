@@ -314,5 +314,75 @@
   },
   "engineTrayExit": {
     "message": "Salir"
+  },
+  "peekMode": {
+    "message": "Modo vistazo"
+  },
+  "peekModeHint": {
+    "message": "Ocultar hasta mantener presionada la tecla"
+  },
+  "peekSettings": {
+    "message": "Configuración de modo vistazo"
+  },
+  "peekKey": {
+    "message": "Tecla para mostrar"
+  },
+  "peekKeyMouse4": {
+    "message": "Lateral del mouse 1 (Atrás)"
+  },
+  "peekKeyMouse5": {
+    "message": "Lateral del mouse 2 (Adelante)"
+  },
+  "peekIdleOpacity": {
+    "message": "Visibilidad en reposo"
+  },
+  "peekIdleZero": {
+    "message": "0% (Oculto)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Tenue)"
+  },
+  "peekActiveOpacity": {
+    "message": "Opacidad al mostrar"
+  },
+  "mediaRemote": {
+    "message": "Control en juego"
+  },
+  "mediaRemoteHint": {
+    "message": "Reproducción, salto y volumen sin perder el foco"
+  },
+  "mediaSettings": {
+    "message": "Configuración de control en juego"
+  },
+  "mediaSeekStep": {
+    "message": "Intervalo de salto"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Volumen con Alt + rueda"
+  },
+  "mediaPlayPause": {
+    "message": "Reproducir / Pausar"
+  },
+  "mediaSeekBack": {
+    "message": "Retroceder"
+  },
+  "mediaSeekForward": {
+    "message": "Avanzar"
+  },
+  "hudVolume": {
+    "message": "Volumen $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

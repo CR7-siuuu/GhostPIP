@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Вийти"
+  },
+  "peekMode": {
+    "message": "Режим підглядання"
+  },
+  "peekModeHint": {
+    "message": "Ховати вікно, доки не затиснуто клавішу"
+  },
+  "peekSettings": {
+    "message": "Налаштування режиму підглядання"
+  },
+  "peekKey": {
+    "message": "Клавіша утримання"
+  },
+  "peekKeyMouse4": {
+    "message": "Бічна кнопка миші 1 (Назад)"
+  },
+  "peekKeyMouse5": {
+    "message": "Бічна кнопка миші 2 (Вперед)"
+  },
+  "peekIdleOpacity": {
+    "message": "Видимість у спокої"
+  },
+  "peekIdleZero": {
+    "message": "0% (Приховано)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Ледь помітно)"
+  },
+  "peekActiveOpacity": {
+    "message": "Непрозорість під час натискання"
+  },
+  "mediaRemote": {
+    "message": "Ігровий пульт"
+  },
+  "mediaRemoteHint": {
+    "message": "Пауза, перемотування й гучність без втрати фокуса"
+  },
+  "mediaSettings": {
+    "message": "Налаштування ігрового пульта"
+  },
+  "mediaSeekStep": {
+    "message": "Крок перемотування"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ с",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Гучність через Alt + колесо"
+  },
+  "mediaPlayPause": {
+    "message": "Відтворити / Пауза"
+  },
+  "mediaSeekBack": {
+    "message": "Перемотати назад"
+  },
+  "mediaSeekForward": {
+    "message": "Перемотати вперед"
+  },
+  "hudVolume": {
+    "message": "Гучність $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

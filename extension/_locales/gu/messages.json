@@ -314,5 +314,75 @@
   },
   "engineTrayExit": {
     "message": "બહાર નીકળો"
+  },
+  "peekMode": {
+    "message": "પીક મોડ"
+  },
+  "peekModeHint": {
+    "message": "કી દબાવી રાખો ત્યાં સુધી છુપાવો"
+  },
+  "peekSettings": {
+    "message": "પીક મોડ સેટિંગ્સ"
+  },
+  "peekKey": {
+    "message": "દબાવીને જોવાની કી"
+  },
+  "peekKeyMouse4": {
+    "message": "માઉસ સાઇડ 1 (પાછળ)"
+  },
+  "peekKeyMouse5": {
+    "message": "માઉસ સાઇડ 2 (આગળ)"
+  },
+  "peekIdleOpacity": {
+    "message": "સામાન્ય દૃશ્યતા"
+  },
+  "peekIdleZero": {
+    "message": "0% (છુપાયેલ)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (ઝાંખું)"
+  },
+  "peekActiveOpacity": {
+    "message": "દબાવતી વખતે અપારદર્શકતા"
+  },
+  "mediaRemote": {
+    "message": "ઇન-ગેમ રિમોટ"
+  },
+  "mediaRemoteHint": {
+    "message": "ફોકસ ગુમાવ્યા વિના પ્લે, સીક અને વોલ્યુમ"
+  },
+  "mediaSettings": {
+    "message": "ઇન-ગેમ રિમોટ સેટિંગ્સ"
+  },
+  "mediaSeekStep": {
+    "message": "સીક અંતરાલ"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ સે",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Alt + વ્હીલ વોલ્યુમ"
+  },
+  "mediaPlayPause": {
+    "message": "પ્લે / પોઝ"
+  },
+  "mediaSeekBack": {
+    "message": "પાછળ ખસેડો"
+  },
+  "mediaSeekForward": {
+    "message": "આગળ ખસેડો"
+  },
+  "hudVolume": {
+    "message": "વોલ્યુમ $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "종료"
+  },
+  "peekMode": {
+    "message": "역방향 고스트"
+  },
+  "peekModeHint": {
+    "message": "평소엔 숨기고 키를 누를 때만 표시"
+  },
+  "peekSettings": {
+    "message": "역방향 고스트 설정"
+  },
+  "peekKey": {
+    "message": "탭 투 뷰 키"
+  },
+  "peekKeyMouse4": {
+    "message": "마우스 측면 1 (뒤로)"
+  },
+  "peekKeyMouse5": {
+    "message": "마우스 측면 2 (앞으로)"
+  },
+  "peekIdleOpacity": {
+    "message": "평소 투명도"
+  },
+  "peekIdleZero": {
+    "message": "0% (완전 숨김)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (희미하게)"
+  },
+  "peekActiveOpacity": {
+    "message": "누를 때 투명도"
+  },
+  "mediaRemote": {
+    "message": "인게임 리모컨"
+  },
+  "mediaRemoteHint": {
+    "message": "포커스 유지 재생 · 탐색 · 볼륨 조절"
+  },
+  "mediaSettings": {
+    "message": "인게임 리모컨 설정"
+  },
+  "mediaSeekStep": {
+    "message": "이동 간격"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$초",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Alt + 휠 볼륨 조절"
+  },
+  "mediaPlayPause": {
+    "message": "재생 / 일시정지"
+  },
+  "mediaSeekBack": {
+    "message": "뒤로 이동"
+  },
+  "mediaSeekForward": {
+    "message": "앞으로 이동"
+  },
+  "hudVolume": {
+    "message": "볼륨 $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

@@ -3,7 +3,8 @@
 화면을 가리지 않는 PiP. 영상 창을 투명하게 하거나 클릭이 뒤로 통과하게 만들고, 마우스가 다가오면 다른 모서리로 비켜 줍니다.
 
 - **웹 모드**: 브라우저 탭 안에 떠 있는 창입니다. 탭을 옮겨도 따라옵니다. 확장만 있으면 됩니다.
-- **전체 모드**: 게임이나 다른 프로그램 위에 뜨는 Document PiP 창입니다. 투명도, 클릭 통과, 자동 회피를 쓰려면 Windows용 GhostPiP Engine이 필요합니다.
+- **전체 모드**: 게임이나 다른 프로그램 위에 뜨는 Document PiP / 독립 창입니다. 투명도, 클릭 통과, 자동 회피를 쓰려면 Windows용 GhostPiP Engine이 필요합니다.
+- **주요 기능**: 다중 PiP(여러 영상 동시 플로팅·독립 창), 창 위치·크기 기억(가로·세로 비율 안전 구분), 실시간 자막 오버레이(유튜브·넷플릭스·HTML5 트랙), 포커스를 뺏지 않는 인게임 리모컨, 역방향 고스트(평소 0~5% 숨김 · 키 누를 때만 80% 표시).
 
 지원 사이트(`extension/config/selectors.json`):
 
@@ -30,6 +31,10 @@ OTT는 대부분 DRM 영상이라 전체 모드가 크롬 기본 PiP 창으로 �
 | 클릭 통과 | `Alt+G` |
 | 자동 회피 | `Alt+Shift+D` |
 | 음소거 | `Alt+M` |
+| 역방향 고스트 켜기/끄기 | `Alt+P` (켜진 상태에서 지정 홀드 키를 누르는 동안만 표시) |
+| 인게임 리모컨 (재생/일시정지) | `Alt+Space` |
+| 인게임 리모컨 (뒤로/앞으로 이동) | `Alt+←` / `Alt+→` (5초 · 10초 선택 가능) |
+| 인게임 리모컨 (볼륨 조절) | `Alt+마우스 휠` |
 
 ## 백신 오탐과 코드 서명
 
@@ -66,7 +71,8 @@ npm run build:zip
 npm run test:unit
 node test/e2e/popup.mjs
 node test/e2e/generic.mjs
-node test/e2e/engine.mjs      # 엔진 빌드 필요
+node test/e2e/engine.mjs         # 엔진 빌드 필요
+node test/e2e/features_v1_1.mjs  # v1.1 기능 통합 E2E
 node test/e2e/crosstab.mjs
 node test/e2e/run.mjs youtube
 ```

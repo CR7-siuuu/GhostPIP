@@ -314,5 +314,75 @@
   },
   "engineTrayExit": {
     "message": "बाहर निकलें"
+  },
+  "peekMode": {
+    "message": "पीक मोड"
+  },
+  "peekModeHint": {
+    "message": "कुंजी दबाए रखने तक विंडो छिपाएँ"
+  },
+  "peekSettings": {
+    "message": "पीक मोड सेटिंग्स"
+  },
+  "peekKey": {
+    "message": "दबाकर देखने की कुंजी"
+  },
+  "peekKeyMouse4": {
+    "message": "माउस साइड बटन 1 (पीछे)"
+  },
+  "peekKeyMouse5": {
+    "message": "माउस साइड बटन 2 (आगे)"
+  },
+  "peekIdleOpacity": {
+    "message": "सामान्य दृश्यता"
+  },
+  "peekIdleZero": {
+    "message": "0% (छिपा हुआ)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (हल्का)"
+  },
+  "peekActiveOpacity": {
+    "message": "दबाने पर अपारदर्शिता"
+  },
+  "mediaRemote": {
+    "message": "इन-गेम रिमोट"
+  },
+  "mediaRemoteHint": {
+    "message": "फ़ोकस खोए बिना प्ले, सीक और वॉल्यूम नियंत्रण"
+  },
+  "mediaSettings": {
+    "message": "इन-गेम रिमोट सेटिंग्स"
+  },
+  "mediaSeekStep": {
+    "message": "सीक अंतराल"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ से॰",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Alt + व्हील से वॉल्यूम"
+  },
+  "mediaPlayPause": {
+    "message": "चलाएँ / रोकें"
+  },
+  "mediaSeekBack": {
+    "message": "पीछे जाएँ"
+  },
+  "mediaSeekForward": {
+    "message": "आगे जाएँ"
+  },
+  "hudVolume": {
+    "message": "वॉल्यूम $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

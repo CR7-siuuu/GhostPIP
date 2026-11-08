@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "終了"
+  },
+  "peekMode": {
+    "message": "ピークモード"
+  },
+  "peekModeHint": {
+    "message": "普段は非表示にし、キーを押している間だけ表示"
+  },
+  "peekSettings": {
+    "message": "ピークモード設定"
+  },
+  "peekKey": {
+    "message": "ピーク表示キー"
+  },
+  "peekKeyMouse4": {
+    "message": "マウス側面 1 (戻る)"
+  },
+  "peekKeyMouse5": {
+    "message": "マウス側面 2 (進む)"
+  },
+  "peekIdleOpacity": {
+    "message": "通常時の表示"
+  },
+  "peekIdleZero": {
+    "message": "0% (完全非表示)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (うっすら表示)"
+  },
+  "peekActiveOpacity": {
+    "message": "ピーク時の不透明度"
+  },
+  "mediaRemote": {
+    "message": "ゲーム内リモコン"
+  },
+  "mediaRemoteHint": {
+    "message": "フォーカスを奪わずに再生・シーク・音量調整"
+  },
+  "mediaSettings": {
+    "message": "ゲーム内リモコン設定"
+  },
+  "mediaSeekStep": {
+    "message": "シーク間隔"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$秒",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Alt + ホイールで音量調整"
+  },
+  "mediaPlayPause": {
+    "message": "再生 / 一時停止"
+  },
+  "mediaSeekBack": {
+    "message": "巻き戻し"
+  },
+  "mediaSeekForward": {
+    "message": "早送り"
+  },
+  "hudVolume": {
+    "message": "音量 $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

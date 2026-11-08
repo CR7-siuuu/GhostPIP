@@ -314,5 +314,75 @@
   },
   "engineTrayExit": {
     "message": "Quitter"
+  },
+  "peekMode": {
+    "message": "Mode aperçu"
+  },
+  "peekModeHint": {
+    "message": "Masquer jusqu'au maintien de la touche"
+  },
+  "peekSettings": {
+    "message": "Paramètres du mode aperçu"
+  },
+  "peekKey": {
+    "message": "Touche d'aperçu maintenue"
+  },
+  "peekKeyMouse4": {
+    "message": "Bouton latéral souris 1 (Retour)"
+  },
+  "peekKeyMouse5": {
+    "message": "Bouton latéral souris 2 (Suivant)"
+  },
+  "peekIdleOpacity": {
+    "message": "Visibilité au repos"
+  },
+  "peekIdleZero": {
+    "message": "0% (Masqué)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Léger)"
+  },
+  "peekActiveOpacity": {
+    "message": "Opacité en aperçu"
+  },
+  "mediaRemote": {
+    "message": "Télécommande en jeu"
+  },
+  "mediaRemoteHint": {
+    "message": "Lecture, saut et volume sans perdre le focus"
+  },
+  "mediaSettings": {
+    "message": "Paramètres de télécommande en jeu"
+  },
+  "mediaSeekStep": {
+    "message": "Pas de saut"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Volume avec Alt + molette"
+  },
+  "mediaPlayPause": {
+    "message": "Lecture / Pause"
+  },
+  "mediaSeekBack": {
+    "message": "Reculer"
+  },
+  "mediaSeekForward": {
+    "message": "Avancer"
+  },
+  "hudVolume": {
+    "message": "Volume $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

@@ -314,5 +314,75 @@
   },
   "engineTrayExit": {
     "message": "Lopeta"
+  },
+  "peekMode": {
+    "message": "Kurkistustila"
+  },
+  "peekModeHint": {
+    "message": "Piilota, kunnes pidät kurkistusnäppäintä pohjassa"
+  },
+  "peekSettings": {
+    "message": "Kurkistustilan asetukset"
+  },
+  "peekKey": {
+    "message": "Pidä pohjassa -näppäin"
+  },
+  "peekKeyMouse4": {
+    "message": "Hiiren sivupainike 1 (Takaisin)"
+  },
+  "peekKeyMouse5": {
+    "message": "Hiiren sivupainike 2 (Eteenpäin)"
+  },
+  "peekIdleOpacity": {
+    "message": "Näkyvyys lepotilassa"
+  },
+  "peekIdleZero": {
+    "message": "0% (Piilotettu)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Himmeä)"
+  },
+  "peekActiveOpacity": {
+    "message": "Peittävyys painettaessa"
+  },
+  "mediaRemote": {
+    "message": "Pelinsisäinen kaukosäädin"
+  },
+  "mediaRemoteHint": {
+    "message": "Toisto, kelaus ja äänenvoimakkuus fokusta menettämättä"
+  },
+  "mediaSettings": {
+    "message": "Kaukosäätimen asetukset"
+  },
+  "mediaSeekStep": {
+    "message": "Kelausaskel"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Äänenvoimakkuus Alt + rulla"
+  },
+  "mediaPlayPause": {
+    "message": "Toista / Tauko"
+  },
+  "mediaSeekBack": {
+    "message": "Kelaa taaksepäin"
+  },
+  "mediaSeekForward": {
+    "message": "Kelaa eteenpäin"
+  },
+  "hudVolume": {
+    "message": "Äänenvoimakkuus $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

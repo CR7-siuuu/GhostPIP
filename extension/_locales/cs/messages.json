@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Ukončit"
+  },
+  "peekMode": {
+    "message": "Režim nahlédnutí"
+  },
+  "peekModeHint": {
+    "message": "Skrýt, dokud nepodržíte klávesu nahlédnutí"
+  },
+  "peekSettings": {
+    "message": "Nastavení režimu nahlédnutí"
+  },
+  "peekKey": {
+    "message": "Klávesa pro podržení"
+  },
+  "peekKeyMouse4": {
+    "message": "Boční tlačítko myši 1 (Zpět)"
+  },
+  "peekKeyMouse5": {
+    "message": "Boční tlačítko myši 2 (Vpřed)"
+  },
+  "peekIdleOpacity": {
+    "message": "Viditelnost v klidu"
+  },
+  "peekIdleZero": {
+    "message": "0% (Skryto)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Jemně)"
+  },
+  "peekActiveOpacity": {
+    "message": "Neprůhlednost při podržení"
+  },
+  "mediaRemote": {
+    "message": "Ovladač ve hře"
+  },
+  "mediaRemoteHint": {
+    "message": "Přehrávání, posun a hlasitost bez ztráty fokusu"
+  },
+  "mediaSettings": {
+    "message": "Nastavení ovladače ve hře"
+  },
+  "mediaSeekStep": {
+    "message": "Krok posunu"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Hlasitost pomocí Alt + kolečko"
+  },
+  "mediaPlayPause": {
+    "message": "Přehrát / Pozastavit"
+  },
+  "mediaSeekBack": {
+    "message": "Posunout zpět"
+  },
+  "mediaSeekForward": {
+    "message": "Posunout vpřed"
+  },
+  "hudVolume": {
+    "message": "Hlasitost $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

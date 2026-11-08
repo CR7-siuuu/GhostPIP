@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "నిష్క్రమించు"
+  },
+  "peekMode": {
+    "message": "పీక్ మోడ్"
+  },
+  "peekModeHint": {
+    "message": "కీ నొక్కి ఉంచే వరకు దాచు"
+  },
+  "peekSettings": {
+    "message": "పీక్ మోడ్ సెట్టింగ్‌లు"
+  },
+  "peekKey": {
+    "message": "నొక్కి చూసే కీ"
+  },
+  "peekKeyMouse4": {
+    "message": "మౌస్ సైడ్ 1 (వెనుకకు)"
+  },
+  "peekKeyMouse5": {
+    "message": "మౌస్ సైడ్ 2 (ముందుకు)"
+  },
+  "peekIdleOpacity": {
+    "message": "సాధారణ దృశ్యమానత"
+  },
+  "peekIdleZero": {
+    "message": "0% (దాచబడింది)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (మసకగా)"
+  },
+  "peekActiveOpacity": {
+    "message": "నొక్కినప్పుడు అపారదర్శకత"
+  },
+  "mediaRemote": {
+    "message": "ఇన్-గేమ్ రిమోట్"
+  },
+  "mediaRemoteHint": {
+    "message": "ఫోకస్ కోల్పోకుండా ప్లే, సీక్ & వాల్యూమ్"
+  },
+  "mediaSettings": {
+    "message": "ఇన్-గేమ్ రిమోట్ సెట్టింగ్‌లు"
+  },
+  "mediaSeekStep": {
+    "message": "సీక్ వ్యవధి"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ సె",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Alt + వీల్ వాల్యూమ్"
+  },
+  "mediaPlayPause": {
+    "message": "ప్లే / పాజ్"
+  },
+  "mediaSeekBack": {
+    "message": "వెనుకకు జరుపు"
+  },
+  "mediaSeekForward": {
+    "message": "ముందుకు జరుపు"
+  },
+  "hudVolume": {
+    "message": "వాల్యూమ్ $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Thoát"
+  },
+  "peekMode": {
+    "message": "Chế độ xem nhanh"
+  },
+  "peekModeHint": {
+    "message": "Ẩn đi cho đến khi nhấn giữ phím xem"
+  },
+  "peekSettings": {
+    "message": "Cài đặt chế độ xem nhanh"
+  },
+  "peekKey": {
+    "message": "Phím nhấn giữ để xem"
+  },
+  "peekKeyMouse4": {
+    "message": "Nút hông chuột 1 (Lùi)"
+  },
+  "peekKeyMouse5": {
+    "message": "Nút hông chuột 2 (Tiến)"
+  },
+  "peekIdleOpacity": {
+    "message": "Độ hiện khi nghỉ"
+  },
+  "peekIdleZero": {
+    "message": "0% (Ẩn hoàn toàn)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Mờ nhẹ)"
+  },
+  "peekActiveOpacity": {
+    "message": "Độ mờ khi nhấn giữ"
+  },
+  "mediaRemote": {
+    "message": "Điều khiển trong game"
+  },
+  "mediaRemoteHint": {
+    "message": "Phát, tua và chỉnh âm lượng không mất tiêu điểm"
+  },
+  "mediaSettings": {
+    "message": "Cài đặt điều khiển trong game"
+  },
+  "mediaSeekStep": {
+    "message": "Bước tua"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ giây",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Âm lượng bằng Alt + con lăn"
+  },
+  "mediaPlayPause": {
+    "message": "Phát / Tạm dừng"
+  },
+  "mediaSeekBack": {
+    "message": "Tua lùi"
+  },
+  "mediaSeekForward": {
+    "message": "Tua tới"
+  },
+  "hudVolume": {
+    "message": "Âm lượng $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

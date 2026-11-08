@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "ನಿರ್ಗಮಿಸಿ"
+  },
+  "peekMode": {
+    "message": "ಪೀಕ್ ಮೋಡ್"
+  },
+  "peekModeHint": {
+    "message": "ಕೀ ಹಿಡಿದಿಡುವವರೆಗೆ ಮರೆಮಾಡಿ"
+  },
+  "peekSettings": {
+    "message": "ಪೀಕ್ ಮೋಡ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"
+  },
+  "peekKey": {
+    "message": "ಹಿಡಿದು ನೋಡುವ ಕೀ"
+  },
+  "peekKeyMouse4": {
+    "message": "ಮೌಸ್ ಸೈಡ್ 1 (ಹಿಂದೆ)"
+  },
+  "peekKeyMouse5": {
+    "message": "ಮೌಸ್ ಸೈಡ್ 2 (ಮುಂದೆ)"
+  },
+  "peekIdleOpacity": {
+    "message": "ಸಾಮಾನ್ಯ ಗೋಚರತೆ"
+  },
+  "peekIdleZero": {
+    "message": "0% (ಮರೆಮಾಡಲಾಗಿದೆ)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (ಮಂದ)"
+  },
+  "peekActiveOpacity": {
+    "message": "ಒತ್ತಿದಾಗ ಅಪಾರದರ್ಶಕತೆ"
+  },
+  "mediaRemote": {
+    "message": "ಇನ್-ಗೇಮ್ ರಿಮೋಟ್"
+  },
+  "mediaRemoteHint": {
+    "message": "ಫೋಕಸ್ ಕಳೆದುಕೊಳ್ಳದೆ ಪ್ಲೇ, ಸೀಕ್ ಮತ್ತು ವಾಲ್ಯೂಮ್"
+  },
+  "mediaSettings": {
+    "message": "ಇನ್-ಗೇಮ್ ರಿಮೋಟ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"
+  },
+  "mediaSeekStep": {
+    "message": "ಸೀಕ್ ಹಂತ"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ ಸೆ",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Alt + ವ್ಹೀಲ್ ವಾಲ್ಯೂಮ್"
+  },
+  "mediaPlayPause": {
+    "message": "ಪ್ಲೇ / ವಿರಾಮ"
+  },
+  "mediaSeekBack": {
+    "message": "ಹಿಂದಕ್ಕೆ ಸರಿಸಿ"
+  },
+  "mediaSeekForward": {
+    "message": "ಮುಂದಕ್ಕೆ ಸರಿಸಿ"
+  },
+  "hudVolume": {
+    "message": "ವಾಲ್ಯೂಮ್ $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "প্রস্থান"
+  },
+  "peekMode": {
+    "message": "পিক মোড"
+  },
+  "peekModeHint": {
+    "message": "পিক কী ধরে না রাখা পর্যন্ত লুকিয়ে রাখুন"
+  },
+  "peekSettings": {
+    "message": "পিক মোড সেটিংস"
+  },
+  "peekKey": {
+    "message": "ধরে রেখে দেখার কী"
+  },
+  "peekKeyMouse4": {
+    "message": "মাউস সাইড ১ (পিছনে)"
+  },
+  "peekKeyMouse5": {
+    "message": "মাউস সাইড ২ (সামনে)"
+  },
+  "peekIdleOpacity": {
+    "message": "স্বাভাবিক দৃশ্যমানতা"
+  },
+  "peekIdleZero": {
+    "message": "0% (লুকানো)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (হালকা)"
+  },
+  "peekActiveOpacity": {
+    "message": "ধরে রাখলে অস্বচ্ছতা"
+  },
+  "mediaRemote": {
+    "message": "ইন-গেম রিমোট"
+  },
+  "mediaRemoteHint": {
+    "message": "ফোকাস না হারিয়ে প্লে, সিক ও ভলিউম নিয়ন্ত্রণ"
+  },
+  "mediaSettings": {
+    "message": "ইন-গেম রিমোট সেটিংস"
+  },
+  "mediaSeekStep": {
+    "message": "সিক ধাপ"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ সেকেন্ড",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Alt + হুইল ভলিউম"
+  },
+  "mediaPlayPause": {
+    "message": "প্লে / পজ"
+  },
+  "mediaSeekBack": {
+    "message": "পিছনে টানুন"
+  },
+  "mediaSeekForward": {
+    "message": "সামনে টানুন"
+  },
+  "hudVolume": {
+    "message": "ভলিউম $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

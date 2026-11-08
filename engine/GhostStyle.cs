@@ -20,6 +20,7 @@ public sealed unsafe class GhostStyle
     private const uint WS_CLIPCHILDREN_U = 0x02000000;
 
     private static readonly nint HWND_TOPMOST = -1;
+    private static readonly nint HWND_NOTOPMOST = -2;
     private const uint SWP_NOSIZE = 0x0001;
     private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOZORDER = 0x0004;
@@ -112,6 +113,7 @@ public sealed unsafe class GhostStyle
         int PadW,
         int PadH,
         nint OrigStyle,
+        nint OrigExStyle,
         nint HostHwnd,
         nint RenderChild,
         nint D3dChild);
@@ -215,6 +217,25 @@ public sealed unsafe class GhostStyle
             ? state.RenderChild
             : hwnd;
 
+    public nint GetLogicalTopHwnd(nint hwnd) =>
+        _applied.TryGetValue(hwnd, out var state) && state.HostHwnd != IntPtr.Zero && IsWindow(state.HostHwnd)
+            ? state.HostHwnd
+            : hwnd;
+
+    public bool IsManagedWindow(nint hwnd)
+    {
+        if (hwnd == IntPtr.Zero)
+            return false;
+        if (_applied.ContainsKey(hwnd))
+            return true;
+        foreach (var state in _applied.Values)
+        {
+            if (state.HostHwnd == hwnd || state.RenderChild == hwnd || state.D3dChild == hwnd)
+                return true;
+        }
+        return false;
+    }
+
     public bool TryGetLogicalWindowRect(nint hwnd, out PipTracker.RECT rc)
     {
         if (_applied.TryGetValue(hwnd, out var state) && state.HostHwnd != IntPtr.Zero && IsWindow(state.HostHwnd))
@@ -317,7 +338,10 @@ public sealed unsafe class GhostStyle
     }
 
     public static byte ComputeAlpha(double opacity) =>
-        (byte)Math.Clamp((int)Math.Round(opacity * 255.0, MidpointRounding.AwayFromZero), 26, 255);
+        ComputeAlpha(opacity, allowZero: false);
+
+    public static byte ComputeAlpha(double opacity, bool allowZero) =>
+        (byte)Math.Clamp((int)Math.Round(opacity * 255.0, MidpointRounding.AwayFromZero), allowZero ? 0 : 26, 255);
 
     private static void DetachFromHost(nint hwnd, AppliedState prev)
     {
@@ -337,16 +361,18 @@ public sealed unsafe class GhostStyle
                 SetParent(hwnd, IntPtr.Zero);
             if (prev.OrigStyle != IntPtr.Zero)
                 SetWindowLongPtrW(hwnd, GWL_STYLE, prev.OrigStyle);
+            nint zOrder = (prev.OrigExStyle & WS_EX_TOPMOST) != 0 ? HWND_TOPMOST : HWND_NOTOPMOST;
             if (hasHostPos)
-                SetWindowPos(hwnd, HWND_TOPMOST, restoreX, restoreY, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-            SetWindowRgn(hwnd, IntPtr.Zero, true);
+                SetWindowPos(hwnd, zOrder, restoreX, restoreY, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+            SubtitleOverlay.RestoreDwmBorder(hwnd);
+        SetWindowRgn(hwnd, IntPtr.Zero, true);
         }
 
         if (host != IntPtr.Zero && IsWindow(host))
             DestroyWindow(host);
     }
 
-    public bool Apply(nint hwnd, double opacity, bool clickThrough, bool hideHeader = false)
+    public bool Apply(nint hwnd, double opacity, bool clickThrough, bool hideHeader = false, bool allowZeroAlpha = false)
     {
         bool hadPrev = _applied.TryGetValue(hwnd, out var prev);
         if (hwnd == IntPtr.Zero || !IsWindow(hwnd))
@@ -359,7 +385,8 @@ public sealed unsafe class GhostStyle
             return false;
         }
 
-        byte alpha = ComputeAlpha(opacity);
+        nint origExStyle = hadPrev ? prev.OrigExStyle : GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+        byte alpha = ComputeAlpha(opacity, allowZeroAlpha);
         bool wantClip = false;
         int clipL = 0, clipT = 0, clipR = 0, clipB = 0;
         nint renderChild = IntPtr.Zero;
@@ -410,7 +437,11 @@ public sealed unsafe class GhostStyle
                 if (hostHwnd != IntPtr.Zero)
                 {
                     hostCreated = true;
+                    SubtitleOverlay.SuppressDwmBorder(hostHwnd);
                     SetLayeredWindowAttributes(hostHwnd, 0, alpha, LWA_ALPHA);
+                    nint preChildEx = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+                    if ((preChildEx & WS_EX_LAYERED) != 0)
+                        SetWindowLongPtrW(hwnd, GWL_EXSTYLE, preChildEx & ~WS_EX_LAYERED);
                     nint childStyle = unchecked((origStyle & ~(nint)0x80000000L) | (nint)0x40000000L);
                     SetWindowLongPtrW(hwnd, GWL_STYLE, childStyle);
                     SetParent(hwnd, hostHwnd);
@@ -448,6 +479,7 @@ public sealed unsafe class GhostStyle
 
                 nint curHwndEx = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
                 nint desiredHwndEx = clickThrough ? (curHwndEx | WS_EX_TRANSPARENT) : (curHwndEx & ~WS_EX_TRANSPARENT);
+                desiredHwndEx &= ~WS_EX_LAYERED;
                 if (desiredHwndEx != curHwndEx)
                     SetWindowLongPtrW(hwnd, GWL_EXSTYLE, desiredHwndEx);
 
@@ -455,7 +487,7 @@ public sealed unsafe class GhostStyle
                     SetLayeredWindowAttributes(hostHwnd, 0, alpha, LWA_ALPHA);
 
                 int nextHostedTick = hadPrev ? prev.TickCount + 1 : 0;
-                if (hostCreated || hostExChanged || (curHostEx & WS_EX_TOPMOST) == 0 || (clickThrough && nextHostedTick % 10 == 0))
+                if (hostCreated || hostExChanged || (curHostEx & WS_EX_TOPMOST) == 0 || nextHostedTick % 10 == 0)
                 {
                     uint flags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | (hostExChanged ? SWP_FRAMECHANGED : 0u);
                     SetWindowPos(hostHwnd, HWND_TOPMOST, 0, 0, 0, 0, flags);
@@ -465,7 +497,7 @@ public sealed unsafe class GhostStyle
                     alpha,
                     clickThrough,
                     nextHostedTick,
-                     true,
+                    true,
                     clipL,
                     clipT,
                     clipR,
@@ -473,6 +505,7 @@ public sealed unsafe class GhostStyle
                     padW,
                     padH,
                     origStyle,
+                    origExStyle,
                     hostHwnd,
                     renderChild,
                     d3dChild);
@@ -494,18 +527,21 @@ public sealed unsafe class GhostStyle
         if (exChanged)
             SetWindowLongPtrW(hwnd, GWL_EXSTYLE, desiredEx);
 
+        if (!hadPrev)
+            SubtitleOverlay.SuppressDwmBorder(hwnd);
+
         bool layeredWasMissing = (curEx & WS_EX_LAYERED) == 0;
         if (!hadPrev || layeredWasMissing || exChanged || prev.Alpha != alpha)
             SetLayeredWindowAttributes(hwnd, 0, alpha, LWA_ALPHA);
 
         int nextTick = hadPrev ? prev.TickCount + 1 : 0;
-        if ((curEx & WS_EX_TOPMOST) == 0 || exChanged || (clickThrough && nextTick % 10 == 0))
+        if ((curEx & WS_EX_TOPMOST) == 0 || exChanged || nextTick % 10 == 0)
         {
             uint flags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | (exChanged ? SWP_FRAMECHANGED : 0u);
             SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, flags);
         }
 
-        _applied[hwnd] = new AppliedState(alpha, clickThrough, nextTick, false, 0, 0, 0, 0, 0, 0, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+        _applied[hwnd] = new AppliedState(alpha, clickThrough, nextTick, false, 0, 0, 0, 0, 0, 0, IntPtr.Zero, origExStyle, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
         return true;
     }
 
@@ -520,11 +556,14 @@ public sealed unsafe class GhostStyle
         if (hwnd == IntPtr.Zero || !IsWindow(hwnd))
             return;
 
+        SubtitleOverlay.RestoreDwmBorder(hwnd);
         SetWindowRgn(hwnd, IntPtr.Zero, true);
         nint curEx = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
         nint nextEx = curEx & ~(WS_EX_LAYERED | WS_EX_TRANSPARENT);
         if (nextEx != curEx)
             SetWindowLongPtrW(hwnd, GWL_EXSTYLE, nextEx);
+        if (hadPrev && (prev.OrigExStyle & WS_EX_TOPMOST) == 0)
+            SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     }
 
     public void RestoreAll()

@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Kilépés"
+  },
+  "peekMode": {
+    "message": "Bepillantó mód"
+  },
+  "peekModeHint": {
+    "message": "Elrejtés, amíg lenyomva nem tartod a gombot"
+  },
+  "peekSettings": {
+    "message": "Bepillantó mód beállításai"
+  },
+  "peekKey": {
+    "message": "Lenyomva tartandó gomb"
+  },
+  "peekKeyMouse4": {
+    "message": "Egér oldalsó gomb 1 (Vissza)"
+  },
+  "peekKeyMouse5": {
+    "message": "Egér oldalsó gomb 2 (Előre)"
+  },
+  "peekIdleOpacity": {
+    "message": "Láthatóság alaphelyzetben"
+  },
+  "peekIdleZero": {
+    "message": "0% (Rejtett)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Halvány)"
+  },
+  "peekActiveOpacity": {
+    "message": "Átlátszatlanság nyomva tartáskor"
+  },
+  "mediaRemote": {
+    "message": "Játékon belüli távirányító"
+  },
+  "mediaRemoteHint": {
+    "message": "Lejátszás, tekerés és hangerő fókuszvesztés nélkül"
+  },
+  "mediaSettings": {
+    "message": "Távirányító beállításai"
+  },
+  "mediaSeekStep": {
+    "message": "Tekerés lépésköze"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ mp",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Hangerő Alt + görgővel"
+  },
+  "mediaPlayPause": {
+    "message": "Lejátszás / Szünet"
+  },
+  "mediaSeekBack": {
+    "message": "Visszatekerés"
+  },
+  "mediaSeekForward": {
+    "message": "Előretekerés"
+  },
+  "hudVolume": {
+    "message": "Hangerő $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

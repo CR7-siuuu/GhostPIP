@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "പുറത്തുകടക്കുക"
+  },
+  "peekMode": {
+    "message": "പീക്ക് മോഡ്"
+  },
+  "peekModeHint": {
+    "message": "കീ അമർത്തിപ്പിടിക്കുന്നതുവരെ മറയ്ക്കുക"
+  },
+  "peekSettings": {
+    "message": "പീക്ക് മോഡ് ക്രമീകരണങ്ങൾ"
+  },
+  "peekKey": {
+    "message": "അമർത്തി കാണാനുള്ള കീ"
+  },
+  "peekKeyMouse4": {
+    "message": "മൗസ് സൈഡ് 1 (പിന്നോട്ട്)"
+  },
+  "peekKeyMouse5": {
+    "message": "മൗസ് സൈഡ് 2 (മുന്നോട്ട്)"
+  },
+  "peekIdleOpacity": {
+    "message": "സാധാരണ ദൃശ്യത"
+  },
+  "peekIdleZero": {
+    "message": "0% (മറച്ചത്)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (മങ്ങിയത്)"
+  },
+  "peekActiveOpacity": {
+    "message": "അമർത്തുമ്പോൾ അതാര്യത"
+  },
+  "mediaRemote": {
+    "message": "ഇൻ-ഗെയിം റിമോട്ട്"
+  },
+  "mediaRemoteHint": {
+    "message": "ഫോക്കസ് നഷ്ടപ്പെടാതെ പ്ലേ, സീക്ക്, വോളിയം"
+  },
+  "mediaSettings": {
+    "message": "ഇൻ-ഗെയിം റിമോട്ട് ക്രമീകരണങ്ങൾ"
+  },
+  "mediaSeekStep": {
+    "message": "സീക്ക് ഇടവേള"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$ സെ.",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Alt + വീൽ വോളിയം"
+  },
+  "mediaPlayPause": {
+    "message": "പ്ലേ / പോസ്"
+  },
+  "mediaSeekBack": {
+    "message": "പിന്നോട്ട് നീക്കുക"
+  },
+  "mediaSeekForward": {
+    "message": "മുന്നോട്ട് നീക്കുക"
+  },
+  "hudVolume": {
+    "message": "വോളിയം $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }

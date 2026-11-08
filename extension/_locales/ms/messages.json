@@ -308,5 +308,75 @@
   },
   "engineTrayExit": {
     "message": "Keluar"
+  },
+  "peekMode": {
+    "message": "Mod Intai"
+  },
+  "peekModeHint": {
+    "message": "Sembunyikan sehingga kekunci intai ditahan"
+  },
+  "peekSettings": {
+    "message": "Tetapan Mod Intai"
+  },
+  "peekKey": {
+    "message": "Kekunci tahan untuk intai"
+  },
+  "peekKeyMouse4": {
+    "message": "Butang Sisi Tetikus 1 (Undur)"
+  },
+  "peekKeyMouse5": {
+    "message": "Butang Sisi Tetikus 2 (Maju)"
+  },
+  "peekIdleOpacity": {
+    "message": "Keterlihatan melahu"
+  },
+  "peekIdleZero": {
+    "message": "0% (Tersembunyi)"
+  },
+  "peekIdleOutline": {
+    "message": "5% (Samar)"
+  },
+  "peekActiveOpacity": {
+    "message": "Kelegapan semasa intai"
+  },
+  "mediaRemote": {
+    "message": "Alat Kawalan Dalam Permainan"
+  },
+  "mediaRemoteHint": {
+    "message": "Main, langkau & kelantangan tanpa hilang fokus"
+  },
+  "mediaSettings": {
+    "message": "Tetapan Alat Kawalan Dalam Permainan"
+  },
+  "mediaSeekStep": {
+    "message": "Langkah langkau"
+  },
+  "mediaSeekSec": {
+    "message": "$SEC$s",
+    "placeholders": {
+      "sec": {
+        "content": "$1"
+      }
+    }
+  },
+  "mediaWheelVolume": {
+    "message": "Kelantangan Alt + Roda"
+  },
+  "mediaPlayPause": {
+    "message": "Main / Jeda"
+  },
+  "mediaSeekBack": {
+    "message": "Langkau ke belakang"
+  },
+  "mediaSeekForward": {
+    "message": "Langkau ke hadapan"
+  },
+  "hudVolume": {
+    "message": "Kelantangan $PCT$%",
+    "placeholders": {
+      "pct": {
+        "content": "$1"
+      }
+    }
   }
 }
