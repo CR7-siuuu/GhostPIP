@@ -12,7 +12,7 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <OptimizationPreference>Size</OptimizationPreference>
 
-    <Version>1.1.1</Version>
+    <Version>1.1.2</Version>
     <Company>GhostPiP</Company>
     <Product>GhostPiP</Product>
     <AssemblyTitle>GhostPiP Local Helper</AssemblyTitle>

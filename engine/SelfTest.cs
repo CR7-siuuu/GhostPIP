@@ -473,15 +473,15 @@ public static class SelfTest
                msg4 is LocaleMessage lm && lm.Tray == TrayStrings.English,
                "LOCALE falls back to English for missing strings");
 
-        byte[] helloBytes = Protocol.SerializeOutgoing(new HelloMessage("1.1.1", ["Alt+G"], Elevated: false));
+        byte[] helloBytes = Protocol.SerializeOutgoing(new HelloMessage("1.1.2", ["Alt+G"], Elevated: false));
         using var helloDoc = JsonDocument.Parse(helloBytes);
         Assert(helloDoc.RootElement.GetProperty("type").GetString() == "HELLO" &&
-               helloDoc.RootElement.GetProperty("engineVersion").GetString() == "1.1.1" &&
+               helloDoc.RootElement.GetProperty("engineVersion").GetString() == "1.1.2" &&
                !helloDoc.RootElement.GetProperty("elevated").GetBoolean() &&
                helloDoc.RootElement.GetProperty("hotkeyErrors")[0].GetString() == "Alt+G",
                "HELLO serialized with elevated=false");
 
-        byte[] helloElevBytes = Protocol.SerializeOutgoing(new HelloMessage("1.1.1", [], Elevated: true));
+        byte[] helloElevBytes = Protocol.SerializeOutgoing(new HelloMessage("1.1.2", [], Elevated: true));
         using var helloElevDoc = JsonDocument.Parse(helloElevBytes);
         Assert(helloElevDoc.RootElement.GetProperty("elevated").GetBoolean(),
                "HELLO serialized with elevated=true");

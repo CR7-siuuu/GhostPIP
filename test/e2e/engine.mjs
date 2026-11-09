@@ -192,7 +192,7 @@ try {
       st.badge === "엔진 연결됨" &&
       st.bannerHidden === true &&
       engineState?.connected === true &&
-      engineState?.engineVersion === "1.1.1" &&
+      engineState?.engineVersion === "1.1.2" &&
       spawnedPids.length >= 1;
     return {
       ok,

@@ -124,7 +124,7 @@ public sealed record PongMessage() : OutgoingMessage("PONG");
 public static class Protocol
 {
     public const int ProtocolVersion = 1;
-    public const string EngineVersion = "1.1.1";
+    public const string EngineVersion = "1.1.2";
     public const double MaxAbsCoord = 100000;
     public const double MaxSize = 20000;
     public const double MinDpr = 0.25;
