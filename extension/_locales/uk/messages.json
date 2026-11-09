@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Увімкнути/вимкнути звук вкладки з відео"
   },
-  "modeWeb": {
-    "message": "Веб-режим"
-  },
-  "modeWebTitle": {
-    "message": "Веб-режим (накладання у вкладці браузера)"
-  },
   "modeFull": {
     "message": "Повний режим"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Повернути"
   },
-  "btnSourceTab": {
-    "message": "Вкладка джерела"
-  },
   "hudOpacity": {
     "message": "Непрозорість $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Непрозорість $PCT$% (прокрутіть, щоб змінити) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Угорі відео на YouTube, Twitch, CHZZK, SOOP та в OTT-сервісах, як-от Netflix, Disney+ і Prime Video, з'являються дві кнопки."
-  },
-  "guideWebModeBody": {
-    "message": "Плаваюче вікно всередині вкладки браузера. Переходить разом із вами на інші вкладки. Нічого не потрібно встановлювати."
   },
   "guideFullModeBody": {
     "message": "Вікно поверх ігор та інших програм. Для непрозорості, наскрізних кліків і автоухилення потрібен <b>GhostPiP Engine</b>."

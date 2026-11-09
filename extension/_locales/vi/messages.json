@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Bật/tắt tiếng thẻ video"
   },
-  "modeWeb": {
-    "message": "Chế độ web"
-  },
-  "modeWebTitle": {
-    "message": "Chế độ web (lớp phủ trong thẻ trình duyệt)"
-  },
   "modeFull": {
     "message": "Chế độ toàn phần"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Trả về"
   },
-  "btnSourceTab": {
-    "message": "Thẻ nguồn"
-  },
   "hudOpacity": {
     "message": "Độ mờ đục $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Độ mờ đục $PCT$% (cuộn để điều chỉnh) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Hai nút sẽ xuất hiện ở đầu video trên YouTube, Twitch, CHZZK, SOOP và các dịch vụ OTT như Netflix, Disney+ và Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Cửa sổ nổi bên trong thẻ trình duyệt. Đi theo bạn sang các thẻ khác. Không cần cài đặt gì."
   },
   "guideFullModeBody": {
     "message": "Cửa sổ nổi trên game và các chương trình khác. Độ mờ đục, nhấp xuyên qua và tự động né cần có <b>GhostPiP Engine</b>."

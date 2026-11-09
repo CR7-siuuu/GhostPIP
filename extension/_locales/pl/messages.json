@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Przełącz wyciszenie karty z filmem"
   },
-  "modeWeb": {
-    "message": "Tryb web"
-  },
-  "modeWebTitle": {
-    "message": "Tryb web (nakładka w karcie przeglądarki)"
-  },
   "modeFull": {
     "message": "Tryb pełny"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Przywróć"
   },
-  "btnSourceTab": {
-    "message": "Karta źródłowa"
-  },
   "hudOpacity": {
     "message": "Krycie $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Krycie $PCT$% (przewiń, aby zmienić) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "U góry filmów w serwisach YouTube, Twitch, CHZZK, SOOP i usługach OTT, takich jak Netflix, Disney+ i Prime Video, pojawiają się dwa przyciski."
-  },
-  "guideWebModeBody": {
-    "message": "Pływające okno wewnątrz karty przeglądarki. Podąża za Tobą do innych kart. Nie trzeba nic instalować."
   },
   "guideFullModeBody": {
     "message": "Okno unoszące się nad grami i innymi programami. Krycie, przeklikiwanie i automatyczne unikanie wymagają <b>GhostPiP Engine</b>."

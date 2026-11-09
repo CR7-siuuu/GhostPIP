@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Vklopi/izklopi zvok zavihka z videom"
   },
-  "modeWeb": {
-    "message": "Spletni način"
-  },
-  "modeWebTitle": {
-    "message": "Spletni način (prekrivni sloj v zavihku brskalnika)"
-  },
   "modeFull": {
     "message": "Polni način"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Vrni"
   },
-  "btnSourceTab": {
-    "message": "Izvorni zavihek"
-  },
   "hudOpacity": {
     "message": "Neprosojnost $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Neprosojnost $PCT$% (pomaknite za prilagoditev) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Na vrhu videoposnetkov na YouTube, Twitch, CHZZK, SOOP in storitvah OTT, kot so Netflix, Disney+ in Prime Video, se prikažeta dva gumba."
-  },
-  "guideWebModeBody": {
-    "message": "Lebdeče okno v zavihku brskalnika. Sledi vam v druge zavihke. Ničesar ni treba namestiti."
   },
   "guideFullModeBody": {
     "message": "Okno, ki lebdi nad igrami in drugimi programi. Za neprosojnost, klik skozi in samodejno izogibanje je potreben <b>GhostPiP Engine</b>."

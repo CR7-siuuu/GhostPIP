@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Silenciar/reactivar la pestaña del vídeo"
   },
-  "modeWeb": {
-    "message": "Modo web"
-  },
-  "modeWebTitle": {
-    "message": "Modo web (superposición en la pestaña del navegador)"
-  },
   "modeFull": {
     "message": "Modo completo"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Volver"
   },
-  "btnSourceTab": {
-    "message": "Pestaña de origen"
-  },
   "hudOpacity": {
     "message": "Opacidad $PCT$ %",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Opacidad $PCT$ % (desplaza para ajustar) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Aparecen dos botones en la parte superior de los vídeos de YouTube, Twitch, CHZZK, SOOP y servicios OTT como Netflix, Disney+ y Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Una ventana flotante dentro de la pestaña del navegador. Te sigue a otras pestañas. No hay que instalar nada."
   },
   "guideFullModeBody": {
     "message": "Una ventana que flota sobre juegos y otros programas. La opacidad, el clic a través y la esquiva automática requieren <b>GhostPiP Engine</b>."

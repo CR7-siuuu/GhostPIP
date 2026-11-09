@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Togol redam pada tab video"
   },
-  "modeWeb": {
-    "message": "Mod Web"
-  },
-  "modeWebTitle": {
-    "message": "Mod Web (tindanan di dalam tab penyemak imbas)"
-  },
   "modeFull": {
     "message": "Mod Penuh"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Kembalikan"
   },
-  "btnSourceTab": {
-    "message": "Tab sumber"
-  },
   "hudOpacity": {
     "message": "Kelegapan $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Kelegapan $PCT$% (tatal untuk melaraskan) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Dua butang muncul di bahagian atas video di YouTube, Twitch, CHZZK, SOOP dan perkhidmatan OTT seperti Netflix, Disney+ dan Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Tetingkap terapung di dalam tab penyemak imbas. Ia mengikut anda ke tab lain. Tiada apa-apa untuk dipasang."
   },
   "guideFullModeBody": {
     "message": "Tetingkap yang terapung di atas permainan dan program lain. Kelegapan, klik tembus dan elak automatik memerlukan <b>GhostPiP Engine</b>."

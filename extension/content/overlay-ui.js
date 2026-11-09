@@ -5,14 +5,10 @@
   const MIN_FLOAT_HEIGHT = Protocol?.LAYOUT?.MIN_HEIGHT ?? 90;
   const PIP_CHAT_HEIGHT = Protocol?.LAYOUT?.PIP_CHAT_HEIGHT ?? 420;
 
-  const FLOAT_CLASS = "ghostpip-inpage-target";
   const DOCPIP_SOURCE_CLASS = "ghostpip-docpip-source";
-  const GP_VARS = Object.freeze(["--gp-x", "--gp-y", "--gp-w", "--gp-h", "--gp-opacity"]);
   const RESIZE_DIRS = Object.freeze(["nw", "ne", "sw", "se", "n", "s", "e", "w"]);
   const SVG_NS = "http://www.w3.org/2000/svg";
 
-  const ICON_WEB_MODE =
-    "M2 3.5A1.5 1.5 0 0 1 3.5 2h9A1.5 1.5 0 0 1 14 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.5v-9ZM3.5 3.2a.3.3 0 0 0-.3.3v9a.3.3 0 0 0 .3.3h9a.3.3 0 0 0 .3-.3v-9a.3.3 0 0 0-.3-.3h-9ZM8 8.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v2.5a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5V8.5Z";
   const ICON_FULL_MODE =
     "M2.5 3A1.5 1.5 0 0 0 1 4.5v7A1.5 1.5 0 0 0 2.5 13h5a.6.6 0 0 0 0-1.2h-5a.3.3 0 0 1-.3-.3v-7a.3.3 0 0 1 .3-.3h7a.3.3 0 0 1 .3.3v2a.6.6 0 1 0 1.2 0v-2A1.5 1.5 0 0 0 9.5 3h-7Zm6.5 5.5A1.5 1.5 0 0 1 10.5 7h3A1.5 1.5 0 0 1 15 8.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 11.5v-3Z";
   const ICON_CHAT =
@@ -33,85 +29,6 @@
       color: #fff; box-shadow: inset 0 0 0 1px rgba(125, 211, 252, 0.35); }
     button:hover svg { fill: #fff; }
     :host([data-pinned]) .bar:not(:hover) { opacity: 0.65; }`;
-
-  const CONTROLLER_CSS = `
-    .surface { position: absolute; inset: 0; box-sizing: border-box; pointer-events: none; border-radius: 6px;
-      border: 2px solid rgba(56, 189, 248, 0.92);
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%);
-      box-shadow: 0 0 18px rgba(56, 189, 248, 0.22), inset 0 0 12px rgba(56, 189, 248, 0.12); }
-    .handle { position: absolute; z-index: 2; pointer-events: auto; }
-    .handle.n { top: -4px; left: 14px; right: 14px; height: 10px; cursor: ns-resize; }
-    .handle.s { bottom: -4px; left: 14px; right: 14px; height: 10px; cursor: ns-resize; }
-    .handle.w { left: -4px; top: 14px; bottom: 14px; width: 10px; cursor: ew-resize; }
-    .handle.e { right: -4px; top: 14px; bottom: 14px; width: 10px; cursor: ew-resize; }
-    .handle.nw { top: -5px; left: -5px; width: 18px; height: 18px; cursor: nwse-resize; }
-    .handle.ne { top: -5px; right: -5px; width: 18px; height: 18px; cursor: nesw-resize; }
-    .handle.sw { bottom: -5px; left: -5px; width: 18px; height: 18px; cursor: nesw-resize; }
-    .handle.se { bottom: -5px; right: -5px; width: 18px; height: 18px; cursor: nwse-resize; }
-    .handle.nw::after, .handle.ne::after, .handle.sw::after, .handle.se::after {
-      content: ""; position: absolute; width: 9px; height: 9px; border-radius: 3px;
-      background: linear-gradient(135deg, #bae6fd 0%, #38bdf8 100%);
-      border: 1.5px solid #0f172a;
-      box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
-    }
-    .handle.nw::after { top: 4px; left: 4px; }
-    .handle.ne::after { top: 4px; right: 4px; }
-    .handle.sw::after { bottom: 4px; left: 4px; }
-    .handle.se::after { bottom: 4px; right: 4px; }
-    .bar { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 3;
-      pointer-events: auto; }
-    .skip-ad { position: absolute; bottom: 12px; right: 12px; z-index: 4; pointer-events: auto;
-      display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 999px;
-      background: rgba(15, 23, 42, 0.92); border: 1.5px solid rgba(56, 189, 248, 0.78);
-      color: #f8fafc; font: 700 11.5px/1 "Pretendard", system-ui, "Malgun Gothic", sans-serif;
-      box-shadow: 0 6px 18px rgba(2, 6, 23, 0.65); cursor: pointer; backdrop-filter: blur(8px); }
-    .skip-ad:hover { background: linear-gradient(135deg, rgba(56, 189, 248, 0.35) 0%, rgba(99, 102, 241, 0.4) 100%);
-      border-color: #7dd3fc; color: #fff; }
-    .skip-ad[hidden] { display: none !important; }
-    .hud { position: absolute; bottom: 10px; left: 10px; z-index: 3; pointer-events: none;
-      padding: 5px 10px; border-radius: 999px;
-      background: rgba(15, 23, 42, 0.88); border: 1px solid rgba(125, 211, 252, 0.35); color: #e0f2fe;
-      font: 700 11.5px/1 "Pretendard", system-ui, "Malgun Gothic", sans-serif;
-      box-shadow: 0 4px 12px rgba(2, 6, 23, 0.55); backdrop-filter: blur(8px); }
-    :host([data-bar-only]) .surface,
-    :host([data-bar-only]) .handle { display: none; }
-    :host([data-bar-only]:not([data-has-toast])) .hud { display: none; }
-    :host([data-toast-only]) .surface,
-    :host([data-toast-only]) .handle,
-    :host([data-toast-only]) .bar,
-    :host([data-toast-only]) .skip-ad { display: none !important; }
-    :host([data-peek-silhouette]) .surface { border: 1px solid rgba(56, 189, 248, 0.35); background: none; box-shadow: none; }
-    :host([data-peek-silhouette]) .handle,
-    :host([data-peek-silhouette]) .bar,
-    :host([data-peek-silhouette]) .skip-ad { display: none !important; }
-    :host([data-peek-silhouette]:not([data-has-toast])) .hud { display: none; }
-    :host([data-click-through]) *,
-    :host([data-click-through]) .bar,
-    :host([data-click-through]) .handle,
-    :host([data-click-through]) .skip-ad { pointer-events: none !important; }
-    :host([data-remote]) button[data-mode="local"],
-    :host(:not([data-remote])) button[data-mode="remote"] { display: none; }`;
-
-  const WEB_CHAT_CSS = `
-    :host { box-sizing: border-box; background: #0f172a; box-shadow: 0 8px 24px rgba(2, 6, 23, 0.55); }
-    iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
-    .chat-resize { position: absolute; left: 14px; right: 14px; bottom: 0; height: 12px; z-index: 2; cursor: ns-resize; touch-action: none; }
-    .chat-resize::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 4px; border-radius: 4px;
-      transform: translate(-50%, -50%); background: rgba(125, 211, 252, 0.9); box-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
-      opacity: 0; transition: opacity 0.14s ease; }
-    :host(:hover) .chat-resize::after, :host([data-interactive]) .chat-resize::after, .chat-resize[data-active]::after { opacity: 1; }
-    :host([data-resizing]) iframe,
-    :host([data-click-through]) iframe,
-    :host([data-click-through]) .chat-resize { pointer-events: none !important; }`;
-
-  const SUBTITLES_CSS = `
-    :host { pointer-events: none !important; }
-    .gp-sub-box { position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%); max-width: 92%;
-      padding: 2px 6px; background: transparent; border: 0; outline: none; color: #fff;
-      font: 700 clamp(12px, calc(var(--gp-w, 480px) * 0.04), 26px)/1.36 "Pretendard", system-ui, "Malgun Gothic", sans-serif;
-      text-align: center; white-space: pre-line; word-break: keep-all; overflow-wrap: break-word;
-      text-shadow: -1.5px -1.5px 0 rgba(0, 0, 0, 0.96), 1.5px -1.5px 0 rgba(0, 0, 0, 0.96), -1.5px 1.5px 0 rgba(0, 0, 0, 0.96), 1.5px 1.5px 0 rgba(0, 0, 0, 0.96), 0 -1.5px 0 rgba(0, 0, 0, 0.96), 0 1.5px 0 rgba(0, 0, 0, 0.96), -1.5px 0 0 rgba(0, 0, 0, 0.96), 1.5px 0 0 rgba(0, 0, 0, 0.96), 0 2px 6px rgba(0, 0, 0, 0.85);
-      pointer-events: none; box-sizing: border-box; }`;
 
   const PIP_CSS = `
     ${BASE_CSS}
@@ -258,9 +175,7 @@
   }
 
   function removeStrayOverlays() {
-    for (const el of document.querySelectorAll(
-      "#ghostpip-launcher, #ghostpip-controller, .ghostpip-controller, #ghostpip-chat, .ghostpip-chat, .ghostpip-subtitles",
-    )) {
+    for (const el of document.querySelectorAll("#ghostpip-launcher")) {
       if (!activeOverlayHosts.has(el)) el.remove();
     }
   }
@@ -277,66 +192,9 @@
       h(
         "div",
         { class: "bar" },
-        h("button", { "data-action": "inTab", title: t("modeWebTitle") }, svgIcon(ICON_WEB_MODE), t("modeWeb")),
         h("button", { "data-action": "docPip", title: t("modeFullTitle") }, svgIcon(ICON_FULL_MODE), t("modeFull")),
       ),
     );
-  }
-
-  function createFloatingOverlays({ ctrlId, chatId, subId, isRemote = false, testHooks = false, canShow, onAction }) {
-    const hudEl = h("div", { class: "hud" }, "");
-    const webChatLabel = h("span", {}, t("chatShow"));
-    const webChatBtn = h("button", { "data-action": "toggleWebChat" }, svgIcon(ICON_CHAT), webChatLabel);
-    const skipAdBtn = h("button", { class: "skip-ad", "data-action": "skipAd", hidden: "" }, t("skipAd"));
-    const webChatFrame = h("iframe", {});
-    const webChatResize = h("div", { class: "chat-resize", title: t("chatResizeTitle") });
-    const subtitleBox = h("div", { class: "gp-sub-box" }, "");
-
-    const webChat = overlayHost(
-      { id: chatId, className: "ghostpip-chat", css: WEB_CHAT_CSS, testHooks, canShow },
-      webChatFrame,
-      webChatResize,
-    );
-    const subtitleHost = overlayHost(
-      { id: subId, className: "ghostpip-subtitles", css: SUBTITLES_CSS, blockPointer: false, testHooks, canShow },
-      subtitleBox,
-    );
-    const controller = overlayHost(
-      {
-        id: ctrlId,
-        className: "ghostpip-controller",
-        css: BASE_CSS + CONTROLLER_CSS,
-        onAction,
-        testHooks,
-        canShow,
-      },
-      h("div", { class: "surface" }),
-      ...RESIZE_DIRS.map((dir) => h("div", { class: `handle ${dir}`, "data-resize": dir })),
-      hudEl,
-      skipAdBtn,
-      h(
-        "div",
-        { class: "bar" },
-        h("button", { "data-action": "idle" }, t("btnReturn")),
-        h("button", { "data-action": "docPip", "data-mode": "local" }, svgIcon(ICON_FULL_MODE), t("modeFull")),
-        h("button", { "data-action": "focusSource", "data-mode": "remote" }, t("btnSourceTab")),
-        webChatBtn,
-      ),
-    );
-    controller.host.toggleAttribute("data-remote", Boolean(isRemote));
-
-    return {
-      controller,
-      webChat,
-      subtitleHost,
-      hudEl,
-      webChatLabel,
-      webChatBtn,
-      skipAdBtn,
-      webChatFrame,
-      webChatResize,
-      subtitleBox,
-    };
   }
 
   function enterIdle({ ctx, ensureAlive, canShow, isPointerOnPlayer, onAction }) {
@@ -437,118 +295,12 @@
     };
   }
 
-  function renderFloatingOverlays(
-    overlays,
-    {
-      video,
-      r,
-      b,
-      w,
-      hPx,
-      webChatOpen,
-      peekHidden,
-      idleOpacity,
-      forcePass,
-      interactive,
-      hovered,
-      hasSkipAd,
-      opacity,
-      anim,
-      dragging,
-      chatResizing,
-      subtitleText,
-      toastText,
-      settingOpacity,
-    },
-  ) {
-    const {
-      controller,
-      webChat,
-      subtitleHost,
-      hudEl,
-      webChatLabel,
-      webChatBtn,
-      skipAdBtn,
-      webChatFrame,
-      subtitleBox,
-    } = overlays;
-    const canShowChat = Boolean(b.chatUrl);
-    const showChatNow = Boolean(webChatOpen && canShowChat);
-    webChatBtn.style.display = canShowChat ? "inline-flex" : "none";
-    webChatLabel.textContent = showChatNow ? t("chatHide") : t("chatShow");
-    skipAdBtn.hidden = !hasSkipAd;
-
-    const showBarOnly = !interactive && !forcePass && (hovered || hasSkipAd);
-    const videoGeo = { x: px(r.l), y: px(b.videoT), w: px(w), h: px(hPx) };
-    const passNow = !interactive && forcePass;
-    const peekOutline = !interactive && peekHidden && idleOpacity > 0;
-    const shouldAnim = Boolean(anim && !document.hidden && !dragging);
-    video.toggleAttribute("data-gp-anim", shouldAnim);
-    setVars(video, { ...videoGeo, opacity: String(opacity) });
-    video.toggleAttribute("data-gp-pass", passNow);
-    video.toggleAttribute("data-click-through", passNow);
-    video.toggleAttribute("data-gp-peek-outline", peekOutline);
-    video.toggleAttribute("data-gp-drag", dragging);
-
-    if (canShowChat) {
-      if (!webChat.host.isConnected) document.documentElement.append(webChat.host);
-      if (webChatFrame.getAttribute("src") !== b.chatUrl) {
-        webChatFrame.setAttribute("src", b.chatUrl);
-      }
-    }
-    if (showChatNow && b.chatH > 0 && !(peekHidden && idleOpacity === 0)) {
-      webChat.host.toggleAttribute("data-gp-anim", shouldAnim && !chatResizing);
-      webChat.host.toggleAttribute("data-gp-pass", passNow);
-      webChat.host.toggleAttribute("data-click-through", passNow);
-      webChat.host.toggleAttribute("data-gp-drag", dragging);
-      webChat.host.toggleAttribute("data-interactive", interactive);
-      webChat.show({
-        x: px(r.l),
-        y: px(b.chatT),
-        w: px(w),
-        h: px(b.chatH),
-        opacity: String(opacity),
-      });
-    } else {
-      webChat.hide();
-    }
-
-    if (subtitleText && !(peekHidden && idleOpacity === 0)) {
-      subtitleBox.textContent = subtitleText;
-      subtitleHost.host.toggleAttribute("data-gp-anim", shouldAnim);
-      subtitleHost.host.toggleAttribute("data-gp-drag", dragging);
-      subtitleHost.show({ ...videoGeo, opacity: String(opacity) });
-    } else {
-      subtitleHost.hide();
-    }
-
-    const hasToast = Boolean(toastText) && !(peekHidden && idleOpacity === 0);
-    hudEl.textContent = hasToast
-      ? toastText
-      : t("hudOpacityWheel", [String(Math.round(settingOpacity * 100)), `${w}×${hPx}`]);
-    const toastOnly = hasToast && !interactive && !showBarOnly && !peekOutline;
-    controller.host.toggleAttribute("data-hovered", hovered && !passNow);
-    controller.host.toggleAttribute("data-bar-only", showBarOnly);
-    controller.host.toggleAttribute("data-has-toast", hasToast);
-    controller.host.toggleAttribute("data-toast-only", toastOnly);
-    controller.host.toggleAttribute("data-peek-silhouette", peekOutline);
-    controller.host.toggleAttribute("data-click-through", passNow);
-    if (interactive || showBarOnly || peekOutline || toastOnly) controller.show(videoGeo);
-    else controller.hide();
-  }
-
   globalThis.GhostPiPOverlayUI = Object.freeze({
-    FLOAT_CLASS,
     DOCPIP_SOURCE_CLASS,
-    GP_VARS,
     RESIZE_DIRS,
-    ICON_WEB_MODE,
     ICON_FULL_MODE,
     ICON_CHAT,
     BASE_CSS,
-    CONTROLLER_CSS,
-    WEB_CHAT_CSS,
-    SUBTITLES_CSS,
     PIP_CSS,
     t,
     px,
@@ -559,8 +311,6 @@
     overlayHost,
     removeStrayOverlays,
     createLauncherOverlay,
-    createFloatingOverlays,
     enterIdle,
-    renderFloatingOverlays,
   });
 })();

@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Slå lyd til/fra på videofanen"
   },
-  "modeWeb": {
-    "message": "Webtilstand"
-  },
-  "modeWebTitle": {
-    "message": "Webtilstand (overlay i browserfanen)"
-  },
   "modeFull": {
     "message": "Fuld tilstand"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Tilbage"
   },
-  "btnSourceTab": {
-    "message": "Kildefane"
-  },
   "hudOpacity": {
     "message": "Opacitet $PCT$ %",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Opacitet $PCT$ % (rul for at justere) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Der vises to knapper øverst på videoer på YouTube, Twitch, CHZZK, SOOP og OTT-tjenester som Netflix, Disney+ og Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Et svævende vindue i browserfanen. Det følger med til andre faner. Intet at installere."
   },
   "guideFullModeBody": {
     "message": "Et vindue, der svæver over spil og andre programmer. Opacitet, klik igennem og automatisk undvigelse kræver <b>GhostPiP Engine</b>."

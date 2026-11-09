@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Attiva/disattiva audio della scheda del video"
   },
-  "modeWeb": {
-    "message": "Modalità Web"
-  },
-  "modeWebTitle": {
-    "message": "Modalità Web (overlay nella scheda del browser)"
-  },
   "modeFull": {
     "message": "Modalità completa"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Ripristina"
   },
-  "btnSourceTab": {
-    "message": "Scheda di origine"
-  },
   "hudOpacity": {
     "message": "Opacità $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Opacità $PCT$% (scorri per regolare) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Due pulsanti compaiono in alto sui video di YouTube, Twitch, CHZZK, SOOP e dei servizi OTT come Netflix, Disney+ e Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Una finestra mobile nella scheda del browser. Ti segue nelle altre schede. Nessuna installazione."
   },
   "guideFullModeBody": {
     "message": "Una finestra che resta sopra giochi e altri programmi. Opacità, clic passante e schivata automatica richiedono <b>GhostPiP Engine</b>."

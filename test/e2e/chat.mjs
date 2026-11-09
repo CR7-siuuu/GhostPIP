@@ -105,88 +105,9 @@ try {
     throw new Error(`launcher (${action}) not shown`);
   }
 
-  // ---- Web mode: hold Ctrl+Alt to expose the controller, open chat, check ranking hidden, drag the grip.
-  const btn = await launcherButton("inTab");
-  await page.mouse.click(btn.x, btn.y);
-  await sleep(600);
-  await page.keyboard.down("Control");
-  await page.keyboard.down("Alt");
-  const chatToggle = await poll(
-    () => page.evaluate(() => {
-      const el = document.getElementById("ghostpip-controller")?.shadowRoot?.querySelector('[data-action="toggleWebChat"]');
-      const r = el?.getBoundingClientRect();
-      return r?.width ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null;
-    }),
-    Boolean,
-    2000,
-  );
-  await page.mouse.click(chatToggle.x, chatToggle.y);
-  const chatFrame = await poll(
-    () => page.frames().find((f) => /\/chat$/.test(new URL(f.url()).pathname) && f.parentFrame() === page.mainFrame()) ?? null,
-    Boolean,
-    8000,
-  );
-  await sleep(4000);
-  const webProbe = chatFrame ? await chatFrame.evaluate(RANKING_PROBE).catch((e) => ({ error: e.message })) : null;
-  record("1 web chat frame marked as embed", webProbe?.embed, JSON.stringify(webProbe));
-  const webPlanted = chatFrame ? await chatFrame.evaluate(PLANT_RANKING).catch(() => null) : null;
-  record("2 web chat ranking hidden", webProbe && !webProbe.rankingVisible && webPlanted === true, `real found=${webProbe?.rankingFound} visible=${webProbe?.rankingVisible} planted hidden=${webPlanted}`);
-
-  // Release and re-press Ctrl+Alt so the controller popover is re-opened after the chat popover,
-  // confirming the controller's south handle does not steal the top-edge chat grip.
-  await page.keyboard.up("Alt");
-  await page.keyboard.up("Control");
-  await sleep(100);
-  await page.keyboard.down("Control");
-  await page.keyboard.down("Alt");
-  await sleep(100);
-
-  const readChat = () => page.evaluate(() => {
-    const host = document.getElementById("ghostpip-chat");
-    const grip = host?.shadowRoot?.querySelector(".chat-resize");
-    const hr = host.getBoundingClientRect();
-    const gr = grip.getBoundingClientRect();
-    return {
-      open: host.matches(":popover-open"),
-      h: Math.round(hr.height),
-      top: Math.round(hr.top),
-      atBottom: Math.abs(gr.bottom - hr.bottom) <= 2,
-      grip: { x: gr.left + gr.width / 2, y: gr.top + gr.height / 2 },
-    };
-  });
-  const before = await readChat();
-  await page.mouse.move(before.grip.x, before.grip.y, { steps: 3 });
-  await page.mouse.down();
-  await page.mouse.move(before.grip.x, before.grip.y - 60, { steps: 8 });
-  await page.mouse.up();
-  await sleep(300);
-  const shrunk = await readChat();
-  await page.mouse.move(shrunk.grip.x, shrunk.grip.y, { steps: 3 });
-  await page.mouse.down();
-  await page.mouse.move(shrunk.grip.x, shrunk.grip.y + 40, { steps: 8 });
-  await page.mouse.up();
-  await sleep(300);
-  const after = await readChat();
-  const stored = await sw.evaluate(async () => (await chrome.storage.local.get("floatLayout")).floatLayout?.chatHeight);
-  record(
-    "3 web chat bottom grip resizes and persists",
-    before.open && before.atBottom && before.h - shrunk.h === 60 && after.h - shrunk.h === 40 && after.top === before.top && stored === after.h,
-    `open=${before.open} atBottom=${before.atBottom} h=${before.h}->${shrunk.h}->${after.h} top=${before.top}->${after.top} stored=${stored}`,
-  );
-
-  // ---- Full mode: click the controller's docPip button directly (trusted click preserves user activation).
-  const dbtn = await poll(
-    () => page.evaluate(() => {
-      const el = document.getElementById("ghostpip-controller")?.shadowRoot?.querySelector('[data-action="docPip"]');
-      const r = el?.getBoundingClientRect();
-      return r?.width ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null;
-    }),
-    Boolean,
-    2000,
-  );
+  // ---- PiP mode: click the launcher's docPip button directly (trusted click preserves user activation).
+  const dbtn = await launcherButton("docPip");
   await page.mouse.click(dbtn.x, dbtn.y);
-  await page.keyboard.up("Alt");
-  await page.keyboard.up("Control");
   await page.waitForFunction(() => documentPictureInPicture.window?.document.querySelector("iframe"), { timeout: 8000 });
   await sleep(5000);
   const pipFrameDoc = await page.evaluate(() => {
@@ -198,12 +119,12 @@ try {
       rankingVisible: els.some((el) => el.getBoundingClientRect().height > 0),
     };
   });
-  record("4 PiP chat frame marked as embed", pipFrameDoc.embed, JSON.stringify(pipFrameDoc));
+  record("1 PiP chat frame marked as embed", pipFrameDoc.embed, JSON.stringify(pipFrameDoc));
   const pipPlanted = await page.evaluate((src) => {
     const w = documentPictureInPicture.window.document.querySelector("iframe").contentWindow;
     return w.eval(`(${src})()`);
   }, PLANT_RANKING.toString()).catch((e) => "ERR " + e.message);
-  record("5 PiP chat ranking hidden", !pipFrameDoc.rankingVisible && pipPlanted === true, `real found=${pipFrameDoc.rankingFound} visible=${pipFrameDoc.rankingVisible} planted hidden=${pipPlanted}`);
+  record("2 PiP chat ranking hidden", !pipFrameDoc.rankingVisible && pipPlanted === true, `real found=${pipFrameDoc.rankingFound} visible=${pipFrameDoc.rankingVisible} planted hidden=${pipPlanted}`);
 
   const split = await page.evaluate(async () => {
     const w = documentPictureInPicture.window;
@@ -254,7 +175,7 @@ try {
     2500,
   );
   record(
-    "6 PiP bottom grip resizes chat and keeps video size",
+    "3 PiP bottom grip resizes chat and keeps video size",
     split.atBottom && split.before - split.shrunk >= 60 && split.after - split.shrunk >= 40 && split.videoBefore === split.videoAfter && pipStored === split.after,
     `atBottom=${split.atBottom} chat=${split.before}->${split.shrunk}->${split.after} video=${split.videoBefore}->${split.videoAfter} stored=${pipStored}`,
   );
@@ -284,7 +205,7 @@ try {
     };
   });
   record(
-    "7 PiP corner/edge resize enlarges video without inflating chat",
+    "4 PiP corner/edge resize enlarges video without inflating chat",
     afterResize.vidAfter - beforeResize.vid0 >= 220 && afterResize.chatAfter <= beforeResize.chat0,
     `video=${beforeResize.vid0}->${afterResize.vidAfter} chat=${beforeResize.chat0}->${afterResize.chatAfter}`,
   );
@@ -349,7 +270,7 @@ for ($i = 0; $i -lt 40; $i++) {
   await sleep(500);
   const afterCorner = await readPip();
   record(
-    "7b PiP Win32 corner drag keeps chat height, grows video",
+    "5 PiP Win32 corner drag keeps chat height, grows video",
     afterCorner.chat === beforeCorner.chat && afterCorner.vid - beforeCorner.vid >= 100,
     `chat=${beforeCorner.chat}->${afterCorner.chat} video=${beforeCorner.vid}->${afterCorner.vid} innerH=${beforeCorner.innerH}->${afterCorner.innerH}`,
   );
@@ -365,7 +286,7 @@ for ($i = 0; $i -lt 40; $i++) {
   await sleep(500);
   const afterEdge = await readPip();
   record(
-    "8 PiP bottom edge (off-center) resizes chat, keeps video",
+    "6 PiP bottom edge (off-center) resizes chat, keeps video",
     Math.abs(afterEdge.chat - beforeEdge.chat - 60) <= 3 && Math.abs(afterEdge.vid - beforeEdge.vid) <= 1,
     `chat=${beforeEdge.chat}->${afterEdge.chat} video=${beforeEdge.vid}->${afterEdge.vid}`,
   );
@@ -380,7 +301,7 @@ for ($i = 0; $i -lt 40; $i++) {
   await sleep(900);
   const afterPlus = await readPip();
   record(
-    "9 PiP + button grows chat at Chrome size cap",
+    "7 PiP + button grows chat at Chrome size cap",
     Math.abs(afterPlus.innerH - atCap.innerH) <= 2 && afterPlus.chat - atCap.chat >= 70 && atCap.vid - afterPlus.vid >= 70,
     `innerH=${atCap.innerH}->${afterPlus.innerH} chat=${atCap.chat}->${afterPlus.chat} video=${atCap.vid}->${afterPlus.vid}`,
   );
@@ -392,4 +313,4 @@ for ($i = 0; $i -lt 40; $i++) {
 
 console.log("\n[chat e2e]");
 for (const r of results) console.log(`  ${r.ok ? "PASS" : "FAIL"} ${r.name.padEnd(40)} ${r.info}`);
-process.exit(results.length === 10 && results.every((r) => r.ok) ? 0 : 1);
+process.exit(results.length === 7 && results.every((r) => r.ok) ? 0 : 1);

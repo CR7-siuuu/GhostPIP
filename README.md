@@ -1,17 +1,17 @@
 # GhostPiP
 
-화면을 가리지 않는 PiP. 영상 창을 투명하게 하거나 클릭이 뒤로 통과하게 만들고, 마우스가 다가오면 다른 모서리로 비켜 줍니다.
+화면을 가리지 않는 데스크톱 PiP. 게임이나 다른 프로그램 위에 떠 있는 영상 창을 반투명하게 하거나 클릭이 뒤로 통과하게 만들고, 마우스가 다가오면 다른 모서리로 비켜 줍니다.
 
-- **웹 모드**: 브라우저 탭 안에 떠 있는 창입니다. 탭을 옮겨도 따라옵니다. 확장만 있으면 됩니다.
-- **전체 모드**: 게임이나 다른 프로그램 위에 뜨는 Document PiP / 독립 창입니다. 투명도, 클릭 통과, 자동 회피를 쓰려면 Windows용 GhostPiP Engine이 필요합니다.
-- **주요 기능**: 다중 PiP(여러 영상 동시 플로팅·독립 창), 창 위치·크기 기억(가로·세로 비율 안전 구분), 실시간 자막 오버레이(유튜브·넷플릭스·HTML5 트랙), 포커스를 뺏지 않는 리모컨, 역 투명화(평소 0~5% 숨김 · 키 누를 때만 80% 표시).
+- **단일 데스크톱 PiP**: 스트리밍 사이트에서는 실시간 채팅이 포함된 Document PiP 창으로, DRM 영상(OTT)에서는 기본 PiP 창으로, 여러 영상을 동시에 띄울 때는 독립 팝업 PiP 창으로 열립니다.
+- **GhostPiP Engine (Windows)**: 투명도 조절, 클릭 통과(Ghost Mode), 커서 접근 시 자동 회피, 역 투명화(Peek), 실시간 자막 오버레이, 포커스를 뺏지 않는 글로벌 리모컨을 적용합니다.
+- **주요 기능**: 다중 PiP(여러 영상 동시 독립 창), 창 위치·크기 기억(가로·세로 비율 안전 구분), 실시간 자막 오버레이(유튜브·넷플릭스·HTML5 트랙), 포커스를 뺏지 않는 리모컨, 역 투명화(평소 0~5% 숨김 · 키 누를 때만 80% 표시).
 
 지원 사이트(`extension/config/selectors.json`):
 
-- 스트리밍: 유튜브, 치지직(라이브·다시보기), SOOP, 트위치(라이브·다시보기)
+- 스트리밍: 유튜브(라이브·일반 영상), 치지직(라이브·다시보기), SOOP, 트위치(라이브·다시보기)
 - OTT: 넷플릭스, 디즈니+, 프라임 비디오, 쿠팡플레이, 티빙, 웨이브, 왓챠, 라프텔, 시리즈온, Apple TV+, Max, Hulu, Paramount+, Peacock, 크런치롤
 
-OTT는 대부분 DRM 영상이라 전체 모드가 크롬 기본 PiP 창으로 열립니다. 이때도 엔진이 투명도·클릭 통과·자동 회피를 적용합니다. 팝업의 "모든 사이트에서 사용"을 켜 두면 다른 사이트의 일반 동영상 플레이어에서도 동작합니다. GIF처럼 소리 없이 반복 재생되는 짧은 영상은 대상에서 빠집니다.
+OTT는 대부분 DRM 영상이라 크롬 기본 PiP 창으로 열리며, 이때도 엔진이 투명도·클릭 통과·자동 회피·자막 오버레이를 똑같이 적용합니다. 팝업의 "모든 사이트에서 사용"을 켜고 권한을 허용하면 다른 사이트의 일반 동영상 플레이어에서도 동작합니다. GIF처럼 소리 없이 반복 재생되는 짧은 영상은 대상에서 빠집니다.
 
 ## 설치
 
@@ -32,8 +32,8 @@ OTT는 대부분 DRM 영상이라 전체 모드가 크롬 기본 PiP 창으로 �
 | 자동 회피 | `Alt+Shift+D` |
 | 음소거 | `Alt+M` |
 | 역 투명화 켜기/끄기 | `Alt+P` (켜진 상태에서 지정 홀드 키를 누르는 동안만 표시) |
-| 리모컨 (재생/일시정지) | `Alt+Space` |
-| 리모컨 (뒤로/앞으로 이동) | `Alt+←` / `Alt+→` (5초 · 10초 선택 가능) |
+| 리모컨 (재생/일시정지) | `Alt+Space` (PiP 재생 중) |
+| 리모컨 (뒤로/앞으로 이동) | `Alt+←` / `Alt+→` (5초 · 10초 선택 가능, PiP 재생 중) |
 | 리모컨 (볼륨 조절) | `Alt+마우스 휠` |
 
 ## 백신 오탐과 코드 서명
@@ -54,11 +54,11 @@ OTT는 대부분 DRM 영상이라 전체 모드가 크롬 기본 PiP 창으로 �
 ## Chrome 웹 스토어 게시
 
 - `GhostPiP-Extension-store.zip`을 업로드합니다.
-- 스토어가 부여한 확장 ID를 `engine/installer/install.ps1`의 `$DefaultExtensionIds`에 추가한 뒤 엔진 패키지를 다시 빌드합니다. 이 ID가 없으면 스토어판 확장이 엔진에 연결할 수 없습니다.
+- 스토어가 부여한 확장 ID를 `engine/installer/install.ps1`의 `$StoreExtensionIds`에 추가한 뒤 엔진 패키지를 다시 빌드합니다. 이 ID가 없으면 스토어판 확장이 엔진에 연결할 수 없습니다.
 - 개인정보 처리방침은 [PRIVACY.md](PRIVACY.md)를 사용하세요.
 - 권한 사유:
   - `nativeMessaging`: 로컬 엔진과 통신
-  - `scripting`, 지원 사이트 `host_permissions` 및 선택적 호스트 권한(`optional_host_permissions`): 지원 스트리밍·OTT 사이트와(사용자가 허용한 경우) 일반 사이트 동영상에 오버레이 표시
+  - `scripting`, 지원 사이트 `host_permissions` 및 선택적 호스트 권한(`optional_host_permissions`): 지원 스트리밍·OTT 사이트와(사용자가 허용한 경우) 일반 사이트 동영상에 런처 표시 및 PiP 실행
   - `declarativeNetRequest`: 확장 페이지 및 지원 방송 사이트 안에서 채팅 팝아웃 페이지를 iframe으로 띄울 때 프레임 차단 헤더만 제한적으로 제거
   - `storage`: 설정 저장
 
@@ -69,10 +69,11 @@ npm install
 powershell -File scripts/build-res.ps1   # engine/GhostPiP.Engine.rc를 바꿨을 때만
 npm run build:zip
 npm run test:unit
+npm run test:locales
 node test/e2e/popup.mjs
 node test/e2e/generic.mjs
+node test/e2e/i18n.mjs
 node test/e2e/engine.mjs         # 엔진 빌드 필요
-node test/e2e/features_v1_1.mjs  # v1.1 기능 통합 E2E
-node test/e2e/crosstab.mjs
+node test/e2e/features_v1_1.mjs  # 기능 통합 E2E
 node test/e2e/run.mjs youtube
 ```

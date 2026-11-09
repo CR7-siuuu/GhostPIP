@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Εναλλαγή σίγασης καρτέλας βίντεο"
   },
-  "modeWeb": {
-    "message": "Λειτουργία web"
-  },
-  "modeWebTitle": {
-    "message": "Λειτουργία web (επικάλυψη μέσα στην καρτέλα)"
-  },
   "modeFull": {
     "message": "Πλήρης λειτουργία"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Επιστροφή"
   },
-  "btnSourceTab": {
-    "message": "Καρτέλα προέλευσης"
-  },
   "hudOpacity": {
     "message": "Αδιαφάνεια $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Αδιαφάνεια $PCT$% (κύλιση για ρύθμιση) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Δύο κουμπιά εμφανίζονται στο πάνω μέρος των βίντεο στο YouTube, Twitch, CHZZK, SOOP και σε υπηρεσίες OTT όπως Netflix, Disney+ και Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Ένα αιωρούμενο παράθυρο μέσα στην καρτέλα του προγράμματος περιήγησης. Σας ακολουθεί σε άλλες καρτέλες. Δεν χρειάζεται εγκατάσταση."
   },
   "guideFullModeBody": {
     "message": "Ένα παράθυρο που αιωρείται πάνω από παιχνίδια και άλλα προγράμματα. Η αδιαφάνεια, η διέλευση κλικ και η αυτόματη αποφυγή απαιτούν το <b>GhostPiP Engine</b>."

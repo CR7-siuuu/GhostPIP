@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Stummschaltung des Video-Tabs umschalten"
   },
-  "modeWeb": {
-    "message": "Webmodus"
-  },
-  "modeWebTitle": {
-    "message": "Webmodus (Overlay im Browser-Tab)"
-  },
   "modeFull": {
     "message": "Vollmodus"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Zurück"
   },
-  "btnSourceTab": {
-    "message": "Quell-Tab"
-  },
   "hudOpacity": {
     "message": "Deckkraft $PCT$ %",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Deckkraft $PCT$ % (zum Anpassen scrollen) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Oben auf Videos bei YouTube, Twitch, CHZZK, SOOP und OTT-Diensten wie Netflix, Disney+ und Prime Video erscheinen zwei Schaltflächen."
-  },
-  "guideWebModeBody": {
-    "message": "Ein schwebendes Fenster im Browser-Tab. Es folgt Ihnen in andere Tabs. Keine Installation nötig."
   },
   "guideFullModeBody": {
     "message": "Ein Fenster, das über Spielen und anderen Programmen schwebt. Deckkraft, Durchklicken und Auto-Ausweichen erfordern die <b>GhostPiP Engine</b>."

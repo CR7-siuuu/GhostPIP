@@ -1,25 +1,25 @@
-# GhostPiP — Master Technical Specification (v2.2 / App v1.1.1)
+# GhostPiP — Master Technical Specification (v2.3 / App v1.1.1)
 
-> v2.1 대비 변경점: .NET 10 Native AOT 전환, 다중 PiP·실시간 자막·미디어 리모컨·역 투명화(Peek)·창 위치/크기 기억 반영, 세션 범위 DNR 규칙(`initiatorDomains`), 선택적 전체 사이트 호스트 권한(`optional_host_permissions`), 공유 핫키 검증 벡터(`shared/hotkey-vectors.json`), 저수준 마우스 훅 스냅샷 분리 및 비동기 출력 큐, 엔진/확장 모듈 분리. 초기 실험 근거는 [spike/PHASE0_RESULTS.md](spike/PHASE0_RESULTS.md) 참고.
+> v2.2 대비 변경점: 브라우저 탭 내부에 갇혀 동작하던 구 '웹 모드(In-Tab 플로팅 및 탭 간 캔버스 오버레이)'를 완전히 제거하고, 데스크톱 PiP(Document PiP · 다중 PiP 팝업 창 · DRM 기본 PiP) 단일 모드로 일원화.
 
 ## 1. 개요
 - **이름**: GhostPiP (고스트핍)
 - **버전**: `1.1.1` (확장 및 Windows 엔진 공통)
 - **스토어 제목**: GhostPiP - 화면을 안 가리는 투명/클릭통과/자동회피 PIP / GhostPiP - Transparent, Click-Through & Auto-Dodge PiP
-- **핵심**: 영상 PiP를 (1) 반투명, (2) 클릭 통과, (3) 커서 접근 시 자동 회피(금지 코너 지원), (4) 실시간 자막·리모컨·역 투명화(Peek) 지원
+- **핵심**: 데스크톱 영상 PiP 창을 (1) 반투명, (2) 클릭 통과, (3) 커서 접근 시 자동 회피(금지 코너 지원), (4) 실시간 자막·리모컨·역 투명화(Peek) 지원
 - **플랫폼**: Chrome MV3 (`minimum_chrome_version: 116`) + Windows 10/11 엔진
 - **대상 사이트**: 스트리밍(YouTube, 치지직, SOOP, Twitch) 및 OTT(Netflix, Disney+, Prime Video, Coupang Play, TVING, Wavve, Watcha, Laftel, SeriesOn, Apple TV+, Max, Hulu, Paramount+, Peacock, Crunchyroll). 선택적 권한 승인 시 모든 사이트 일반 `<video>` 지원.
 
 ## 2. 확정 결정
 | 항목 | 결정 | 근거 |
 |---|---|---|
+| 모드 구성 | **단일 데스크톱 PiP 모드** (`docPip` / `popupPip` / `nativePip`) | 탭 내부 Popover 플로팅(구 웹 모드)은 사이트 레이아웃 충돌과 탭 간 미러링 오버헤드만 유발하고 게임 오버레이 목적에 부합하지 않아 제거 |
 | 확장 ↔ 엔진 연결 | **Native Messaging** (`chrome.runtime.connectNative`) | 정확한 확장 ID만 접속 가능, 열린 포트 없음. 미설치 시 재시도 중단, 단절 시 지수 백오프(1s→60s) |
-| 엔진 권한 | **`asInvoker`** (관리자 권한 불필요) | H4: 관리자 권한 게임 위에서도 `RegisterHotKey` 동작. 비관리자 실행 시 `HELLO.elevated=false`로 팝업에 `Alt+G` 조작 안내 표시 |
+| 엔진 권한 | **`asInvoker`** (관리자 권한 불필요) | 관리자 권한 게임 위에서도 `RegisterHotKey` 동작. 비관리자 실행 시 `HELLO.elevated=false`로 팝업에 `Alt+G` 조작 안내 표시 |
 | 엔진 언어 | **C# .NET 10 Native AOT** (`net10.0-windows`) | Win32 P/Invoke, 단일 실행 파일, 빠른 시작 및 낮은 메모리 사용 |
-| In-Tab 플로팅 | **Popover Top Layer + `@layer ghostpip`** | H6: `position: fixed`는 사이트 스태킹 컨텍스트에 막히나 Popover는 모두 통과 |
-| Document PiP 영상 | **`captureStream()` / WebRTC 루프백 미러**, DRM이면 기본/팝업 PiP | 원본 재생을 끊지 않고 다중 탭·독립 창으로 미러링 |
+| 데스크톱 PiP 영상 | **1순위 `documentPictureInPicture` (`captureStream`) · 다중 PiP 시 독립 팝업 창(`player.html` WebRTC 루프백) · DRM 시 기본 PiP** | 원본 재생을 끊지 않고 채팅 결합 및 다중 PiP 동시 실행 지원 |
 | Document PiP 호스팅 | **엔진 호스트 창(`SetParent`) + `WS_EX_LAYERED`** | 크롬 창 헤더를 클리핑하고 투명도·클릭 통과·리사이즈를 일관되게 제어 |
-| Document PiP 채팅 | **세션 DNR 규칙(`initiatorDomains` 제한) + 팝아웃 채팅 iframe** | 확장 및 지원 방송 도메인에서만 `x-frame-options`와 `frame-ancestors`를 제거해 클릭재킹·XSS 약화 방지 |
+| PiP 채팅 | **세션 DNR 규칙(`initiatorDomains` 제한) + 팝아웃 채팅 iframe** | 확장 및 지원 방송 도메인에서만 `x-frame-options`와 `frame-ancestors`를 제거해 클릭재킹·XSS 약화 방지 |
 | PiP 창 탐지 | **대기 중인 `PIP_OPENED` 요청 + 브라우저 프로세스 + rect 핸드셰이크** | 요청 없는 임의 TOPMOST 창 오탐 방지, `SendMessageTimeoutW` 및 최소 100ms 열거 쓰로틀 적용 |
 | 입력 훅 | **스냅샷 기반 저수준 마우스 훅 + UI 스레드 `PostMessage`** | 훅 콜백에서 Win32/IPC 호출을 배제해 `LowLevelHooksTimeout` 해제를 방지 |
 
@@ -151,6 +151,6 @@ GhostPIP/
 │   ├── SelfTest.cs                  # --self-test 스위트
 │   └── installer/                   # NativeMessagingHosts 등록(-Dev 지원), 정상 종료 대기
 └── test/
-    ├── unit/*.test.mjs              # 단위 테스트 (95개)
+    ├── unit/*.test.mjs              # 단위 테스트
     └── e2e/*.mjs                    # Puppeteer + Win32 통합 E2E
 ```

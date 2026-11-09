@@ -1,70 +1,17 @@
 /* Layered !important outranks the sites' unlayered !important rules (PHASE0 H6, SOOP). */
 @layer ghostpip {
-  .ghostpip-inpage-target:popover-open {
-    position: fixed !important;
-    inset: auto !important;
-    left: var(--gp-x) !important;
-    top: var(--gp-y) !important;
-    width: var(--gp-w) !important;
-    height: var(--gp-h) !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    max-width: none !important;
-    max-height: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    box-sizing: border-box !important;
-    display: block !important;
-    visibility: visible !important;
-    overflow: visible !important;
-    background: #000 !important;
-    object-fit: fill !important;
-    transform: none !important;
-    translate: none !important;
-    rotate: none !important;
-    scale: none !important;
-    clip-path: none !important;
-    filter: none !important;
-    opacity: var(--gp-opacity) !important;
-    pointer-events: auto !important;
-    transition: none !important;
-  }
-
-  .ghostpip-inpage-target:popover-open[data-gp-anim]:not([data-gp-drag]) {
-    transition: left 0.15s ease-out, top 0.15s ease-out, opacity 0.15s ease-out !important;
-  }
-
-  .ghostpip-inpage-target:popover-open[data-gp-pass],
-  .ghostpip-inpage-target:popover-open[data-click-through] {
-    pointer-events: none !important;
-  }
-
-  .ghostpip-inpage-target:popover-open[data-gp-peek-outline] {
-    outline: 1px solid rgba(56, 189, 248, 0.35) !important;
-    outline-offset: -1px !important;
-  }
-
-  .ghostpip-inpage-target:popover-open[data-gp-drag] {
-    transition: none !important;
-  }
-
   .ghostpip-docpip-source {
     filter: brightness(0) !important;
     pointer-events: none !important;
   }
 
-  #ghostpip-launcher:popover-open,
-  #ghostpip-controller:popover-open,
-  .ghostpip-controller:popover-open,
-  #ghostpip-chat:popover-open,
-  .ghostpip-chat:popover-open,
-  #ghostpip-subtitles:popover-open,
-  .ghostpip-subtitles:popover-open {
+  #ghostpip-launcher:popover-open {
     position: fixed !important;
     inset: auto !important;
     left: var(--gp-x) !important;
     top: var(--gp-y) !important;
+    width: auto !important;
+    height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
     border: 0 !important;
@@ -76,79 +23,11 @@
     visibility: visible !important;
     opacity: 1 !important;
     filter: none !important;
+    transform: translateX(-50%) !important;
     pointer-events: auto !important;
   }
 
-  #ghostpip-chat:popover-open,
-  .ghostpip-chat:popover-open {
-    width: var(--gp-w) !important;
-    height: var(--gp-h) !important;
-    opacity: var(--gp-opacity, 1) !important;
-    overflow: hidden !important;
-    border-radius: 0 0 8px 8px !important;
-    transition: none !important;
-  }
-
-  #ghostpip-chat:popover-open[data-gp-anim]:not([data-gp-drag]),
-  .ghostpip-chat:popover-open[data-gp-anim]:not([data-gp-drag]) {
-    transition: left 0.15s ease-out, top 0.15s ease-out, opacity 0.15s ease-out !important;
-  }
-
-  #ghostpip-chat:popover-open[data-gp-pass],
-  .ghostpip-chat:popover-open[data-gp-pass],
-  #ghostpip-chat:popover-open[data-click-through],
-  .ghostpip-chat:popover-open[data-click-through] {
-    pointer-events: none !important;
-  }
-
-  #ghostpip-chat:popover-open[data-gp-drag],
-  .ghostpip-chat:popover-open[data-gp-drag] {
-    transition: none !important;
-  }
-
-  #ghostpip-launcher:popover-open {
-    width: auto !important;
-    height: auto !important;
-    transform: translateX(-50%) !important;
-  }
-
-  #ghostpip-controller:popover-open,
-  .ghostpip-controller:popover-open {
-    width: var(--gp-w) !important;
-    height: var(--gp-h) !important;
-    transform: none !important;
-    pointer-events: none !important;
-  }
-
-  #ghostpip-controller:popover-open[data-bar-only],
-  .ghostpip-controller:popover-open[data-bar-only],
-  #ghostpip-controller:popover-open[data-click-through],
-  .ghostpip-controller:popover-open[data-click-through] {
-    pointer-events: none !important;
-  }
-
-  #ghostpip-subtitles:popover-open,
-  .ghostpip-subtitles:popover-open {
-    width: var(--gp-w) !important;
-    height: var(--gp-h) !important;
-    opacity: var(--gp-opacity, 1) !important;
-    transform: none !important;
-    pointer-events: none !important;
-    transition: none !important;
-  }
-
-  #ghostpip-subtitles:popover-open[data-gp-anim]:not([data-gp-drag]),
-  .ghostpip-subtitles:popover-open[data-gp-anim]:not([data-gp-drag]) {
-    transition: left 0.15s ease-out, top 0.15s ease-out, opacity 0.15s ease-out !important;
-  }
-
-  html[data-gp-disabled] #ghostpip-launcher:popover-open,
-  html[data-gp-disabled] #ghostpip-controller:popover-open,
-  html[data-gp-disabled] .ghostpip-controller:popover-open,
-  html[data-gp-disabled] #ghostpip-chat:popover-open,
-  html[data-gp-disabled] .ghostpip-chat:popover-open,
-  html[data-gp-disabled] #ghostpip-subtitles:popover-open,
-  html[data-gp-disabled] .ghostpip-subtitles:popover-open {
+  html[data-gp-disabled] #ghostpip-launcher:popover-open {
     display: none !important;
     visibility: hidden !important;
     pointer-events: none !important;

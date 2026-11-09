@@ -10,8 +10,7 @@ fs.mkdirSync(OUT, { recursive: true });
 
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
 const lib = {};
-vm.runInNewContext(read("extension/shared/settings.js") + "\n" + read("extension/content/dodge.js"), lib);
-const Dodge = lib.GhostPiPDodge;
+vm.runInNewContext(read("extension/shared/settings.js"), lib);
 const DEFAULTS = JSON.parse(JSON.stringify(lib.GhostPiPSettings.DEFAULTS));
 const SITES = JSON.parse(read("extension/config/selectors.json")).sites;
 
@@ -30,10 +29,8 @@ const TARGETS = [
   { name: "soop" },
 ].filter((t) => process.argv.length <= 2 || process.argv.slice(2).includes(t.name));
 
-const STEPS = ["1 launcher", "2 inTab", "3 dodge", "4 clickThrough/hold", "5 drag→home", "6 restore", "7 docPip"];
+const STEPS = ["1 launcher", "2 docPip"];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const near = (a, b, tol = 2) => ["l", "t", "r", "b"].every((k) => Math.abs(a[k] - b[k]) <= tol);
-const fmt = (r) => r && `${Math.round(r.l)},${Math.round(r.t)}-${Math.round(r.r)},${Math.round(r.b)}`;
 
 const browser = await puppeteer.launch({
   executablePath: CHROME,
@@ -72,7 +69,6 @@ async function patchSettings(patch) {
   }, patch);
 }
 
-const readSettings = async () => (await worker()).evaluate(async () => (await chrome.storage.local.get("settings")).settings);
 const readPip = async () => (await worker()).evaluate(async () => (await chrome.storage.session.get("pip")).pip ?? {});
 
 async function poll(fn, ok, timeout = 2000) {
@@ -119,7 +115,6 @@ async function runSite(page, target) {
   const selector = siteEntry?.[1].video ?? null;
   row.siteId = siteEntry?.[0] ?? "generic";
   await resetSettings({ dodge: { autoReturn: false } });
-  const settings = DEFAULTS;
 
   row.selector = await page.evaluate((sel) => {
     const area = (v) => {
@@ -137,20 +132,6 @@ async function runSite(page, target) {
     const r = window.__gp.v.getBoundingClientRect();
     return { l: r.left, t: r.top, r: r.right, b: r.bottom };
   });
-  const float = () => page.evaluate(() => {
-    const v = window.__gp.v;
-    const r = v.getBoundingClientRect();
-    const cx = (r.left + r.right) / 2, cy = (r.top + r.bottom) / 2;
-    return {
-      open: v.matches(":popover-open"),
-      rect: { l: r.left, t: r.top, r: r.right, b: r.bottom },
-      pe: getComputedStyle(v).pointerEvents,
-      hit: document.elementFromPoint(cx, cy) === v,
-      inPlace: v.isConnected && v.parentNode === window.__gp.parent && v.nextSibling === window.__gp.next,
-      area: { l: 0, t: 0, r: document.documentElement.clientWidth, b: document.documentElement.clientHeight },
-      size: { w: 480, h: Math.round((480 * v.videoHeight) / v.videoWidth) },
-    };
-  });
   const advancing = async () => {
     const t0 = await page.evaluate(() => window.__gp.v.currentTime);
     await sleep(1200);
@@ -165,7 +146,6 @@ async function runSite(page, target) {
     return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
   }, hostId, action);
   const center = (r) => ({ x: (r.l + r.r) / 2, y: (r.t + r.b) / 2 });
-  const cornerOf = (corner, f) => Dodge.cornerRect(corner, f.size, f.area, settings.dodge.edgeInsetPx);
   const shot = (step) => page.screenshot({ path: path.join(OUT, `${target.name}_${step}.png`) }).catch(() => {});
 
   async function step(name, fn) {
@@ -190,7 +170,7 @@ async function runSite(page, target) {
       const host = document.getElementById("ghostpip-launcher");
       return { open: !!host?.matches(":popover-open"), pinned: !!host?.hasAttribute("data-pinned") };
     });
-    const b = await hoverLauncher("inTab");
+    const b = await hoverLauncher("docPip");
     const meta = await page.evaluate(() => {
       const host = document.getElementById("ghostpip-launcher");
       const bar = host?.shadowRoot?.querySelector(".bar");
@@ -203,7 +183,7 @@ async function runSite(page, target) {
     const ok =
       !!b &&
       (!before.open || before.pinned) &&
-      meta.btns.join(",") === "웹 모드,전체 모드" &&
+      meta.btns.join(",") === "PiP 열기" &&
       meta.centerDiff <= 4;
     return {
       ok,
@@ -211,105 +191,7 @@ async function runSite(page, target) {
     };
   });
 
-  await step("2 inTab", async () => {
-    const b = await shadowButton("ghostpip-launcher", "inTab");
-    await page.mouse.move(b.x, b.y, { steps: 4 });
-    await page.mouse.click(b.x, b.y);
-    await sleep(600);
-    const f = await float();
-    const want = cornerOf("BR", f);
-    const adv = await advancing();
-    await shot("2_inTab");
-    const ok = f.open && near(f.rect, want) && f.hit && f.inPlace && adv.ok;
-    return { ok, info: `open=${f.open} rect=${fmt(f.rect)} want=${fmt(want)} hit=${f.hit} inPlace=${f.inPlace} dt=${adv.dt}` };
-  });
-
-  await step("3 dodge", async () => {
-    const f0 = await float();
-    const cursor = center(f0.rect);
-    let s = Dodge.initialState("BR");
-    let predicted = null;
-    for (let now = 1e6; now < 1e6 + 3000 && !predicted; now += 50) {
-      const out = Dodge.step(s, { now, cursor, size: f0.size, area: f0.area }, settings.dodge);
-      s = out.state;
-      if (out.action.type !== "stay") predicted = out.action.type === "move" ? out.action.corner : "fade";
-    }
-    await page.mouse.move(cursor.x, cursor.y, { steps: 10 });
-    const want = cornerOf(predicted, f0);
-    const f = await poll(float, (v) => near(v.rect, want), 2500);
-    await shot("3_dodge");
-    return { ok: near(f.rect, want), info: `predicted=${predicted} rect=${fmt(f.rect)} want=${fmt(want)}` };
-  });
-
-  await step("4 clickThrough/hold", async () => {
-    await patchSettings({ clickThrough: true });
-    const a = (await poll(float, (v) => v.pe === "none")).pe;
-    await page.keyboard.down("Control");
-    await page.keyboard.down("Alt");
-    const b = (await poll(float, (v) => v.pe === "auto")).pe;
-    await page.keyboard.up("Alt");
-    await page.keyboard.up("Control");
-    const c = (await poll(float, (v) => v.pe === "none")).pe;
-    return { ok: a === "none" && b === "auto" && c === "none", info: `ghost=${a} held=${b} released=${c}` };
-  });
-
-  await step("5 drag→home", async () => {
-    await patchSettings({ dodge: { home: "TL" } });
-    await sleep(200);
-    await page.keyboard.down("Control");
-    await page.keyboard.down("Alt");
-    const f0 = await float();
-    const from = center(f0.rect);
-    const want = cornerOf("BR", f0);
-    const to = center(want);
-    await page.mouse.move(from.x, from.y, { steps: 6 });
-    await sleep(200);
-    await page.mouse.down();
-    await page.mouse.move(to.x, to.y, { steps: 15 });
-    await page.mouse.up();
-    await sleep(500);
-    const f = await float();
-    const home = (await poll(readSettings, (s) => s?.dodge?.home === "BR", 1500))?.dodge?.home;
-    await shot("5_drag");
-    await page.mouse.move(f.area.r / 2, f.area.b / 2, { steps: 5 });
-    await page.keyboard.up("Alt");
-    await page.keyboard.up("Control");
-    return { ok: near(f.rect, want) && home === "BR", info: `from=${fmt(f0.rect)} rect=${fmt(f.rect)} want=${fmt(want)} home=${home}` };
-  });
-
-  await step("6 restore", async () => {
-    await page.keyboard.down("Control");
-    await page.keyboard.down("Alt");
-    await page.mouse.move(10, 10, { steps: 3 });
-    const b = await poll(() => shadowButton("ghostpip-controller", "idle"), Boolean, 1500);
-    if (!b) {
-      await page.keyboard.up("Alt");
-      await page.keyboard.up("Control");
-      return { ok: false, info: "controller not open while holding Ctrl+Alt" };
-    }
-    await page.mouse.move(b.x, b.y, { steps: 6 });
-    await page.mouse.click(b.x, b.y);
-    await page.keyboard.up("Alt");
-    await page.keyboard.up("Control");
-    await sleep(500);
-    const f = await float();
-    const leftovers = await page.evaluate(() => {
-      const v = window.__gp.v;
-      return [
-        v.classList.contains("ghostpip-inpage-target") && "class",
-        v.hasAttribute("popover") && "popover",
-        [...v.attributes].some((a) => a.name.startsWith("data-gp")) && "data-gp-*",
-        (v.getAttribute("style") ?? "").includes("--gp-") && "--gp-*",
-      ].filter(Boolean);
-    });
-    const adv = await advancing();
-    await patchSettings({ clickThrough: false });
-    await shot("6_restore");
-    const ok = !f.open && f.inPlace && leftovers.length === 0 && adv.ok;
-    return { ok, info: `open=${f.open} inPlace=${f.inPlace} leftovers=[${leftovers}] dt=${adv.dt}` };
-  });
-
-  await step("7 docPip", async () => {
+  await step("2 docPip", async () => {
     await page.mouse.move(5, 5, { steps: 3 });
     const b = await hoverLauncher("docPip");
     if (!b) return { ok: false, info: "launcher not open" };
@@ -362,7 +244,7 @@ async function runSite(page, target) {
       1500,
     );
     await patchSettings({ showChat: true });
-    await shot("7_docPip");
+    await shot("2_docPip");
     await page.evaluate(() => documentPictureInPicture.window.close());
     const cleared = Object.keys(await poll(readPip, (p) => Object.keys(p).length === 0, 2000)).length === 0;
     const restoredSource = await page.evaluate(() => !window.__gp.v.classList.contains("ghostpip-docpip-source"));

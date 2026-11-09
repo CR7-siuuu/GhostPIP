@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "ವೀಡಿಯೊ ಟ್ಯಾಬ್ ಮ್ಯೂಟ್ ಆನ್/ಆಫ್ ಮಾಡಿ"
   },
-  "modeWeb": {
-    "message": "ವೆಬ್ ಮೋಡ್"
-  },
-  "modeWebTitle": {
-    "message": "ವೆಬ್ ಮೋಡ್ (ಬ್ರೌಸರ್ ಟ್ಯಾಬ್ ಒಳಗಿನ ಓವರ್‌ಲೇ)"
-  },
   "modeFull": {
     "message": "ಪೂರ್ಣ ಮೋಡ್"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "ಹಿಂತಿರುಗಿಸಿ"
   },
-  "btnSourceTab": {
-    "message": "ಮೂಲ ಟ್ಯಾಬ್"
-  },
   "hudOpacity": {
     "message": "ಅಪಾರದರ್ಶಕತೆ $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "ಅಪಾರದರ್ಶಕತೆ $PCT$% (ಹೊಂದಿಸಲು ಸ್ಕ್ರಾಲ್ ಮಾಡಿ) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "YouTube, Twitch, CHZZK, SOOP ಮತ್ತು Netflix, Disney+, Prime Video ನಂತಹ OTT ಸೇವೆಗಳ ವೀಡಿಯೊಗಳ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಎರಡು ಬಟನ್‌ಗಳು ಕಾಣಿಸುತ್ತವೆ."
-  },
-  "guideWebModeBody": {
-    "message": "ಬ್ರೌಸರ್ ಟ್ಯಾಬ್ ಒಳಗೆ ತೇಲುವ ವಿಂಡೋ. ಇತರ ಟ್ಯಾಬ್‌ಗಳಿಗೂ ನಿಮ್ಮನ್ನು ಹಿಂಬಾಲಿಸುತ್ತದೆ. ಏನನ್ನೂ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಬೇಕಿಲ್ಲ."
   },
   "guideFullModeBody": {
     "message": "ಗೇಮ್‌ಗಳು ಮತ್ತು ಇತರ ಪ್ರೋಗ್ರಾಂಗಳ ಮೇಲೆ ತೇಲುವ ವಿಂಡೋ. ಅಪಾರದರ್ಶಕತೆ, ಕ್ಲಿಕ್-ಥ್ರೂ ಮತ್ತು ಸ್ವಯಂ ತಪ್ಪಿಸುವಿಕೆಗೆ <b>GhostPiP Engine</b> ಅಗತ್ಯವಿದೆ."

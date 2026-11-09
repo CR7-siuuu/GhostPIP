@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Ieslēgt/izslēgt video cilnes skaņu"
   },
-  "modeWeb": {
-    "message": "Tīmekļa režīms"
-  },
-  "modeWebTitle": {
-    "message": "Tīmekļa režīms (pārklājums pārlūka cilnē)"
-  },
   "modeFull": {
     "message": "Pilnais režīms"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Atgriezt"
   },
-  "btnSourceTab": {
-    "message": "Avota cilne"
-  },
   "hudOpacity": {
     "message": "Necaurredzamība $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Necaurredzamība $PCT$% (ritiniet, lai pielāgotu) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Video augšdaļā parādās divas pogas vietnēs YouTube, Twitch, CHZZK, SOOP un OTT pakalpojumos, piemēram, Netflix, Disney+ un Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Peldošs logs pārlūka cilnē. Tas seko jums uz citām cilnēm. Nekas nav jāinstalē."
   },
   "guideFullModeBody": {
     "message": "Logs, kas peld virs spēlēm un citām programmām. Necaurredzamībai, klikšķu caurlaidībai un automātiskai izvairīšanās ir nepieciešams <b>GhostPiP Engine</b>."

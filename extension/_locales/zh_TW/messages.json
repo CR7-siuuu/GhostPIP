@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "切換影片分頁靜音"
   },
-  "modeWeb": {
-    "message": "網頁模式"
-  },
-  "modeWebTitle": {
-    "message": "網頁模式（瀏覽器分頁內的浮動層）"
-  },
   "modeFull": {
     "message": "完整模式"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "還原"
   },
-  "btnSourceTab": {
-    "message": "來源分頁"
-  },
   "hudOpacity": {
     "message": "不透明度 $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "不透明度 $PCT$%（捲動以調整）· $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "在 YouTube、Twitch、CHZZK、SOOP 以及 Netflix、Disney+、Prime Video 等 OTT 服務的影片上方會出現兩個按鈕。"
-  },
-  "guideWebModeBody": {
-    "message": "瀏覽器分頁內的浮動視窗，切換到其他分頁時也會跟著移動。不需要安裝任何程式。"
   },
   "guideFullModeBody": {
     "message": "浮在遊戲和其他程式上方的視窗。不透明度、點擊穿透和自動閃避需要 <b>GhostPiP Engine</b>。"

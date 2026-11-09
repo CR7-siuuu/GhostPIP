@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Videó lapjának némítása be/ki"
   },
-  "modeWeb": {
-    "message": "Webes mód"
-  },
-  "modeWebTitle": {
-    "message": "Webes mód (átfedés a böngészőlapon belül)"
-  },
   "modeFull": {
     "message": "Teljes mód"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Visszaállítás"
   },
-  "btnSourceTab": {
-    "message": "Forráslap"
-  },
   "hudOpacity": {
     "message": "Átlátszatlanság: $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Átlátszatlanság: $PCT$% (görgetéssel állítható) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Két gomb jelenik meg a videók tetején a YouTube-on, a Twitch-en, a CHZZK-n, a SOOP-on és az olyan OTT-szolgáltatásokon, mint a Netflix, a Disney+ és a Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Lebegő ablak a böngészőlapon belül. Más lapokra is követi. Nem kell semmit telepíteni."
   },
   "guideFullModeBody": {
     "message": "Játékok és más programok fölött lebegő ablak. Az átlátszatlansághoz, az átkattintáshoz és az automatikus kitéréshez a <b>GhostPiP Engine</b> szükséges."

@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "व्हिडिओ टॅबचा म्यूट चालू/बंद करा"
   },
-  "modeWeb": {
-    "message": "वेब मोड"
-  },
-  "modeWebTitle": {
-    "message": "वेब मोड (ब्राउझर टॅबमधील ओव्हरले)"
-  },
   "modeFull": {
     "message": "पूर्ण मोड"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "परत ठेवा"
   },
-  "btnSourceTab": {
-    "message": "मूळ टॅब"
-  },
   "hudOpacity": {
     "message": "अपारदर्शकता $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "अपारदर्शकता $PCT$% (बदलण्यासाठी स्क्रोल करा) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "YouTube, Twitch, CHZZK, SOOP आणि Netflix, Disney+, Prime Video सारख्या OTT सेवांवरील व्हिडिओंच्या वरच्या भागात दोन बटणे दिसतात."
-  },
-  "guideWebModeBody": {
-    "message": "ब्राउझर टॅबमध्ये तरंगणारी विंडो. ती इतर टॅबमध्येही तुमच्यासोबत येते. काहीही इंस्टॉल करण्याची गरज नाही."
   },
   "guideFullModeBody": {
     "message": "गेम आणि इतर प्रोग्रामवर तरंगणारी विंडो. अपारदर्शकता, क्लिक-थ्रू आणि आपोआप बाजूला होणे यासाठी <b>GhostPiP Engine</b> आवश्यक आहे."

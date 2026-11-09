@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Comută sunetul filei video"
   },
-  "modeWeb": {
-    "message": "Modul web"
-  },
-  "modeWebTitle": {
-    "message": "Modul web (suprapunere în fila browserului)"
-  },
   "modeFull": {
     "message": "Modul complet"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Revino"
   },
-  "btnSourceTab": {
-    "message": "Fila sursă"
-  },
   "hudOpacity": {
     "message": "Opacitate $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Opacitate $PCT$% (derulează pentru a ajusta) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Două butoane apar în partea de sus a videoclipurilor pe YouTube, Twitch, CHZZK, SOOP și servicii OTT precum Netflix, Disney+ și Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "O fereastră plutitoare în fila browserului. Te urmează în alte file. Nimic de instalat."
   },
   "guideFullModeBody": {
     "message": "O fereastră care plutește peste jocuri și alte programe. Opacitatea, clic prin și evitarea automată necesită <b>GhostPiP Engine</b>."

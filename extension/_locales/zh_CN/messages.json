@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "切换视频标签页静音"
   },
-  "modeWeb": {
-    "message": "网页模式"
-  },
-  "modeWebTitle": {
-    "message": "网页模式（浏览器标签页内的悬浮层）"
-  },
   "modeFull": {
     "message": "完整模式"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "还原"
   },
-  "btnSourceTab": {
-    "message": "来源标签页"
-  },
   "hudOpacity": {
     "message": "不透明度 $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "不透明度 $PCT$%（滚动调节）· $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "在 YouTube、Twitch、CHZZK、SOOP 以及 Netflix、Disney+、Prime Video 等 OTT 服务的视频顶部会出现两个按钮。"
-  },
-  "guideWebModeBody": {
-    "message": "浏览器标签页内的悬浮窗口，切换到其他标签页也会跟随。无需安装任何程序。"
   },
   "guideFullModeBody": {
     "message": "悬浮在游戏和其他程序之上的窗口。不透明度、点击穿透和自动避让需要 <b>GhostPiP Engine</b>。"

@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "వీడియో ట్యాబ్ మ్యూట్‌ను టోగుల్ చేయి"
   },
-  "modeWeb": {
-    "message": "వెబ్ మోడ్"
-  },
-  "modeWebTitle": {
-    "message": "వెబ్ మోడ్ (బ్రౌజర్ ట్యాబ్ లోపల ఓవర్‌లే)"
-  },
   "modeFull": {
     "message": "పూర్తి మోడ్"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "తిరిగి ఉంచు"
   },
-  "btnSourceTab": {
-    "message": "మూల ట్యాబ్"
-  },
   "hudOpacity": {
     "message": "అపారదర్శకత $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "అపారదర్శకత $PCT$% (సర్దుబాటుకు స్క్రోల్ చేయండి) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "YouTube, Twitch, CHZZK, SOOP మరియు Netflix, Disney+, Prime Video వంటి OTT సేవల్లో వీడియోల పైభాగంలో రెండు బటన్‌లు కనిపిస్తాయి."
-  },
-  "guideWebModeBody": {
-    "message": "బ్రౌజర్ ట్యాబ్ లోపల తేలియాడే విండో. ఇతర ట్యాబ్‌లకు కూడా మిమ్మల్ని అనుసరిస్తుంది. ఏమీ ఇన్‌స్టాల్ చేయనవసరం లేదు."
   },
   "guideFullModeBody": {
     "message": "గేమ్‌లు మరియు ఇతర ప్రోగ్రామ్‌లపై తేలియాడే విండో. అపారదర్శకత, క్లిక్-త్రూ మరియు ఆటో-తప్పుకోవడానికి <b>GhostPiP Engine</b> అవసరం."

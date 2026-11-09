@@ -101,7 +101,7 @@
     const isEnabled = Boolean(settings.enabled);
 
     document.body.toggleAttribute("data-disabled", !isEnabled);
-    els.modeBadge.textContent = !isEnabled ? t("badgeOff") : engine.connected ? t("engineConnected") : t("modeWeb");
+    els.modeBadge.textContent = !isEnabled ? t("badgeOff") : engine.connected ? t("engineConnected") : t("guideEngineMissing");
     els.modeBadge.toggleAttribute("data-active", isEnabled && Boolean(engine.connected));
     els.modeBadge.toggleAttribute("data-disabled", !isEnabled);
     els.engineBanner.hidden = Boolean(engine.connected || engine.installed);

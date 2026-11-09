@@ -95,11 +95,11 @@ try {
   });
   await videoPage.mouse.move(vRect.x, vRect.y, { steps: 6 });
 
-  const inTabBtn = await poll(
+  const docPipBtn = await poll(
     () =>
       videoPage.evaluate(() => {
         const host = document.getElementById("ghostpip-launcher");
-        const b = host?.shadowRoot?.querySelector('[data-action="inTab"]');
+        const b = host?.shadowRoot?.querySelector('[data-action="docPip"]');
         if (!host?.matches(":popover-open") || !b) return null;
         const r = b.getBoundingClientRect();
         return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
@@ -107,11 +107,11 @@ try {
     Boolean,
     2500,
   );
-  assert(inTabBtn, "launcher inTab button did not open");
-  await videoPage.mouse.click(inTabBtn.x, inTabBtn.y);
-  await poll(() => videoPage.evaluate(() => window.__gpVideo.matches(":popover-open")), Boolean, 2000);
+  assert(docPipBtn, "launcher docPip button did not open");
+  await videoPage.mouse.click(docPipBtn.x, docPipBtn.y);
+  await poll(() => videoPage.evaluate(() => Boolean(documentPictureInPicture.window?.document.querySelector("video"))), Boolean, 4000);
 
-  await sw.evaluate(() => chrome.storage.session.remove(["pip", "engine"]));
+  await sw.evaluate(() => chrome.storage.session.remove("engine"));
   const popupPage = await browser.newPage();
   await popupPage.goto(`chrome-extension://${extId}/popup/popup.html`, { waitUntil: "domcontentloaded" });
   await sleep(300);
@@ -146,7 +146,7 @@ try {
     const init = await readPopupState();
     await popupPage.screenshot({ path: path.join(OUT, "popup_1_initial.png") }).catch(() => {});
     const initOk =
-      init.badge === "웹 모드" &&
+      init.badge === "엔진 미설치" &&
       init.bannerHidden === false &&
       init.clickThrough === DEFAULTS.clickThrough &&
       init.dodgeEnabled === DEFAULTS.dodge.enabled &&
@@ -173,7 +173,7 @@ try {
     );
     const restored = await poll(
       readPopupState,
-      (s) => s.badge === "웹 모드" && s.bannerHidden === false && s.warningHidden === true,
+      (s) => s.badge === "엔진 미설치" && s.bannerHidden === false && s.warningHidden === true,
       2000,
     );
     const ok =
@@ -183,7 +183,7 @@ try {
       active.bannerHidden &&
       !active.warningHidden &&
       active.warningText.includes("Alt+G") &&
-      restored.badge === "웹 모드" &&
+      restored.badge === "엔진 미설치" &&
       restored.warningHidden === true;
     return {
       ok,
@@ -204,29 +204,29 @@ try {
     const videoState = await poll(
       () =>
         videoPage.evaluate(() => {
-          const v = window.__gpVideo;
+          const d = documentPictureInPicture.window?.document;
+          const v = d?.querySelector("video");
           return {
-            pass: v.hasAttribute("data-gp-pass"),
-            pe: getComputedStyle(v).pointerEvents,
-            varOpacity: Number(v.style.getPropertyValue("--gp-opacity")),
-            opacity: Number(getComputedStyle(v).opacity),
+            pass: Boolean(d?.body?.hasAttribute("data-click-through")),
+            hasChat: Boolean(d?.querySelector("iframe")),
+            opacity: Number(v?.style?.opacity ?? 1),
           };
         }),
-      (v) => v.pass && v.pe === "none" && Math.abs(v.varOpacity - 0.45) < 0.001 && Math.abs(v.opacity - 0.45) < 0.02,
+      (v) => v.pass && !v.hasChat && Math.abs(v.opacity - 0.45) < 0.02,
       2500,
     );
     await popupPage.bringToFront();
     const stored = await sw.evaluate(async () => (await chrome.storage.local.get("settings")).settings);
     const ok =
       videoState.pass &&
-      videoState.pe === "none" &&
+      !videoState.hasChat &&
       Math.abs(videoState.opacity - 0.45) < 0.02 &&
       stored.clickThrough === true &&
       stored.showChat === false &&
       Math.abs(stored.opacity - 0.45) < 0.001;
     return {
       ok,
-      info: `stored=(clickThrough=${stored.clickThrough}, showChat=${stored.showChat}, opacity=${stored.opacity}) video=(pass=${videoState.pass}, pe=${videoState.pe}, opacity=${videoState.opacity})`,
+      info: `stored=(clickThrough=${stored.clickThrough}, showChat=${stored.showChat}, opacity=${stored.opacity}) pip=(pass=${videoState.pass}, hasChat=${videoState.hasChat}, opacity=${videoState.opacity})`,
     };
   });
 
@@ -354,10 +354,10 @@ try {
     const disabledVideo = await poll(
       () =>
         videoPage.evaluate(() => ({
-          inTabOpen: window.__gpVideo.matches(":popover-open"),
+          pipOpen: Boolean(documentPictureInPicture.window && !documentPictureInPicture.window.closed),
           launcherOpen: Boolean(document.getElementById("ghostpip-launcher")?.matches(":popover-open")),
         })),
-      (v) => v.inTabOpen === false && v.launcherOpen === false,
+      (v) => v.pipOpen === false && v.launcherOpen === false,
       2000,
     );
     await videoPage.mouse.move(vRect.x, vRect.y, { steps: 4 });
@@ -396,7 +396,7 @@ try {
       disabledPopup.enabled === false &&
       disabledPopup.badge === "꺼짐" &&
       disabledPopup.bannerHidden === true &&
-      disabledVideo.inTabOpen === false &&
+      disabledVideo.pipOpen === false &&
       launcherStillClosed === true &&
       reenabledPopup === true;
     return {

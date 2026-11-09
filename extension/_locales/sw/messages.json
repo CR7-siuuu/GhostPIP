@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Washa/zima sauti ya kichupo cha video"
   },
-  "modeWeb": {
-    "message": "Hali ya wavuti"
-  },
-  "modeWebTitle": {
-    "message": "Hali ya wavuti (dirisha ndani ya kichupo cha kivinjari)"
-  },
   "modeFull": {
     "message": "Hali kamili"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Rudisha"
   },
-  "btnSourceTab": {
-    "message": "Kichupo asili"
-  },
   "hudOpacity": {
     "message": "Uangavu $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Uangavu $PCT$% (sogeza gurudumu kurekebisha) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Vitufe viwili vinaonekana juu ya video kwenye YouTube, Twitch, CHZZK, SOOP na huduma za OTT kama Netflix, Disney+ na Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Dirisha linaloelea ndani ya kichupo cha kivinjari. Linakufuata kwenye vichupo vingine. Hakuna cha kusakinisha."
   },
   "guideFullModeBody": {
     "message": "Dirisha linaloelea juu ya michezo na programu nyingine. Uangavu, kubofya kupitia na kukwepa kiotomatiki vinahitaji <b>GhostPiP Engine</b>."

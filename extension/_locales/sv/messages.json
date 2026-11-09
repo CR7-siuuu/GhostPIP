@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Slå på/av ljud på videofliken"
   },
-  "modeWeb": {
-    "message": "Webbläge"
-  },
-  "modeWebTitle": {
-    "message": "Webbläge (överlägg i webbläsarfliken)"
-  },
   "modeFull": {
     "message": "Fullt läge"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Tillbaka"
   },
-  "btnSourceTab": {
-    "message": "Källflik"
-  },
   "hudOpacity": {
     "message": "Opacitet $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Opacitet $PCT$% (scrolla för att justera) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Två knappar visas överst på videor på YouTube, Twitch, CHZZK, SOOP och OTT-tjänster som Netflix, Disney+ och Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Ett flytande fönster i webbläsarfliken. Det följer med till andra flikar. Inget att installera."
   },
   "guideFullModeBody": {
     "message": "Ett fönster som svävar över spel och andra program. Opacitet, klickgenomsläpp och auto-undvik kräver <b>GhostPiP Engine</b>."

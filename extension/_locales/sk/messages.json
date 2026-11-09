@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Prepnúť stlmenie karty s videom"
   },
-  "modeWeb": {
-    "message": "Webový režim"
-  },
-  "modeWebTitle": {
-    "message": "Webový režim (prekrytie v karte prehliadača)"
-  },
   "modeFull": {
     "message": "Úplný režim"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Vrátiť"
   },
-  "btnSourceTab": {
-    "message": "Zdrojová karta"
-  },
   "hudOpacity": {
     "message": "Nepriehľadnosť $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Nepriehľadnosť $PCT$% (upravte kolieskom) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "V hornej časti videí na YouTube, Twitch, CHZZK, SOOP a OTT službách ako Netflix, Disney+ a Prime Video sa zobrazia dve tlačidlá."
-  },
-  "guideWebModeBody": {
-    "message": "Plávajúce okno v karte prehliadača. Nasleduje vás do ďalších kariet. Nič netreba inštalovať."
   },
   "guideFullModeBody": {
     "message": "Okno, ktoré pláva nad hrami a inými programami. Nepriehľadnosť, preklikávanie a automatické uhýbanie vyžadujú <b>GhostPiP Engine</b>."

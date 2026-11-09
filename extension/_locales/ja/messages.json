@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "動画タブのミュート切り替え"
   },
-  "modeWeb": {
-    "message": "Web モード"
-  },
-  "modeWebTitle": {
-    "message": "Web モード（ブラウザ タブ内のオーバーレイ）"
-  },
   "modeFull": {
     "message": "フルモード"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "元に戻す"
   },
-  "btnSourceTab": {
-    "message": "元のタブ"
-  },
   "hudOpacity": {
     "message": "不透明度 $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "不透明度 $PCT$%（スクロールで調整）· $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "YouTube、Twitch、CHZZK、SOOP や、Netflix、Disney+、Prime Video などの OTT サービスの動画上部に 2 つのボタンが表示されます。"
-  },
-  "guideWebModeBody": {
-    "message": "ブラウザ タブ内に浮かぶウィンドウです。他のタブに移ってもついてきます。インストールは不要です。"
   },
   "guideFullModeBody": {
     "message": "ゲームや他のプログラムの上に浮かぶウィンドウです。不透明度、クリック透過、自動回避には <b>GhostPiP Engine</b> が必要です。"

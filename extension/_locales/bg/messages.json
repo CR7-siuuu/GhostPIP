@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Вкл./изкл. звука на раздела с видеото"
   },
-  "modeWeb": {
-    "message": "Уеб режим"
-  },
-  "modeWebTitle": {
-    "message": "Уеб режим (наслагване в раздела на браузъра)"
-  },
   "modeFull": {
     "message": "Пълен режим"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Върни"
   },
-  "btnSourceTab": {
-    "message": "Изходен раздел"
-  },
   "hudOpacity": {
     "message": "Непрозрачност $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Непрозрачност $PCT$% (превъртете за промяна) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "В горната част на видеоклиповете в YouTube, Twitch, CHZZK, SOOP и OTT услуги като Netflix, Disney+ и Prime Video се появяват два бутона."
-  },
-  "guideWebModeBody": {
-    "message": "Плаващ прозорец в раздела на браузъра. Следва ви и в други раздели. Не изисква инсталиране."
   },
   "guideFullModeBody": {
     "message": "Прозорец, който плава над игри и други програми. Непрозрачността, пропускането на кликове и автоотбягването изискват <b>GhostPiP Engine</b>."

@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Вкл./выкл. звук вкладки с видео"
   },
-  "modeWeb": {
-    "message": "Веб-режим"
-  },
-  "modeWebTitle": {
-    "message": "Веб-режим (оверлей во вкладке браузера)"
-  },
   "modeFull": {
     "message": "Полный режим"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Вернуть"
   },
-  "btnSourceTab": {
-    "message": "Исходная вкладка"
-  },
   "hudOpacity": {
     "message": "Непрозрачность $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Непрозрачность $PCT$% (колесо для настройки) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Вверху видео на YouTube, Twitch, CHZZK, SOOP и OTT-сервисах, таких как Netflix, Disney+ и Prime Video, появляются две кнопки."
-  },
-  "guideWebModeBody": {
-    "message": "Плавающее окно внутри вкладки браузера. Оно следует за вами на другие вкладки. Ничего устанавливать не нужно."
   },
   "guideFullModeBody": {
     "message": "Окно, которое отображается поверх игр и других программ. Для непрозрачности, сквозного клика и автоуклонения нужен <b>GhostPiP Engine</b>."

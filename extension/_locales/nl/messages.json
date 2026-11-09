@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Geluid van videotabblad aan/uit"
   },
-  "modeWeb": {
-    "message": "Webmodus"
-  },
-  "modeWebTitle": {
-    "message": "Webmodus (overlay in het browsertabblad)"
-  },
   "modeFull": {
     "message": "Volledige modus"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Terugzetten"
   },
-  "btnSourceTab": {
-    "message": "Brontabblad"
-  },
   "hudOpacity": {
     "message": "Dekking $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Dekking $PCT$% (scrol om aan te passen) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Er verschijnen twee knoppen boven aan video's op YouTube, Twitch, CHZZK, SOOP en OTT-diensten zoals Netflix, Disney+ en Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Een zwevend venster in het browsertabblad. Het volgt je naar andere tabbladen. Niets te installeren."
   },
   "guideFullModeBody": {
     "message": "Een venster dat boven games en andere programma's zweeft. Dekking, doorklikken en automatisch ontwijken vereisen <b>GhostPiP Engine</b>."

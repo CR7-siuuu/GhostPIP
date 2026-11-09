@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "വീഡിയോ ടാബിന്റെ മ്യൂട്ട് ഓൺ/ഓഫ് ചെയ്യുക"
   },
-  "modeWeb": {
-    "message": "വെബ് മോഡ്"
-  },
-  "modeWebTitle": {
-    "message": "വെബ് മോഡ് (ബ്രൗസർ ടാബിനുള്ളിലെ ഓവർലേ)"
-  },
   "modeFull": {
     "message": "ഫുൾ മോഡ്"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "തിരികെ വയ്ക്കുക"
   },
-  "btnSourceTab": {
-    "message": "ഉറവിട ടാബ്"
-  },
   "hudOpacity": {
     "message": "അതാര്യത $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "അതാര്യത $PCT$% (ക്രമീകരിക്കാൻ സ്ക്രോൾ ചെയ്യുക) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "YouTube, Twitch, CHZZK, SOOP എന്നിവയിലും Netflix, Disney+, Prime Video പോലുള്ള OTT സേവനങ്ങളിലും വീഡിയോകളുടെ മുകളിൽ രണ്ട് ബട്ടണുകൾ ദൃശ്യമാകും."
-  },
-  "guideWebModeBody": {
-    "message": "ബ്രൗസർ ടാബിനുള്ളിൽ ഒഴുകിനിൽക്കുന്ന വിൻഡോ. മറ്റ് ടാബുകളിലേക്കും ഇത് നിങ്ങളെ പിന്തുടരും. ഒന്നും ഇൻസ്റ്റാൾ ചെയ്യേണ്ടതില്ല."
   },
   "guideFullModeBody": {
     "message": "ഗെയിമുകൾക്കും മറ്റ് പ്രോഗ്രാമുകൾക്കും മുകളിൽ ഒഴുകിനിൽക്കുന്ന വിൻഡോ. അതാര്യത, ക്ലിക്ക്-ത്രൂ, സ്വയം ഒഴിഞ്ഞുമാറൽ എന്നിവയ്ക്ക് <b>GhostPiP Engine</b> ആവശ്യമാണ്."

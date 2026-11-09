@@ -47,7 +47,7 @@ for (const { lang, loc, rtl, launcher } of LANGS) {
     await page.goto(`chrome-extension://${extId}/popup/popup.html`);
     await sleep(700);
     const popup = await inspect();
-    const badgeOk = [m("modeWeb"), m("engineConnected"), m("badgeOff")].includes(popup.badge);
+    const badgeOk = [m("guideEngineMissing"), m("engineConnected"), m("badgeOff")].includes(popup.badge);
     record(
       `${loc} popup`,
       popup.hangul.length === 0 && popup.empty === 0 && popup.unresolved.length === 0 && badgeOk &&
@@ -89,7 +89,7 @@ for (const { lang, loc, rtl, launcher } of LANGS) {
       }
       record(
         `${loc} launcher`,
-        labels?.join("|") === `${m("modeWeb")}|${m("modeFull")}`,
+        labels?.join("|") === m("modeFull"),
         `labels=${JSON.stringify(labels)}`,
       );
     }

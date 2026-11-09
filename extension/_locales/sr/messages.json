@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Укључи/искључи звук картице са видеом"
   },
-  "modeWeb": {
-    "message": "Веб режим"
-  },
-  "modeWebTitle": {
-    "message": "Веб режим (преклоп у картици прегледача)"
-  },
   "modeFull": {
     "message": "Пун режим"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Врати"
   },
-  "btnSourceTab": {
-    "message": "Изворна картица"
-  },
   "hudOpacity": {
     "message": "Непрозирност $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Непрозирност $PCT$% (точкић за подешавање) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "На врху видео снимака на YouTube, Twitch, CHZZK, SOOP и OTT услугама као што су Netflix, Disney+ и Prime Video појављују се два дугмета."
-  },
-  "guideWebModeBody": {
-    "message": "Плутајући прозор унутар картице прегледача. Прати вас у друге картице. Ништа не треба инсталирати."
   },
   "guideFullModeBody": {
     "message": "Прозор који лебди изнад игара и других програма. За непрозирност, клик кроз и аутоматско измицање потребан је <b>GhostPiP Engine</b>."

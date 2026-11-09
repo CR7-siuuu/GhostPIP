@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "வீடியோ தாவலின் ஒலியை முடக்கு/இயக்கு"
   },
-  "modeWeb": {
-    "message": "வலைப் பயன்முறை"
-  },
-  "modeWebTitle": {
-    "message": "வலைப் பயன்முறை (உலாவித் தாவலுக்குள் மேலடுக்கு)"
-  },
   "modeFull": {
     "message": "முழுப் பயன்முறை"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "திரும்பு"
   },
-  "btnSourceTab": {
-    "message": "மூலத் தாவல்"
-  },
   "hudOpacity": {
     "message": "ஒளிபுகாமை $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "ஒளிபுகாமை $PCT$% (சரிசெய்ய ஸ்க்ரோல் செய்யவும்) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "YouTube, Twitch, CHZZK, SOOP மற்றும் Netflix, Disney+, Prime Video போன்ற OTT சேவைகளில் வீடியோக்களின் மேலே இரண்டு பட்டன்கள் தோன்றும்."
-  },
-  "guideWebModeBody": {
-    "message": "உலாவித் தாவலுக்குள் மிதக்கும் சாளரம். பிற தாவல்களுக்கும் உங்களைப் பின்தொடரும். எதையும் நிறுவத் தேவையில்லை."
   },
   "guideFullModeBody": {
     "message": "கேம்கள் மற்றும் பிற நிரல்களின் மேல் மிதக்கும் சாளரம். ஒளிபுகாமை, கிளிக் ஊடுருவல், தானியங்கு விலகலுக்கு <b>GhostPiP Engine</b> தேவை."

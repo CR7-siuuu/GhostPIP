@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Silencia/activa el so de la pestanya del vídeo"
   },
-  "modeWeb": {
-    "message": "Mode web"
-  },
-  "modeWebTitle": {
-    "message": "Mode web (superposició dins la pestanya del navegador)"
-  },
   "modeFull": {
     "message": "Mode complet"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Torna"
   },
-  "btnSourceTab": {
-    "message": "Pestanya d'origen"
-  },
   "hudOpacity": {
     "message": "Opacitat $PCT$ %",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Opacitat $PCT$ % (desplaça per ajustar) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Apareixen dos botons a la part superior dels vídeos de YouTube, Twitch, CHZZK, SOOP i serveis OTT com Netflix, Disney+ i Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Una finestra flotant dins la pestanya del navegador. Et segueix a altres pestanyes. No cal instal·lar res."
   },
   "guideFullModeBody": {
     "message": "Una finestra que flota sobre jocs i altres programes. L'opacitat, el clic a través i l'esquivada automàtica requereixen <b>GhostPiP Engine</b>."

@@ -167,7 +167,7 @@
     return isAllowedChatUrl(out) ? out : null;
   }
 
-  function mediaTargetCandidates({ preferredTabId = null, sourceByPopupTab = new Map(), pip = {}, latestInTabSourceId = null }) {
+  function mediaTargetCandidates({ preferredTabId = null, sourceByPopupTab = new Map(), pip = {} }) {
     const out = [];
     const push = (id) => {
       if (isInt(id, 0) && !out.includes(id)) out.push(id);
@@ -180,7 +180,6 @@
       const e = entries[i];
       push(Number.isFinite(e?.sourceTabId) ? e.sourceTabId : e?.tabId);
     }
-    push(latestInTabSourceId);
     return out;
   }
 

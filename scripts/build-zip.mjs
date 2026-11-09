@@ -212,7 +212,7 @@ const readme = Buffer.from(
     "  1. chrome://extensions 를 열고 오른쪽 위 '개발자 모드'를 켭니다.",
     "  2. '압축해제된 확장 프로그램을 로드합니다'를 눌러 이 폴더의 extension 폴더를 고릅니다.",
     "",
-    "[2] GhostPiP Engine (전체 모드: 게임·다른 프로그램 위 투명/클릭 통과/자동 회피)",
+    "[2] GhostPiP Engine (게임·다른 프로그램 위 투명/클릭 통과/자동 회피)",
     "  1. engine 폴더의 install.bat 을 더블클릭합니다.",
     "     엔진은 %LOCALAPPDATA%\\Programs\\GhostPiP 에 복사되므로 설치 후 이 폴더는 지워도 됩니다.",
     "  2. 제거: engine\\uninstall.bat 실행",

@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Įjungti / išjungti vaizdo įrašo skirtuko garsą"
   },
-  "modeWeb": {
-    "message": "Žiniatinklio režimas"
-  },
-  "modeWebTitle": {
-    "message": "Žiniatinklio režimas (perdanga naršyklės skirtuke)"
-  },
   "modeFull": {
     "message": "Visas režimas"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Grąžinti"
   },
-  "btnSourceTab": {
-    "message": "Šaltinio skirtukas"
-  },
   "hudOpacity": {
     "message": "Nepermatomumas $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Nepermatomumas $PCT$% (slinkite, kad reguliuotumėte) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Du mygtukai atsiranda vaizdo įrašų viršuje YouTube, Twitch, CHZZK, SOOP ir OTT paslaugose, pvz., Netflix, Disney+ ir Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Slankusis langas naršyklės skirtuke. Seka jus į kitus skirtukus. Nieko diegti nereikia."
   },
   "guideFullModeBody": {
     "message": "Langas, rodomas virš žaidimų ir kitų programų. Nepermatomumui, spustelėjimų praleidimui ir automatiniam vengimui reikia <b>GhostPiP Engine</b>."

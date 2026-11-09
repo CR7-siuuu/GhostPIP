@@ -18,14 +18,12 @@ const Dodge = lib.GhostPiPDodge;
 const DEFAULTS = JSON.parse(JSON.stringify(lib.GhostPiPSettings.DEFAULTS));
 
 const STEPS = [
-  "1 web memory & aspect ratio safety (16:9 <-> 9:16)",
-  "2 live subtitles (YouTube DOM, HTML5 track, remote tab)",
-  "3 multi-PiP web mode (2 independent remote overlays)",
-  "4 multi-PiP full mode (docPip + popupPip + independent OS dodge)",
-  "5 full mode window bounds memory (PIP_BOUNDS round-trip)",
-  "6 DRM native PiP Win32 subtitle overlay (GhostPiPSubtitleOverlay)",
-  "7 in-game media remote (focus-free play/pause, seek, Alt+Wheel volume)",
-  "8 peek mode / reverse ghost (0%/5% hidden -> 80% hold -> 0% release)",
+  "1 live subtitles (YouTube DOM & HTML5 track in docPip)",
+  "2 multi-PiP full mode (docPip + popupPip + independent OS dodge)",
+  "3 full mode window bounds memory (PIP_BOUNDS round-trip)",
+  "4 DRM native PiP Win32 subtitle overlay (GhostPiPSubtitleOverlay)",
+  "5 in-game media remote (focus-free play/pause, seek, Alt+Wheel volume)",
+  "6 peek mode / reverse ghost (0%/5% hidden -> 80% hold -> 0% release)",
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -415,212 +413,54 @@ win32gui.EnumWindows(cb, None)`,
     await page.mouse.click(btn.x, btn.y);
   };
 
-  const readFloats = (page) =>
-    page.evaluate(() =>
-      [...document.querySelectorAll(".ghostpip-inpage-target")].map((v) => {
-        const r = v.getBoundingClientRect();
-        return {
-          open: v.matches(":popover-open"),
-          remote: v.hasAttribute("data-gp-remote"),
-          sourceTab: v.getAttribute("data-gp-source-tab"),
-          rect: { l: r.left, t: r.top, r: r.right, b: r.bottom, w: Math.round(r.width), h: Math.round(r.height) },
-        };
-      }),
-    );
+  const readDocPipSubtitle = (page) =>
+    page.evaluate(() => {
+      const el = documentPictureInPicture.window?.document?.querySelector(".pip-subtitles");
+      return el && !el.hidden ? { text: el.textContent ?? "", pe: getComputedStyle(el).pointerEvents } : null;
+    });
 
-  const readWebSubtitles = (page) =>
-    page.evaluate(() =>
-      [...document.querySelectorAll(".ghostpip-subtitles")].map((h) => ({
-        id: h.id,
-        open: h.matches(":popover-open"),
-        pe: getComputedStyle(h).pointerEvents,
-        text: h.shadowRoot?.querySelector(".gp-sub-box")?.textContent ?? "",
-      })),
-    );
-
-  // STEP 1: Web Mode Memory & Aspect Ratio Safety
-  await step("1 web memory & aspect ratio safety (16:9 <-> 9:16)", async () => {
+  // STEP 1: Live Subtitles (YouTube DOM & HTML5 <track> in docPip)
+  await step("1 live subtitles (YouTube DOM & HTML5 track in docPip)", async () => {
     await resetAll({ dodge: { enabled: false, autoReturn: false } });
     await tab1.goto(`${base}?w=640&h=360&hue=190`, { waitUntil: "load" });
-    await openLauncherAndClick(tab1, "inTab");
+    await openLauncherAndClick(tab1, "docPip");
+    await poll(() => tab1.evaluate(() => Boolean(documentPictureInPicture.window?.document.querySelector("video"))), Boolean, 3000);
 
-    const f0 = await poll(() => readFloats(tab1).then((a) => a[0]), (f) => f?.open, 2000);
-    assert(f0?.open, "initial 16:9 float did not open");
-
-    await tab1.keyboard.down("Control");
-    await tab1.keyboard.down("Alt");
-    const se = await poll(
-      () =>
-        tab1.evaluate(() => {
-          const host = document.getElementById("ghostpip-controller") || document.querySelector(".ghostpip-controller");
-          const h = host?.shadowRoot?.querySelector('[data-resize="se"]');
-          if (!host?.matches(":popover-open") || !h) return null;
-          const r = h.getBoundingClientRect();
-          return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-        }),
-      Boolean,
-      1500,
-    );
-    await tab1.mouse.move(se.x, se.y, { steps: 4 });
-    await tab1.mouse.down();
-    await tab1.mouse.move(se.x - 120, se.y - 67, { steps: 8 });
-    await tab1.mouse.up();
-    await sleep(120);
-
-    const resized = (await readFloats(tab1))[0];
-    const targetL = 110;
-    const targetT = 180;
-    await tab1.mouse.move((resized.rect.l + resized.rect.r) / 2, (resized.rect.t + resized.rect.b) / 2, { steps: 4 });
-    await tab1.mouse.down();
-    await tab1.mouse.move(targetL + resized.rect.w / 2, targetT + resized.rect.h / 2, { steps: 10 });
-    await tab1.mouse.up();
-    await tab1.keyboard.up("Alt");
-    await tab1.keyboard.up("Control");
-    await sleep(200);
-
-    // Navigate to a 9:16 vertical Shorts video -> width & pos remembered, height adapts to 9:16!
-    await tab1.goto(`${base}?w=360&h=640&hue=40`, { waitUntil: "load" });
-    await openLauncherAndClick(tab1, "inTab");
-    const fVert = await poll(() => readFloats(tab1).then((a) => a[0]), (f) => f?.open, 2000);
-
-    // Navigate to another 16:9 video -> exact width, 16:9 height, and position remembered!
-    await tab1.goto(`${base}?w=640&h=360&hue=280`, { waitUntil: "load" });
-    await openLauncherAndClick(tab1, "inTab");
-    const fLand = await poll(() => readFloats(tab1).then((a) => a[0]), (f) => f?.open, 2000);
-
-    const ok =
-      Math.abs(resized.rect.w - 360) <= 6 &&
-      fVert.rect.h > fVert.rect.w * 1.4 &&
-      Math.abs(fLand.rect.w - resized.rect.w) <= 6 &&
-      Math.abs(fLand.rect.h - resized.rect.h) <= 6 &&
-      Math.abs(fLand.rect.l - targetL) <= 8 &&
-      Math.abs(fLand.rect.t - targetT) <= 8;
-    return {
-      ok,
-      info: `saved16x9=${resized.rect.w}x${resized.rect.h} vertical9x16=${fVert.rect.w}x${fVert.rect.h} next16x9=${fLand.rect.w}x${fLand.rect.h}@(${Math.round(fLand.rect.l)},${Math.round(fLand.rect.t)})`,
-    };
-  });
-
-  // STEP 2: Live Subtitles (YouTube DOM, Remote Tab Mirroring, HTML5 <track>)
-  await step("2 live subtitles (YouTube DOM, HTML5 track, remote tab)", async () => {
     await tab1.evaluate(() => window.__setYtCaption("안녕하세요 유튜브 자막 테스트"));
     const localSub = await poll(
-      () => readWebSubtitles(tab1).then((a) => a.find((s) => s.open)),
+      () => readDocPipSubtitle(tab1),
       (s) => s?.text === "안녕하세요 유튜브 자막 테스트",
       2500,
     );
-
-    const tabRemote = await browser.newPage();
-    await tabRemote.goto(`${base}?w=640&h=360&hue=10`, { waitUntil: "load" });
-    await tabRemote.bringToFront();
-
-    const remoteSub1 = await poll(
-      () => readWebSubtitles(tabRemote).then((a) => a.find((s) => s.open)),
-      (s) => s?.text === "안녕하세요 유튜브 자막 테스트",
-      3000,
-    );
-
-    await tab1.evaluate(() => window.__setYtCaption("실시간 두 번째 자막"));
-    const remoteSub2 = await poll(
-      () => readWebSubtitles(tabRemote).then((a) => a.find((s) => s.open)),
-      (s) => s?.text === "실시간 두 번째 자막",
-      2500,
-    );
-
-    await tabRemote.close();
-    await tab1.bringToFront();
 
     await tab1.evaluate(() => {
       window.__setYtCaption("");
       window.__setTrackCaption("HTML5 트랙 자막 정상 출력");
     });
     const trackSub = await poll(
-      () => readWebSubtitles(tab1).then((a) => a.find((s) => s.open)),
+      () => readDocPipSubtitle(tab1),
       (s) => s?.text === "HTML5 트랙 자막 정상 출력",
       2500,
     );
     const trackMode = await tab1.evaluate(() => document.getElementById("vid").textTracks[0]?.mode);
     await tab1.evaluate(() => {
       window.__setTrackCaption("");
+      documentPictureInPicture.window?.close();
     });
 
     const ok =
       localSub?.text === "안녕하세요 유튜브 자막 테스트" &&
       localSub?.pe === "none" &&
-      remoteSub1?.text === "안녕하세요 유튜브 자막 테스트" &&
-      remoteSub2?.text === "실시간 두 번째 자막" &&
       trackSub?.text === "HTML5 트랙 자막 정상 출력" &&
       trackMode === "hidden";
     return {
       ok,
-      info: `local="${localSub?.text}"(pe=${localSub?.pe}) remote="${remoteSub2?.text}" track="${trackSub?.text}"(mode=${trackMode})`,
+      info: `local="${localSub?.text}"(pe=${localSub?.pe}) track="${trackSub?.text}"(mode=${trackMode})`,
     };
   });
 
-  // STEP 3: Multi-PiP Web Mode (2 Independent Floating Overlays Across Tabs)
-  await step("3 multi-PiP web mode (2 independent remote overlays)", async () => {
-    await resetAll({ dodge: { enabled: false, autoReturn: false } });
-    await tab1.goto(`${base}?w=640&h=360&hue=120`, { waitUntil: "load" });
-    await openLauncherAndClick(tab1, "inTab");
-    await poll(() => readFloats(tab1).then((a) => a.length === 1 && a[0].open), Boolean, 2000);
-
-    const tab2 = await browser.newPage();
-    await tab2.goto(`${base}?w=640&h=360&hue=300`, { waitUntil: "load" });
-    await openLauncherAndClick(tab2, "inTab");
-    await poll(() => readFloats(tab2).then((a) => a.some((f) => !f.remote && f.open)), Boolean, 2500);
-
-    const tab3 = await browser.newPage();
-    await tab3.goto(`${base}?w=640&h=360&hue=60`, { waitUntil: "load" });
-    await tab3.bringToFront();
-
-    const both = await poll(
-      () => readFloats(tab3),
-      (arr) => arr.filter((f) => f.open && f.remote).length === 2,
-      3500,
-    );
-    const remotes = both.filter((f) => f.open && f.remote);
-    const rA = remotes[0]?.rect;
-    const rB = remotes[1]?.rect;
-    const nonOverlapping =
-      Boolean(rA && rB) && (rA.r <= rB.l + 4 || rB.r <= rA.l + 4 || rA.b <= rB.t + 4 || rB.b <= rA.t + 4);
-
-    // Close only the 2nd remote overlay via real hover + click and verify the 1st remains open
-    const secondSrc = remotes[1]?.sourceTab;
-    await tab3.mouse.move((rB.l + rB.r) / 2, (rB.t + rB.b) / 2, { steps: 5 });
-    const closeSecondBtn = await poll(
-      () =>
-        tab3.evaluate((srcId) => {
-          const ctrl = document.getElementById(`ghostpip-controller-${srcId}`) || document.getElementById("ghostpip-controller");
-          const b = ctrl?.shadowRoot?.querySelector('[data-action="idle"]');
-          if (!ctrl?.matches(":popover-open") || !b) return null;
-          const r = b.getBoundingClientRect();
-          return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-        }, secondSrc),
-      Boolean,
-      2000,
-    );
-    assert(closeSecondBtn, "2nd remote overlay close button did not open on hover");
-    await tab3.mouse.click(closeSecondBtn.x, closeSecondBtn.y);
-
-    const afterCloseOne = await poll(
-      () => readFloats(tab3),
-      (arr) => arr.filter((f) => f.open && f.remote).length === 1,
-      2500,
-    );
-
-    await tab3.close();
-    await tab2.close();
-    await resetAll();
-
-    const ok = remotes.length === 2 && nonOverlapping && afterCloseOne.filter((f) => f.open && f.remote).length === 1;
-    return {
-      ok,
-      info: `remoteCount=${remotes.length} rect1=${fmt(rA)} rect2=${fmt(rB)} nonOverlapping=${nonOverlapping} remainingAfterSingleClose=${afterCloseOne.length}`,
-    };
-  });
-
-  // STEP 4: Multi-PiP Full Mode (docPip + popupPip Independent OS Windows + Subtitles + Independent Dodge)
-  await step("4 multi-PiP full mode (docPip + popupPip + independent OS dodge)", async () => {
+  // STEP 2: Multi-PiP Full Mode (docPip + popupPip Independent OS Windows + Subtitles + Independent Dodge)
+  await step("2 multi-PiP full mode (docPip + popupPip + independent OS dodge)", async () => {
     await resetAll({ clickThrough: false, dodge: { enabled: false, autoReturn: false } });
     await sw.evaluate(() => GhostPiPBackground.connectEngine());
     await poll(
@@ -750,8 +590,8 @@ win32gui.EnumWindows(cb, None)`,
     };
   });
 
-  // STEP 5: Full Mode Window Position & Size Memory (PIP_BOUNDS Round-Trip)
-  await step("5 full mode window bounds memory (PIP_BOUNDS round-trip)", async () => {
+  // STEP 3: Full Mode Window Position & Size Memory (PIP_BOUNDS Round-Trip)
+  await step("3 full mode window bounds memory (PIP_BOUNDS round-trip)", async () => {
     await resetAll({ clickThrough: true, dodge: { enabled: false, autoReturn: false } });
     await sw.evaluate(() => GhostPiPBackground.connectEngine());
     await tab1.goto(`${base}?w=640&h=360&hue=210`, { waitUntil: "load" });
@@ -830,8 +670,8 @@ win32gui.EnumWindows(cb, None)`,
     };
   });
 
-  // STEP 6: DRM / Native PiP Win32 Subtitle Overlay (GhostPiPSubtitleOverlay)
-  await step("6 DRM native PiP Win32 subtitle overlay (GhostPiPSubtitleOverlay)", async () => {
+  // STEP 4: DRM / Native PiP Win32 Subtitle Overlay (GhostPiPSubtitleOverlay)
+  await step("4 DRM native PiP Win32 subtitle overlay (GhostPiPSubtitleOverlay)", async () => {
     await resetAll({ clickThrough: true, dodge: { enabled: false, autoReturn: false } });
     await sw.evaluate(() => GhostPiPBackground.connectEngine());
 
@@ -899,8 +739,8 @@ win32gui.EnumWindows(cb, None)`,
     };
   });
 
-  // STEP 7: Focus-Free In-Game Media Remote (Alt+Space Play/Pause, Alt+Arrows Seek, Alt+Wheel Volume)
-  await step("7 in-game media remote (focus-free play/pause, seek, Alt+Wheel volume)", async () => {
+  // STEP 5: Focus-Free In-Game Media Remote (Alt+Space Play/Pause, Alt+Arrows Seek, Alt+Wheel Volume)
+  await step("5 in-game media remote (focus-free play/pause, seek, Alt+Wheel volume)", async () => {
     await resetAll({
       clickThrough: true,
       dodge: { enabled: false, autoReturn: false },
@@ -996,8 +836,8 @@ win32gui.EnumWindows(cb, None)`,
     };
   });
 
-  // STEP 8: Reverse Ghost / Peek Mode (0%/5% Hidden -> 80% Hold -> 0% Release, Full Mode + Web Mode)
-  await step("8 peek mode / reverse ghost (0%/5% hidden -> 80% hold -> 0% release)", async () => {
+  // STEP 6: Reverse Ghost / Peek Mode (0%/5% Hidden -> 80% Hold -> 0% Release)
+  await step("6 peek mode / reverse ghost (0%/5% hidden -> 80% hold -> 0% release)", async () => {
     // Intentionally leave clickThrough: false to prove Peek Mode enforces click-through on its own!
     await resetAll({
       clickThrough: false,
@@ -1059,47 +899,6 @@ win32gui.EnumWindows(cb, None)`,
     await tab1.evaluate(() => documentPictureInPicture.window?.close());
     await poll(() => inspectWin32State(), (s) => s.pips.length === 0, 3000);
 
-    // Also verify Web Mode floating <video> responds to engine PEEK_STATE (0 -> 0.8 -> 0)
-    await sw.evaluate(async () => {
-      await GhostPiPBackground.patchSettings({ peek: { idleOpacity: 0, activeOpacity: 0.8 } });
-      GhostPiPBackground.postToEngine({ v: 1, type: "TEST_PEEK", peek: false });
-    });
-    await openLauncherAndClick(tab1, "inTab");
-    const webHidden = await poll(
-      () =>
-        tab1.evaluate(() => {
-          const v = document.getElementById("vid");
-          return {
-            open: v.matches(":popover-open"),
-            op: Number(v.style.getPropertyValue("--gp-opacity")),
-            pe: getComputedStyle(v).pointerEvents,
-          };
-        }),
-      (s) => s.open && s.op === 0 && s.pe === "none",
-      2500,
-    );
-
-    await sw.evaluate(() => GhostPiPBackground.postToEngine({ v: 1, type: "TEST_PEEK", peek: true }));
-    const webPeeking = await poll(
-      () =>
-        tab1.evaluate(() => {
-          const v = document.getElementById("vid");
-          return {
-            op: Number(v.style.getPropertyValue("--gp-opacity")),
-            pe: getComputedStyle(v).pointerEvents,
-          };
-        }),
-      (s) => Math.abs(s.op - 0.8) < 0.001 && s.pe === "none",
-      2500,
-    );
-
-    await sw.evaluate(() => GhostPiPBackground.postToEngine({ v: 1, type: "TEST_PEEK", peek: false }));
-    const webReleased = await poll(
-      () => tab1.evaluate(() => Number(document.getElementById("vid").style.getPropertyValue("--gp-opacity"))),
-      (op) => op === 0,
-      2500,
-    );
-
     const ok =
       Boolean(wInitial && wHidden0 && wPeeking && wReleased && wOutline) &&
       wHidden0.alpha === 0 &&
@@ -1107,15 +906,10 @@ win32gui.EnumWindows(cb, None)`,
       wPeeking.alpha === 204 &&
       wPeeking.hitPassesThrough === true &&
       wReleased.alpha === 0 &&
-      wOutline.alpha === 13 &&
-      webHidden.op === 0 &&
-      webHidden.pe === "none" &&
-      Math.abs(webPeeking.op - 0.8) < 0.001 &&
-      webPeeking.pe === "none" &&
-      webReleased === 0;
+      wOutline.alpha === 13;
     return {
       ok,
-      info: `win32Alpha=(${wInitial?.alpha}->${wHidden0?.alpha}->hold:${wPeeking?.alpha}->rel:${wReleased?.alpha}->5%:${wOutline?.alpha}) passThrough=${wPeeking?.hitPassesThrough} webOp=(${webHidden.op}->${webPeeking.op}->${webReleased})`,
+      info: `win32Alpha=(${wInitial?.alpha}->${wHidden0?.alpha}->hold:${wPeeking?.alpha}->rel:${wReleased?.alpha}->5%:${wOutline?.alpha}) passThrough=${wPeeking?.hitPassesThrough}`,
     };
   });
 

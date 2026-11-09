@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Ativar/desativar som da guia do vídeo"
   },
-  "modeWeb": {
-    "message": "Modo web"
-  },
-  "modeWebTitle": {
-    "message": "Modo web (sobreposição na guia do navegador)"
-  },
   "modeFull": {
     "message": "Modo completo"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Voltar"
   },
-  "btnSourceTab": {
-    "message": "Guia de origem"
-  },
   "hudOpacity": {
     "message": "Opacidade $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Opacidade $PCT$% (role para ajustar) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Dois botões aparecem no topo dos vídeos no YouTube, Twitch, CHZZK, SOOP e serviços OTT como Netflix, Disney+ e Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Uma janela flutuante dentro da guia do navegador. Ela acompanha você em outras guias. Nada para instalar."
   },
   "guideFullModeBody": {
     "message": "Uma janela que flutua sobre jogos e outros programas. Opacidade, clique através e desvio automático exigem o <b>GhostPiP Engine</b>."

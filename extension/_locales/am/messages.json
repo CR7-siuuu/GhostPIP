@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "የቪዲዮ ትሩን ድምጸ-ከል ቀያይር"
   },
-  "modeWeb": {
-    "message": "የድር ሁነታ"
-  },
-  "modeWebTitle": {
-    "message": "የድር ሁነታ (በአሳሽ ትር ውስጥ ተደራቢ)"
-  },
   "modeFull": {
     "message": "ሙሉ ሁነታ"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "መልስ"
   },
-  "btnSourceTab": {
-    "message": "ምንጭ ትር"
-  },
   "hudOpacity": {
     "message": "ግልጽ አለመሆን $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "ግልጽ አለመሆን $PCT$% (ለማስተካከል ይሸብልሉ) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "በYouTube፣ Twitch፣ CHZZK፣ SOOP እና እንደ Netflix፣ Disney+ እና Prime Video ባሉ የOTT አገልግሎቶች ላይ በቪዲዮዎች አናት ሁለት አዝራሮች ይታያሉ።"
-  },
-  "guideWebModeBody": {
-    "message": "በአሳሽ ትር ውስጥ የሚንሳፈፍ መስኮት። ወደ ሌሎች ትሮችም ይከተልዎታል። ምንም መጫን አያስፈልግም።"
   },
   "guideFullModeBody": {
     "message": "ከጨዋታዎች እና ከሌሎች ፕሮግራሞች በላይ የሚንሳፈፍ መስኮት። ግልጽ አለመሆን፣ ጠቅታ ማሳለፍ እና ራስ-ሰር ማምለጥ <b>GhostPiP Engine</b> ያስፈልጋቸዋል።"

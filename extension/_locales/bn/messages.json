@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "ভিডিও ট্যাবের শব্দ বন্ধ/চালু"
   },
-  "modeWeb": {
-    "message": "ওয়েব মোড"
-  },
-  "modeWebTitle": {
-    "message": "ওয়েব মোড (ব্রাউজার ট্যাবের ভেতরে ওভারলে)"
-  },
   "modeFull": {
     "message": "ফুল মোড"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "ফেরত"
   },
-  "btnSourceTab": {
-    "message": "উৎস ট্যাব"
-  },
   "hudOpacity": {
     "message": "অস্বচ্ছতা $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "অস্বচ্ছতা $PCT$% (সামঞ্জস্য করতে স্ক্রল করুন) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "YouTube, Twitch, CHZZK, SOOP এবং Netflix, Disney+ ও Prime Video-র মতো OTT পরিষেবার ভিডিওর ওপরে দুটি বোতাম দেখা যায়।"
-  },
-  "guideWebModeBody": {
-    "message": "ব্রাউজার ট্যাবের ভেতরে একটি ভাসমান উইন্ডো। অন্য ট্যাবেও আপনার সঙ্গে যায়। কিছু ইনস্টল করতে হয় না।"
   },
   "guideFullModeBody": {
     "message": "গেম ও অন্যান্য প্রোগ্রামের ওপর ভাসমান একটি উইন্ডো। অস্বচ্ছতা, ক্লিক-থ্রু ও স্বয়ংক্রিয় সরে যাওয়ার জন্য <b>GhostPiP Engine</b> প্রয়োজন।"

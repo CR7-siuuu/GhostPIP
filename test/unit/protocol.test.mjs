@@ -124,12 +124,12 @@ test("chat framing rules are scoped by initiator or tab and strip only framing h
   assert.equal(P.chatFramingRules("id").length, 2);
 });
 
-test("media target candidates prefer the mapped source, then the newest PiP, then the newest in-tab session", () => {
+test("media target candidates prefer the mapped source, then the newest PiP", () => {
   const pip = { 5: { tabId: 5, sourceTabId: 2 }, 9: { tabId: 9 } };
   const popups = new Map([[40, 3]]);
-  assert.deepEqual(plain(P.mediaTargetCandidates({ preferredTabId: 40, sourceByPopupTab: popups, pip, latestInTabSourceId: 8 })), [3, 9, 2, 8]);
+  assert.deepEqual(plain(P.mediaTargetCandidates({ preferredTabId: 40, sourceByPopupTab: popups, pip })), [3, 9, 2]);
   assert.deepEqual(plain(P.mediaTargetCandidates({ preferredTabId: 5, pip })), [2, 9]);
-  assert.deepEqual(plain(P.mediaTargetCandidates({ preferredTabId: -1, pip: {}, latestInTabSourceId: 8 })), [8]);
+  assert.deepEqual(plain(P.mediaTargetCandidates({ preferredTabId: -1, pip: {} })), []);
   assert.deepEqual(plain(P.mediaTargetCandidates({ pip: {} })), []);
 });
 

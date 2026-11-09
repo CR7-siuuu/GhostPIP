@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Bisukan/bunyikan tab video"
   },
-  "modeWeb": {
-    "message": "Mode Web"
-  },
-  "modeWebTitle": {
-    "message": "Mode Web (overlay di dalam tab browser)"
-  },
   "modeFull": {
     "message": "Mode Penuh"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Kembalikan"
   },
-  "btnSourceTab": {
-    "message": "Tab sumber"
-  },
   "hudOpacity": {
     "message": "Opasitas $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Opasitas $PCT$% (gulir untuk mengatur) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "Dua tombol muncul di bagian atas video di YouTube, Twitch, CHZZK, SOOP, dan layanan OTT seperti Netflix, Disney+, dan Prime Video."
-  },
-  "guideWebModeBody": {
-    "message": "Jendela mengambang di dalam tab browser. Ikut pindah ke tab lain. Tidak perlu instal apa pun."
   },
   "guideFullModeBody": {
     "message": "Jendela yang mengambang di atas game dan program lain. Opasitas, klik tembus, dan hindar otomatis memerlukan <b>GhostPiP Engine</b>."

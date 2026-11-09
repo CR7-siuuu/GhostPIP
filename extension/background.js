@@ -25,11 +25,6 @@ let engineHostMissing = false;
 let reconnectAttempt = 0;
 let lastEngineJson = null;
 
-let inTabSeq = 0;
-let inTabOrderSeq = 0;
-let inTabLoaded = false;
-let latestInTabSourceId = null;
-const inTabSessions = new Map();
 const lastFramesByTab = new Map();
 const lastSubtitlesByTab = new Map();
 const senderStreamPorts = new Map();
@@ -70,49 +65,8 @@ function setPopupTab(sourceTabId, popupTabId) {
   allowChatFramingInTab(popupTabId);
 }
 
-function refreshLatestInTabSourceId() {
-  let bestId = null;
-  let bestOrder = -1;
-  for (const [id, s] of inTabSessions.entries()) {
-    const ord = s.order ?? 0;
-    if (ord >= bestOrder) {
-      bestOrder = ord;
-      bestId = id;
-    }
-  }
-  latestInTabSourceId = bestId;
-  return bestId;
-}
-
-async function ensureInTabSessions() {
-  if (inTabLoaded) return inTabSessions;
-  inTabLoaded = true;
-  try {
-    const { inTabSessions: storedMap } = await chrome.storage.session.get("inTabSessions");
-    for (const s of Object.values(storedMap || {})) {
-      if (s && Number.isFinite(s.sourceTabId)) {
-        inTabSessions.set(s.sourceTabId, s);
-        inTabSeq = Math.max(inTabSeq, s.connId || 0);
-        inTabOrderSeq = Math.max(inTabOrderSeq, s.order || 0);
-      }
-    }
-    refreshLatestInTabSourceId();
-  } catch {}
-  return inTabSessions;
-}
-
 function ready() {
-  return Promise.all([ensureInTabSessions(), loadPopupMaps()]);
-}
-
-async function persistInTabSessions() {
-  refreshLatestInTabSourceId();
-  if (inTabSessions.size === 0) {
-    await chrome.storage.session.remove("inTabSessions").catch(() => {});
-    if (popupPipBySource.size === 0) clearChatFramingTabs();
-    return;
-  }
-  await chrome.storage.session.set({ inTabSessions: Object.fromEntries(inTabSessions.entries()) }).catch(() => {});
+  return loadPopupMaps();
 }
 
 chrome.storage.onChanged?.addListener((changes, area) => {
@@ -121,13 +75,6 @@ chrome.storage.onChanged?.addListener((changes, area) => {
     return;
   }
   if (area !== "session") return;
-  if (changes.inTabSessions && !changes.inTabSessions.newValue && inTabSessions.size > 0) {
-    inTabSessions.clear();
-    lastFramesByTab.clear();
-    lastSubtitlesByTab.clear();
-    latestInTabSourceId = null;
-    syncEngineSessionState();
-  }
   if (changes.engine && Boolean(changes.engine.oldValue?.connected) !== Boolean(changes.engine.newValue?.connected)) {
     broadcastEngineState(Boolean(changes.engine.newValue?.connected));
   }
@@ -166,139 +113,8 @@ function forgetChatFramingTab(tabId) {
   updateChatFraming((ids) => ids.delete(tabId));
 }
 
-function clearChatFramingTabs() {
-  updateChatFraming((ids) => ids.clear());
-}
-
 function isNormalWebTab(tab) {
   return Boolean(tab && tab.id != null && !sourceByPopupTab.has(tab.id) && (!tab.url || /^https?:/i.test(tab.url)));
-}
-
-function toRemotePayload(session) {
-  const srcId = session.sourceTabId;
-  return {
-    connId: session.connId,
-    sourceTabId: srcId,
-    ratio: session.ratio || 9 / 16,
-    vw: session.vw || 0,
-    vh: session.vh || 0,
-    chatUrl: session.chatUrl || null,
-    initialFrame: lastFramesByTab.get(srcId) || null,
-    initialSubtitle: lastSubtitlesByTab.get(srcId) ?? session.subtitle ?? "",
-  };
-}
-
-function remoteSessionsForTab(tabId) {
-  return [...inTabSessions.values()]
-    .filter((s) => Number.isFinite(s.sourceTabId) && s.sourceTabId !== tabId)
-    .sort((a, b) => (a.order || 0) - (b.order || 0))
-    .map(toRemotePayload);
-}
-
-function syncTabRemoteOverlays(tabId) {
-  if (!Number.isFinite(tabId) || sourceByPopupTab.has(tabId)) return Promise.resolve(null);
-  const sessions = remoteSessionsForTab(tabId);
-  if (sessions.some((s) => s.chatUrl)) allowChatFramingInTab(tabId);
-  return sendTab(tabId, { type: "REMOTE_INTAB_SYNC", sessions });
-}
-
-async function broadcastRemoteStop(excludeTabId = null, sourceTabId = null) {
-  if (!chrome.tabs?.query) return;
-  try {
-    const tabs = await chrome.tabs.query({});
-    for (const t of tabs) {
-      if (t.id != null && t.id !== excludeTabId && !sourceByPopupTab.has(t.id)) {
-        const msg = Number.isFinite(sourceTabId)
-          ? { type: "REMOTE_INTAB_STOP", sourceTabId }
-          : { type: "REMOTE_INTAB_STOP" };
-        sendTab(t.id, msg);
-      }
-    }
-  } catch {}
-}
-
-function prewarmTab(tabId, session) {
-  if (!Number.isFinite(tabId) || !session?.sourceTabId || tabId === session.sourceTabId || sourceByPopupTab.has(tabId)) {
-    return Promise.resolve(null);
-  }
-  if (session.chatUrl) allowChatFramingInTab(tabId);
-  return sendTab(tabId, {
-    type: "REMOTE_INTAB_START",
-    ...toRemotePayload(session),
-  });
-}
-
-async function prewarmRemoteTabs(session) {
-  if (!session?.sourceTabId || !chrome.tabs?.query) return;
-  try {
-    const tabs = await chrome.tabs.query({});
-    for (const t of tabs) {
-      if (isNormalWebTab(t) && t.id !== session.sourceTabId) {
-        prewarmTab(t.id, session);
-      }
-    }
-  } catch {}
-}
-
-async function syncActiveTab(activeTabId, windowId = null) {
-  if (!Number.isFinite(activeTabId) || sourceByPopupTab.has(activeTabId)) return;
-  if (windowId != null && sourceByPopupWindow.has(windowId)) return;
-  const playerPrefix = chrome.runtime.getURL("player/");
-  const activeTabInfo = await chrome.tabs?.get?.(activeTabId).catch(() => null);
-  if (
-    activeTabInfo &&
-    (sourceByPopupWindow.has(activeTabInfo.windowId) ||
-      activeTabInfo.url?.startsWith(playerPrefix) ||
-      activeTabInfo.pendingUrl?.startsWith(playerPrefix))
-  ) {
-    return;
-  }
-  await ensureInTabSessions();
-  if (inTabSessions.size === 0) return;
-
-  const remoteList = [...inTabSessions.values()].filter((s) => s.sourceTabId !== activeTabId);
-  if (remoteList.length === 0) {
-    sendTab(activeTabId, { type: "REMOTE_INTAB_SYNC", sessions: [] });
-    return;
-  }
-
-  for (const s of remoteList) {
-    s.connId = ++inTabSeq;
-  }
-  await persistInTabSessions();
-
-  const immediateStart = syncTabRemoteOverlays(activeTabId);
-
-  let updatedAny = false;
-  await Promise.all(
-    remoteList.map(async (s) => {
-      const info = await sendTab(s.sourceTabId, { type: "INTAB_QUERY_SOURCE" });
-      const live = inTabSessions.get(s.sourceTabId);
-      if (!info?.ok || !live) return;
-      if (info.ratio) live.ratio = info.ratio;
-      if (info.vw > 0 && info.vh > 0) {
-        live.vw = info.vw;
-        live.vh = info.vh;
-      }
-      if (info.chatUrl !== undefined) {
-        live.chatUrl = Protocol.isAllowedChatUrl(info.chatUrl) ? info.chatUrl : null;
-      }
-      if (typeof info.subtitle === "string") {
-        live.subtitle = info.subtitle;
-        lastSubtitlesByTab.set(s.sourceTabId, info.subtitle);
-      }
-      if (info.frame?.dataUrl) {
-        lastFramesByTab.set(s.sourceTabId, { ...info.frame, sourceTabId: s.sourceTabId });
-      }
-      updatedAny = true;
-    }),
-  );
-
-  if (updatedAny) await persistInTabSessions();
-  const started = await immediateStart;
-  if (!started?.ok || updatedAny) {
-    await syncTabRemoteOverlays(activeTabId);
-  }
 }
 
 function parseReceiverSourceId(portName) {
@@ -311,11 +127,9 @@ function parseReceiverSourceId(portName) {
 function notifySenderReceivers(sourceTabId) {
   const senderPort = senderStreamPorts.get(sourceTabId);
   if (!senderPort) return;
-  const fallbackId = latestInTabSourceId;
   let active = false;
   for (const rp of receiverStreamPorts.values()) {
-    const target = rp.sourceTabId ?? fallbackId;
-    if (target === sourceTabId && rp.visible) active = true;
+    if (rp.sourceTabId === sourceTabId && rp.visible) active = true;
   }
   if (senderPort.__receiversActive === active) return;
   senderPort.__receiversActive = active;
@@ -336,17 +150,9 @@ chrome.runtime.onConnect.addListener((port) => {
       const taggedOut = { ...msg, sourceTabId };
       if (msg.type === "FRAME" && msg.dataUrl) {
         lastFramesByTab.set(sourceTabId, taggedOut);
-        const sess = inTabSessions.get(sourceTabId);
-        if (sess && msg.vw > 0 && msg.vh > 0) {
-          sess.vw = msg.vw;
-          sess.vh = msg.vh;
-          sess.ratio = msg.vh / msg.vw;
-        }
       } else if (msg.type === "SUBTITLE") {
         const text = typeof msg.text === "string" ? msg.text : "";
         lastSubtitlesByTab.set(sourceTabId, text);
-        const sess = inTabSessions.get(sourceTabId);
-        if (sess) sess.subtitle = text;
       }
       if (msg.portId && receiverStreamPorts.has(msg.portId)) {
         try {
@@ -354,9 +160,8 @@ chrome.runtime.onConnect.addListener((port) => {
         } catch {}
         return;
       }
-      const fallbackId = refreshLatestInTabSourceId();
       for (const rp of receiverStreamPorts.values()) {
-        if (rp.sourceTabId === sourceTabId || (rp.sourceTabId == null && fallbackId === sourceTabId)) {
+        if (rp.sourceTabId === sourceTabId) {
           try {
             rp.port.postMessage(taggedOut);
           } catch {}
@@ -371,12 +176,6 @@ chrome.runtime.onConnect.addListener((port) => {
   } else if (port.name === "ghostpip-receiver" || port.name?.startsWith("ghostpip-receiver:")) {
     const portId = ++receiverPortSeq;
     const parsedSrcId = parseReceiverSourceId(port.name);
-    const entry = {
-      port,
-      sourceTabId: parsedSrcId,
-      visible: true,
-    };
-    receiverStreamPorts.set(portId, entry);
     const receiverTabId = port.sender?.tab?.id;
     if (
       Number.isFinite(parsedSrcId) &&
@@ -386,6 +185,12 @@ chrome.runtime.onConnect.addListener((port) => {
       sourceByPopupTab.set(receiverTabId, parsedSrcId);
       if (popupPipBySource.get(parsedSrcId)?.popupTabId == null) setPopupTab(parsedSrcId, receiverTabId);
     }
+    const entry = {
+      port,
+      sourceTabId: parsedSrcId ?? sourceByPopupTab.get(receiverTabId) ?? null,
+      visible: true,
+    };
+    receiverStreamPorts.set(portId, entry);
 
     const sendInitialSnapshot = (srcId) => {
       if (!Number.isFinite(srcId)) return;
@@ -403,7 +208,7 @@ chrome.runtime.onConnect.addListener((port) => {
       }
     };
 
-    const initialTarget = entry.sourceTabId ?? refreshLatestInTabSourceId();
+    const initialTarget = entry.sourceTabId ?? sourceByPopupTab.get(receiverTabId);
     if (Number.isFinite(initialTarget)) {
       sendInitialSnapshot(initialTarget);
       notifySenderReceivers(initialTarget);
@@ -411,12 +216,12 @@ chrome.runtime.onConnect.addListener((port) => {
 
     port.onMessage.addListener((msg) => {
       if (!msg) return;
-      const prevTarget = entry.sourceTabId ?? latestInTabSourceId;
+      const prevTarget = entry.sourceTabId ?? sourceByPopupTab.get(receiverTabId);
       if (Number.isFinite(msg.sourceTabId) && entry.sourceTabId !== msg.sourceTabId) {
         entry.sourceTabId = msg.sourceTabId;
         sendInitialSnapshot(entry.sourceTabId);
       }
-      const targetSrcId = entry.sourceTabId ?? refreshLatestInTabSourceId();
+      const targetSrcId = entry.sourceTabId ?? sourceByPopupTab.get(receiverTabId);
       if (Number.isFinite(targetSrcId) && entry.sourceTabId == null) {
         entry.sourceTabId = targetSrcId;
       }
@@ -436,19 +241,11 @@ chrome.runtime.onConnect.addListener((port) => {
         } catch {}
       } else if (Number.isFinite(targetSrcId)) {
         sendTab(targetSrcId, { type: "INTAB_RECONNECT_SENDER" });
-      } else {
-        ensureInTabSessions().then(() => {
-          const recovered = entry.sourceTabId ?? refreshLatestInTabSourceId();
-          if (Number.isFinite(recovered)) {
-            entry.sourceTabId = recovered;
-            sendTab(recovered, { type: "INTAB_RECONNECT_SENDER" });
-          }
-        });
       }
     });
     port.onDisconnect.addListener(() => {
       receiverStreamPorts.delete(portId);
-      const targetSrcId = entry.sourceTabId ?? refreshLatestInTabSourceId();
+      const targetSrcId = entry.sourceTabId ?? sourceByPopupTab.get(receiverTabId);
       const senderPort = Number.isFinite(targetSrcId) ? senderStreamPorts.get(targetSrcId) : null;
       if (senderPort) {
         try {
@@ -472,19 +269,16 @@ function postToEngine(msg) {
 
 async function syncEngineSessionState(pipOverride = null) {
   if (!nativePort) return;
-  const [pip] = await Promise.all([
-    pipOverride
-      ? Promise.resolve(pipOverride)
-      : chrome.storage.session
-          .get("pip")
-          .then((r) => r?.pip || {})
-          .catch(() => ({})),
-    ensureInTabSessions(),
-  ]);
+  const pip = pipOverride
+    ? pipOverride
+    : await chrome.storage.session
+        .get("pip")
+        .then((r) => r?.pip || {})
+        .catch(() => ({}));
   postToEngine({
     v: 1,
     type: "SESSION_STATE",
-    active: Object.keys(pip || {}).length > 0 || inTabSessions.size > 0,
+    active: Object.keys(pip || {}).length > 0,
   });
 }
 
@@ -649,6 +443,8 @@ async function closePopupPipForSource(sourceTabId, { notifySource = false } = {}
   const info = popupPipBySource.get(sourceTabId);
   if (!info) return;
   popupPipBySource.delete(sourceTabId);
+  lastFramesByTab.delete(sourceTabId);
+  lastSubtitlesByTab.delete(sourceTabId);
   if (info.popupWindowId != null) sourceByPopupWindow.delete(info.popupWindowId);
   if (info.popupTabId != null) sourceByPopupTab.delete(info.popupTabId);
   await persistPopupMaps();
@@ -922,7 +718,6 @@ function connectEngine() {
   Promise.all([
     chrome.storage.local.get(["settings", "engineInstalled", "pipBounds"]),
     chrome.storage.session.get("pip"),
-    ensureInTabSessions(),
   ])
     .then(([{ settings, engineInstalled: storedInstalled, pipBounds }, { pip = {} }]) => {
       if (typeof storedInstalled === "boolean" && !engineInstalled) {
@@ -1021,19 +816,6 @@ function loadSites() {
   return sitesPromise;
 }
 
-chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
-  syncActiveTab(tabId, windowId);
-});
-
-chrome.tabs.onUpdated?.addListener(async (tabId, changeInfo) => {
-  if (changeInfo.status !== "complete") return;
-  await ready();
-  if (sourceByPopupTab.has(tabId)) return;
-  if (inTabSessions.size > 0) {
-    syncTabRemoteOverlays(tabId);
-  }
-});
-
 chrome.windows?.onRemoved?.addListener(async (windowId) => {
   await ready();
   const sourceTabId = sourceByPopupWindow.get(windowId);
@@ -1045,6 +827,8 @@ chrome.windows?.onRemoved?.addListener(async (windowId) => {
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   await ready();
   forgetChatFramingTab(tabId);
+  lastFramesByTab.delete(tabId);
+  lastSubtitlesByTab.delete(tabId);
   if (sourceByPopupTab.has(tabId)) {
     const srcId = sourceByPopupTab.get(tabId);
     await closePopupPipForSource(srcId, { notifySource: true });
@@ -1054,14 +838,6 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
     await closePopupPipForSource(tabId, { notifySource: false });
   }
   pipChanged(tabId, null);
-  if (inTabSessions.has(tabId)) {
-    inTabSessions.delete(tabId);
-    lastFramesByTab.delete(tabId);
-    lastSubtitlesByTab.delete(tabId);
-    await persistInTabSessions();
-    syncEngineSessionState();
-    await broadcastRemoteStop(tabId, tabId);
-  }
 });
 
 async function findMuteTargetTab(preferredTabId = null) {
@@ -1071,7 +847,6 @@ async function findMuteTargetTab(preferredTabId = null) {
     preferredTabId,
     sourceByPopupTab,
     pip,
-    latestInTabSourceId: refreshLatestInTabSourceId(),
   });
   for (const targetId of candidates) {
     const tab = await chrome.tabs.get(targetId).catch(() => null);
@@ -1143,15 +918,6 @@ async function executeMediaAction(action, { deltaSec = 0, deltaVolume = 0, tabId
     const popupTabId = popupPipBySource.get(tab.id)?.popupTabId;
     if (Number.isFinite(popupTabId)) {
       sendTab(popupTabId, { type: "MEDIA_HUD", sourceTabId: tab.id, text: res.hudText });
-    }
-    await ensureInTabSessions();
-    if (inTabSessions.has(tab.id) && chrome.tabs?.query) {
-      const tabs = await chrome.tabs.query({}).catch(() => []);
-      for (const t of tabs) {
-        if (t.id != null && t.id !== tab.id && !sourceByPopupTab.has(t.id)) {
-          sendTab(t.id, { type: "MEDIA_HUD", sourceTabId: tab.id, text: res.hudText });
-        }
-      }
     }
   }
 
@@ -1231,7 +997,6 @@ async function resolveTargetSourceTabId(requestedId, sender, fallbackToSender = 
       senderTabId == null ||
       senderTabId === requestedId ||
       mappedPopupSrc === requestedId ||
-      inTabSessions.has(requestedId) ||
       popupPipBySource.has(requestedId)
     ) {
       return requestedId;
@@ -1242,7 +1007,7 @@ async function resolveTargetSourceTabId(requestedId, sender, fallbackToSender = 
     }
     return null;
   }
-  return mappedPopupSrc ?? refreshLatestInTabSourceId() ?? (fallbackToSender ? senderTabId : null);
+  return mappedPopupSrc ?? (fallbackToSender ? senderTabId : null);
 }
 
 const handlers = {
@@ -1253,13 +1018,6 @@ const handlers = {
       ready(),
     ]);
     const senderTabId = sender?.tab?.id ?? null;
-    if (senderTabId != null && !sourceByPopupTab.has(senderTabId)) {
-      if (sender.tab.active) {
-        syncActiveTab(senderTabId);
-      } else if (inTabSessions.size > 0) {
-        syncTabRemoteOverlays(senderTabId);
-      }
-    }
     const base = found ? { siteId: found.siteId, site: found.site } : GENERIC_SITE;
     return {
       ...base,
@@ -1268,85 +1026,6 @@ const handlers = {
       peekActive: Boolean(enginePeekActive),
       ...getDocPipStatus(pip),
     };
-  },
-  async INTAB_OPENED({ ratio, vw, vh, chatUrl, frame, subtitle } = {}, sender) {
-    const tabId = sender?.tab?.id;
-    if (!Number.isFinite(tabId)) return { ok: false };
-    await ready();
-    if (frame?.dataUrl) {
-      lastFramesByTab.set(tabId, { ...frame, sourceTabId: tabId });
-    }
-    if (typeof subtitle === "string") {
-      lastSubtitlesByTab.set(tabId, subtitle);
-    }
-    const safeChatUrl = Protocol.isAllowedChatUrl(chatUrl) ? chatUrl : null;
-    if (safeChatUrl) allowChatFramingInTab(tabId);
-    const existing = inTabSessions.get(tabId);
-    const next = {
-      sourceTabId: tabId,
-      connId: ++inTabSeq,
-      order: existing?.order ?? ++inTabOrderSeq,
-      ratio: Number.isFinite(ratio) && ratio > 0 ? ratio : 9 / 16,
-      vw: Number.isFinite(vw) && vw > 0 ? vw : frame?.vw || 0,
-      vh: Number.isFinite(vh) && vh > 0 ? vh : frame?.vh || 0,
-      chatUrl: safeChatUrl,
-      subtitle: typeof subtitle === "string" ? subtitle : lastSubtitlesByTab.get(tabId) || "",
-    };
-    inTabSessions.set(tabId, next);
-    await persistInTabSessions();
-    if (!nativePort) connectEngine();
-    syncEngineSessionState();
-    prewarmRemoteTabs(next);
-    if (chrome.tabs?.query) {
-      const activeTabs = await chrome.tabs.query({ active: true }).catch(() => []);
-      for (const activeTab of activeTabs) {
-        if (isNormalWebTab(activeTab)) {
-          syncActiveTab(activeTab.id);
-        }
-      }
-    }
-    return { ok: true };
-  },
-  async INTAB_CLOSED(_msg, sender) {
-    const tabId = sender?.tab?.id;
-    if (!Number.isFinite(tabId)) return { ok: true };
-    await ready();
-    if (inTabSessions.has(tabId)) {
-      inTabSessions.delete(tabId);
-      lastFramesByTab.delete(tabId);
-      lastSubtitlesByTab.delete(tabId);
-      await persistInTabSessions();
-      syncEngineSessionState();
-      await broadcastRemoteStop(tabId, tabId);
-    }
-    return { ok: true };
-  },
-  async INTAB_STOP_SINGLE({ sourceTabId } = {}, sender) {
-    const targetId = await resolveTargetSourceTabId(sourceTabId, sender);
-    if (Number.isFinite(targetId) && inTabSessions.has(targetId)) {
-      inTabSessions.delete(targetId);
-      lastFramesByTab.delete(targetId);
-      lastSubtitlesByTab.delete(targetId);
-      await persistInTabSessions();
-      syncEngineSessionState();
-      sendTab(targetId, { type: "INTAB_FORCE_IDLE" });
-      await broadcastRemoteStop(null, targetId);
-    }
-    return { ok: true };
-  },
-  async INTAB_STOP_ALL() {
-    await ready();
-    const srcIds = [...inTabSessions.keys()];
-    inTabSessions.clear();
-    lastFramesByTab.clear();
-    lastSubtitlesByTab.clear();
-    await persistInTabSessions();
-    syncEngineSessionState();
-    for (const srcId of srcIds) {
-      sendTab(srcId, { type: "INTAB_FORCE_IDLE" });
-    }
-    await broadcastRemoteStop();
-    return { ok: true };
   },
   async FOCUS_SOURCE_TAB({ sourceTabId } = {}, sender) {
     const targetTabId = await resolveTargetSourceTabId(sourceTabId, sender, true);
@@ -1529,7 +1208,6 @@ const handlers = {
     const res = await updateSettings((current) => GhostPiPSettings.patch(current, patch));
     if (res.ok && patch?.enabled === false) {
       engineAllowed = false;
-      await handlers.INTAB_STOP_ALL();
       await closeAllPopupPips();
       await chrome.storage.session.set({ pip: {} });
       syncEngineSessionState({});

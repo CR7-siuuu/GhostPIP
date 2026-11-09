@@ -14,14 +14,8 @@
   "cmdMute": {
     "message": "영상 탭 음소거 토글"
   },
-  "modeWeb": {
-    "message": "웹 모드"
-  },
-  "modeWebTitle": {
-    "message": "웹 모드 (브라우저 탭 내 오버레이)"
-  },
   "modeFull": {
-    "message": "전체 모드"
+    "message": "PiP 열기"
   },
   "modeFullTitle": {
     "message": "전체 모드 (데스크톱 PiP 창)"
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "복귀"
   },
-  "btnSourceTab": {
-    "message": "원본 탭"
-  },
   "hudOpacity": {
     "message": "투명도 $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "투명도 $PCT$% (휠 조절) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -94,7 +74,7 @@
     "message": "자동 회피"
   },
   "showChatFull": {
-    "message": "전체 모드 채팅 표시"
+    "message": "채팅 표시 (스트리밍)"
   },
   "allSites": {
     "message": "모든 사이트에서 사용"
@@ -235,10 +215,7 @@
     "message": "1. 영상 위에 마우스를 올리세요"
   },
   "guideStep1Body": {
-    "message": "유튜브 · 치지직 · SOOP · 트위치와 넷플릭스 · 디즈니+ · 프라임 비디오 · 쿠팡플레이 · 티빙 · 웨이브 · 왓챠 같은 OTT 영상 위 상단에 두 버튼이 나타납니다."
-  },
-  "guideWebModeBody": {
-    "message": "브라우저 탭 안에서 떠 있는 창. 다른 탭으로 옮겨도 따라옵니다. 설치 필요 없음."
+    "message": "유튜브 · 치지직 · SOOP · 트위치와 넷플릭스 · 디즈니+ · 프라임 비디오 · 쿠팡플레이 · 티빙 · 웨이브 · 왓챠 같은 OTT 영상 위 상단에 PiP 버튼이 나타납니다."
   },
   "guideFullModeBody": {
     "message": "게임 · 다른 프로그램 위에도 떠 있는 창. 투명도 · 클릭 통과 · 자동 회피는 <b>GhostPiP Engine</b>이 필요합니다."

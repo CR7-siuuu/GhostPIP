@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "Video sekmesinin sesini aç/kapat"
   },
-  "modeWeb": {
-    "message": "Web modu"
-  },
-  "modeWebTitle": {
-    "message": "Web modu (tarayıcı sekmesi içinde katman)"
-  },
   "modeFull": {
     "message": "Tam mod"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "Geri döndür"
   },
-  "btnSourceTab": {
-    "message": "Kaynak sekme"
-  },
   "hudOpacity": {
     "message": "Opaklık %$PCT$",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "Opaklık %$PCT$ (ayarlamak için kaydırın) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "YouTube, Twitch, CHZZK, SOOP ve Netflix, Disney+, Prime Video gibi OTT hizmetlerindeki videoların üstünde iki düğme görünür."
-  },
-  "guideWebModeBody": {
-    "message": "Tarayıcı sekmesi içinde yüzen bir pencere. Diğer sekmelerde de sizi takip eder. Hiçbir şey yüklemeniz gerekmez."
   },
   "guideFullModeBody": {
     "message": "Oyunların ve diğer programların üzerinde yüzen bir pencere. Opaklık, tıklama geçirme ve otomatik kaçınma için <b>GhostPiP Engine</b> gerekir."

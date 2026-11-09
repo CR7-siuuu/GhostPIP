@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "تبديل كتم صوت علامة تبويب الفيديو"
   },
-  "modeWeb": {
-    "message": "وضع الويب"
-  },
-  "modeWebTitle": {
-    "message": "وضع الويب (طبقة داخل علامة تبويب المتصفح)"
-  },
   "modeFull": {
     "message": "الوضع الكامل"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "إرجاع"
   },
-  "btnSourceTab": {
-    "message": "علامة التبويب المصدر"
-  },
   "hudOpacity": {
     "message": "العتامة $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "العتامة $PCT$% (مرّر العجلة للضبط) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "يظهر زران أعلى الفيديوهات على YouTube وTwitch وCHZZK وSOOP وخدمات OTT مثل Netflix وDisney+ وPrime Video."
-  },
-  "guideWebModeBody": {
-    "message": "نافذة عائمة داخل علامة تبويب المتصفح. تتبعك إلى علامات التبويب الأخرى. لا حاجة إلى تثبيت أي شيء."
   },
   "guideFullModeBody": {
     "message": "نافذة تطفو فوق الألعاب والبرامج الأخرى. تتطلب العتامة وتمرير النقرات والتفادي التلقائي <b>GhostPiP Engine</b>."

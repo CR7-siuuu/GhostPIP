@@ -6,7 +6,6 @@
     "build:zip": "node scripts/build-zip.mjs",
     "test:unit": "node --test \"test/unit/*.test.mjs\"",
     "test:e2e": "node test/e2e/run.mjs",
-    "test:crosstab": "node test/e2e/crosstab.mjs",
     "test:popup": "node test/e2e/popup.mjs",
     "test:engine": "node test/e2e/engine.mjs",
     "test:features": "node test/e2e/features_v1_1.mjs",

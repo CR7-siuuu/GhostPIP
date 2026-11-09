@@ -14,12 +14,6 @@
   "cmdMute": {
     "message": "เปิด/ปิดเสียงแท็บวิดีโอ"
   },
-  "modeWeb": {
-    "message": "โหมดเว็บ"
-  },
-  "modeWebTitle": {
-    "message": "โหมดเว็บ (ซ้อนทับในแท็บเบราว์เซอร์)"
-  },
   "modeFull": {
     "message": "โหมดเต็ม"
   },
@@ -47,25 +41,11 @@
   "btnReturn": {
     "message": "กลับคืน"
   },
-  "btnSourceTab": {
-    "message": "แท็บต้นทาง"
-  },
   "hudOpacity": {
     "message": "ความทึบ $PCT$%",
     "placeholders": {
       "pct": {
         "content": "$1"
-      }
-    }
-  },
-  "hudOpacityWheel": {
-    "message": "ความทึบ $PCT$% (เลื่อนเพื่อปรับ) · $SIZE$",
-    "placeholders": {
-      "pct": {
-        "content": "$1"
-      },
-      "size": {
-        "content": "$2"
       }
     }
   },
@@ -236,9 +216,6 @@
   },
   "guideStep1Body": {
     "message": "ปุ่มสองปุ่มจะปรากฏที่ด้านบนของวิดีโอบน YouTube, Twitch, CHZZK, SOOP และบริการ OTT เช่น Netflix, Disney+ และ Prime Video"
-  },
-  "guideWebModeBody": {
-    "message": "หน้าต่างลอยภายในแท็บเบราว์เซอร์ ติดตามคุณไปยังแท็บอื่นได้ ไม่ต้องติดตั้งอะไร"
   },
   "guideFullModeBody": {
     "message": "หน้าต่างที่ลอยเหนือเกมและโปรแกรมอื่นๆ ความทึบ คลิกทะลุ และหลบอัตโนมัติต้องใช้ <b>GhostPiP Engine</b>"
