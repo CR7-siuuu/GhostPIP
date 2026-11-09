@@ -4,7 +4,7 @@
 
 - **웹 모드**: 브라우저 탭 안에 떠 있는 창입니다. 탭을 옮겨도 따라옵니다. 확장만 있으면 됩니다.
 - **전체 모드**: 게임이나 다른 프로그램 위에 뜨는 Document PiP / 독립 창입니다. 투명도, 클릭 통과, 자동 회피를 쓰려면 Windows용 GhostPiP Engine이 필요합니다.
-- **주요 기능**: 다중 PiP(여러 영상 동시 플로팅·독립 창), 창 위치·크기 기억(가로·세로 비율 안전 구분), 실시간 자막 오버레이(유튜브·넷플릭스·HTML5 트랙), 포커스를 뺏지 않는 인게임 리모컨, 역방향 고스트(평소 0~5% 숨김 · 키 누를 때만 80% 표시).
+- **주요 기능**: 다중 PiP(여러 영상 동시 플로팅·독립 창), 창 위치·크기 기억(가로·세로 비율 안전 구분), 실시간 자막 오버레이(유튜브·넷플릭스·HTML5 트랙), 포커스를 뺏지 않는 리모컨, 역 투명화(평소 0~5% 숨김 · 키 누를 때만 80% 표시).
 
 지원 사이트(`extension/config/selectors.json`):
 
@@ -20,7 +20,7 @@ OTT는 대부분 DRM 영상이라 전체 모드가 크롬 기본 PiP 창으로 �
    - `GhostPiP-Extension-store.zip`: Chrome 웹 스토어 업로드용. `key`와 `_metadata`를 뺀 버전입니다.
    - `GhostPiP-Engine-win-x64.zip`: 엔진만 들어 있습니다.
 2. 확장: `chrome://extensions`에서 개발자 모드를 켜고 `extension` 폴더를 로드합니다.
-3. 엔진: `engine\install.bat`을 실행합니다. 엔진은 `%LOCALAPPDATA%\Programs\GhostPiP`에 복사되고 Chrome, Edge, Whale, Brave에 네이티브 메시징 호스트로 등록됩니다. 관리자 권한은 필요 없습니다. 제거는 `uninstall.bat`입니다.
+3. 엔진: `engine\install.bat`을 실행합니다(언팩 개발 확장을 함께 등록하려면 `powershell -ExecutionPolicy Bypass -File engine\installer\install.ps1 -Dev`). 엔진은 `%LOCALAPPDATA%\Programs\GhostPiP`에 복사되고 Chrome, Edge, Whale, Brave에 네이티브 메시징 호스트로 등록됩니다. 관리자 권한은 필요 없습니다. 제거는 `uninstall.bat`입니다.
 
 ## 조작
 
@@ -31,10 +31,10 @@ OTT는 대부분 DRM 영상이라 전체 모드가 크롬 기본 PiP 창으로 �
 | 클릭 통과 | `Alt+G` |
 | 자동 회피 | `Alt+Shift+D` |
 | 음소거 | `Alt+M` |
-| 역방향 고스트 켜기/끄기 | `Alt+P` (켜진 상태에서 지정 홀드 키를 누르는 동안만 표시) |
-| 인게임 리모컨 (재생/일시정지) | `Alt+Space` |
-| 인게임 리모컨 (뒤로/앞으로 이동) | `Alt+←` / `Alt+→` (5초 · 10초 선택 가능) |
-| 인게임 리모컨 (볼륨 조절) | `Alt+마우스 휠` |
+| 역 투명화 켜기/끄기 | `Alt+P` (켜진 상태에서 지정 홀드 키를 누르는 동안만 표시) |
+| 리모컨 (재생/일시정지) | `Alt+Space` |
+| 리모컨 (뒤로/앞으로 이동) | `Alt+←` / `Alt+→` (5초 · 10초 선택 가능) |
+| 리모컨 (볼륨 조절) | `Alt+마우스 휠` |
 
 ## 백신 오탐과 코드 서명
 
@@ -58,8 +58,8 @@ OTT는 대부분 DRM 영상이라 전체 모드가 크롬 기본 PiP 창으로 �
 - 개인정보 처리방침은 [PRIVACY.md](PRIVACY.md)를 사용하세요.
 - 권한 사유:
   - `nativeMessaging`: 로컬 엔진과 통신
-  - `scripting`, 모든 사이트 호스트 권한: 일반 사이트 동영상에 오버레이 표시
-  - `declarativeNetRequest`: 채팅 팝아웃 페이지를 PiP 창 안 iframe으로 띄우기 위해 해당 채팅 URL의 프레임 차단 헤더만 제거
+  - `scripting`, 지원 사이트 `host_permissions` 및 선택적 호스트 권한(`optional_host_permissions`): 지원 스트리밍·OTT 사이트와(사용자가 허용한 경우) 일반 사이트 동영상에 오버레이 표시
+  - `declarativeNetRequest`: 확장 페이지 및 지원 방송 사이트 안에서 채팅 팝아웃 페이지를 iframe으로 띄울 때 프레임 차단 헤더만 제한적으로 제거
   - `storage`: 설정 저장
 
 ## 개발

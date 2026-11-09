@@ -310,13 +310,13 @@
     "message": "Iziet"
   },
   "peekMode": {
-    "message": "Ieskata režīms"
+    "message": "Apgrieztā caurspīdība"
   },
   "peekModeHint": {
     "message": "Paslēpt, līdz turat nospiestu taustiņu"
   },
   "peekSettings": {
-    "message": "Ieskata režīma iestatījumi"
+    "message": "Apgrieztās caurspīdības iestatījumi"
   },
   "peekKey": {
     "message": "Turēšanas taustiņš"
@@ -340,13 +340,13 @@
     "message": "Necaurredzamība turot"
   },
   "mediaRemote": {
-    "message": "Vadība spēlē"
+    "message": "Tālvadība"
   },
   "mediaRemoteHint": {
     "message": "Atskaņošana, pārtīšana un skaļums nezaudējot fokusu"
   },
   "mediaSettings": {
-    "message": "Vadības spēlē iestatījumi"
+    "message": "Tālvadības iestatījumi"
   },
   "mediaSeekStep": {
     "message": "Pārtīšanas solis"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Spēlēs, kas palaistas administratora režīmā, Ctrl+Alt turēšana nesasniedz PiP. Tā vietā izmantojiet Alt+G, lai ieslēgtu vai izslēgtu klikšķu caurlaidību."
+  },
+  "tipMediaHotkeys": {
+    "message": "Kamēr tiek atskaņots PiP, Alt+Left, Alt+Right un Alt+Space kontrolē video un aizstāj Atpakaļ, Uz priekšu un loga izvēlni."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Atļaujiet piekļuvi visām vietnēm, lai to izmantotu."
   }
 }

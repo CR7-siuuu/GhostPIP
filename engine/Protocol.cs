@@ -112,7 +112,7 @@ public sealed record TestHotkeyMessage(string Action) : IncomingMessage("TEST_HO
 public sealed record TestMouseMessage(string Event, int X, int Y) : IncomingMessage("TEST_MOUSE");
 
 public abstract record OutgoingMessage(string Type);
-public sealed record HelloMessage(string EngineVersion, string[] HotkeyErrors) : OutgoingMessage("HELLO");
+public sealed record HelloMessage(string EngineVersion, string[] HotkeyErrors, bool Elevated) : OutgoingMessage("HELLO");
 public sealed record IntentMessage(string Intent, string? Corner = null, double? Opacity = null, double? Delta = null, int? TabId = null) : OutgoingMessage("INTENT");
 public sealed record PeekStateMessage(bool Active) : OutgoingMessage("PEEK_STATE");
 public sealed record PipBoundMessage(int TabId) : OutgoingMessage("PIP_BOUND");
@@ -124,7 +124,15 @@ public sealed record PongMessage() : OutgoingMessage("PONG");
 public static class Protocol
 {
     public const int ProtocolVersion = 1;
-    public const string EngineVersion = "1.1.0";
+    public const string EngineVersion = "1.1.1";
+    public const double MaxAbsCoord = 100000;
+    public const double MaxSize = 20000;
+    public const double MinDpr = 0.25;
+    public const double MaxDpr = 8;
+    public const double MaxAbsDeltaH = 4000;
+
+    // GHOSTPIP_TEST_MODE is read once; the self-test flips this property to cover both branches.
+    public static bool TestMode { get; set; } = Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1";
 
     public static bool TryParseIncoming(string json, out IncomingMessage? message) =>
         TryParseIncoming(Encoding.UTF8.GetBytes(json), out message);
@@ -159,18 +167,12 @@ public static class Protocol
                 "SESSION_STATE" => TryParseSessionState(root, out message),
                 "PING" => SetResult(new PingMessage(), out message),
                 "LOCALE" => TryParseLocale(root, out message),
-                "TEST_CURSOR" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
-                    TryParseTestCursor(root, out message),
-                "TEST_WHEEL" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
-                    TryParseTestWheel(root, out message),
-                "TEST_HOLD" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
-                    TryParseTestHold(root, out message),
-                "TEST_PEEK" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
-                    TryParseTestPeek(root, out message),
-                "TEST_HOTKEY" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
-                    TryParseTestHotkey(root, out message),
-                "TEST_MOUSE" when Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE") == "1" =>
-                    TryParseTestMouse(root, out message),
+                "TEST_CURSOR" when TestMode => TryParseTestCursor(root, out message),
+                "TEST_WHEEL" when TestMode => TryParseTestWheel(root, out message),
+                "TEST_HOLD" when TestMode => TryParseTestHold(root, out message),
+                "TEST_PEEK" when TestMode => TryParseTestPeek(root, out message),
+                "TEST_HOTKEY" when TestMode => TryParseTestHotkey(root, out message),
+                "TEST_MOUSE" when TestMode => TryParseTestMouse(root, out message),
                 _ => false
             };
         }
@@ -232,12 +234,12 @@ public static class Protocol
             return false;
 
         bool autoReturn = GetBoolOrDefault(dodgeEl, "autoReturn", def.Dodge.AutoReturn);
-        int returnDelayMs = Math.Max(0, GetIntOrDefault(dodgeEl, "returnDelayMs", def.Dodge.ReturnDelayMs));
-        int marginPx = Math.Max(0, GetIntOrDefault(dodgeEl, "marginPx", def.Dodge.MarginPx));
-        int edgeInsetPx = Math.Max(0, GetIntOrDefault(dodgeEl, "edgeInsetPx", def.Dodge.EdgeInsetPx));
-        int hoverDelayMs = Math.Max(0, GetIntOrDefault(dodgeEl, "hoverDelayMs", def.Dodge.HoverDelayMs));
-        int cooldownMs = Math.Max(0, GetIntOrDefault(dodgeEl, "cooldownMs", def.Dodge.CooldownMs));
-        int ignoreScreenEdgePx = Math.Max(0, GetIntOrDefault(dodgeEl, "ignoreScreenEdgePx", def.Dodge.IgnoreScreenEdgePx));
+        int returnDelayMs = Math.Clamp(GetIntOrDefault(dodgeEl, "returnDelayMs", def.Dodge.ReturnDelayMs), 0, 60000);
+        int marginPx = Math.Clamp(GetIntOrDefault(dodgeEl, "marginPx", def.Dodge.MarginPx), 0, 200);
+        int edgeInsetPx = Math.Clamp(GetIntOrDefault(dodgeEl, "edgeInsetPx", def.Dodge.EdgeInsetPx), 0, 200);
+        int hoverDelayMs = Math.Clamp(GetIntOrDefault(dodgeEl, "hoverDelayMs", def.Dodge.HoverDelayMs), 0, 5000);
+        int cooldownMs = Math.Clamp(GetIntOrDefault(dodgeEl, "cooldownMs", def.Dodge.CooldownMs), 0, 10000);
+        int ignoreScreenEdgePx = Math.Clamp(GetIntOrDefault(dodgeEl, "ignoreScreenEdgePx", def.Dodge.IgnoreScreenEdgePx), 0, 200);
 
         var hotkeys = def.Hotkeys;
         if (settingsEl.TryGetProperty("hotkeys", out var hkEl) && hkEl.ValueKind == JsonValueKind.Object)
@@ -308,46 +310,35 @@ public static class Protocol
     private static bool TryParsePipOpened(JsonElement root, out IncomingMessage? message)
     {
         message = null;
-        if (!root.TryGetProperty("tabId", out var tabEl) || tabEl.ValueKind != JsonValueKind.Number || !tabEl.TryGetInt32(out int tabId))
+        if (!TryGetTabId(root, minTabId: 0, out int tabId))
             return false;
 
         string kind = GetStringOrDefault(root, "kind", "");
         if (kind is not ("native" or "document" or "popup"))
             return false;
 
-        if (!root.TryGetProperty("rect", out var rectEl) || rectEl.ValueKind != JsonValueKind.Object)
+        if (!root.TryGetProperty("rect", out var rectEl) || !TryReadRect(rectEl, allowZeroSize: false, out var rect))
             return false;
 
-        double x = GetDoubleOrDefault(rectEl, "x", double.NaN);
-        double y = GetDoubleOrDefault(rectEl, "y", double.NaN);
-        double w = GetDoubleOrDefault(rectEl, "w", double.NaN);
-        double h = GetDoubleOrDefault(rectEl, "h", double.NaN);
-        if (!double.IsFinite(x) || !double.IsFinite(y) || !double.IsFinite(w) || !double.IsFinite(h) || w <= 0 || h <= 0)
+        double dpr = 1.0;
+        if (root.TryGetProperty("dpr", out var dprEl) && !TryReadDpr(dprEl, out dpr))
             return false;
-
-        double dpr = GetDoubleOrDefault(root, "dpr", 1.0);
-        if (!double.IsFinite(dpr) || dpr <= 0)
-            dpr = 1.0;
 
         PipRect? savedBounds = null;
         if (root.TryGetProperty("savedBounds", out var sbEl) && sbEl.ValueKind == JsonValueKind.Object)
         {
-            double sx = GetDoubleOrDefault(sbEl, "x", double.NaN);
-            double sy = GetDoubleOrDefault(sbEl, "y", double.NaN);
-            double sw = GetDoubleOrDefault(sbEl, "w", 0.0);
-            double sh = GetDoubleOrDefault(sbEl, "h", 0.0);
-            if (double.IsFinite(sx) && double.IsFinite(sy) && double.IsFinite(sw) && double.IsFinite(sh) && sw >= 0 && sh >= 0)
-                savedBounds = new PipRect(sx, sy, sw, sh);
+            if (TryReadRect(sbEl, allowZeroSize: true, out var sb))
+                savedBounds = sb;
         }
 
-        message = new PipOpenedMessage(tabId, kind, new PipRect(x, y, w, h), dpr, savedBounds);
+        message = new PipOpenedMessage(tabId, kind, rect, dpr, savedBounds);
         return true;
     }
 
     private static bool TryParsePipClosed(JsonElement root, out IncomingMessage? message)
     {
         message = null;
-        if (!root.TryGetProperty("tabId", out var tabEl) || tabEl.ValueKind != JsonValueKind.Number || !tabEl.TryGetInt32(out int tabId))
+        if (!TryGetTabId(root, minTabId: 0, out int tabId))
             return false;
 
         message = new PipClosedMessage(tabId);
@@ -356,11 +347,21 @@ public static class Protocol
 
     private static bool TryParsePipResize(JsonElement root, out IncomingMessage? message)
     {
-        int deltaH = GetIntOrDefault(root, "deltaH", 0);
-        double dpr = GetDoubleOrDefault(root, "dpr", 1.0);
-        if (!double.IsFinite(dpr) || dpr <= 0)
-            dpr = 1.0;
-        int tabId = GetIntOrDefault(root, "tabId", -1);
+        message = null;
+        if (!root.TryGetProperty("deltaH", out var dEl) || dEl.ValueKind != JsonValueKind.Number ||
+            !dEl.TryGetDouble(out double rawDelta) || !double.IsFinite(rawDelta))
+        {
+            return false;
+        }
+        int deltaH = (int)Math.Round(Math.Clamp(rawDelta, -MaxAbsDeltaH, MaxAbsDeltaH), MidpointRounding.AwayFromZero);
+
+        double dpr = 1.0;
+        if (root.TryGetProperty("dpr", out var dprEl) && !TryReadDpr(dprEl, out dpr))
+            return false;
+
+        int tabId = -1;
+        if (root.TryGetProperty("tabId", out _) && !TryGetTabId(root, minTabId: -1, out tabId))
+            return false;
 
         message = new PipResizeMessage(deltaH, dpr, tabId);
         return true;
@@ -369,7 +370,7 @@ public static class Protocol
     private static bool TryParsePipSubtitle(JsonElement root, out IncomingMessage? message)
     {
         message = null;
-        if (!root.TryGetProperty("tabId", out var tabEl) || tabEl.ValueKind != JsonValueKind.Number || !tabEl.TryGetInt32(out int tabId) || tabId < -1)
+        if (!TryGetTabId(root, minTabId: -1, out int tabId))
             return false;
 
         string text = GetStringOrDefault(root, "text", "");
@@ -377,6 +378,50 @@ public static class Protocol
             text = text[..1000];
 
         message = new PipSubtitleMessage(tabId, text);
+        return true;
+    }
+
+    private static bool TryGetTabId(JsonElement root, int minTabId, out int tabId)
+    {
+        tabId = 0;
+        return root.TryGetProperty("tabId", out var tabEl) &&
+               tabEl.ValueKind == JsonValueKind.Number &&
+               tabEl.TryGetInt32(out tabId) &&
+               tabId >= minTabId;
+    }
+
+    private static bool TryReadDpr(JsonElement el, out double dpr)
+    {
+        dpr = 1.0;
+        return el.ValueKind == JsonValueKind.Number &&
+               el.TryGetDouble(out dpr) &&
+               double.IsFinite(dpr) &&
+               dpr >= MinDpr && dpr <= MaxDpr;
+    }
+
+    public static bool IsValidRect(double x, double y, double w, double h, bool allowZeroSize)
+    {
+        if (!double.IsFinite(x) || !double.IsFinite(y) || !double.IsFinite(w) || !double.IsFinite(h))
+            return false;
+        if (Math.Abs(x) > MaxAbsCoord || Math.Abs(y) > MaxAbsCoord)
+            return false;
+        if (allowZeroSize && w == 0 && h == 0)
+            return true;
+        return w >= 1 && w <= MaxSize && h >= 1 && h <= MaxSize;
+    }
+
+    private static bool TryReadRect(JsonElement el, bool allowZeroSize, out PipRect rect)
+    {
+        rect = default;
+        if (el.ValueKind != JsonValueKind.Object)
+            return false;
+        double x = GetDoubleOrDefault(el, "x", double.NaN);
+        double y = GetDoubleOrDefault(el, "y", double.NaN);
+        double w = GetDoubleOrDefault(el, "w", allowZeroSize ? 0.0 : double.NaN);
+        double h = GetDoubleOrDefault(el, "h", allowZeroSize ? 0.0 : double.NaN);
+        if (!IsValidRect(x, y, w, h, allowZeroSize))
+            return false;
+        rect = new PipRect(x, y, w, h);
         return true;
     }
 
@@ -522,6 +567,7 @@ public static class Protocol
             {
                 case HelloMessage hello:
                     writer.WriteString("engineVersion", hello.EngineVersion);
+                    writer.WriteBoolean("elevated", hello.Elevated);
                     writer.WritePropertyName("hotkeyErrors");
                     writer.WriteStartArray();
                     foreach (var err in hello.HotkeyErrors)

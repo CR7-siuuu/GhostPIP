@@ -316,13 +316,13 @@
     "message": "Quitter"
   },
   "peekMode": {
-    "message": "Mode aperçu"
+    "message": "Transparence inversée"
   },
   "peekModeHint": {
     "message": "Masquer jusqu'au maintien de la touche"
   },
   "peekSettings": {
-    "message": "Paramètres du mode aperçu"
+    "message": "Paramètres de transparence inversée"
   },
   "peekKey": {
     "message": "Touche d'aperçu maintenue"
@@ -346,13 +346,13 @@
     "message": "Opacité en aperçu"
   },
   "mediaRemote": {
-    "message": "Télécommande en jeu"
+    "message": "Télécommande"
   },
   "mediaRemoteHint": {
     "message": "Lecture, saut et volume sans perdre le focus"
   },
   "mediaSettings": {
-    "message": "Paramètres de télécommande en jeu"
+    "message": "Paramètres de la télécommande"
   },
   "mediaSeekStep": {
     "message": "Pas de saut"
@@ -384,5 +384,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Sur les jeux exécutés en tant qu'administrateur, le maintien de Ctrl+Alt ne peut pas atteindre le PiP. Utilisez plutôt Alt+G pour activer ou désactiver le clic traversant."
+  },
+  "tipMediaHotkeys": {
+    "message": "Pendant la lecture d'un PiP, Alt+Left, Alt+Right et Alt+Space contrôlent la vidéo et remplacent Retour, Suivant et le menu de la fenêtre."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Autorisez l'accès à tous les sites pour utiliser cette fonctionnalité."
   }
 }

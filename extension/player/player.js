@@ -2,45 +2,27 @@
   "use strict";
 
   const Settings = globalThis.GhostPiPSettings;
+  const Protocol = globalThis.GhostPiPProtocol;
   const { t, apply: applyI18n } = globalThis.GhostPiPI18n;
   applyI18n();
 
-  const MIN_FLOAT_WIDTH = 140;
-  const MAX_FLOAT_WIDTH = 2560;
-  const MIN_FLOAT_HEIGHT = 90;
-  const MAX_FLOAT_HEIGHT = 2160;
-  const PIP_CHAT_HEIGHT = 420;
-  const MIN_CHAT_HEIGHT = 120;
-  const CHAT_SIZE_STEP = 80;
-  const WHEEL_OPACITY_STEP = 0.05;
+  const {
+    MIN_WIDTH: MIN_FLOAT_WIDTH,
+    MAX_WIDTH: MAX_FLOAT_WIDTH,
+    MIN_HEIGHT: MIN_FLOAT_HEIGHT,
+    MAX_HEIGHT: MAX_FLOAT_HEIGHT,
+    PIP_CHAT_HEIGHT,
+    MIN_CHAT_HEIGHT,
+    CHAT_SIZE_STEP,
+    WHEEL_OPACITY_STEP,
+  } = Protocol.LAYOUT;
   const RESIZE_DIRS = ["nw", "ne", "sw", "se", "n", "s", "e", "w"];
   const SVG_NS = "http://www.w3.org/2000/svg";
   const ICON_CHAT =
     "M2.5 2A1.5 1.5 0 0 0 1 3.5v7A1.5 1.5 0 0 0 2.5 12h2.2v2.1a.5.5 0 0 0 .82.38L8.4 12h5.1A1.5 1.5 0 0 0 15 10.5v-7A1.5 1.5 0 0 0 13.5 2h-11Zm2 3.2h7a.6.6 0 1 1 0 1.2h-7a.6.6 0 0 1 0-1.2Zm0 2.6h4.5a.6.6 0 1 1 0 1.2H4.5a.6.6 0 0 1 0-1.2Z";
-  const HOLD = {
-    "Ctrl+Alt": (e) => e.ctrlKey && e.altKey,
-    "Ctrl+Shift": (e) => e.ctrlKey && e.shiftKey,
-    "Alt+Shift": (e) => e.altKey && e.shiftKey,
-    Ctrl: (e) => e.ctrlKey,
-    Alt: (e) => e.altKey,
-    Shift: (e) => e.shiftKey,
-  };
-  const PEEK_MATCH = {
-    Alt: (s) => s.alt,
-    Ctrl: (s) => s.ctrl,
-    Shift: (s) => s.shift,
-    "Ctrl+Alt": (s) => s.ctrl && s.alt,
-    Backquote: (s) => s.backquote,
-    Mouse4: (s) => (s.buttons & 8) !== 0,
-    Mouse5: (s) => (s.buttons & 16) !== 0,
-  };
-  const peekInput = {
-    alt: false,
-    ctrl: false,
-    shift: false,
-    backquote: false,
-    buttons: 0,
-  };
+  const HOLD = Settings.HOLD_MATCH;
+  const PEEK_MATCH = Settings.PEEK_MATCH;
+  const peekInput = Settings.createPeekInput();
   let localPeekActive = false;
   let enginePeekActive = false;
 
@@ -69,16 +51,6 @@
   let hudTimer = null;
   let alive = true;
 
-  function isEditableTarget(tgt) {
-    return Boolean(
-      tgt &&
-        (tgt.tagName === "INPUT" ||
-          tgt.tagName === "TEXTAREA" ||
-          tgt.tagName === "SELECT" ||
-          tgt.isContentEditable),
-    );
-  }
-
   function isPeeking() {
     return Boolean(settings.peek?.enabled && (enginePeekActive || localPeekActive));
   }
@@ -91,23 +63,6 @@
     syncPipOpacity(false);
   }
 
-  function resetLocalPeekInput() {
-    peekInput.alt = false;
-    peekInput.ctrl = false;
-    peekInput.shift = false;
-    peekInput.backquote = false;
-    peekInput.buttons = 0;
-    recomputeLocalPeek();
-  }
-
-  function shouldSuppressMousePeekNav(button) {
-    if (!settings.enabled || !settings.peek?.enabled) return false;
-    return (
-      (settings.peek.key === "Mouse4" && button === 3) ||
-      (settings.peek.key === "Mouse5" && button === 4)
-    );
-  }
-
   async function send(msg) {
     try {
       return await chrome.runtime.sendMessage({ v: 1, ...msg });
@@ -117,14 +72,8 @@
   }
 
   function persistLayout(patch) {
-    chrome.storage.local
-      .get("floatLayout")
-      .then(({ floatLayout }) => {
-        const base = floatLayout && typeof floatLayout === "object" ? floatLayout : {};
-        layout = { ...base, ...patch };
-        return chrome.storage.local.set({ floatLayout: layout });
-      })
-      .catch(() => {});
+    layout = { ...layout, ...patch };
+    send({ type: "PATCH_FLOAT_LAYOUT", patch });
   }
 
   function svgIcon(d) {
@@ -137,28 +86,9 @@
     return svg;
   }
 
-  function resizePopupWindow(deltaH) {
-    try {
-      const prevH = window.outerHeight;
-      const nextH = Math.max(180, prevH + deltaH);
-      const availTop = window.screen?.availTop ?? 0;
-      const availH = window.screen?.availHeight ?? 1080;
-      const inBottomHalf = window.screenY + prevH / 2 > availTop + availH / 2;
-      if (inBottomHalf && deltaH > 0) {
-        window.moveTo(window.screenX, Math.max(availTop, window.screenY - deltaH));
-        window.resizeTo(window.outerWidth, nextH);
-      } else if (inBottomHalf && deltaH < 0) {
-        window.resizeTo(window.outerWidth, nextH);
-        window.moveTo(window.screenX, window.screenY - deltaH);
-      } else {
-        window.resizeTo(window.outerWidth, nextH);
-      }
-    } catch {}
-  }
-
   function handleResizeChat(deltaH) {
     if (!engineConnected) {
-      resizePopupWindow(deltaH);
+      Protocol.resizePipWindow(window, deltaH);
       return;
     }
     send({
@@ -166,7 +96,7 @@
       deltaH,
       dpr: window.devicePixelRatio || 1,
     }).then((res) => {
-      if (!res?.handledByEngine) resizePopupWindow(deltaH);
+      if (!res?.handledByEngine) Protocol.resizePipWindow(window, deltaH);
     });
   }
 
@@ -435,15 +365,17 @@
     lastResizeAt = now;
     if (isNewGesture) {
       gestureStartChatH = chatH;
-      const startedOnBottomEdge =
-        chatShown &&
-        Boolean(frame?.isConnected) &&
-        now - lastPointerAt < 1500 &&
-        lastPointerY >= prevH - 24 &&
-        lastPointerX > 16 &&
-        lastPointerX < prevW - 16 &&
-        dw === 0 &&
-        Math.abs(dh) >= 1;
+      const startedOnBottomEdge = Protocol.isBottomEdgeChatResize({
+        chatShown,
+        frameConnected: Boolean(frame?.isConnected),
+        pointerAgeMs: now - lastPointerAt,
+        pointerX: lastPointerX,
+        pointerY: lastPointerY,
+        prevW,
+        prevH,
+        dw,
+        dh,
+      });
       resizeMode = startedOnBottomEdge ? "chat" : "window";
       if (startedOnBottomEdge) {
         lockedVideoH = Math.max(MIN_FLOAT_HEIGHT, prevH - activeChatH);
@@ -473,123 +405,25 @@
     }
   });
 
-  window.addEventListener(
-    "keydown",
-    (e) => {
-      peekInput.alt = Boolean(e.altKey || e.key === "Alt");
-      peekInput.ctrl = Boolean(e.ctrlKey || e.key === "Control");
-      peekInput.shift = Boolean(e.shiftKey || e.key === "Shift");
-      if (e.code === "Backquote" || e.key === "`" || e.key === "~") peekInput.backquote = true;
-      recomputeLocalPeek();
-      if (HOLD[settings.hotkeys.hold]?.(e)) setHovered(true);
-      if (!settings.enabled || e.repeat || isEditableTarget(e.target)) return;
-      const combo = Settings.formatKeyEvent?.(e);
-      if (!combo) return;
-      const upper = combo.toUpperCase();
-      const hk = settings.hotkeys;
-      if (e.isTrusted) {
-        let intent = null;
-        if (hk.clickThrough && hk.clickThrough.toUpperCase() === upper && upper !== "ALT+G") {
-          intent = "TOGGLE_CLICK_THROUGH";
-        } else if (hk.dodge && hk.dodge.toUpperCase() === upper && upper !== "ALT+SHIFT+D") {
-          intent = "TOGGLE_DODGE";
-        } else if (hk.mute && hk.mute.toUpperCase() === upper && upper !== "ALT+M") {
-          intent = "TOGGLE_MUTE";
-        }
-        if (intent) {
-          e.preventDefault();
-          send({ type: "INTENT", intent });
-          return;
-        }
-      }
-      if (engineConnected) return;
-      if (hk.peek && hk.peek.toUpperCase() === upper) {
-        e.preventDefault();
-        send({ type: "INTENT", intent: "TOGGLE_PEEK" });
-        return;
-      }
-      if (!settings.media?.enabled) return;
-      if (hk.playPause && hk.playPause.toUpperCase() === upper) {
-        e.preventDefault();
-        send({ type: "MEDIA_ACTION", action: "PLAY_PAUSE", sourceTabId });
-      } else if (hk.seekBack && hk.seekBack.toUpperCase() === upper) {
-        e.preventDefault();
-        send({ type: "MEDIA_ACTION", action: "SEEK", deltaSec: -settings.media.seekSec, sourceTabId });
-      } else if (hk.seekForward && hk.seekForward.toUpperCase() === upper) {
-        e.preventDefault();
-        send({ type: "MEDIA_ACTION", action: "SEEK", deltaSec: settings.media.seekSec, sourceTabId });
+  let opacityTimer = null;
+  Settings.bindPeekAndShortcuts(window, {
+    peekState: peekInput,
+    getSettings: () => settings,
+    onPeekInput: recomputeLocalPeek,
+    onHoldKey: (h) => setHovered(h),
+    onShortcut: (e) => {
+      const act = Settings.matchShortcut(e, settings, { engineConnected });
+      if (!act) return;
+      e.preventDefault();
+      send(act.type === "MEDIA_ACTION" ? { ...act, sourceTabId } : act);
+    },
+    onVisibility: (visible) => {
+      if (receiverPort && Number.isFinite(sourceTabId)) {
+        try {
+          receiverPort.postMessage({ type: "RECEIVER_STATE", visible, sourceTabId });
+        } catch {}
       }
     },
-    true,
-  );
-  window.addEventListener(
-    "keyup",
-    (e) => {
-      peekInput.alt = e.key === "Alt" ? false : Boolean(e.altKey);
-      peekInput.ctrl = e.key === "Control" ? false : Boolean(e.ctrlKey);
-      peekInput.shift = e.key === "Shift" ? false : Boolean(e.shiftKey);
-      if (e.code === "Backquote" || e.key === "`" || e.key === "~") peekInput.backquote = false;
-      recomputeLocalPeek();
-      if (settings.clickThrough && !HOLD[settings.hotkeys.hold]?.(e)) setHovered(false);
-    },
-    true,
-  );
-  const onPeekButtonDown = (e) => {
-    if (typeof e.altKey === "boolean") peekInput.alt = e.altKey;
-    if (typeof e.ctrlKey === "boolean") peekInput.ctrl = e.ctrlKey;
-    if (typeof e.shiftKey === "boolean") peekInput.shift = e.shiftKey;
-    if (typeof e.buttons === "number" && e.buttons !== 0) {
-      peekInput.buttons = e.buttons;
-    } else if (e.button === 3) {
-      peekInput.buttons |= 8;
-    } else if (e.button === 4) {
-      peekInput.buttons |= 16;
-    }
-    recomputeLocalPeek();
-    if (shouldSuppressMousePeekNav(e.button)) e.preventDefault();
-  };
-  const onPeekButtonUp = (e) => {
-    if (typeof e.altKey === "boolean") peekInput.alt = e.altKey;
-    if (typeof e.ctrlKey === "boolean") peekInput.ctrl = e.ctrlKey;
-    if (typeof e.shiftKey === "boolean") peekInput.shift = e.shiftKey;
-    if (e.button === 3) {
-      peekInput.buttons &= ~8;
-    } else if (e.button === 4) {
-      peekInput.buttons &= ~16;
-    } else if (typeof e.buttons === "number") {
-      peekInput.buttons = e.buttons;
-    }
-    recomputeLocalPeek();
-    if (shouldSuppressMousePeekNav(e.button)) e.preventDefault();
-  };
-  window.addEventListener("pointerdown", onPeekButtonDown, true);
-  window.addEventListener("mousedown", onPeekButtonDown, true);
-  window.addEventListener("pointerup", onPeekButtonUp, true);
-  window.addEventListener("mouseup", onPeekButtonUp, true);
-  window.addEventListener(
-    "auxclick",
-    (e) => {
-      if (shouldSuppressMousePeekNav(e.button)) e.preventDefault();
-    },
-    true,
-  );
-  window.addEventListener(
-    "mousemove",
-    (e) => {
-      if (typeof e.altKey === "boolean") peekInput.alt = e.altKey;
-      if (typeof e.ctrlKey === "boolean") peekInput.ctrl = e.ctrlKey;
-      if (typeof e.shiftKey === "boolean") peekInput.shift = e.shiftKey;
-      if (typeof e.buttons === "number") peekInput.buttons = e.buttons;
-      recomputeLocalPeek();
-    },
-    true,
-  );
-  window.addEventListener("blur", () => {
-    resetLocalPeekInput();
-    if (settings.clickThrough) setHovered(false);
-  });
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) resetLocalPeekInput();
   });
   window.addEventListener(
     "wheel",
@@ -624,23 +458,18 @@
       const next = Math.round(Math.min(1, Math.max(0.1, settings.opacity + delta)) * 100) / 100;
       if (next !== settings.opacity) {
         settings = { ...settings, opacity: next };
-        send({ type: "PATCH_SETTINGS", patch: { opacity: next } });
+        lastSettingsJson = JSON.stringify(settings);
+        clearTimeout(opacityTimer);
+        opacityTimer = setTimeout(() => {
+          send({ type: "PATCH_SETTINGS", patch: { opacity: settings.opacity } });
+        }, 100);
       }
       syncPipOpacity(true);
     },
     { capture: true, passive: false },
   );
 
-  function boostVideoSdp(sdp) {
-    if (typeof sdp !== "string") return sdp;
-    let out = sdp.replace(/(m=video .*\r\n)/, "$1b=AS:12000\r\n");
-    out = out.replace(
-      /(a=fmtp:\d+ )([^\r\n]*)/g,
-      (_m, p1, p2) =>
-        `${p1}${p2};x-google-min-bitrate=4000;x-google-start-bitrate=8000;x-google-max-bitrate=12000`,
-    );
-    return out;
-  }
+  const boostVideoSdp = Protocol.boostVideoSdp;
 
   let receiverPort = null;
   let rtcPeer = null;
@@ -776,13 +605,19 @@
           pulling = false;
         }
       });
+      port.postMessage({ type: "RECEIVER_STATE", visible: !document.hidden, sourceTabId });
       port.postMessage({ type: "RTC_INIT", sourceTabId });
     } catch {}
   }
 
   let lastShowChatSetting = true;
+  let lastSettingsJson = "";
   function applySettingsState(raw) {
-    settings = Settings.merge(raw);
+    const merged = Settings.merge(raw);
+    const json = JSON.stringify(merged);
+    if (json === lastSettingsJson) return;
+    lastSettingsJson = json;
+    settings = merged;
     if (!settings.enabled) {
       alive = false;
       window.close();
@@ -834,12 +669,6 @@
         showHudToast(msg.text);
       }
       sendResponse({ ok: true });
-      return false;
-    }
-    if (msg.type === "POPUP_PIP_CLOSE" && (!msg.sourceTabId || msg.sourceTabId === sourceTabId)) {
-      alive = false;
-      sendResponse({ ok: true });
-      window.close();
       return false;
     }
     return false;
@@ -907,17 +736,8 @@
             enginePeekActive = res.peekActive;
           }
           syncPipOpacity(false);
-          if (!engineConnected && !res?.multiPip && layout?.pipPos && Number.isFinite(layout.pipPos.x) && Number.isFinite(layout.pipPos.y)) {
-            try {
-              const availL = window.screen?.availLeft ?? 0;
-              const availT = window.screen?.availTop ?? 0;
-              const availW = window.screen?.availWidth ?? 1920;
-              const availH = window.screen?.availHeight ?? 1080;
-              const cx = Math.min(Math.max(availL, layout.pipPos.x), Math.max(availL, availL + availW - window.outerWidth));
-              const cy = Math.min(Math.max(availT, layout.pipPos.y), Math.max(availT, availT + availH - window.outerHeight));
-              window.moveTo(cx, cy);
-              lastKnownPos = { x: window.screenX, y: window.screenY };
-            } catch {}
+          if (!engineConnected && !res?.multiPip && Protocol.moveWindowWithinScreen(window, layout?.pipPos)) {
+            lastKnownPos = { x: window.screenX, y: window.screenY };
           }
         });
 

@@ -310,13 +310,13 @@
     "message": "Beenden"
   },
   "peekMode": {
-    "message": "Peek-Modus"
+    "message": "Umgekehrte Transparenz"
   },
   "peekModeHint": {
     "message": "Ausblenden, bis die Peek-Taste gehalten wird"
   },
   "peekSettings": {
-    "message": "Peek-Modus-Einstellungen"
+    "message": "Einstellungen für umgekehrte Transparenz"
   },
   "peekKey": {
     "message": "Taste zum Einblenden"
@@ -340,7 +340,7 @@
     "message": "Deckkraft beim Halten"
   },
   "mediaRemote": {
-    "message": "In-Game-Fernbedienung"
+    "message": "Fernbedienung"
   },
   "mediaRemoteHint": {
     "message": "Wiedergabe, Spulen & Lautstärke ohne Fokusverlust"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Bei Spielen, die als Administrator ausgeführt werden, erreicht das Gedrückthalten von Ctrl+Alt das PiP nicht. Verwenden Sie stattdessen Alt+G, um das Durchklicken umzuschalten."
+  },
+  "tipMediaHotkeys": {
+    "message": "Während ein PiP abgespielt wird, steuern Alt+Left, Alt+Right und Alt+Space das Video und überschreiben Zurück, Vor sowie das Fenstermenü."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Gewähren Sie Zugriff auf alle Websites, um dies zu verwenden."
   }
 }

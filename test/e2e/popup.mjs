@@ -61,7 +61,7 @@ try {
   const sw = await swTarget.worker();
 
   await sw.evaluate(async (defaults) => {
-    await chrome.storage.local.set({ settings: structuredClone(defaults) });
+    await chrome.storage.local.set({ settings: structuredClone(defaults), gpTestHooks: true });
     await chrome.storage.session.remove(["pip", "engine"]);
   }, DEFAULTS);
 

@@ -3,54 +3,80 @@
   "sites": {
     "youtube": {
       "match": "^https://(www|m)\\.youtube\\.com/(watch|live/)",
+      "hosts": ["https://www.youtube.com/*", "https://m.youtube.com/*"],
       "video": "video.html5-main-video",
       "chatPopoutUrl": "https://www.youtube.com/live_chat?is_popout=1&v={videoId}",
-      "idFrom": { "param": "v" }
+      "idFrom": [{ "param": "v" }, { "pathPrefix": "/live/", "pathIndex": 2 }]
     },
     "chzzk": {
       "match": "^https://chzzk\\.naver\\.com/live/",
+      "hosts": ["https://chzzk.naver.com/*"],
       "video": "video.webplayer-internal-video",
       "chatPopoutUrl": "https://chzzk.naver.com/live/{channelId}/chat",
       "idFrom": { "pathIndex": 2 }
     },
     "chzzkVod": {
       "match": "^https://chzzk\\.naver\\.com/video/",
+      "hosts": ["https://chzzk.naver.com/*"],
       "video": "video.webplayer-internal-video",
       "chatPopoutUrl": null
     },
     "soop": {
       "match": "^https://(play|vod)\\.sooplive\\.(com|co\\.kr)/",
+      "hosts": [
+        "https://play.sooplive.com/*",
+        "https://vod.sooplive.com/*",
+        "https://play.sooplive.co.kr/*",
+        "https://vod.sooplive.co.kr/*"
+      ],
       "video": "video.af_video",
       "chatPopoutUrl": null
     },
     "twitch": {
-      "match": "^https://www\\.twitch\\.tv/[^/?#]+/?([?#].*)?$",
+      "match": "^https://www\\.twitch\\.tv/(?!(directory|search|settings|subscriptions|inventory|wallet|drops|downloads|jobs|turbo|friends|messages|login|signup|prime|store|videos)(/|[?#]|$))[^/?#]+/?([?#].*)?$",
+      "hosts": ["https://www.twitch.tv/*"],
       "video": "video",
       "chatPopoutUrl": "https://www.twitch.tv/popout/{channel}/chat",
       "idFrom": { "pathIndex": 1 }
     },
     "twitchVod": {
       "match": "^https://www\\.twitch\\.tv/(videos/\\d+|[^/]+/clip/)",
+      "hosts": ["https://www.twitch.tv/*"],
       "video": "video",
       "chatPopoutUrl": null
     },
-    "netflix": { "match": "^https://www\\.netflix\\.com/", "chatPopoutUrl": null },
-    "disneyplus": { "match": "^https://(www\\.)?disneyplus\\.com/", "chatPopoutUrl": null },
+    "netflix": { "match": "^https://www\\.netflix\\.com/", "hosts": ["https://www.netflix.com/*"], "chatPopoutUrl": null },
+    "disneyplus": { "match": "^https://(www\\.)?disneyplus\\.com/", "hosts": ["https://*.disneyplus.com/*"], "chatPopoutUrl": null },
     "primevideo": {
       "match": "^https://(www\\.)?(primevideo\\.com/|amazon\\.(com|co\\.jp|co\\.uk|de|fr|it|es|ca|in|com\\.au|com\\.br|com\\.mx)/gp/video/)",
+      "hosts": [
+        "https://*.primevideo.com/*",
+        "https://*.amazon.com/*",
+        "https://*.amazon.co.jp/*",
+        "https://*.amazon.co.uk/*",
+        "https://*.amazon.de/*",
+        "https://*.amazon.fr/*",
+        "https://*.amazon.it/*",
+        "https://*.amazon.es/*",
+        "https://*.amazon.ca/*",
+        "https://*.amazon.in/*",
+        "https://*.amazon.com.au/*",
+        "https://*.amazon.com.br/*",
+        "https://*.amazon.com.mx/*"
+      ],
       "chatPopoutUrl": null
     },
-    "coupangplay": { "match": "^https://(www\\.)?coupangplay\\.com/", "chatPopoutUrl": null },
-    "tving": { "match": "^https://(www\\.)?tving\\.com/", "chatPopoutUrl": null },
-    "wavve": { "match": "^https://(www\\.)?wavve\\.com/", "chatPopoutUrl": null },
-    "watcha": { "match": "^https://(www\\.)?watcha\\.com/", "chatPopoutUrl": null },
-    "laftel": { "match": "^https://(www\\.)?laftel\\.net/", "chatPopoutUrl": null },
-    "serieson": { "match": "^https://serieson\\.naver\\.com/", "chatPopoutUrl": null },
-    "appletv": { "match": "^https://tv\\.apple\\.com/", "chatPopoutUrl": null },
-    "max": { "match": "^https://(play\\.)?(max|hbomax)\\.com/", "chatPopoutUrl": null },
-    "hulu": { "match": "^https://www\\.hulu\\.com/", "chatPopoutUrl": null },
-    "paramountplus": { "match": "^https://www\\.paramountplus\\.com/", "chatPopoutUrl": null },
-    "peacock": { "match": "^https://www\\.peacocktv\\.com/", "chatPopoutUrl": null },
-    "crunchyroll": { "match": "^https://www\\.crunchyroll\\.com/", "chatPopoutUrl": null }
+    "coupangplay": { "match": "^https://(www\\.)?coupangplay\\.com/", "hosts": ["https://*.coupangplay.com/*"], "chatPopoutUrl": null },
+    "tving": { "match": "^https://(www\\.)?tving\\.com/", "hosts": ["https://*.tving.com/*"], "chatPopoutUrl": null },
+    "wavve": { "match": "^https://(www\\.)?wavve\\.com/", "hosts": ["https://*.wavve.com/*"], "chatPopoutUrl": null },
+    "watcha": { "match": "^https://(www\\.)?watcha\\.com/", "hosts": ["https://*.watcha.com/*"], "chatPopoutUrl": null },
+    "laftel": { "match": "^https://(www\\.)?laftel\\.net/", "hosts": ["https://*.laftel.net/*"], "chatPopoutUrl": null },
+    "serieson": { "match": "^https://serieson\\.naver\\.com/", "hosts": ["https://serieson.naver.com/*"], "chatPopoutUrl": null },
+    "appletv": { "match": "^https://tv\\.apple\\.com/", "hosts": ["https://tv.apple.com/*"], "chatPopoutUrl": null },
+    "max": { "match": "^https://(play\\.)?(max|hbomax)\\.com/", "hosts": ["https://*.max.com/*", "https://*.hbomax.com/*"], "chatPopoutUrl": null },
+    "hulu": { "match": "^https://www\\.hulu\\.com/", "hosts": ["https://www.hulu.com/*"], "chatPopoutUrl": null },
+    "paramountplus": { "match": "^https://www\\.paramountplus\\.com/", "hosts": ["https://www.paramountplus.com/*"], "chatPopoutUrl": null },
+    "peacock": { "match": "^https://www\\.peacocktv\\.com/", "hosts": ["https://www.peacocktv.com/*"], "chatPopoutUrl": null },
+    "crunchyroll": { "match": "^https://www\\.crunchyroll\\.com/", "hosts": ["https://www.crunchyroll.com/*"], "chatPopoutUrl": null }
   }
 }

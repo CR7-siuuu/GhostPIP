@@ -132,7 +132,24 @@ for (const ent of fs.readdirSync(DIST)) {
 }
 
 console.log("[1/4] GhostPiP.Engine.exe 빌드 (Release win-x64 Native AOT)...");
+const isEngineRunning = () => {
+  try {
+    const out = execFileSync("tasklist", ["/FI", `IMAGENAME eq ${EXE_NAME}`, "/NH"], { encoding: "utf8" });
+    return out.toLowerCase().includes(EXE_NAME.toLowerCase());
+  } catch {
+    return false;
+  }
+};
 const killEngine = () => {
+  if (!isEngineRunning()) return;
+  try {
+    execFileSync("taskkill", ["/IM", EXE_NAME], { stdio: "ignore" });
+    const deadline = Date.now() + 3000;
+    while (Date.now() < deadline) {
+      if (!isEngineRunning()) return;
+      sleep(100);
+    }
+  } catch {}
   try {
     execFileSync("taskkill", ["/F", "/IM", EXE_NAME], { stdio: "ignore" });
     sleep(300);
@@ -143,7 +160,10 @@ const NO_BUILD = process.argv.includes("--no-build");
 let exe;
 if (NO_BUILD) {
   console.log("  --no-build: 기존 빌드를 패키징합니다.");
-  exe = readWithRetry(path.join(PUBLISH_DIR, EXE_NAME));
+  const existingExe = path.join(PUBLISH_DIR, EXE_NAME);
+  readWithRetry(existingExe);
+  execFileSync(existingExe, ["--self-test"], { cwd: ROOT, stdio: "inherit" });
+  exe = readWithRetry(existingExe);
 } else {
   // Build into a staging dir: the registered host path (PUBLISH_DIR) can be re-locked at any moment
   // because a running browser respawns the engine on demand.
@@ -154,9 +174,10 @@ if (NO_BUILD) {
   );
   const stagedExe = path.join(STAGE_DIR, EXE_NAME);
 
-  console.log("[2/4] 코드 서명...");
+  console.log("[2/4] 코드 서명 및 자체 테스트...");
   readWithRetry(stagedExe);
   signIfConfigured(stagedExe);
+  execFileSync(stagedExe, ["--self-test"], { cwd: ROOT, stdio: "inherit" });
   exe = readWithRetry(stagedExe);
 
   const exePath = path.join(PUBLISH_DIR, EXE_NAME);

@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import http from "node:http";
 import path from "node:path";
 import puppeteer from "puppeteer-core";
@@ -5,6 +6,36 @@ import puppeteer from "puppeteer-core";
 const ROOT = path.resolve(import.meta.dirname, "../..");
 const CHROME = "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function grantAllSitesPermission(browser, extId) {
+  const p = await browser.newPage();
+  await p.goto(`chrome-extension://${extId}/popup/popup.html`, { waitUntil: "domcontentloaded" });
+  await p.evaluate(() => {
+    const btn = document.createElement("button");
+    btn.id = "__gpGrantAllSites";
+    btn.onclick = () => chrome.permissions.request({ origins: ["http://*/*", "https://*/*"] });
+    document.body.prepend(btn);
+  });
+  await p.click("#__gpGrantAllSites");
+  await sleep(350);
+  execFileSync("python", [
+    "-c",
+    `import win32gui, win32con, time
+def cb(h, _):
+    if win32gui.IsWindowVisible(h) and win32gui.GetClassName(h) == "Chrome_WidgetWin_1" and win32gui.GetWindowText(h) == "":
+        l, t, r, b = win32gui.GetWindowRect(h)
+        if 250 <= r - l <= 800 and 100 <= b - t <= 450:
+            win32gui.PostMessage(h, win32con.WM_KEYDOWN, win32con.VK_TAB, 0)
+            win32gui.PostMessage(h, win32con.WM_KEYUP, win32con.VK_TAB, 0)
+            time.sleep(0.06)
+            win32gui.PostMessage(h, win32con.WM_KEYDOWN, win32con.VK_RETURN, 0)
+            win32gui.PostMessage(h, win32con.WM_KEYUP, win32con.VK_RETURN, 0)
+    return True
+win32gui.EnumWindows(cb, None)`,
+  ]);
+  await sleep(250);
+  await p.close();
+}
 
 // Canvas-backed <video> elements so the page needs no media files. `real` is an unmuted player with
 // controls; `gif` mimics a gifv clip (muted, looping, autoplay, no audio); `cover` is an image card
@@ -46,10 +77,12 @@ try {
     (t) => t.type() === "service_worker" && t.url().startsWith(`chrome-extension://${extId}/`),
   );
   const sw = await swTarget.worker();
+  await grantAllSitesPermission(browser, extId);
   const setAllSites = (on) =>
     sw.evaluate(async (on) => {
       const { settings } = await chrome.storage.local.get("settings");
-      await chrome.storage.local.set({ settings: { ...GhostPiPSettings.merge(settings), allSites: on } });
+      await chrome.storage.local.set({ settings: { ...GhostPiPSettings.merge(settings), allSites: on }, gpTestHooks: true });
+      await globalThis.GhostPiPBackground?.reconcileAllSitesScripts?.();
     }, on);
 
   const page = (await browser.pages())[0] ?? (await browser.newPage());

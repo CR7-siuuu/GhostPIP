@@ -10,7 +10,7 @@ fs.mkdirSync(OUT, { recursive: true });
 
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
 const lib = {};
-vm.runInNewContext(read("extension/content/dodge.js") + "\n" + read("extension/shared/settings.js"), lib);
+vm.runInNewContext(read("extension/shared/settings.js") + "\n" + read("extension/content/dodge.js"), lib);
 const Dodge = lib.GhostPiPDodge;
 const DEFAULTS = JSON.parse(JSON.stringify(lib.GhostPiPSettings.DEFAULTS));
 const SITES = JSON.parse(read("extension/config/selectors.json")).sites;
@@ -59,7 +59,7 @@ async function resetSettings(patch = {}) {
   await w.evaluate(async (defaults, patch) => {
     const s = structuredClone(defaults);
     Object.assign(s.dodge, patch.dodge ?? {});
-    await chrome.storage.local.set({ settings: { ...s, ...patch, dodge: s.dodge } });
+    await chrome.storage.local.set({ settings: { ...s, ...patch, dodge: s.dodge }, gpTestHooks: true });
   }, DEFAULTS, patch);
 }
 

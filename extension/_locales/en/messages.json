@@ -339,13 +339,13 @@
     "message": "Exit"
   },
   "peekMode": {
-    "message": "Peek Mode"
+    "message": "Reverse transparency"
   },
   "peekModeHint": {
     "message": "Hide until you hold the peek key"
   },
   "peekSettings": {
-    "message": "Peek Mode settings"
+    "message": "Reverse transparency settings"
   },
   "peekKey": {
     "message": "Hold-to-peek key"
@@ -369,13 +369,13 @@
     "message": "Peek opacity"
   },
   "mediaRemote": {
-    "message": "In-game Remote"
+    "message": "Remote control"
   },
   "mediaRemoteHint": {
     "message": "Focus-free play, seek & volume"
   },
   "mediaSettings": {
-    "message": "In-game Remote settings"
+    "message": "Remote control settings"
   },
   "mediaSeekStep": {
     "message": "Seek step"
@@ -409,5 +409,14 @@
         "example": "80"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Over games running as administrator, the Ctrl+Alt hold can't reach the PiP. Use Alt+G to toggle click-through instead."
+  },
+  "tipMediaHotkeys": {
+    "message": "While a PiP is playing, Alt+Left, Alt+Right and Alt+Space control the video and override Back, Forward and the window menu."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Allow access to all sites to use this."
   }
 }

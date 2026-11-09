@@ -60,6 +60,14 @@ small,
   line-height: 1.35;
 }
 
+#allSitesHint[data-warn] {
+  color: #fcd34d;
+}
+
+#mediaDetails .hint {
+  padding: 4px 0 2px;
+}
+
 .label-stack {
   display: flex;
   flex-direction: column;

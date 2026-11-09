@@ -8,6 +8,7 @@ const code = readFileSync(new URL("extension/content/dodge.js", root), "utf8");
 const vectors = JSON.parse(readFileSync(new URL("shared/dodge-vectors.json", root), "utf8"));
 
 const sandbox = {};
+vm.runInNewContext(readFileSync(new URL("extension/shared/settings.js", root), "utf8"), sandbox);
 vm.runInNewContext(code, sandbox);
 const D = sandbox.GhostPiPDodge;
 

@@ -316,13 +316,13 @@
     "message": "יציאה"
   },
   "peekMode": {
-    "message": "מצב הצצה"
+    "message": "שקיפות הפוכה"
   },
   "peekModeHint": {
     "message": "הסתרה עד ללחיצה ממושכת על מקש ההצצה"
   },
   "peekSettings": {
-    "message": "הגדרות מצב הצצה"
+    "message": "הגדרות שקיפות הפוכה"
   },
   "peekKey": {
     "message": "מקש החזקה להצצה"
@@ -346,13 +346,13 @@
     "message": "אטימות בעת הצצה"
   },
   "mediaRemote": {
-    "message": "שלט במשחק"
+    "message": "שלט רחוק"
   },
   "mediaRemoteHint": {
     "message": "ניגון, דילוג ועוצמת שמע בלי לאבד מיקוד"
   },
   "mediaSettings": {
-    "message": "הגדרות שלט במשחק"
+    "message": "הגדרות שלט רחוק"
   },
   "mediaSeekStep": {
     "message": "מרווח דילוג"
@@ -384,5 +384,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "במשחקים שמופעלים כמנהל מערכת, החזקת Ctrl+Alt אינה מגיעה אל ה-PiP. השתמשו ב-Alt+G כדי להפעיל או לכבות את העברת הלחיצות."
+  },
+  "tipMediaHotkeys": {
+    "message": "בזמן הפעלת PiP, המקשים Alt+Left,‏ Alt+Right ו-Alt+Space שולטים בווידאו ומחליפים את אחורה, קדימה ותפריט החלון."
+  },
+  "allSitesNeedsPermission": {
+    "message": "יש לאפשר גישה לכל האתרים כדי להשתמש בזה."
   }
 }

@@ -1,7 +1,38 @@
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
 import puppeteer from "puppeteer-core";
+
+async function grantAllSitesPermission(browser, extId) {
+  const p = await browser.newPage();
+  await p.goto(`chrome-extension://${extId}/popup/popup.html`, { waitUntil: "domcontentloaded" });
+  await p.evaluate(() => {
+    const btn = document.createElement("button");
+    btn.id = "__gpGrantAllSites";
+    btn.onclick = () => chrome.permissions.request({ origins: ["http://*/*", "https://*/*"] });
+    document.body.prepend(btn);
+  });
+  await p.click("#__gpGrantAllSites");
+  await new Promise((r) => setTimeout(r, 350));
+  execFileSync("python", [
+    "-c",
+    `import win32gui, win32con, time
+def cb(h, _):
+    if win32gui.IsWindowVisible(h) and win32gui.GetClassName(h) == "Chrome_WidgetWin_1" and win32gui.GetWindowText(h) == "":
+        l, t, r, b = win32gui.GetWindowRect(h)
+        if 250 <= r - l <= 800 and 100 <= b - t <= 450:
+            win32gui.PostMessage(h, win32con.WM_KEYDOWN, win32con.VK_TAB, 0)
+            win32gui.PostMessage(h, win32con.WM_KEYUP, win32con.VK_TAB, 0)
+            time.sleep(0.06)
+            win32gui.PostMessage(h, win32con.WM_KEYDOWN, win32con.VK_RETURN, 0)
+            win32gui.PostMessage(h, win32con.WM_KEYUP, win32con.VK_RETURN, 0)
+    return True
+win32gui.EnumWindows(cb, None)`,
+  ]);
+  await new Promise((r) => setTimeout(r, 250));
+  await p.close();
+}
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
 const OUT = path.join(ROOT, "test/e2e/out");
@@ -10,7 +41,7 @@ fs.mkdirSync(OUT, { recursive: true });
 
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
 const lib = {};
-vm.runInNewContext(read("extension/content/dodge.js") + "\n" + read("extension/shared/settings.js"), lib);
+vm.runInNewContext(read("extension/shared/settings.js") + "\n" + read("extension/content/dodge.js"), lib);
 const Dodge = lib.GhostPiPDodge;
 const DEFAULTS = JSON.parse(JSON.stringify(lib.GhostPiPSettings.DEFAULTS));
 
@@ -63,6 +94,7 @@ try {
     { timeout: 10000 },
   );
   const sw = await swTarget.worker();
+  await grantAllSitesPermission(browser, extId);
 
   const patchSettings = async (patch) =>
     sw.evaluate(async (patch) => {
@@ -78,7 +110,7 @@ try {
   await sw.evaluate(async (defaults) => {
     const s = structuredClone(defaults);
     s.dodge.autoReturn = false;
-    await chrome.storage.local.set({ settings: s });
+    await chrome.storage.local.set({ settings: s, gpTestHooks: true });
     await chrome.storage.local.remove("floatLayout");
     await chrome.storage.session.remove(["pip", "engine", "inTab"]);
   }, DEFAULTS);

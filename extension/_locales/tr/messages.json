@@ -310,13 +310,13 @@
     "message": "Çıkış"
   },
   "peekMode": {
-    "message": "Göz Atma Modu"
+    "message": "Ters Şeffaflık"
   },
   "peekModeHint": {
     "message": "Tuşa basılı tutana kadar gizle"
   },
   "peekSettings": {
-    "message": "Göz Atma Modu ayarları"
+    "message": "Ters Şeffaflık ayarları"
   },
   "peekKey": {
     "message": "Basılı tutma tuşu"
@@ -340,13 +340,13 @@
     "message": "Basılıyken opaklık"
   },
   "mediaRemote": {
-    "message": "Oyun İçi Kumanda"
+    "message": "Kumanda"
   },
   "mediaRemoteHint": {
     "message": "Odak kaybetmeden oynat, sar ve ses ayarla"
   },
   "mediaSettings": {
-    "message": "Oyun İçi Kumanda ayarları"
+    "message": "Kumanda ayarları"
   },
   "mediaSeekStep": {
     "message": "Sarma aralığı"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Yönetici olarak çalışan oyunlarda Ctrl+Alt tuşunu basılı tutmak PiP'e ulaşamaz. Tıklama geçirmeyi açıp kapatmak için bunun yerine Alt+G tuşunu kullanın."
+  },
+  "tipMediaHotkeys": {
+    "message": "Bir PiP oynatılırken Alt+Left, Alt+Right ve Alt+Space tuşları videoyu kontrol eder ve Geri, İleri ile pencere menüsünü geçersiz kılar."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Bunu kullanmak için tüm sitelere erişime izin verin."
   }
 }

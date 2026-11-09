@@ -13,7 +13,7 @@ fs.mkdirSync(OUT, { recursive: true });
 
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
 const lib = {};
-vm.runInNewContext(read("extension/content/dodge.js") + "\n" + read("extension/shared/settings.js"), lib);
+vm.runInNewContext(read("extension/shared/settings.js") + "\n" + read("extension/content/dodge.js"), lib);
 const Dodge = lib.GhostPiPDodge;
 const DEFAULTS = JSON.parse(JSON.stringify(lib.GhostPiPSettings.DEFAULTS));
 
@@ -287,7 +287,7 @@ const base = `http://127.0.0.1:${server.address().port}/`;
 
 execFileSync(
   "powershell",
-  ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(ROOT, "engine/installer/install.ps1"), "-InPlace"],
+  ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(ROOT, "engine/installer/install.ps1"), "-InPlace", "-Dev"],
   { stdio: "inherit" },
 );
 await sleep(800);
@@ -320,6 +320,35 @@ try {
   );
   const sw = await swTarget.worker();
   await poll(() => sw.evaluate(() => typeof globalThis.GhostPiPBackground === "object"), Boolean, 3000);
+  {
+    const p = await browser.newPage();
+    await p.goto(`chrome-extension://${extId}/popup/popup.html`, { waitUntil: "domcontentloaded" });
+    await p.evaluate(() => {
+      const btn = document.createElement("button");
+      btn.id = "__gpGrantAllSites";
+      btn.onclick = () => chrome.permissions.request({ origins: ["http://*/*", "https://*/*"] });
+      document.body.prepend(btn);
+    });
+    await p.click("#__gpGrantAllSites");
+    await sleep(350);
+    execFileSync("python", [
+      "-c",
+      `import win32gui, win32con, time
+def cb(h, _):
+    if win32gui.IsWindowVisible(h) and win32gui.GetClassName(h) == "Chrome_WidgetWin_1" and win32gui.GetWindowText(h) == "":
+        l, t, r, b = win32gui.GetWindowRect(h)
+        if 250 <= r - l <= 800 and 100 <= b - t <= 450:
+            win32gui.PostMessage(h, win32con.WM_KEYDOWN, win32con.VK_TAB, 0)
+            win32gui.PostMessage(h, win32con.WM_KEYUP, win32con.VK_TAB, 0)
+            time.sleep(0.06)
+            win32gui.PostMessage(h, win32con.WM_KEYDOWN, win32con.VK_RETURN, 0)
+            win32gui.PostMessage(h, win32con.WM_KEYUP, win32con.VK_RETURN, 0)
+    return True
+win32gui.EnumWindows(cb, None)`,
+    ]);
+    await sleep(250);
+    await p.close();
+  }
 
   const resetAll = async (patch = {}) => {
     await sw.evaluate(async ({ defaults, patch }) => {
@@ -333,7 +362,7 @@ try {
         peek: { ...base.peek, ...(patch.peek ?? {}) },
         hotkeys: { ...base.hotkeys, ...(patch.hotkeys ?? {}) },
       };
-      await chrome.storage.local.set({ settings: next });
+      await chrome.storage.local.set({ settings: next, gpTestHooks: true });
       await chrome.storage.local.remove(["floatLayout", "pipBounds"]);
       await chrome.storage.session.remove(["pip", "inTab", "inTabSessions"]);
       GhostPiPBackground.postToEngine({ v: 1, type: "STATE", settings: next });
@@ -678,7 +707,7 @@ try {
         clickThrough: true,
         dodge: { ...settings.dodge, enabled: true, autoReturn: false, hoverDelayMs: 60, cooldownMs: 120 },
       };
-      await chrome.storage.local.set({ settings: next });
+      await chrome.storage.local.set({ settings: next, gpTestHooks: true });
       GhostPiPBackground.postToEngine({ v: 1, type: "STATE", settings: next });
     });
     await sleep(150);

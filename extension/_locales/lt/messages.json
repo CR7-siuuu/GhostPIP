@@ -310,13 +310,13 @@
     "message": "Išeiti"
   },
   "peekMode": {
-    "message": "Žvilgtelėjimo režimas"
+    "message": "Atvirkštinis permatomumas"
   },
   "peekModeHint": {
     "message": "Slėpti, kol laikote nuspaudę klavišą"
   },
   "peekSettings": {
-    "message": "Žvilgtelėjimo nustatymai"
+    "message": "Atvirkštinio permatomumo nustatymai"
   },
   "peekKey": {
     "message": "Laikomas klavišas"
@@ -340,13 +340,13 @@
     "message": "Nepermatomumas laikant"
   },
   "mediaRemote": {
-    "message": "Valdymas žaidime"
+    "message": "Nuotolinis valdymas"
   },
   "mediaRemoteHint": {
     "message": "Atkūrimas, prasukimas ir garsas neprarandant fokuso"
   },
   "mediaSettings": {
-    "message": "Valdymo žaidime nustatymai"
+    "message": "Nuotolinio valdymo nustatymai"
   },
   "mediaSeekStep": {
     "message": "Prasukimo žingsnis"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Žaidimuose, paleistuose administratoriaus teisėmis, laikomas Ctrl+Alt nepasiekia PiP. Norėdami perjungti spustelėjimų praleidimą, naudokite Alt+G."
+  },
+  "tipMediaHotkeys": {
+    "message": "Kai leidžiamas PiP, Alt+Left, Alt+Right ir Alt+Space valdo vaizdo įrašą ir pakeičia Atgal, Pirmyn bei lango meniu."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Leiskite pasiekti visas svetaines, kad galėtumėte tai naudoti."
   }
 }

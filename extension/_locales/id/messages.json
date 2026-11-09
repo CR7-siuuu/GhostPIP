@@ -310,13 +310,13 @@
     "message": "Keluar"
   },
   "peekMode": {
-    "message": "Mode Intip"
+    "message": "Transparansi terbalik"
   },
   "peekModeHint": {
     "message": "Sembunyikan sampai tombol intip ditahan"
   },
   "peekSettings": {
-    "message": "Pengaturan Mode Intip"
+    "message": "Pengaturan transparansi terbalik"
   },
   "peekKey": {
     "message": "Tombol tahan untuk intip"
@@ -340,13 +340,13 @@
     "message": "Opasitas saat ditahan"
   },
   "mediaRemote": {
-    "message": "Remot Dalam Game"
+    "message": "Remot"
   },
   "mediaRemoteHint": {
     "message": "Putar, geser waktu & volume tanpa lepas fokus"
   },
   "mediaSettings": {
-    "message": "Pengaturan Remot Dalam Game"
+    "message": "Pengaturan remot"
   },
   "mediaSeekStep": {
     "message": "Langkah geser"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Di atas game yang berjalan sebagai administrator, menahan Ctrl+Alt tidak dapat menjangkau PiP. Gunakan Alt+G untuk mengaktifkan/menonaktifkan klik tembus."
+  },
+  "tipMediaHotkeys": {
+    "message": "Saat PiP sedang diputar, Alt+Left, Alt+Right, dan Alt+Space mengontrol video dan menggantikan Kembali, Maju, serta menu jendela."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Izinkan akses ke semua situs untuk menggunakan ini."
   }
 }

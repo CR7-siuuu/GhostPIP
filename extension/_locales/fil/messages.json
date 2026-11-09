@@ -316,13 +316,13 @@
     "message": "Lumabas"
   },
   "peekMode": {
-    "message": "Peek Mode"
+    "message": "Baligtad na transparency"
   },
   "peekModeHint": {
     "message": "Itago hangga't hindi pinipindot nang matagal ang key"
   },
   "peekSettings": {
-    "message": "Mga setting ng Peek Mode"
+    "message": "Mga setting ng baligtad na transparency"
   },
   "peekKey": {
     "message": "Key na pipindutin para sumilip"
@@ -346,13 +346,13 @@
     "message": "Opacity habang nakapindot"
   },
   "mediaRemote": {
-    "message": "In-game Remote"
+    "message": "Remote control"
   },
   "mediaRemoteHint": {
     "message": "Play, seek at volume nang hindi nawawala ang focus"
   },
   "mediaSettings": {
-    "message": "Mga setting ng In-game Remote"
+    "message": "Mga setting ng Remote control"
   },
   "mediaSeekStep": {
     "message": "Hakbang sa pag-seek"
@@ -384,5 +384,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Sa mga larong tumatakbo bilang administrator, hindi maabot ng pagpindot sa Ctrl+Alt ang PiP. Gamitin ang Alt+G para i-toggle ang click-through sa halip."
+  },
+  "tipMediaHotkeys": {
+    "message": "Habang nagpe-play ang PiP, kinokontrol ng Alt+Left, Alt+Right at Alt+Space ang video at pinapalitan ang Bumalik, Abante at ang menu ng window."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Payagan ang access sa lahat ng site para magamit ito."
   }
 }

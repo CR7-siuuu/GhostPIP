@@ -310,13 +310,13 @@
     "message": "ውጣ"
   },
   "peekMode": {
-    "message": "የአጭር እይታ ሁነታ"
+    "message": "የተገላቢጦሽ ግልጽነት"
   },
   "peekModeHint": {
     "message": "ቁልፉን ተጭነው እስኪይዙ ድረስ ደብቅ"
   },
   "peekSettings": {
-    "message": "የአጭር እይታ ቅንብሮች"
+    "message": "የተገላቢጦሽ ግልጽነት ቅንብሮች"
   },
   "peekKey": {
     "message": "ተጭኖ የማሳያ ቁልፍ"
@@ -340,13 +340,13 @@
     "message": "ሲጫኑ ግልጽነት"
   },
   "mediaRemote": {
-    "message": "የጨዋታ ውስጥ መቆጣጠሪያ"
+    "message": "የርቀት መቆጣጠሪያ"
   },
   "mediaRemoteHint": {
     "message": "ትኩረት ሳይለቁ ማጫወቻ፣ መፈለጊያ እና ድምጽ"
   },
   "mediaSettings": {
-    "message": "የጨዋታ ውስጥ መቆጣጠሪያ ቅንብሮች"
+    "message": "የርቀት መቆጣጠሪያ ቅንብሮች"
   },
   "mediaSeekStep": {
     "message": "የመዝለያ እርምጃ"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "በአስተዳዳሪ (administrator) በሚሰሩ ጨዋታዎች ላይ Ctrl+Alt ተጭኖ መያዝ ወደ PiP መድረስ አይችልም። በምትኩ ጠቅታ ማሳለፍን ለማብራት ወይም ለማጥፋት Alt+G ይጠቀሙ።"
+  },
+  "tipMediaHotkeys": {
+    "message": "PiP በሚጫወትበት ጊዜ Alt+Left፣ Alt+Right እና Alt+Space ቪዲዮውን ይቆጣጠራሉ እንዲሁም ወደ ኋላ፣ ወደ ፊት እና የመስኮት ሜኑን ይተካሉ።"
+  },
+  "allSitesNeedsPermission": {
+    "message": "ይህንን ለመጠቀም የሁሉም ጣቢያዎች መዳረሻን ይፍቀዱ።"
   }
 }

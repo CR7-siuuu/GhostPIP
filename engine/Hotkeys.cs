@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace GhostPiP.Engine;
 
@@ -18,6 +19,15 @@ public sealed class Hotkeys : IDisposable
     public const int ID_SEEK_BACK = 6;
     public const int ID_SEEK_FORWARD = 7;
 
+    /// <summary>Mirror of shared/hotkey-vectors.json "reserved"; the self-test fails if they drift.</summary>
+    public static readonly HashSet<string> Reserved = new(StringComparer.Ordinal)
+    {
+        "Ctrl+A", "Ctrl+C", "Ctrl+V", "Ctrl+X", "Ctrl+Z", "Ctrl+Y", "Ctrl+S", "Ctrl+F", "Ctrl+P",
+        "Ctrl+W", "Ctrl+T", "Ctrl+N", "Ctrl+TAB", "Ctrl+Shift+TAB", "Ctrl+ESC", "Ctrl+ESCAPE",
+        "Ctrl+Shift+ESC", "Ctrl+Shift+ESCAPE", "Alt+TAB", "Alt+Shift+TAB", "Alt+F4", "Alt+ESC",
+        "Alt+ESCAPE", "Ctrl+Alt+DELETE"
+    };
+
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool RegisterHotKey(nint hWnd, int id, uint fsModifiers, uint vk);
 
@@ -25,179 +35,133 @@ public sealed class Hotkeys : IDisposable
     private static extern bool UnregisterHotKey(nint hWnd, int id);
 
     private readonly nint _hwnd;
-    private readonly HashSet<int> _registeredIds = new();
-    private HotkeyConfig? _currentConfig;
-    private bool _mediaActive;
-    private bool _lastApplyHadErrors;
-    private string? _mediaPlayPause;
-    private string? _mediaSeekBack;
-    private string? _mediaSeekForward;
+    private readonly HashSet<int> _registered = new();
+    private readonly Dictionary<int, string?> _attempted = new();
 
     public Hotkeys(nint hwnd)
     {
         _hwnd = hwnd;
     }
 
-    public string[] Apply(HotkeyConfig config, bool registerMedia = false)
+    /// <summary>
+    /// Brings registrations in line with the wanted set. Peek is registered only while peek mode is
+    /// on, media keys only while a tracked PiP is playing. An id whose spec is unchanged since the
+    /// last attempt is left alone, so a failing combo is not retried every tick; call
+    /// <see cref="UnregisterAll"/> first to force a retry after the user edits hotkeys.
+    /// </summary>
+    public string[] Apply(HotkeyConfig config, bool peek, bool media)
     {
-        if (_currentConfig is not null &&
-            _currentConfig == config &&
-            _mediaActive == registerMedia &&
-            !_lastApplyHadErrors)
-        {
-            return [];
-        }
-
-        UnregisterAll();
-        _currentConfig = config;
-        _mediaActive = registerMedia;
-        _mediaPlayPause = registerMedia ? config.PlayPause : null;
-        _mediaSeekBack = registerMedia ? config.SeekBack : null;
-        _mediaSeekForward = registerMedia ? config.SeekForward : null;
-
         var errors = new List<string>();
-        TryRegisterOne(ID_CLICK_THROUGH, config.ClickThrough, noRepeat: true, errors);
-        TryRegisterOne(ID_DODGE, config.Dodge, noRepeat: true, errors);
-        TryRegisterOne(ID_MUTE, config.Mute, noRepeat: true, errors);
-        TryRegisterOne(ID_PEEK, config.Peek, noRepeat: true, errors);
-
-        if (registerMedia)
-        {
-            TryRegisterOne(ID_PLAY_PAUSE, config.PlayPause, noRepeat: true, errors);
-            TryRegisterOne(ID_SEEK_BACK, config.SeekBack, noRepeat: false, errors);
-            TryRegisterOne(ID_SEEK_FORWARD, config.SeekForward, noRepeat: false, errors);
-        }
-
-        _lastApplyHadErrors = errors.Count > 0;
+        Sync(ID_CLICK_THROUGH, config.ClickThrough, noRepeat: true, errors);
+        Sync(ID_DODGE, config.Dodge, noRepeat: true, errors);
+        Sync(ID_MUTE, config.Mute, noRepeat: true, errors);
+        Sync(ID_PEEK, peek ? config.Peek : null, noRepeat: true, errors);
+        Sync(ID_PLAY_PAUSE, media ? config.PlayPause : null, noRepeat: true, errors);
+        Sync(ID_SEEK_BACK, media ? config.SeekBack : null, noRepeat: false, errors);
+        Sync(ID_SEEK_FORWARD, media ? config.SeekForward : null, noRepeat: false, errors);
         return errors.ToArray();
     }
 
-    public void SetMediaActive(HotkeyConfig config, bool active)
+    public bool IsRegistered(int id) => _registered.Contains(id);
+
+    private void Sync(int id, string? spec, bool noRepeat, List<string> errors)
     {
-        if (!active)
-        {
-            UnregisterOne(ID_PLAY_PAUSE);
-            UnregisterOne(ID_SEEK_BACK);
-            UnregisterOne(ID_SEEK_FORWARD);
-            _mediaActive = false;
-            _mediaPlayPause = null;
-            _mediaSeekBack = null;
-            _mediaSeekForward = null;
-            return;
-        }
-
-        if (_mediaActive &&
-            string.Equals(_mediaPlayPause, config.PlayPause, StringComparison.Ordinal) &&
-            string.Equals(_mediaSeekBack, config.SeekBack, StringComparison.Ordinal) &&
-            string.Equals(_mediaSeekForward, config.SeekForward, StringComparison.Ordinal))
-        {
-            return;
-        }
-
-        UnregisterOne(ID_PLAY_PAUSE);
-        UnregisterOne(ID_SEEK_BACK);
-        UnregisterOne(ID_SEEK_FORWARD);
-
-        TryRegisterOne(ID_PLAY_PAUSE, config.PlayPause, noRepeat: true, errors: null);
-        TryRegisterOne(ID_SEEK_BACK, config.SeekBack, noRepeat: false, errors: null);
-        TryRegisterOne(ID_SEEK_FORWARD, config.SeekForward, noRepeat: false, errors: null);
-
-        _mediaActive = true;
-        _mediaPlayPause = config.PlayPause;
-        _mediaSeekBack = config.SeekBack;
-        _mediaSeekForward = config.SeekForward;
-    }
-
-    private void TryRegisterOne(int id, string spec, bool noRepeat, List<string>? errors)
-    {
-        if (string.IsNullOrWhiteSpace(spec))
+        string? wanted = string.IsNullOrWhiteSpace(spec) ? null : spec;
+        if (_attempted.TryGetValue(id, out string? prev) && string.Equals(prev, wanted, StringComparison.Ordinal))
             return;
 
-        if (!TryParseHotkey(spec, out uint mods, out uint vk))
+        _attempted[id] = wanted;
+        if (_registered.Remove(id) && _hwnd != IntPtr.Zero)
+            UnregisterHotKey(_hwnd, id);
+
+        if (wanted is null)
+            return;
+
+        if (!TryParseHotkey(wanted, out uint mods, out uint vk))
         {
-            errors?.Add(spec);
+            errors.Add(wanted);
             return;
         }
 
         uint flags = noRepeat ? (mods | MOD_NOREPEAT) : mods;
         if (_hwnd != IntPtr.Zero && RegisterHotKey(_hwnd, id, flags, vk))
-        {
-            _registeredIds.Add(id);
-        }
+            _registered.Add(id);
         else
-        {
-            errors?.Add(spec);
-        }
-    }
-
-    private void UnregisterOne(int id)
-    {
-        if (!_registeredIds.Remove(id))
-            return;
-
-        if (_hwnd != IntPtr.Zero)
-            UnregisterHotKey(_hwnd, id);
+            errors.Add(wanted);
     }
 
     public void UnregisterAll()
     {
         if (_hwnd != IntPtr.Zero)
         {
-            foreach (int id in _registeredIds)
+            foreach (int id in _registered)
                 UnregisterHotKey(_hwnd, id);
         }
-        _registeredIds.Clear();
-        _mediaActive = false;
-        _mediaPlayPause = null;
-        _mediaSeekBack = null;
-        _mediaSeekForward = null;
+        _registered.Clear();
+        _attempted.Clear();
     }
 
     public void Dispose() => UnregisterAll();
 
-    public static bool TryParseHotkey(string? spec, out uint modifiers, out uint vk)
+    public static bool TryParseHotkey(string? spec, out uint modifiers, out uint vk) =>
+        TryParseHotkey(spec, out modifiers, out vk, out _);
+
+    /// <summary>
+    /// The shared hotkey rule (shared/hotkey-vectors.json): one valid key token plus modifiers, the key
+    /// is F1-F12 or the modifiers include Ctrl/Alt/Win, and the normalized combo is not reserved.
+    /// </summary>
+    public static bool TryParseHotkey(string? spec, out uint modifiers, out uint vk, out string normalized)
     {
         modifiers = 0;
         vk = 0;
+        normalized = string.Empty;
         if (string.IsNullOrWhiteSpace(spec))
             return false;
 
-        string[] parts = spec.Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        if (parts.Length < 1)
-            return false;
-
-        for (int i = 0; i < parts.Length; i++)
+        string? keyToken = null;
+        foreach (string part in spec.Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
-            string part = parts[i];
-            if (string.Equals(part, "Alt", StringComparison.OrdinalIgnoreCase))
+            uint mod = ModifierOf(part);
+            if (mod != 0)
             {
-                modifiers |= MOD_ALT;
+                modifiers |= mod;
+                continue;
             }
-            else if (string.Equals(part, "Ctrl", StringComparison.OrdinalIgnoreCase) ||
-                     string.Equals(part, "Control", StringComparison.OrdinalIgnoreCase))
-            {
-                modifiers |= MOD_CONTROL;
-            }
-            else if (string.Equals(part, "Shift", StringComparison.OrdinalIgnoreCase))
-            {
-                modifiers |= MOD_SHIFT;
-            }
-            else if (string.Equals(part, "Win", StringComparison.OrdinalIgnoreCase) ||
-                     string.Equals(part, "Meta", StringComparison.OrdinalIgnoreCase))
-            {
-                modifiers |= MOD_WIN;
-            }
-            else
-            {
-                if (vk != 0)
-                    return false;
-                if (!TryParseKeyToken(part, out vk))
-                    return false;
-            }
+            if (keyToken is not null || !TryParseKeyToken(part, out vk))
+                return false;
+            keyToken = part.ToUpperInvariant();
         }
 
+        if (keyToken is null)
+            return false;
+
         bool isFunctionKey = vk is >= 0x70 and <= 0x7B;
-        return vk != 0 && (modifiers != 0 || isFunctionKey);
+        if (!isFunctionKey && (modifiers & (MOD_CONTROL | MOD_ALT | MOD_WIN)) == 0)
+            return false;
+
+        var sb = new StringBuilder();
+        if ((modifiers & MOD_CONTROL) != 0) sb.Append("Ctrl+");
+        if ((modifiers & MOD_ALT) != 0) sb.Append("Alt+");
+        if ((modifiers & MOD_SHIFT) != 0) sb.Append("Shift+");
+        if ((modifiers & MOD_WIN) != 0) sb.Append("Win+");
+        sb.Append(keyToken);
+        normalized = sb.ToString();
+        return !Reserved.Contains(normalized);
+    }
+
+    private static uint ModifierOf(string part)
+    {
+        if (string.Equals(part, "Alt", StringComparison.OrdinalIgnoreCase))
+            return MOD_ALT;
+        if (string.Equals(part, "Ctrl", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(part, "Control", StringComparison.OrdinalIgnoreCase))
+            return MOD_CONTROL;
+        if (string.Equals(part, "Shift", StringComparison.OrdinalIgnoreCase))
+            return MOD_SHIFT;
+        if (string.Equals(part, "Win", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(part, "Meta", StringComparison.OrdinalIgnoreCase))
+            return MOD_WIN;
+        return 0;
     }
 
     private static bool TryParseKeyToken(string token, out uint vk)

@@ -1,6 +1,6 @@
 {
   "name": "ghostpip",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "",
   "scripts": {
     "build:zip": "node scripts/build-zip.mjs",

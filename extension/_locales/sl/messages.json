@@ -310,13 +310,13 @@
     "message": "Izhod"
   },
   "peekMode": {
-    "message": "Način pokuka"
+    "message": "Obratna prosojnost"
   },
   "peekModeHint": {
     "message": "Skrij, dokler ne držiš tipke za prikaz"
   },
   "peekSettings": {
-    "message": "Nastavitve načina pokuka"
+    "message": "Nastavitve obratne prosojnosti"
   },
   "peekKey": {
     "message": "Tipka za držanje"
@@ -340,13 +340,13 @@
     "message": "Neprosojnost ob držanju"
   },
   "mediaRemote": {
-    "message": "Upravljalnik v igri"
+    "message": "Daljinski upravljalnik"
   },
   "mediaRemoteHint": {
     "message": "Predvajanje, previjanje in glasnost brez izgube fokusa"
   },
   "mediaSettings": {
-    "message": "Nastavitve upravljalnika v igri"
+    "message": "Nastavitve daljinskega upravljalnika"
   },
   "mediaSeekStep": {
     "message": "Korak previjanja"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Pri igrah, ki se izvajajo kot skrbnik, pridržanje Ctrl+Alt ne doseže PiP-a. Namesto tega uporabite Alt+G za preklop klika skozi."
+  },
+  "tipMediaHotkeys": {
+    "message": "Med predvajanjem PiP-a bližnjice Alt+Left, Alt+Right in Alt+Space upravljajo videoposnetek in preglasijo Nazaj, Naprej ter meni okna."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Dovolite dostop do vseh spletnih mest, če želite to uporabljati."
   }
 }

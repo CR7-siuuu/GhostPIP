@@ -310,13 +310,13 @@
     "message": "Surt"
   },
   "peekMode": {
-    "message": "Mode ullada"
+    "message": "Transparència inversa"
   },
   "peekModeHint": {
     "message": "Amaga fins que mantinguis premuda la tecla"
   },
   "peekSettings": {
-    "message": "Opcions del mode ullada"
+    "message": "Opcions de transparència inversa"
   },
   "peekKey": {
     "message": "Tecla per mantenir i veure"
@@ -340,13 +340,13 @@
     "message": "Opacitat en prémer"
   },
   "mediaRemote": {
-    "message": "Comandament en joc"
+    "message": "Comandament"
   },
   "mediaRemoteHint": {
     "message": "Reproducció, salt i volum sense perdre el focus"
   },
   "mediaSettings": {
-    "message": "Opcions del comandament en joc"
+    "message": "Opcions del comandament"
   },
   "mediaSeekStep": {
     "message": "Pas de salt"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "En jocs que s'executen com a administrador, mantenir premut Ctrl+Alt no arriba al PiP. Utilitza Alt+G per activar o desactivar el clic a través."
+  },
+  "tipMediaHotkeys": {
+    "message": "Mentre es reprodueix un PiP, Alt+Left, Alt+Right i Alt+Space controlen el vídeo i substitueixen Enrere, Endavant i el menú de la finestra."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Permet l'accés a tots els llocs per utilitzar això."
   }
 }

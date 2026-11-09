@@ -310,13 +310,13 @@
     "message": "Keluar"
   },
   "peekMode": {
-    "message": "Mod Intai"
+    "message": "Ketelusan terbalik"
   },
   "peekModeHint": {
     "message": "Sembunyikan sehingga kekunci intai ditahan"
   },
   "peekSettings": {
-    "message": "Tetapan Mod Intai"
+    "message": "Tetapan ketelusan terbalik"
   },
   "peekKey": {
     "message": "Kekunci tahan untuk intai"
@@ -340,13 +340,13 @@
     "message": "Kelegapan semasa intai"
   },
   "mediaRemote": {
-    "message": "Alat Kawalan Dalam Permainan"
+    "message": "Alat kawalan jauh"
   },
   "mediaRemoteHint": {
     "message": "Main, langkau & kelantangan tanpa hilang fokus"
   },
   "mediaSettings": {
-    "message": "Tetapan Alat Kawalan Dalam Permainan"
+    "message": "Tetapan alat kawalan jauh"
   },
   "mediaSeekStep": {
     "message": "Langkah langkau"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Pada permainan yang dijalankan sebagai pentadbir, menahan Ctrl+Alt tidak dapat mencapai PiP. Gunakan Alt+G untuk menogol klik tembus sebaliknya."
+  },
+  "tipMediaHotkeys": {
+    "message": "Semasa PiP dimainkan, Alt+Left, Alt+Right dan Alt+Space mengawal video dan mengatasi Undur, Maju serta menu tetingkap."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Benarkan akses ke semua tapak untuk menggunakan ini."
   }
 }

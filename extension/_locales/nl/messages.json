@@ -310,13 +310,13 @@
     "message": "Afsluiten"
   },
   "peekMode": {
-    "message": "Spiekmodus"
+    "message": "Omgekeerde transparantie"
   },
   "peekModeHint": {
     "message": "Verbergen tot je de spiektoets ingedrukt houdt"
   },
   "peekSettings": {
-    "message": "Instellingen voor spiekmodus"
+    "message": "Instellingen voor omgekeerde transparantie"
   },
   "peekKey": {
     "message": "Vasthouden-om-te-tonen-toets"
@@ -340,7 +340,7 @@
     "message": "Dekking bij indrukken"
   },
   "mediaRemote": {
-    "message": "In-game afstandsbediening"
+    "message": "Afstandsbediening"
   },
   "mediaRemoteHint": {
     "message": "Afspelen, spoelen en volume zonder focusverlies"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Bij games die als administrator worden uitgevoerd, bereikt Ctrl+Alt ingedrukt houden het PiP-venster niet. Gebruik in plaats daarvan Alt+G om doorklikken in of uit te schakelen."
+  },
+  "tipMediaHotkeys": {
+    "message": "Tijdens het afspelen van een PiP bedienen Alt+Left, Alt+Right en Alt+Space de video en overschrijven ze Terug, Vooruit en het venstermenu."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Geef toegang tot alle sites om dit te gebruiken."
   }
 }

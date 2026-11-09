@@ -4,6 +4,122 @@ using System.Runtime.InteropServices;
 
 namespace GhostPiP.Engine;
 
+public enum FrameStatus
+{
+    Frame,
+    Oversize,
+    End
+}
+
+public sealed class OutgoingQueue
+{
+    public const int Capacity = 256;
+
+    private sealed class Entry(string? coalesceKey, byte[] payload)
+    {
+        public string? CoalesceKey { get; } = coalesceKey;
+        public byte[] Payload { get; set; } = payload;
+    }
+
+    private readonly object _gate = new();
+    private readonly Queue<Entry> _queue = new();
+    private readonly Dictionary<string, Entry> _pendingByKey = new(StringComparer.Ordinal);
+    private bool _closed;
+
+    public int Count
+    {
+        get { lock (_gate) return _queue.Count; }
+    }
+
+    public static string? CoalesceKeyOf(OutgoingMessage message) => message switch
+    {
+        PipHoverMessage hover => "PIP_HOVER:" + hover.TabId,
+        PipBoundsMessage bounds => "PIP_BOUNDS:" + bounds.TabId,
+        PeekStateMessage => "PEEK_STATE",
+        _ => null
+    };
+
+    /// <summary>
+    /// Latest-wins for state messages (hover, bounds, peek). Everything else is queued unconditionally:
+    /// intents are user actions and must reach the extension.
+    /// </summary>
+    public void Enqueue(OutgoingMessage message) => Enqueue(CoalesceKeyOf(message), Protocol.SerializeOutgoing(message));
+
+    public void Enqueue(string? coalesceKey, byte[] payload)
+    {
+        lock (_gate)
+        {
+            if (_closed)
+                return;
+
+            if (coalesceKey is not null)
+            {
+                if (_pendingByKey.TryGetValue(coalesceKey, out var pending))
+                {
+                    pending.Payload = payload;
+                    return;
+                }
+                if (_queue.Count >= Capacity)
+                    return;
+            }
+
+            var entry = new Entry(coalesceKey, payload);
+            _queue.Enqueue(entry);
+            if (coalesceKey is not null)
+                _pendingByKey[coalesceKey] = entry;
+            Monitor.Pulse(_gate);
+        }
+    }
+
+    public bool TryTake(int timeoutMs, out byte[]? payload)
+    {
+        lock (_gate)
+        {
+            while (_queue.Count == 0)
+            {
+                if (_closed || !Monitor.Wait(_gate, timeoutMs))
+                {
+                    payload = null;
+                    return false;
+                }
+            }
+
+            var entry = _queue.Dequeue();
+            if (entry.CoalesceKey is not null)
+                _pendingByKey.Remove(entry.CoalesceKey);
+            payload = entry.Payload;
+            Monitor.PulseAll(_gate);
+            return true;
+        }
+    }
+
+    public bool WaitEmpty(int timeoutMs)
+    {
+        long deadline = Environment.TickCount64 + timeoutMs;
+        lock (_gate)
+        {
+            while (_queue.Count > 0 && !_closed)
+            {
+                int remaining = (int)(deadline - Environment.TickCount64);
+                if (remaining <= 0 || !Monitor.Wait(_gate, remaining))
+                    return _queue.Count == 0;
+            }
+            return true;
+        }
+    }
+
+    public void Close()
+    {
+        lock (_gate)
+        {
+            _closed = true;
+            _queue.Clear();
+            _pendingByKey.Clear();
+            Monitor.PulseAll(_gate);
+        }
+    }
+}
+
 public sealed class NativeMessagingHost
 {
     public const int MaxFrameBytes = 256 * 1024;
@@ -16,9 +132,10 @@ public sealed class NativeMessagingHost
     private readonly nint _targetHwnd;
     private readonly Stream _input;
     private readonly Stream _output;
-    private readonly object _writeLock = new();
     private readonly ConcurrentQueue<IncomingMessage> _incoming = new();
+    private readonly OutgoingQueue _outgoing = new();
     private Thread? _readerThread;
+    private Thread? _writerThread;
 
     public NativeMessagingHost(nint targetHwnd, Stream? input = null, Stream? output = null)
     {
@@ -34,21 +151,37 @@ public sealed class NativeMessagingHost
             IsBackground = true,
             Name = "GhostPiP-NativeMessaging-Reader"
         };
+        _writerThread = new Thread(WriteLoop)
+        {
+            IsBackground = true,
+            Name = "GhostPiP-NativeMessaging-Writer"
+        };
         _readerThread.Start();
+        _writerThread.Start();
     }
 
     public bool TryDequeue(out IncomingMessage? message) =>
         _incoming.TryDequeue(out message);
 
-    public void Send(OutgoingMessage message)
+    public void Send(OutgoingMessage message) => _outgoing.Enqueue(message);
+
+    public void Flush(int timeoutMs) => _outgoing.WaitEmpty(timeoutMs);
+
+    private void WriteLoop()
     {
         try
         {
-            WriteMessage(_output, message, _writeLock);
+            while (true)
+            {
+                if (!_outgoing.TryTake(Timeout.Infinite, out byte[]? payload) || payload is null)
+                    return;
+                WriteFrame(_output, payload);
+            }
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore write errors if Chrome already closed the pipe.
+            Console.Error.WriteLine($"[GhostPiP] stdout writer stopped: {ex.Message}");
+            _outgoing.Close();
         }
     }
 
@@ -58,9 +191,14 @@ public sealed class NativeMessagingHost
         {
             while (true)
             {
-                byte[]? frame = ReadFrame(_input);
-                if (frame is null)
+                FrameStatus status = ReadFrame(_input, out byte[]? frame);
+                if (status == FrameStatus.End)
                     break;
+                if (status == FrameStatus.Oversize || frame is null)
+                {
+                    Console.Error.WriteLine("[GhostPiP] skipped an invalid-length frame");
+                    continue;
+                }
 
                 if (Protocol.TryParseIncoming(frame, out var msg) && msg is not null)
                 {
@@ -70,9 +208,9 @@ public sealed class NativeMessagingHost
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Pipe closed or malformed frame size; trigger clean shutdown.
+            Console.Error.WriteLine($"[GhostPiP] stdin reader stopped: {ex.Message}");
         }
         finally
         {
@@ -81,57 +219,60 @@ public sealed class NativeMessagingHost
         }
     }
 
-    public static byte[]? ReadFrame(Stream input)
+    /// <summary>
+    /// Reads one length-prefixed frame. An oversized or empty frame is drained and reported as
+    /// <see cref="FrameStatus.Oversize"/> so one bad message never takes the engine down.
+    /// </summary>
+    public static FrameStatus ReadFrame(Stream input, out byte[]? payload)
     {
+        payload = null;
         Span<byte> lenBuf = stackalloc byte[4];
-        int headRead = ReadExact(input, lenBuf);
-        if (headRead == 0)
-            return null;
-        if (headRead < 4)
-            throw new InvalidDataException("Truncated 4-byte Native Messaging length prefix.");
+        if (ReadExact(input, lenBuf) < 4)
+            return FrameStatus.End;
 
         uint length = BinaryPrimitives.ReadUInt32LittleEndian(lenBuf);
-        if (length == 0 || length > MaxFrameBytes)
-            throw new InvalidDataException($"Invalid Native Messaging frame length: {length}.");
+        if (length == 0)
+            return FrameStatus.Oversize;
 
-        byte[] payload = new byte[length];
-        int bodyRead = ReadExact(input, payload);
-        if (bodyRead < (int)length)
-            throw new InvalidDataException("Truncated Native Messaging frame body.");
+        if (length > MaxFrameBytes)
+            return Drain(input, length) ? FrameStatus.Oversize : FrameStatus.End;
 
-        return payload;
+        byte[] body = new byte[length];
+        if (ReadExact(input, body) < (int)length)
+            return FrameStatus.End;
+
+        payload = body;
+        return FrameStatus.Frame;
     }
 
-    public static void WriteFrame(Stream output, ReadOnlySpan<byte> utf8Payload, object? syncRoot = null)
+    private static bool Drain(Stream input, uint length)
+    {
+        Span<byte> scratch = stackalloc byte[4096];
+        long remaining = length;
+        while (remaining > 0)
+        {
+            int n = input.Read(scratch[..(int)Math.Min(scratch.Length, remaining)]);
+            if (n <= 0)
+                return false;
+            remaining -= n;
+        }
+        return true;
+    }
+
+    public static void WriteFrame(Stream output, ReadOnlySpan<byte> utf8Payload)
     {
         if (utf8Payload.IsEmpty || utf8Payload.Length > MaxFrameBytes)
             throw new InvalidDataException($"Invalid outgoing frame length: {utf8Payload.Length}.");
 
-        byte[] lenBytes = new byte[4];
+        Span<byte> lenBytes = stackalloc byte[4];
         BinaryPrimitives.WriteUInt32LittleEndian(lenBytes, (uint)utf8Payload.Length);
-
-        if (syncRoot is not null)
-        {
-            lock (syncRoot)
-            {
-                output.Write(lenBytes, 0, 4);
-                output.Write(utf8Payload);
-                output.Flush();
-            }
-        }
-        else
-        {
-            output.Write(lenBytes, 0, 4);
-            output.Write(utf8Payload);
-            output.Flush();
-        }
+        output.Write(lenBytes);
+        output.Write(utf8Payload);
+        output.Flush();
     }
 
-    public static void WriteMessage(Stream output, OutgoingMessage message, object? syncRoot = null)
-    {
-        byte[] payload = Protocol.SerializeOutgoing(message);
-        WriteFrame(output, payload, syncRoot);
-    }
+    public static void WriteMessage(Stream output, OutgoingMessage message) =>
+        WriteFrame(output, Protocol.SerializeOutgoing(message));
 
     private static int ReadExact(Stream stream, Span<byte> buffer)
     {

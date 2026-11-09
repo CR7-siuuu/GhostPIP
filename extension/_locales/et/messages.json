@@ -316,13 +316,13 @@
     "message": "Välju"
   },
   "peekMode": {
-    "message": "Piilumisrežiim"
+    "message": "Pööratud läbipaistvus"
   },
   "peekModeHint": {
     "message": "Peida, kuni hoiad piilumisklahvi all"
   },
   "peekSettings": {
-    "message": "Piilumisrežiimi seaded"
+    "message": "Pööratud läbipaistvuse seaded"
   },
   "peekKey": {
     "message": "Allhoitav klahv"
@@ -346,13 +346,13 @@
     "message": "Läbipaistmatus hoidmisel"
   },
   "mediaRemote": {
-    "message": "Mängusisene pult"
+    "message": "Kaugjuhtimispult"
   },
   "mediaRemoteHint": {
     "message": "Esitus, kerimine ja helitugevus fookust kaotamata"
   },
   "mediaSettings": {
-    "message": "Mängusisese puldi seaded"
+    "message": "Kaugjuhtimispuldi seaded"
   },
   "mediaSeekStep": {
     "message": "Kerimissamm"
@@ -384,5 +384,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Administraatorina käitatud mängude kohal ei ulatu Ctrl+Alt allhoidmine PiP-aknani. Kasuta selle asemel läbiklõpsu sisse- või väljalülitamiseks klahvikombinatsiooni Alt+G."
+  },
+  "tipMediaHotkeys": {
+    "message": "Kui PiP esitab videot, juhivad Alt+Left, Alt+Right ja Alt+Space videot ning asendavad funktsioonid Tagasi, Edasi ja aknamenüü."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Selle kasutamiseks luba juurdepääs kõigile saitidele."
   }
 }

@@ -65,6 +65,11 @@ for (const { lang, loc, rtl, launcher } of LANGS) {
     );
 
     if (launcher) {
+      const swTarget = await browser.waitForTarget(
+        (t) => t.type() === "service_worker" && t.url().startsWith(`chrome-extension://${extId}/`),
+      );
+      const sw = await swTarget.worker();
+      await sw.evaluate(() => chrome.storage.local.set({ gpTestHooks: true }));
       await page.goto("https://www.youtube.com/watch?v=jNQXAC9IVRw", { waitUntil: "domcontentloaded" });
       await page.waitForFunction(() => [...document.querySelectorAll("video")].some((v) => v.videoWidth > 0), { timeout: 25000 });
       await sleep(1200);

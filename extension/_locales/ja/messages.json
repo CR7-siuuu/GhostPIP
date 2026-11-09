@@ -310,13 +310,13 @@
     "message": "終了"
   },
   "peekMode": {
-    "message": "ピークモード"
+    "message": "逆透明化"
   },
   "peekModeHint": {
     "message": "普段は非表示にし、キーを押している間だけ表示"
   },
   "peekSettings": {
-    "message": "ピークモード設定"
+    "message": "逆透明化の設定"
   },
   "peekKey": {
     "message": "ピーク表示キー"
@@ -340,13 +340,13 @@
     "message": "ピーク時の不透明度"
   },
   "mediaRemote": {
-    "message": "ゲーム内リモコン"
+    "message": "リモコン"
   },
   "mediaRemoteHint": {
     "message": "フォーカスを奪わずに再生・シーク・音量調整"
   },
   "mediaSettings": {
-    "message": "ゲーム内リモコン設定"
+    "message": "リモコン設定"
   },
   "mediaSeekStep": {
     "message": "シーク間隔"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "管理者として実行されているゲーム上では、Ctrl+Alt の長押しが PiP に届きません。代わりに Alt+G でクリック透過を切り替えてください。"
+  },
+  "tipMediaHotkeys": {
+    "message": "PiP の再生中は、Alt+Left、Alt+Right、Alt+Space が動画操作に使用され、「戻る」「進む」やウィンドウ メニューの代わりに機能します。"
+  },
+  "allSitesNeedsPermission": {
+    "message": "これを使用するには、すべてのサイトへのアクセスを許可してください。"
   }
 }

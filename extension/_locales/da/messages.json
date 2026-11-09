@@ -310,13 +310,13 @@
     "message": "Afslut"
   },
   "peekMode": {
-    "message": "Smugkig-tilstand"
+    "message": "Omvendt gennemsigtighed"
   },
   "peekModeHint": {
     "message": "Skjul indtil du holder smugkig-tasten nede"
   },
   "peekSettings": {
-    "message": "Indstillinger for smugkig"
+    "message": "Indstillinger for omvendt gennemsigtighed"
   },
   "peekKey": {
     "message": "Hold-for-at-se-tast"
@@ -340,7 +340,7 @@
     "message": "Synlighed ved tryk"
   },
   "mediaRemote": {
-    "message": "In-game fjernbetjening"
+    "message": "Fjernbetjening"
   },
   "mediaRemoteHint": {
     "message": "Afspil, spol og juster lyd uden at miste fokus"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "I spil, der kører som administrator, kan Ctrl+Alt ikke nå PiP-vinduet. Brug i stedet Alt+G til at slå klik igennem til eller fra."
+  },
+  "tipMediaHotkeys": {
+    "message": "Når en PiP afspilles, styrer Alt+Left, Alt+Right og Alt+Space videoen og tilsidesætter Tilbage, Frem og vinduesmenuen."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Giv adgang til alle websteder for at bruge dette."
   }
 }

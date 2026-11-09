@@ -310,13 +310,13 @@
     "message": "ออก"
   },
   "peekMode": {
-    "message": "โหมดแอบดู"
+    "message": "ความโปร่งใสย้อนกลับ"
   },
   "peekModeHint": {
     "message": "ซ่อนไว้จนกว่าจะกดปุ่มค้างเพื่อดู"
   },
   "peekSettings": {
-    "message": "ตั้งค่าโหมดแอบดู"
+    "message": "ตั้งค่าความโปร่งใสย้อนกลับ"
   },
   "peekKey": {
     "message": "ปุ่มกดค้างเพื่อดู"
@@ -340,13 +340,13 @@
     "message": "ความทึบขณะกดดู"
   },
   "mediaRemote": {
-    "message": "รีโมตในเกม"
+    "message": "รีโมต"
   },
   "mediaRemoteHint": {
     "message": "เล่น กรอ และปรับเสียงโดยไม่เสียโฟกัสเกม"
   },
   "mediaSettings": {
-    "message": "ตั้งค่ารีโมตในเกม"
+    "message": "ตั้งค่ารีโมต"
   },
   "mediaSeekStep": {
     "message": "ระยะการกรอ"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "ในเกมที่ทำงานในฐานะผู้ดูแลระบบ การกด Ctrl+Alt ค้างไว้จะไม่สามารถส่งไปยัง PiP ได้ ให้ใช้ Alt+G เพื่อเปิดหรือปิดคลิกทะลุแทน"
+  },
+  "tipMediaHotkeys": {
+    "message": "ขณะที่ PiP กำลังเล่น Alt+Left, Alt+Right และ Alt+Space จะควบคุมวิดีโอและแทนที่ ย้อนกลับ, ไปข้างหน้า และเมนูหน้าต่าง"
+  },
+  "allSitesNeedsPermission": {
+    "message": "อนุญาตการเข้าถึงทุกเว็บไซต์เพื่อใช้สิ่งนี้"
   }
 }

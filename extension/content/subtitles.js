@@ -272,5 +272,5 @@
     };
   }
 
-  globalThis.GhostPiPSubtitles = Object.freeze({ observe });
+  globalThis.GhostPiPSubtitles = Object.freeze({ observe, stripCueMarkup, normalizeLines });
 })();

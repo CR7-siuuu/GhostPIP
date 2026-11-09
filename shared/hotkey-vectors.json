@@ -1,0 +1,39 @@
+{
+  "rule": "A hotkey is one key token plus modifiers. It is valid when the key token is valid AND (the key is F1-F12 OR the modifiers include Ctrl, Alt or Win) AND the normalized combo is not in reserved. Shift alone never qualifies, because Shift+letter would block typing. Normalized form orders modifiers Ctrl, Alt, Shift, Win and uppercases the key.",
+  "reserved": [
+    "Ctrl+A", "Ctrl+C", "Ctrl+V", "Ctrl+X", "Ctrl+Z", "Ctrl+Y", "Ctrl+S", "Ctrl+F", "Ctrl+P",
+    "Ctrl+W", "Ctrl+T", "Ctrl+N", "Ctrl+TAB", "Ctrl+Shift+TAB", "Ctrl+ESC", "Ctrl+ESCAPE",
+    "Ctrl+Shift+ESC", "Ctrl+Shift+ESCAPE", "Alt+TAB", "Alt+Shift+TAB", "Alt+F4", "Alt+ESC",
+    "Alt+ESCAPE", "Ctrl+Alt+DELETE"
+  ],
+  "cases": [
+    { "spec": "Alt+G", "valid": true },
+    { "spec": "Alt+Shift+D", "valid": true },
+    { "spec": "alt+m", "valid": true },
+    { "spec": "Alt+Space", "valid": true },
+    { "spec": "Alt+Left", "valid": true },
+    { "spec": "Alt+Right", "valid": true },
+    { "spec": "Alt+P", "valid": true },
+    { "spec": "Ctrl+Shift+K", "valid": true },
+    { "spec": "Win+K", "valid": true },
+    { "spec": "F9", "valid": true },
+    { "spec": "Shift+F2", "valid": true },
+    { "spec": "Ctrl+Alt+1", "valid": true },
+    { "spec": "G", "valid": false },
+    { "spec": "Shift+A", "valid": false },
+    { "spec": "Shift+Space", "valid": false },
+    { "spec": "Ctrl+C", "valid": false },
+    { "spec": "ctrl+v", "valid": false },
+    { "spec": "Control+X", "valid": false },
+    { "spec": "Ctrl+Z", "valid": false },
+    { "spec": "Shift+Ctrl+Tab", "valid": false },
+    { "spec": "Alt+Tab", "valid": false },
+    { "spec": "Alt+F4", "valid": false },
+    { "spec": "Ctrl+Alt+Delete", "valid": false },
+    { "spec": "Ctrl+Shift+Esc", "valid": false },
+    { "spec": "Alt+F13", "valid": false },
+    { "spec": "Alt+G+H", "valid": false },
+    { "spec": "Alt", "valid": false },
+    { "spec": "", "valid": false }
+  ]
+}

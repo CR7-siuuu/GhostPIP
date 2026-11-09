@@ -337,7 +337,7 @@ public sealed unsafe class SubtitleOverlay : IDisposable
         _visible = false;
     }
 
-    public void Update(string? rawText, DodgeRect pipRect, double effectiveOpacity)
+    public void Update(string? rawText, DodgeRect pipRect, double effectiveOpacity, nint pipTopHwnd, double dpiScale)
     {
         if (_disposed)
             return;
@@ -358,8 +358,8 @@ public sealed unsafe class SubtitleOverlay : IDisposable
         if (!EnsureWindowCreated())
             return;
 
-        int maxBoxW = Math.Clamp(pipRect.W - 24, 120, 1600);
-        int fontPx = Math.Clamp(pipRect.W / 22, 14, 30);
+        int maxBoxW = Math.Clamp(pipRect.W - Dpi.Px(24, dpiScale), Dpi.Px(120, dpiScale), 1600);
+        int fontPx = Math.Clamp(pipRect.W / 22, Dpi.Px(14, dpiScale), Dpi.Px(30, dpiScale));
 
         bool bitmapChanged = false;
         if (_memDc == IntPtr.Zero ||
@@ -392,7 +392,7 @@ public sealed unsafe class SubtitleOverlay : IDisposable
 
         byte effectiveAlpha = GhostStyle.ComputeAlpha(effectiveOpacity, allowZero: true);
         int x = pipRect.L + (pipRect.W - _boxW) / 2;
-        int y = pipRect.B - _boxH - Math.Clamp(pipRect.H / 16, 10, 28);
+        int y = pipRect.B - _boxH - Math.Clamp(pipRect.H / 16, Dpi.Px(10, dpiScale), Dpi.Px(28, dpiScale));
         bool wasHidden = !_visible;
         bool posChanged = x != _lastX || y != _lastY;
 
@@ -432,8 +432,15 @@ public sealed unsafe class SubtitleOverlay : IDisposable
 
         if (wasHidden || bitmapChanged || posChanged)
             SetWindowPos(_hwnd, HWND_TOPMOST, x, y, _boxW, _boxH, SWP_NOACTIVATE);
-        else
+        else if (LostZOrder(pipTopHwnd))
             SetWindowPos(_hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
+
+    private bool LostZOrder(nint pipTopHwnd)
+    {
+        if ((GhostStyle.GetWindowLongPtrW(_hwnd, GhostStyle.GWL_EXSTYLE) & GhostStyle.WS_EX_TOPMOST) == 0)
+            return true;
+        return pipTopHwnd != IntPtr.Zero && !GhostStyle.IsAbove(_hwnd, pipTopHwnd, maxSteps: 64);
     }
 
     public static void RenderTestBitmap(

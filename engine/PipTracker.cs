@@ -4,12 +4,11 @@ namespace GhostPiP.Engine;
 
 public sealed class TrackedPip : IDisposable
 {
-    public int TabId { get; set; }
+    public int TabId { get; }
     public nint Hwnd { get; }
-    public string Kind { get; set; }
+    public string Kind { get; }
     public DodgeState DodgeState { get; set; }
     public string HomeCorner { get; set; }
-    public long DetectedAtMs { get; }
     public bool Initialized { get; set; }
     public bool CustomPos { get; set; }
     public bool WaitCursorLeave { get; set; }
@@ -25,20 +24,13 @@ public sealed class TrackedPip : IDisposable
     public string SubtitleText { get; set; } = string.Empty;
     public SubtitleOverlay? Subtitle { get; set; }
 
-    public TrackedPip(
-        int tabId,
-        nint hwnd,
-        string kind,
-        string initialCorner,
-        long detectedAtMs,
-        PipRect? savedBounds = null)
+    public TrackedPip(int tabId, nint hwnd, string kind, string initialCorner, PipRect? savedBounds = null)
     {
         TabId = tabId;
         Hwnd = hwnd;
         Kind = kind;
         HomeCorner = initialCorner;
         DodgeState = DodgeSolver.InitialState(initialCorner);
-        DetectedAtMs = detectedAtMs;
         PendingSavedBounds = savedBounds;
     }
 
@@ -49,17 +41,28 @@ public sealed class TrackedPip : IDisposable
     }
 }
 
+public sealed record PendingOpen(int TabId, string Kind, PipRect Rect, double Dpr, PipRect? SavedBounds, long StartedAtMs);
+
+public readonly record struct WindowCandidate(nint Hwnd, DodgeRect Rect, bool Topmost);
+
+/// <summary>
+/// Binds browser PiP windows to extension tabs. A window is bound only while the extension has an
+/// open request (PIP_OPENED) pending for it; nothing is ever adopted unsolicited.
+/// </summary>
 public sealed unsafe class PipTracker : IDisposable
 {
     private const uint EVENT_OBJECT_SHOW = 0x8002;
-    private const uint EVENT_OBJECT_DESTROY = 0x8001;
-    private const uint EVENT_OBJECT_LOCATIONCHANGE = 0x800B;
     private const uint WINEVENT_OUTOFCONTEXT = 0x0000;
     private const uint WINEVENT_SKIPOWNPROCESS = 0x0002;
     private const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
+    private const uint WM_GETTEXTLENGTH = 0x000E;
+    private const uint SMTO_BLOCK = 0x0001;
+    private const uint SMTO_ABORTIFHUNG = 0x0002;
     private const nint WS_EX_TOOLWINDOW = 0x00000080;
     private const long OpenRetryTimeoutMs = 3000;
-    private const long AutoDetectIntervalMs = 500;
+    private const long MinEnumIntervalMs = 100;
+    private const int MinCandidateW = 140;
+    private const int MinCandidateH = 110;
 
     private static readonly string[] BrowserExes =
     [
@@ -68,6 +71,9 @@ public sealed unsafe class PipTracker : IDisposable
         "whale.exe",
         "brave.exe"
     ];
+
+    private static readonly string? TestWindowClass = NullIfEmpty(Environment.GetEnvironmentVariable("GHOSTPIP_TEST_CLASS"));
+    private static readonly bool AllowAnyTopmost = Environment.GetEnvironmentVariable("GHOSTPIP_ALLOW_ANY_TOPMOST") == "1";
 
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT
@@ -100,8 +106,8 @@ public sealed unsafe class PipTracker : IDisposable
     [DllImport("user32.dll", EntryPoint = "GetClassNameW", CharSet = CharSet.Unicode)]
     private static extern int GetClassNameW(nint hWnd, char* lpClassName, int nMaxCount);
 
-    [DllImport("user32.dll", EntryPoint = "GetWindowTextLengthW", CharSet = CharSet.Unicode)]
-    private static extern int GetWindowTextLengthW(nint hWnd);
+    [DllImport("user32.dll", EntryPoint = "SendMessageTimeoutW", SetLastError = true)]
+    private static extern nint SendMessageTimeoutW(nint hWnd, uint msg, nint wParam, nint lParam, uint flags, uint timeoutMs, out nint result);
 
     [DllImport("user32.dll")]
     private static extern uint GetWindowThreadProcessId(nint hWnd, out uint lpdwProcessId);
@@ -128,30 +134,20 @@ public sealed unsafe class PipTracker : IDisposable
     [DllImport("user32.dll")]
     private static extern bool UnhookWinEvent(nint hWinEventHook);
 
-    private sealed record PendingOpen(
-        int TabId,
-        string Kind,
-        PipRect Rect,
-        double Dpr,
-        PipRect? SavedBounds,
-        long StartedAtMs);
-
     private readonly nint _ownHwnd;
     private readonly GhostStyle _ghostStyle;
     private readonly Action<OutgoingMessage> _send;
     private readonly Action<TrackedPip>? _onUnbound;
+    private readonly Func<long> _nowMs;
     private readonly WinEventDelegate _winEventDelegate;
     private readonly EnumWindowsProc _enumDelegate;
-    private readonly List<(nint Hwnd, DodgeRect Rect)> _enumBuffer = new(16);
+    private readonly List<WindowCandidate> _enumBuffer = new(16);
     private readonly Dictionary<int, PendingOpen> _pendingByTab = new();
     private readonly Dictionary<int, string> _pendingSubtitles = new();
     private readonly List<TrackedPip> _tracked = new(4);
-    private nint _hook;
+    private nint _showHook;
     private bool _enumIncludeNonTopmost;
-    private int _enumMinW = 150;
-    private int _enumMinH = 150;
-    private int _nextAutoTabId = -1;
-    private long _lastAutoDetectMs = -AutoDetectIntervalMs;
+    private long _lastEnumMs = -MinEnumIntervalMs;
     private string _defaultCorner = Settings.Defaults.Dodge.Home;
 
     public IReadOnlyList<TrackedPip> Tracked => _tracked;
@@ -160,22 +156,16 @@ public sealed unsafe class PipTracker : IDisposable
         nint ownHwnd,
         GhostStyle ghostStyle,
         Action<OutgoingMessage> send,
+        Func<long> nowMs,
         Action<TrackedPip>? onUnbound = null)
     {
         _ownHwnd = ownHwnd;
         _ghostStyle = ghostStyle;
         _send = send;
+        _nowMs = nowMs;
         _onUnbound = onUnbound;
         _winEventDelegate = OnWinEvent;
         _enumDelegate = OnEnumWindow;
-        _hook = SetWinEventHook(
-            EVENT_OBJECT_DESTROY,
-            EVENT_OBJECT_LOCATIONCHANGE,
-            IntPtr.Zero,
-            _winEventDelegate,
-            0,
-            0,
-            WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
     }
 
     public void SetDefaultCorner(string corner)
@@ -223,14 +213,14 @@ public sealed unsafe class PipTracker : IDisposable
         {
             if (GhostStyle.IsWindow(existing.Hwnd) && IsWindowVisible(existing.Hwnd))
             {
-                bool isPopup = string.Equals(msg.Kind, "popup", StringComparison.Ordinal);
-                var candidates = CollectCandidates(includeNonTopmost: isPopup, minW: 140, minH: 110);
-                nint replacement = FindBestMatch(candidates, msg.Kind, msg.Rect, msg.Dpr);
-                if (replacement != IntPtr.Zero && replacement != existing.Hwnd)
+                var probe = new PendingOpen(msg.TabId, msg.Kind, msg.Rect, msg.Dpr, msg.SavedBounds, nowMs);
+                var matches = MatchPending([probe], CollectCandidates(includeNonTopmost: msg.Kind == "popup"));
+                if (matches.Count == 1 && matches[0].Hwnd != existing.Hwnd)
                 {
                     Unbind(existing, sendLost: false);
-                    BindNew(msg.TabId, replacement, msg.Kind, msg.SavedBounds, nowMs);
                     _pendingByTab.Remove(msg.TabId);
+                    BindNew(probe, matches[0].Hwnd);
+                    SyncShowHook();
                     return;
                 }
 
@@ -243,6 +233,7 @@ public sealed unsafe class PipTracker : IDisposable
                         existing.Initialized = false;
                     }
                     _send(new PipBoundMessage(msg.TabId));
+                    SyncShowHook();
                     return;
                 }
             }
@@ -251,73 +242,26 @@ public sealed unsafe class PipTracker : IDisposable
         }
 
         _pendingByTab[msg.TabId] = new PendingOpen(msg.TabId, msg.Kind, msg.Rect, msg.Dpr, msg.SavedBounds, nowMs);
-        if (TryResolveSinglePending(msg.TabId, nowMs))
-            return;
-
-        if (!string.Equals(msg.Kind, "popup", StringComparison.Ordinal))
-        {
-            TrackedPip? promotable = FindPromotableAutoPip(msg, nowMs);
-            if (promotable is not null)
-            {
-                _pendingByTab.Remove(msg.TabId);
-                promotable.TabId = msg.TabId;
-                promotable.Kind = msg.Kind;
-                promotable.HoverInitialized = false;
-                if (msg.SavedBounds is not null)
-                {
-                    promotable.PendingSavedBounds = msg.SavedBounds;
-                    promotable.Initialized = false;
-                }
-                if (!string.Equals(msg.Kind, "native", StringComparison.Ordinal))
-                    promotable.Subtitle?.Hide();
-                ApplyPendingSubtitleIfAny(promotable);
-                _send(new PipBoundMessage(msg.TabId));
-            }
-        }
-    }
-
-    private TrackedPip? FindPromotableAutoPip(PipOpenedMessage msg, long nowMs)
-    {
-        string? testClass = Environment.GetEnvironmentVariable("GHOSTPIP_TEST_CLASS");
-        for (int i = 0; i < _tracked.Count; i++)
-        {
-            var pip = _tracked[i];
-            if (pip.TabId >= 0)
-                continue;
-            if (!GhostStyle.IsWindow(pip.Hwnd) || !IsWindowVisible(pip.Hwnd))
-                continue;
-
-            bool kindCompat = !string.IsNullOrEmpty(testClass) ||
-                              string.Equals(pip.Kind, msg.Kind, StringComparison.Ordinal);
-            if (!kindCompat)
-                continue;
-
-            if (_tracked.Count == 1 || nowMs - pip.DetectedAtMs <= OpenRetryTimeoutMs)
-                return pip;
-        }
-        return null;
+        TryResolvePending(nowMs);
+        SyncShowHook();
     }
 
     public void OnPipClosed(int tabId)
     {
         _pendingByTab.Remove(tabId);
         _pendingSubtitles.Remove(tabId);
+        SyncShowHook();
 
         var exact = FindByTabId(tabId);
         if (exact is not null)
-        {
             Unbind(exact, sendLost: false);
-            return;
-        }
-
-        if (_tracked.Count == 1 && _tracked[0].TabId < 0)
-            Unbind(_tracked[0], sendLost: false);
     }
 
     public void ClearAll()
     {
         _pendingByTab.Clear();
         _pendingSubtitles.Clear();
+        SyncShowHook();
         for (int i = _tracked.Count - 1; i >= 0; i--)
             Unbind(_tracked[i], sendLost: false);
     }
@@ -331,30 +275,22 @@ public sealed unsafe class PipTracker : IDisposable
                 Unbind(pip, sendLost: true);
         }
 
-        if (_pendingByTab.Count > 0)
-        {
-            TryResolveAllPending(nowMs);
+        if (_pendingByTab.Count == 0)
+            return;
 
-            if (_pendingByTab.Count > 0)
+        TryResolvePending(nowMs);
+
+        int[] keys = [.. _pendingByTab.Keys];
+        foreach (int key in keys)
+        {
+            if (_pendingByTab.TryGetValue(key, out var p) && nowMs - p.StartedAtMs >= OpenRetryTimeoutMs)
             {
-                int[] keys = [.. _pendingByTab.Keys];
-                foreach (int key in keys)
-                {
-                    if (_pendingByTab.TryGetValue(key, out var p) && nowMs - p.StartedAtMs >= OpenRetryTimeoutMs)
-                    {
-                        _pendingByTab.Remove(key);
-                        _pendingSubtitles.Remove(key);
-                        _send(new PipLostMessage(p.TabId, "not_found"));
-                    }
-                }
+                _pendingByTab.Remove(key);
+                _pendingSubtitles.Remove(key);
+                _send(new PipLostMessage(p.TabId, "not_found"));
             }
         }
-
-        if (_pendingByTab.Count == 0 && nowMs - _lastAutoDetectMs >= AutoDetectIntervalMs)
-        {
-            _lastAutoDetectMs = nowMs;
-            TryAutoDetect(nowMs);
-        }
+        SyncShowHook();
     }
 
     private void OnWinEvent(
@@ -366,76 +302,100 @@ public sealed unsafe class PipTracker : IDisposable
         uint dwEventThread,
         uint dwmsEventTime)
     {
-        if (idObject != 0 || hwnd == IntPtr.Zero)
+        if (idObject != 0 || hwnd == IntPtr.Zero || _pendingByTab.Count == 0)
             return;
+        TryResolvePending(_nowMs());
+        SyncShowHook();
+    }
 
-        if (eventType == EVENT_OBJECT_DESTROY)
+    // EVENT_OBJECT_SHOW only matters while a request is pending, so the system-wide hook exists only then.
+    private void SyncShowHook()
+    {
+        bool want = _pendingByTab.Count > 0;
+        if (want && _showHook == IntPtr.Zero)
         {
-            var pip = FindByHwnd(hwnd);
-            if (pip is not null)
-            {
-                Unbind(pip, sendLost: true);
-                return;
-            }
+            _showHook = SetWinEventHook(
+                EVENT_OBJECT_SHOW,
+                EVENT_OBJECT_SHOW,
+                IntPtr.Zero,
+                _winEventDelegate,
+                0,
+                0,
+                WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
         }
-
-        if (_pendingByTab.Count > 0 && (eventType == EVENT_OBJECT_SHOW || eventType == EVENT_OBJECT_LOCATIONCHANGE))
-            TryResolveAllPending(Environment.TickCount64);
+        else if (!want && _showHook != IntPtr.Zero)
+        {
+            UnhookWinEvent(_showHook);
+            _showHook = IntPtr.Zero;
+        }
     }
 
-    private void TryResolveAllPending(long nowMs)
+    private void TryResolvePending(long nowMs)
     {
-        if (_pendingByTab.Count == 0)
+        if (_pendingByTab.Count == 0 || nowMs - _lastEnumMs < MinEnumIntervalMs)
+            return;
+        _lastEnumMs = nowMs;
+
+        bool anyPopup = false;
+        foreach (var p in _pendingByTab.Values)
+            anyPopup |= p.Kind == "popup";
+
+        var candidates = CollectCandidates(includeNonTopmost: anyPopup);
+        if (candidates.Count == 0)
             return;
 
-        int[] tabIds = [.. _pendingByTab.Keys];
-        foreach (int tabId in tabIds)
-            TryResolveSinglePending(tabId, nowMs);
+        var pending = new List<PendingOpen>(_pendingByTab.Values);
+        pending.Sort((a, b) => a.StartedAtMs.CompareTo(b.StartedAtMs));
+        foreach (var (tabId, hwnd) in MatchPending(pending, candidates))
+        {
+            if (_pendingByTab.Remove(tabId, out var p))
+                BindNew(p, hwnd);
+        }
     }
 
-    private bool TryResolveSinglePending(int tabId, long nowMs)
+    /// <summary>
+    /// Pairs pending open requests with candidate windows by rect. Non-popup requests consider only
+    /// topmost windows. A candidate binds at most once, and no request means no binding.
+    /// </summary>
+    public static List<(int TabId, nint Hwnd)> MatchPending(IReadOnlyList<PendingOpen> pending, IReadOnlyList<WindowCandidate> candidates)
     {
-        if (!_pendingByTab.TryGetValue(tabId, out var p))
-            return false;
+        var result = new List<(int TabId, nint Hwnd)>();
+        if (pending.Count == 0 || candidates.Count == 0)
+            return result;
 
-        bool isPopup = string.Equals(p.Kind, "popup", StringComparison.Ordinal);
-        var candidates = CollectCandidates(includeNonTopmost: isPopup, minW: 140, minH: 110);
-        if (candidates.Count == 0)
-            return false;
+        var taken = new HashSet<nint>();
+        var pool = new List<(nint Hwnd, DodgeRect Rect)>(candidates.Count);
+        foreach (var p in pending)
+        {
+            bool isPopup = string.Equals(p.Kind, "popup", StringComparison.Ordinal);
+            pool.Clear();
+            foreach (var c in candidates)
+            {
+                if (!taken.Contains(c.Hwnd) && (isPopup || c.Topmost))
+                    pool.Add((c.Hwnd, c.Rect));
+            }
 
-        nint matched = FindBestMatch(candidates, p.Kind, p.Rect, p.Dpr);
-        if (matched == IntPtr.Zero)
-            return false;
-
-        _pendingByTab.Remove(tabId);
-        BindNew(p.TabId, matched, p.Kind, p.SavedBounds, nowMs);
-        return true;
+            nint matched = FindBestMatch(pool, p.Kind, p.Rect, p.Dpr);
+            if (matched == IntPtr.Zero)
+                continue;
+            taken.Add(matched);
+            result.Add((p.TabId, matched));
+        }
+        return result;
     }
 
-    private void BindNew(int tabId, nint hwnd, string kind, PipRect? savedBounds, long nowMs)
+    private void BindNew(PendingOpen p, nint hwnd)
     {
-        var pip = new TrackedPip(tabId, hwnd, kind, _defaultCorner, nowMs, savedBounds);
+        var pip = new TrackedPip(p.TabId, hwnd, p.Kind, _defaultCorner, p.SavedBounds);
         ApplyPendingSubtitleIfAny(pip);
         _tracked.Add(pip);
-        if (tabId >= 0)
-            _send(new PipBoundMessage(tabId));
+        _send(new PipBoundMessage(p.TabId));
     }
 
     private void ApplyPendingSubtitleIfAny(TrackedPip pip)
     {
-        if (pip.TabId >= 0 && _pendingSubtitles.TryGetValue(pip.TabId, out string? sub))
-        {
-            _pendingSubtitles.Remove(pip.TabId);
+        if (_pendingSubtitles.Remove(pip.TabId, out string? sub))
             pip.SubtitleText = sub;
-        }
-        else if (pip.TabId < 0 && string.Equals(pip.Kind, "native", StringComparison.Ordinal) && _pendingSubtitles.Count == 1)
-        {
-            foreach (var kv in _pendingSubtitles)
-            {
-                pip.SubtitleText = kv.Value;
-                break;
-            }
-        }
     }
 
     private void Unbind(TrackedPip pip, bool sendLost)
@@ -444,36 +404,8 @@ public sealed unsafe class PipTracker : IDisposable
         pip.Dispose();
         _onUnbound?.Invoke(pip);
         _ghostStyle.Restore(pip.Hwnd);
-        if (sendLost && pip.TabId >= 0)
+        if (sendLost)
             _send(new PipLostMessage(pip.TabId, "closed"));
-    }
-
-    private int AllocateAutoTabId()
-    {
-        while (FindByTabId(_nextAutoTabId) is not null)
-            _nextAutoTabId--;
-        return _nextAutoTabId--;
-    }
-
-    private void TryAutoDetect(long nowMs)
-    {
-        string? testClass = Environment.GetEnvironmentVariable("GHOSTPIP_TEST_CLASS");
-        var candidates = CollectCandidates(includeNonTopmost: false, minW: 150, minH: 150);
-        foreach (var (hwnd, rc) in candidates)
-        {
-            if (string.IsNullOrEmpty(testClass) && (rc.W > 1200 || rc.H > 1100))
-                continue;
-
-            string kind = !string.IsNullOrEmpty(testClass)
-                ? "native"
-                : _ghostStyle.TryGetContentRelRect(hwnd, out _)
-                    ? "document"
-                    : "native";
-
-            int autoTabId = AllocateAutoTabId();
-            BindNew(autoTabId, hwnd, kind, savedBounds: null, nowMs);
-            return;
-        }
     }
 
     public static nint FindBestMatch(List<(nint Hwnd, DodgeRect Rect)> candidates, string kind, PipRect target, double dpr)
@@ -555,26 +487,12 @@ public sealed unsafe class PipTracker : IDisposable
                 }
             }
         }
-        if (bestSize != IntPtr.Zero)
-            return bestSize;
-
-        if (!isPopup)
-        {
-            foreach (var (hwnd, rc) in candidates)
-            {
-                if (rc.W <= 1200 && rc.H <= 1100)
-                    return hwnd;
-            }
-        }
-
-        return IntPtr.Zero;
+        return bestSize;
     }
 
-    private List<(nint Hwnd, DodgeRect Rect)> CollectCandidates(bool includeNonTopmost, int minW, int minH)
+    private List<WindowCandidate> CollectCandidates(bool includeNonTopmost)
     {
         _enumIncludeNonTopmost = includeNonTopmost;
-        _enumMinW = minW;
-        _enumMinH = minH;
         _enumBuffer.Clear();
         EnumWindows(_enumDelegate, IntPtr.Zero);
         return _enumBuffer;
@@ -582,14 +500,14 @@ public sealed unsafe class PipTracker : IDisposable
 
     private bool OnEnumWindow(nint hWnd, nint lParam)
     {
-        if (IsCandidateWindow(hWnd, out var rect))
-            _enumBuffer.Add((hWnd, rect));
+        if (IsCandidateWindow(hWnd, out var candidate))
+            _enumBuffer.Add(candidate);
         return true;
     }
 
-    private bool IsCandidateWindow(nint hwnd, out DodgeRect rect)
+    private bool IsCandidateWindow(nint hwnd, out WindowCandidate candidate)
     {
-        rect = default;
+        candidate = default;
         if (hwnd == IntPtr.Zero || hwnd == _ownHwnd)
             return false;
         if (FindByHwnd(hwnd) is not null || _ghostStyle.IsManagedWindow(hwnd))
@@ -605,9 +523,7 @@ public sealed unsafe class PipTracker : IDisposable
         if (!GetWindowRect(hwnd, out var rc))
             return false;
 
-        int w = rc.Right - rc.Left;
-        int h = rc.Bottom - rc.Top;
-        if (w < _enumMinW || h < _enumMinH)
+        if (rc.Right - rc.Left < MinCandidateW || rc.Bottom - rc.Top < MinCandidateH)
             return false;
 
         string className = GetWindowClassName(hwnd);
@@ -617,29 +533,23 @@ public sealed unsafe class PipTracker : IDisposable
             return false;
         }
 
-        string? testClass = Environment.GetEnvironmentVariable("GHOSTPIP_TEST_CLASS");
+        bool isTestClass = TestWindowClass is not null && string.Equals(className, TestWindowClass, StringComparison.Ordinal);
         GetWindowThreadProcessId(hwnd, out uint pid);
-        if (pid == (uint)Environment.ProcessId)
-        {
-            if (string.IsNullOrEmpty(testClass) || !string.Equals(className, testClass, StringComparison.Ordinal))
-                return false;
-        }
+        if (pid == (uint)Environment.ProcessId && !isTestClass)
+            return false;
 
-        rect = new DodgeRect(rc.Left, rc.Top, rc.Right, rc.Bottom);
+        candidate = new WindowCandidate(hwnd, new DodgeRect(rc.Left, rc.Top, rc.Right, rc.Bottom), isTopmost);
 
-        if (!string.IsNullOrEmpty(testClass) && string.Equals(className, testClass, StringComparison.Ordinal))
+        if (isTestClass || (isTopmost && AllowAnyTopmost))
             return true;
 
-        if (isTopmost && Environment.GetEnvironmentVariable("GHOSTPIP_ALLOW_ANY_TOPMOST") == "1")
-            return true;
-
-         if (!string.Equals(className, "Chrome_WidgetWin_1", StringComparison.Ordinal))
+        if (!string.Equals(className, "Chrome_WidgetWin_1", StringComparison.Ordinal))
             return false;
 
         if ((exStyle & WS_EX_TOOLWINDOW) != 0)
             return false;
 
-        if (GetWindowTextLengthW(hwnd) <= 0)
+        if (!HasWindowText(hwnd))
             return false;
 
         string? exeName = GetProcessExeName(pid);
@@ -654,6 +564,11 @@ public sealed unsafe class PipTracker : IDisposable
 
         return false;
     }
+
+    // WM_GETTEXTLENGTH goes to another process; a hung browser window must not stall the UI thread.
+    private static bool HasWindowText(nint hwnd) =>
+        SendMessageTimeoutW(hwnd, WM_GETTEXTLENGTH, IntPtr.Zero, IntPtr.Zero, SMTO_ABORTIFHUNG | SMTO_BLOCK, 50, out nint len) != IntPtr.Zero &&
+        len > 0;
 
     private static string GetWindowClassName(nint hwnd)
     {
@@ -687,13 +602,15 @@ public sealed unsafe class PipTracker : IDisposable
         }
     }
 
+    private static string? NullIfEmpty(string? s) => string.IsNullOrEmpty(s) ? null : s;
+
     public void Dispose()
     {
         ClearAll();
-        if (_hook != IntPtr.Zero)
+        if (_showHook != IntPtr.Zero)
         {
-            UnhookWinEvent(_hook);
-            _hook = IntPtr.Zero;
+            UnhookWinEvent(_showHook);
+            _showHook = IntPtr.Zero;
         }
     }
 }

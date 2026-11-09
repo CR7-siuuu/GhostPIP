@@ -310,13 +310,13 @@
     "message": "Salir"
   },
   "peekMode": {
-    "message": "Modo vistazo"
+    "message": "Transparencia inversa"
   },
   "peekModeHint": {
     "message": "Ocultar hasta mantener pulsada la tecla"
   },
   "peekSettings": {
-    "message": "Ajustes de modo vistazo"
+    "message": "Ajustes de transparencia inversa"
   },
   "peekKey": {
     "message": "Tecla para mostrar"
@@ -340,13 +340,13 @@
     "message": "Opacidad al mostrar"
   },
   "mediaRemote": {
-    "message": "Control en juego"
+    "message": "Control remoto"
   },
   "mediaRemoteHint": {
     "message": "Reproducción, avance y volumen sin perder foco"
   },
   "mediaSettings": {
-    "message": "Ajustes de control en juego"
+    "message": "Ajustes de control remoto"
   },
   "mediaSeekStep": {
     "message": "Salto de tiempo"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "En juegos que se ejecutan como administrador, mantener pulsado Ctrl+Alt no llega al PiP. Usa Alt+G en su lugar para activar o desactivar el clic a través."
+  },
+  "tipMediaHotkeys": {
+    "message": "Mientras se reproduce un PiP, Alt+Left, Alt+Right y Alt+Space controlan el vídeo y anulan Atrás, Adelante y el menú de la ventana."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Permite el acceso a todos los sitios para usar esto."
   }
 }

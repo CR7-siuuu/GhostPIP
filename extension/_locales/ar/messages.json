@@ -310,13 +310,13 @@
     "message": "خروج"
   },
   "peekMode": {
-    "message": "وضع النظرة السريعة"
+    "message": "شفافية عكسية"
   },
   "peekModeHint": {
     "message": "إخفاء النافذة حتى تضغط مطولاً على المفتاح"
   },
   "peekSettings": {
-    "message": "إعدادات وضع النظرة السريعة"
+    "message": "إعدادات الشفافية العكسية"
   },
   "peekKey": {
     "message": "مفتاح الإظهار عند الضغط"
@@ -340,13 +340,13 @@
     "message": "الشفافية عند الضغط"
   },
   "mediaRemote": {
-    "message": "تحكم داخل اللعبة"
+    "message": "جهاز التحكم"
   },
   "mediaRemoteHint": {
     "message": "تشغيل وتقديم ومستوى الصوت دون فقدان التركيز"
   },
   "mediaSettings": {
-    "message": "إعدادات التحكم داخل اللعبة"
+    "message": "إعدادات جهاز التحكم"
   },
   "mediaSeekStep": {
     "message": "مقدار التقديم"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "في الألعاب التي تعمل كمسؤول، لا يمكن للضغط مع الاستمرار على Ctrl+Alt الوصول إلى PiP. استخدم Alt+G لتبديل تمرير النقرات بدلاً من ذلك."
+  },
+  "tipMediaHotkeys": {
+    "message": "أثناء تشغيل PiP، تتحكم مفاتيح Alt+Left وAlt+Right وAlt+Space في الفيديو وتحل محل رجوع وتقدم وقائمة النافذة."
+  },
+  "allSitesNeedsPermission": {
+    "message": "اسمح بالوصول إلى جميع المواقع لاستخدام هذا."
   }
 }

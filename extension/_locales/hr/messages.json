@@ -316,13 +316,13 @@
     "message": "Izlaz"
   },
   "peekMode": {
-    "message": "Način zavirivanja"
+    "message": "Obrnuta prozirnost"
   },
   "peekModeHint": {
     "message": "Sakrij dok ne držiš tipku za prikaz"
   },
   "peekSettings": {
-    "message": "Postavke načina zavirivanja"
+    "message": "Postavke obrnute prozirnosti"
   },
   "peekKey": {
     "message": "Tipka za držanje"
@@ -346,13 +346,13 @@
     "message": "Neprozirnost pri držanju"
   },
   "mediaRemote": {
-    "message": "Daljinski u igri"
+    "message": "Daljinski upravljač"
   },
   "mediaRemoteHint": {
     "message": "Reprodukcija, premotavanje i glasnoća bez gubitka fokusa"
   },
   "mediaSettings": {
-    "message": "Postavke daljinskog u igri"
+    "message": "Postavke daljinskog upravljača"
   },
   "mediaSeekStep": {
     "message": "Korak premotavanja"
@@ -384,5 +384,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Preko igara pokrenutih kao administrator, držanje tipki Ctrl+Alt ne dopire do PiP-a. Umjesto toga upotrijebite Alt+G za uključivanje/isključivanje propuštanja klikova."
+  },
+  "tipMediaHotkeys": {
+    "message": "Dok se PiP reproducira, Alt+Left, Alt+Right i Alt+Space upravljaju videozapisom i zamjenjuju radnje Natrag, Naprijed i izbornik prozora."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Dopustite pristup svim web-mjestima kako biste ovo koristili."
   }
 }

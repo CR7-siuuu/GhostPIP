@@ -3,7 +3,16 @@ $ErrorActionPreference = "Stop"
 $HostName = "app.ghostpip.engine"
 $InstallDir = Join-Path $env:LOCALAPPDATA "Programs\GhostPiP"
 
-Get-Process GhostPiP.Engine -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+$Procs = @(Get-Process GhostPiP.Engine -ErrorAction SilentlyContinue)
+if ($Procs.Count -gt 0) {
+    try { & taskkill.exe /IM GhostPiP.Engine.exe *> $null } catch {}
+    $Deadline = [DateTime]::UtcNow.AddSeconds(3)
+    while ([DateTime]::UtcNow -lt $Deadline) {
+        if (-not (Get-Process GhostPiP.Engine -ErrorAction SilentlyContinue)) { break }
+        Start-Sleep -Milliseconds 100
+    }
+    Get-Process GhostPiP.Engine -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+}
 
 $RegistryKeys = @(
     "HKCU:\Software\Google\Chrome\NativeMessagingHosts\$HostName",

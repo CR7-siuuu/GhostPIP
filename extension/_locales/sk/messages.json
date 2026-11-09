@@ -310,13 +310,13 @@
     "message": "Ukončiť"
   },
   "peekMode": {
-    "message": "Režim nahliadnutia"
+    "message": "Obrátená priehľadnosť"
   },
   "peekModeHint": {
     "message": "Skryť, kým nepodržíte kláves nahliadnutia"
   },
   "peekSettings": {
-    "message": "Nastavenia režimu nahliadnutia"
+    "message": "Nastavenia obrátenej priehľadnosti"
   },
   "peekKey": {
     "message": "Kláves na podržanie"
@@ -340,13 +340,13 @@
     "message": "Nepriehľadnosť pri podržaní"
   },
   "mediaRemote": {
-    "message": "Ovládač v hre"
+    "message": "Diaľkové ovládanie"
   },
   "mediaRemoteHint": {
     "message": "Prehrávanie, posun a hlasitosť bez straty fokusu"
   },
   "mediaSettings": {
-    "message": "Nastavenia ovládača v hre"
+    "message": "Nastavenia diaľkového ovládania"
   },
   "mediaSeekStep": {
     "message": "Krok posunu"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Pri hrách spustených ako správca podržanie Ctrl+Alt nedosiahne na PiP. Na prepnutie preklikávania použite namiesto toho Alt+G."
+  },
+  "tipMediaHotkeys": {
+    "message": "Počas prehrávania v PiP ovládajú Alt+Left, Alt+Right a Alt+Space video a nahrádzajú funkcie Späť, Vpred a ponuku okna."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Ak chcete toto používať, povoľte prístup ku všetkým stránkam."
   }
 }

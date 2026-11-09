@@ -61,7 +61,7 @@
         <label class="row">
           <span class="label-stack">
             <span class="row-title" data-i18n="allSites"></span>
-            <small data-i18n="allSitesHint" data-i18n-title="allSitesList"></small>
+            <small id="allSitesHint" data-i18n="allSitesHint" data-i18n-title="allSitesList"></small>
           </span>
           <input id="allSites" class="switch" type="checkbox" role="switch" />
         </label>
@@ -207,6 +207,8 @@
               <span class="row-title" id="hkSeekForwardLabel" data-i18n="mediaSeekForward"></span>
               <button type="button" class="hotkey-btn" data-hotkey="seekForward" id="hkSeekForward" aria-describedby="hkSeekForwardLabel" data-i18n-title="hotkeyBtnTitle">Alt+Right</button>
             </div>
+
+            <small class="hint" data-i18n="tipMediaHotkeys"></small>
           </div>
         </details>
 
@@ -243,6 +245,7 @@
             <ul class="tips">
               <li id="tipHold"></li>
               <li data-i18n="tipNativePip"></li>
+              <li id="tipElevated" data-i18n="tipElevated" hidden></li>
             </ul>
 
             <button id="resetHotkeys" type="button" class="btn btn-sub" data-i18n="resetHotkeys"></button>

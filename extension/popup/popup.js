@@ -21,6 +21,7 @@
     mediaEnabled: document.getElementById("mediaEnabled"),
     showChat: document.getElementById("showChat"),
     allSites: document.getElementById("allSites"),
+    allSitesHint: document.getElementById("allSitesHint"),
     opacity: document.getElementById("opacity"),
     opacityValue: document.getElementById("opacityValue"),
     wheelSubHint: document.getElementById("wheelSubHint"),
@@ -30,6 +31,7 @@
     kbdPeek: document.getElementById("kbdPeek"),
     kbdMute: document.getElementById("kbdMute"),
     tipHold: document.getElementById("tipHold"),
+    tipElevated: document.getElementById("tipElevated"),
     hotkeyBtns: [...document.querySelectorAll("button[data-hotkey]")],
     resetHotkeys: document.getElementById("resetHotkeys"),
     corners: [...document.querySelectorAll("input[data-corner]")],
@@ -52,12 +54,23 @@
     }
   }
 
+  const ALL_SITES_ORIGINS = ["http://*/*", "https://*/*"];
   let recordingTarget = null;
+  let opacityTimer = null;
 
   let state = {
     settings: Settings.merge(undefined),
     engine: { ...DEFAULT_ENGINE },
+    allSitesGranted: true,
   };
+
+  async function refreshAllSitesPerm() {
+    try {
+      if (chrome.permissions?.contains) {
+        state.allSitesGranted = await chrome.permissions.contains({ origins: ALL_SITES_ORIGINS });
+      }
+    } catch {}
+  }
 
   function send(msg) {
     return chrome.runtime.sendMessage({ v: 1, ...msg });
@@ -110,6 +123,14 @@
     if (els.mediaEnabled) els.mediaEnabled.checked = Boolean(media.enabled);
     if (els.showChat) els.showChat.checked = Boolean(settings.showChat);
     els.allSites.checked = settings.allSites;
+    if (els.allSitesHint) {
+      const needsPerm = Boolean(settings.allSites && !state.allSitesGranted);
+      els.allSitesHint.textContent = needsPerm ? t("allSitesNeedsPermission") : t("allSitesHint");
+      els.allSitesHint.toggleAttribute("data-warn", needsPerm);
+    }
+    if (els.tipElevated) {
+      els.tipElevated.hidden = !(engine.connected && engine.elevated === false);
+    }
 
     showOpacity(Math.round(settings.opacity * 100));
 
@@ -190,12 +211,45 @@
   els.peekEnabled?.addEventListener("change", () => applyPatch({ peek: { enabled: els.peekEnabled.checked } }));
   els.mediaEnabled?.addEventListener("change", () => applyPatch({ media: { enabled: els.mediaEnabled.checked } }));
   els.showChat?.addEventListener("change", () => applyPatch({ showChat: els.showChat.checked }));
-  els.allSites.addEventListener("change", () => applyPatch({ allSites: els.allSites.checked }));
+  els.allSites.addEventListener("change", async () => {
+    const want = els.allSites.checked;
+    if (want && chrome.permissions?.request) {
+      try {
+        const granted = await chrome.permissions.request({ origins: ALL_SITES_ORIGINS });
+        state.allSitesGranted = Boolean(granted);
+        if (!granted) {
+          els.allSites.checked = false;
+          render();
+          return;
+        }
+      } catch {
+        await refreshAllSitesPerm();
+      }
+    }
+    await applyPatch({ allSites: want });
+  });
+  els.allSitesHint?.parentElement?.parentElement?.addEventListener("click", async (e) => {
+    if (e.target === els.allSites) return;
+    if (state.settings.allSites && !state.allSitesGranted && chrome.permissions?.request) {
+      e.preventDefault();
+      try {
+        const granted = await chrome.permissions.request({ origins: ALL_SITES_ORIGINS });
+        state.allSitesGranted = Boolean(granted);
+        render();
+        if (granted) await applyPatch({ allSites: true });
+      } catch {}
+    }
+  });
 
   els.opacity.addEventListener("input", () => {
     const val = Number(els.opacity.value);
     showOpacity(val);
-    applyPatch({ opacity: val / 100 });
+    const local = Settings.patch(state.settings, { opacity: val / 100 });
+    if (local.ok) state.settings = local.settings;
+    clearTimeout(opacityTimer);
+    opacityTimer = setTimeout(() => {
+      send({ type: "PATCH_SETTINGS", patch: { opacity: val / 100 } });
+    }, 80);
   });
 
   els.toggleMute.addEventListener("click", () => applyIntent("TOGGLE_MUTE"));
@@ -283,7 +337,7 @@
     }
   });
 
-  send({ type: "GET_STATE" }).then((res) => {
+  send({ type: "GET_STATE" }).then(async (res) => {
     if (!res) return;
     state.settings = Settings.merge(res.settings);
     const nextEngine = res.engine ?? {};
@@ -292,6 +346,20 @@
       ...nextEngine,
       installed: Boolean(nextEngine.connected || nextEngine.installed),
     };
+    if (typeof res.allSitesGranted === "boolean") {
+      state.allSitesGranted = res.allSitesGranted;
+    } else {
+      await refreshAllSitesPerm();
+    }
+    render();
+  });
+
+  chrome.permissions?.onAdded?.addListener(async () => {
+    await refreshAllSitesPerm();
+    render();
+  });
+  chrome.permissions?.onRemoved?.addListener(async () => {
+    await refreshAllSitesPerm();
     render();
   });
 })();

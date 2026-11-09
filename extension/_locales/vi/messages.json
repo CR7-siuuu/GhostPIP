@@ -310,13 +310,13 @@
     "message": "Thoát"
   },
   "peekMode": {
-    "message": "Chế độ xem nhanh"
+    "message": "Độ trong suốt đảo ngược"
   },
   "peekModeHint": {
     "message": "Ẩn đi cho đến khi nhấn giữ phím xem"
   },
   "peekSettings": {
-    "message": "Cài đặt chế độ xem nhanh"
+    "message": "Cài đặt độ trong suốt đảo ngược"
   },
   "peekKey": {
     "message": "Phím nhấn giữ để xem"
@@ -340,13 +340,13 @@
     "message": "Độ mờ khi nhấn giữ"
   },
   "mediaRemote": {
-    "message": "Điều khiển trong game"
+    "message": "Điều khiển từ xa"
   },
   "mediaRemoteHint": {
     "message": "Phát, tua và chỉnh âm lượng không mất tiêu điểm"
   },
   "mediaSettings": {
-    "message": "Cài đặt điều khiển trong game"
+    "message": "Cài đặt điều khiển từ xa"
   },
   "mediaSeekStep": {
     "message": "Bước tua"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Trên các trò chơi chạy dưới quyền quản trị viên, việc nhấn giữ Ctrl+Alt không tác động được đến PiP. Hãy dùng Alt+G để bật/tắt nhấp xuyên qua."
+  },
+  "tipMediaHotkeys": {
+    "message": "Khi PiP đang phát, Alt+Left, Alt+Right và Alt+Space điều khiển video và thay thế cho Lùi, Tiến cũng như menu cửa sổ."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Cho phép truy cập vào tất cả các trang web để sử dụng tính năng này."
   }
 }

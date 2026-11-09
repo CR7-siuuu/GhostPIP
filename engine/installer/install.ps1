@@ -2,23 +2,39 @@ param(
     [string]$ExePath = "",
     [string[]]$ExtensionId = @(),
     # Dev/test: register the build output where it is instead of copying it to %LOCALAPPDATA%.
-    [switch]$InPlace
+    [switch]$InPlace,
+    [switch]$Dev
 )
 
 $ErrorActionPreference = "Stop"
 
 $HostName = "app.ghostpip.engine"
-# Unpacked/dev builds use the ID pinned by the manifest "key". Add the Chrome Web Store ID here
-# (or pass -ExtensionId) once the store listing exists.
-$DefaultExtensionIds = @(
-    "iphdokhjjgakpbmhemjjgglcdgjfedea",
+$StoreExtensionIds = @(
     "aobdinpjpmbnmbikjkmolfgeoooabfaa"
 )
+# Unpacked/dev builds use the ID pinned by the manifest "key"; include it only when -Dev is passed.
+$DevExtensionId = "iphdokhjjgakpbmhemjjgglcdgjfedea"
+$DefaultExtensionIds = if ($Dev) { $StoreExtensionIds + $DevExtensionId } else { $StoreExtensionIds }
 $InstallerDir = $PSScriptRoot
 $EngineDir = Split-Path -Parent $InstallerDir
 $InstallDir = Join-Path $env:LOCALAPPDATA "Programs\GhostPiP"
 $InstalledExe = Join-Path $InstallDir "GhostPiP.Engine.exe"
 $ManifestPath = Join-Path $InstallDir "$HostName.json"
+
+function Stop-GhostPiPEngine {
+    $Procs = @(Get-Process GhostPiP.Engine -ErrorAction SilentlyContinue)
+    if ($Procs.Count -eq 0) { return }
+
+    try { & taskkill.exe /IM GhostPiP.Engine.exe *> $null } catch {}
+    $Deadline = [DateTime]::UtcNow.AddSeconds(3)
+    while ([DateTime]::UtcNow -lt $Deadline) {
+        if (-not (Get-Process GhostPiP.Engine -ErrorAction SilentlyContinue)) { return }
+        Start-Sleep -Milliseconds 100
+    }
+
+    Get-Process GhostPiP.Engine -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Milliseconds 200
+}
 
 if ([string]::IsNullOrWhiteSpace($ExePath)) {
     $Candidates = @(
@@ -34,8 +50,7 @@ if ([string]::IsNullOrWhiteSpace($ExePath) -or -not (Test-Path -LiteralPath $Exe
         "restore it from quarantine (it is a false positive for unsigned builds) and run install.bat again.")
 }
 
-Get-Process GhostPiP.Engine -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-Start-Sleep -Milliseconds 200
+Stop-GhostPiPEngine
 
 New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
 $SourceFull = [System.IO.Path]::GetFullPath($ExePath)

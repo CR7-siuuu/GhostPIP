@@ -310,13 +310,13 @@
     "message": "Ieșire"
   },
   "peekMode": {
-    "message": "Mod privire rapidă"
+    "message": "Transparență inversă"
   },
   "peekModeHint": {
     "message": "Ascunde până ții apăsată tasta"
   },
   "peekSettings": {
-    "message": "Setări privire rapidă"
+    "message": "Setări transparență inversă"
   },
   "peekKey": {
     "message": "Tastă menținută pentru afișare"
@@ -340,13 +340,13 @@
     "message": "Opacitate la apăsare"
   },
   "mediaRemote": {
-    "message": "Telecomandă în joc"
+    "message": "Telecomandă"
   },
   "mediaRemoteHint": {
     "message": "Redare, derulare și volum fără pierderea focalizării"
   },
   "mediaSettings": {
-    "message": "Setări telecomandă în joc"
+    "message": "Setări telecomandă"
   },
   "mediaSeekStep": {
     "message": "Pas de derulare"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "În jocurile care rulează ca administrator, menținerea apăsată a tastei Ctrl+Alt nu poate ajunge la PiP. Folosește în schimb Alt+G pentru a comuta clic prin."
+  },
+  "tipMediaHotkeys": {
+    "message": "În timp ce un PiP este redat, Alt+Left, Alt+Right și Alt+Space controlează videoclipul și suprascriu Înapoi, Înainte și meniul ferestrei."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Permite accesul la toate site-urile pentru a utiliza acest lucru."
   }
 }

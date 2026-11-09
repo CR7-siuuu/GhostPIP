@@ -60,7 +60,7 @@ try {
   const sw = await (await browser.waitForTarget(
     (t) => t.type() === "service_worker" && t.url().startsWith(`chrome-extension://${extId}/`),
   )).worker();
-  await sw.evaluate(() => chrome.storage.local.set({ floatLayout: null }));
+  await sw.evaluate(() => chrome.storage.local.set({ floatLayout: null, gpTestHooks: true }));
 
   const page = (await browser.pages())[0];
   {

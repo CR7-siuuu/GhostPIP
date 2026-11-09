@@ -310,13 +310,13 @@
     "message": "প্রস্থান"
   },
   "peekMode": {
-    "message": "পিক মোড"
+    "message": "বিপরীত স্বচ্ছতা"
   },
   "peekModeHint": {
     "message": "পিক কী ধরে না রাখা পর্যন্ত লুকিয়ে রাখুন"
   },
   "peekSettings": {
-    "message": "পিক মোড সেটিংস"
+    "message": "বিপরীত স্বচ্ছতা সেটিংস"
   },
   "peekKey": {
     "message": "ধরে রেখে দেখার কী"
@@ -340,13 +340,13 @@
     "message": "ধরে রাখলে অস্বচ্ছতা"
   },
   "mediaRemote": {
-    "message": "ইন-গেম রিমোট"
+    "message": "রিমোট"
   },
   "mediaRemoteHint": {
     "message": "ফোকাস না হারিয়ে প্লে, সিক ও ভলিউম নিয়ন্ত্রণ"
   },
   "mediaSettings": {
-    "message": "ইন-গেম রিমোট সেটিংস"
+    "message": "রিমোট সেটিংস"
   },
   "mediaSeekStep": {
     "message": "সিক ধাপ"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "অ্যাডমিনিস্ট্রেটর হিসেবে চলা গেমের উপর, Ctrl+Alt ধরে রাখলে তা PiP পর্যন্ত পৌঁছাতে পারে না। এর বদলে ক্লিক-থ্রু চালু/বন্ধ করতে Alt+G ব্যবহার করুন।"
+  },
+  "tipMediaHotkeys": {
+    "message": "PiP চলার সময়, Alt+Left, Alt+Right এবং Alt+Space ভিডিও নিয়ন্ত্রণ করে এবং পিছনে, সামনে ও উইন্ডো মেনুর বদলে কাজ করে।"
+  },
+  "allSitesNeedsPermission": {
+    "message": "এটি ব্যবহার করতে সব সাইটে অ্যাক্সেসের অনুমতি দিন।"
   }
 }

@@ -5,7 +5,7 @@ namespace GhostPiP.Engine;
 public enum TrayAction
 {
     None = 0,
-    EmergencyDisableClickThrough = 1001,
+    EmergencyRelease = 1001,
     Exit = 1002
 }
 
@@ -157,7 +157,7 @@ public sealed unsafe class TrayIcon : IDisposable
         {
             AppendMenuW(hMenu, MF_STRING | MF_GRAYED, 0, _strings.Active);
             AppendMenuW(hMenu, MF_SEPARATOR, 0, null);
-            AppendMenuW(hMenu, MF_STRING, (nuint)TrayAction.EmergencyDisableClickThrough, $"{_strings.Emergency} ({clickThroughHotkey})");
+            AppendMenuW(hMenu, MF_STRING, (nuint)TrayAction.EmergencyRelease, $"{_strings.Emergency} ({clickThroughHotkey})");
             AppendMenuW(hMenu, MF_STRING, (nuint)TrayAction.Exit, _strings.Exit);
 
             GetCursorPos(out var pt);
@@ -173,7 +173,7 @@ public sealed unsafe class TrayIcon : IDisposable
 
             return cmd switch
             {
-                (int)TrayAction.EmergencyDisableClickThrough => TrayAction.EmergencyDisableClickThrough,
+                (int)TrayAction.EmergencyRelease => TrayAction.EmergencyRelease,
                 (int)TrayAction.Exit => TrayAction.Exit,
                 _ => TrayAction.None
             };

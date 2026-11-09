@@ -310,13 +310,13 @@
     "message": "退出"
   },
   "peekMode": {
-    "message": "按住速览模式"
+    "message": "反向透明"
   },
   "peekModeHint": {
     "message": "平时隐藏，仅在按住快捷键时显示"
   },
   "peekSettings": {
-    "message": "按住速览设置"
+    "message": "反向透明设置"
   },
   "peekKey": {
     "message": "按住显示按键"
@@ -340,13 +340,13 @@
     "message": "按住时不透明度"
   },
   "mediaRemote": {
-    "message": "游戏内遥控"
+    "message": "遥控器"
   },
   "mediaRemoteHint": {
     "message": "不抢焦点的播放、快进退与音量控制"
   },
   "mediaSettings": {
-    "message": "游戏内遥控设置"
+    "message": "遥控器设置"
   },
   "mediaSeekStep": {
     "message": "快进退步长"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "在以管理员身份运行的游戏上，按住 Ctrl+Alt 无法作用于 PiP。请改用 Alt+G 切换点击穿透。"
+  },
+  "tipMediaHotkeys": {
+    "message": "PiP 播放时，Alt+Left、Alt+Right 和 Alt+Space 用于控制视频，并将覆盖后退、前进和窗口菜单。"
+  },
+  "allSitesNeedsPermission": {
+    "message": "允许访问所有网站以使用此功能。"
   }
 }

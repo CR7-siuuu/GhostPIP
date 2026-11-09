@@ -1,13 +1,7 @@
 (() => {
   "use strict";
 
-  const CORNERS = Object.freeze(["TL", "TR", "BL", "BR"]);
-
-  const PAIRS = {
-    free: [["TL", "TR"], ["TL", "BL"], ["TL", "BR"], ["TR", "BL"], ["TR", "BR"], ["BL", "BR"]],
-    vertical: [["TL", "BL"], ["TR", "BR"]],
-    horizontal: [["TL", "TR"], ["BL", "BR"]],
-  };
+  const { CORNERS, isValidDodge } = globalThis.GhostPiPSettings;
 
   const isTop = (corner) => corner[0] === "T";
   const isLeft = (corner) => corner[1] === "L";
@@ -17,10 +11,6 @@
     vertical: (from, to) => isLeft(from) === isLeft(to),
     horizontal: (from, to) => isTop(from) === isTop(to),
   };
-
-  function isValidDodge(allowed, axis, home) {
-    return allowed.includes(home) && PAIRS[axis].some(([a, b]) => allowed.includes(a) && allowed.includes(b));
-  }
 
   function cornerRect(corner, size, area, inset) {
     const l = isLeft(corner) ? area.l + inset : area.r - inset - size.w;

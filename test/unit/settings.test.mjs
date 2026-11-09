@@ -10,12 +10,19 @@ const {
   DEFAULTS,
   HOLD_KEYS,
   PEEK_KEYS,
+  HOLD_MATCH,
+  PEEK_MATCH,
   SEEK_STEPS,
   isValidDodge,
   isValidHotkey,
   formatKeyEvent,
   merge,
   patch,
+  isEditableTarget,
+  isMousePeekButton,
+  createPeekInput,
+  stepPeekInput,
+  matchShortcut,
 } = sandbox.GhostPiPSettings;
 const plain = (v) => JSON.parse(JSON.stringify(v));
 
@@ -218,4 +225,117 @@ test("patch deep-merges media, peek, and hotkeys and rejects invalid updates cle
   assert.equal(formatKeyEvent({ code: "ArrowLeft", key: "ArrowLeft", altKey: true }), "Alt+Left");
   assert.equal(formatKeyEvent({ key: "ArrowRight", altKey: true }), "Alt+Right");
   assert.equal(formatKeyEvent({ code: "KeyP", key: "p", altKey: true }), "Alt+P");
+});
+
+const hotkeyVectors = JSON.parse(fs.readFileSync(new URL("../../shared/hotkey-vectors.json", import.meta.url), "utf8"));
+
+test("isValidHotkey satisfies every shared hotkey vector", () => {
+  for (const { spec, valid } of hotkeyVectors.cases) assert.equal(isValidHotkey(spec), valid, JSON.stringify(spec));
+});
+
+test("reserved hotkeys mirror shared/hotkey-vectors.json and are all rejected", () => {
+  const { RESERVED_HOTKEYS } = sandbox.GhostPiPSettings;
+  assert.deepEqual(plain(RESERVED_HOTKEYS), hotkeyVectors.reserved);
+  for (const combo of hotkeyVectors.reserved) assert.equal(isValidHotkey(combo), false, combo);
+});
+
+test("formatKeyEvent never yields a combo the validator rejects", () => {
+  assert.equal(formatKeyEvent({ shiftKey: true, code: "KeyA", key: "A" }), null);
+  assert.equal(formatKeyEvent({ ctrlKey: true, code: "KeyC", key: "c" }), null);
+  assert.equal(formatKeyEvent({ shiftKey: true, code: "F2", key: "F2" }), "Shift+F2");
+});
+
+test("dodge numeric fields clamp into their ranges in merge and patch", () => {
+  const { DODGE_RANGES } = sandbox.GhostPiPSettings;
+  const low = merge({ dodge: { marginPx: -5, edgeInsetPx: -1, hoverDelayMs: -10, cooldownMs: -1, returnDelayMs: -1, ignoreScreenEdgePx: -3 } });
+  const high = merge({ dodge: { marginPx: 1e6, edgeInsetPx: 1e6, hoverDelayMs: 1e9, cooldownMs: 1e9, returnDelayMs: 1e9, ignoreScreenEdgePx: 1e6 } });
+  for (const [k, [min, max]] of Object.entries(DODGE_RANGES)) {
+    assert.equal(low.dodge[k], min, `${k} low`);
+    assert.equal(high.dodge[k], max, `${k} high`);
+  }
+  const p = patch(merge(undefined), { dodge: { edgeInsetPx: 1e6, marginPx: 40 } });
+  assert.equal(p.ok, true);
+  assert.equal(p.settings.dodge.edgeInsetPx, DODGE_RANGES.edgeInsetPx[1]);
+  assert.equal(p.settings.dodge.marginPx, 40);
+  assert.equal(patch(merge(undefined), { dodge: { marginPx: "x" } }).ok, false);
+});
+
+test("dodge.js validates corners with the settings.js table and rejects unknown axis or corner", () => {
+  const box = {};
+  vm.runInNewContext(fs.readFileSync(new URL("../../extension/shared/settings.js", import.meta.url), "utf8"), box);
+  vm.runInNewContext(fs.readFileSync(new URL("../../extension/content/dodge.js", import.meta.url), "utf8"), box);
+  const S = box.GhostPiPSettings;
+  const D = box.GhostPiPDodge;
+  const subsets = [];
+  for (let mask = 0; mask < 16; mask++) subsets.push(S.CORNERS.filter((_, i) => mask & (1 << i)));
+  for (const allowed of subsets) {
+    for (const axis of [...Object.keys(S.PAIRS), "diagonal", "toString"]) {
+      for (const home of [...S.CORNERS, "XX"]) {
+        assert.equal(D.isValidDodge(allowed, axis, home), S.isValidDodge(allowed, axis, home), `${allowed}|${axis}|${home}`);
+      }
+    }
+  }
+  assert.equal(D.isValidDodge(["TL", "TR", "ZZ"], "free", "TL"), false);
+  assert.equal(D.isValidDodge(["TL", "TR"], "diagonal", "TL"), false);
+});
+
+test("HOLD_MATCH, PEEK_MATCH, stepPeekInput, isEditableTarget, isMousePeekButton, and matchShortcut", () => {
+  assert.equal(HOLD_MATCH["Ctrl+Alt"]({ ctrlKey: true, altKey: true }), true);
+  assert.equal(HOLD_MATCH["Ctrl+Alt"]({ ctrlKey: true, altKey: false }), false);
+  assert.equal(HOLD_MATCH.Shift({ shiftKey: true }), true);
+
+  let st = createPeekInput();
+  assert.equal(PEEK_MATCH.Alt(st), false);
+  st = stepPeekInput(st, "keydown", { key: "Alt", altKey: true });
+  assert.equal(PEEK_MATCH.Alt(st), true);
+  st = stepPeekInput(st, "keyup", { key: "Alt", altKey: false });
+  assert.equal(PEEK_MATCH.Alt(st), false);
+
+  st = stepPeekInput(st, "keydown", { code: "Backquote", key: "`" });
+  assert.equal(PEEK_MATCH.Backquote(st), true);
+  st = stepPeekInput(st, "buttondown", { button: 3, buttons: 8 });
+  assert.equal(PEEK_MATCH.Mouse4(st), true);
+  st = stepPeekInput(st, "buttonup", { button: 3, buttons: 0 });
+  assert.equal(PEEK_MATCH.Mouse4(st), false);
+  st = stepPeekInput(st, "reset");
+  assert.equal(PEEK_MATCH.Backquote(st), false);
+
+  assert.equal(isEditableTarget({ tagName: "INPUT" }), true);
+  assert.equal(isEditableTarget({ tagName: "DIV", isContentEditable: true }), true);
+  assert.equal(isEditableTarget({ tagName: "DIV", isContentEditable: false }), false);
+  assert.equal(isEditableTarget(null), false);
+
+  const peekMouse4 = merge({ peek: { enabled: true, key: "Mouse4" } });
+  assert.equal(isMousePeekButton(peekMouse4, 3, true), true);
+  assert.equal(isMousePeekButton(peekMouse4, 4, true), false);
+  assert.equal(isMousePeekButton(peekMouse4, 3, false), false);
+
+  const customHk = merge({
+    media: { enabled: true, seekSec: 10 },
+    hotkeys: { clickThrough: "Ctrl+Shift+X", playPause: "Alt+Space", seekBack: "Alt+Left", peek: "Alt+P" },
+  });
+  assert.deepEqual(
+    plain(matchShortcut({ isTrusted: true, ctrlKey: true, shiftKey: true, code: "KeyX", key: "X" }, customHk)),
+    { type: "INTENT", intent: "TOGGLE_CLICK_THROUGH" },
+  );
+  assert.equal(
+    matchShortcut({ isTrusted: true, altKey: true, code: "KeyG", key: "g" }, merge(undefined)),
+    null,
+  );
+  assert.deepEqual(
+    plain(matchShortcut({ altKey: true, code: "Space", key: " " }, customHk)),
+    { type: "MEDIA_ACTION", action: "PLAY_PAUSE" },
+  );
+  assert.deepEqual(
+    plain(matchShortcut({ altKey: true, code: "ArrowLeft", key: "ArrowLeft" }, customHk)),
+    { type: "MEDIA_ACTION", action: "SEEK", deltaSec: -10 },
+  );
+  assert.equal(
+    matchShortcut({ altKey: true, code: "Space", key: " " }, customHk, { engineConnected: true }),
+    null,
+  );
+  assert.equal(
+    matchShortcut({ altKey: true, code: "Space", key: " ", target: { tagName: "INPUT" } }, customHk),
+    null,
+  );
 });

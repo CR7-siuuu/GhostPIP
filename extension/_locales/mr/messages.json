@@ -310,13 +310,13 @@
     "message": "बाहेर पडा"
   },
   "peekMode": {
-    "message": "पीक मोड"
+    "message": "उलट पारदर्शकता"
   },
   "peekModeHint": {
     "message": "की दाबून ठेवेपर्यंत लपवा"
   },
   "peekSettings": {
-    "message": "पीक मोड सेटिंग्ज"
+    "message": "उलट पारदर्शकता सेटिंग्ज"
   },
   "peekKey": {
     "message": "दाबून पाहण्याची की"
@@ -340,13 +340,13 @@
     "message": "दाबताना अपारदर्शकता"
   },
   "mediaRemote": {
-    "message": "इन-गेम रिमोट"
+    "message": "रिमोट"
   },
   "mediaRemoteHint": {
     "message": "फोकस न गमावता प्ले, सीक आणि व्हॉल्यूम"
   },
   "mediaSettings": {
-    "message": "इन-गेम रिमोट सेटिंग्ज"
+    "message": "रिमोट सेटिंग्ज"
   },
   "mediaSeekStep": {
     "message": "सीक अंतर"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "अ‍ॅडमिनिस्ट्रेटर म्हणून चालणाऱ्या गेमवर Ctrl+Alt दाबून ठेवल्यास ते PiP पर्यंत पोहोचत नाही. त्याऐवजी क्लिक-थ्रू चालू/बंद करण्यासाठी Alt+G वापरा."
+  },
+  "tipMediaHotkeys": {
+    "message": "PiP सुरू असताना, Alt+Left, Alt+Right आणि Alt+Space व्हिडिओ नियंत्रित करतात आणि मागे, पुढे व विंडो मेनू ऐवजी काम करतात."
+  },
+  "allSitesNeedsPermission": {
+    "message": "हे वापरण्यासाठी सर्व साइटवर प्रवेशास अनुमती द्या."
   }
 }

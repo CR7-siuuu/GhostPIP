@@ -316,13 +316,13 @@
     "message": "خروج"
   },
   "peekMode": {
-    "message": "حالت نگاه سریع"
+    "message": "شفافیت معکوس"
   },
   "peekModeHint": {
     "message": "پنهان‌کردن تا زمانی که کلید را نگه دارید"
   },
   "peekSettings": {
-    "message": "تنظیمات حالت نگاه سریع"
+    "message": "تنظیمات شفافیت معکوس"
   },
   "peekKey": {
     "message": "کلید نگه‌داشتن برای نمایش"
@@ -346,13 +346,13 @@
     "message": "شفافیت هنگام نگه‌داشتن"
   },
   "mediaRemote": {
-    "message": "کنترل داخل بازی"
+    "message": "کنترل از راه دور"
   },
   "mediaRemoteHint": {
     "message": "پخش، جابه‌جایی و صدا بدون خروج از بازی"
   },
   "mediaSettings": {
-    "message": "تنظیمات کنترل داخل بازی"
+    "message": "تنظیمات کنترل از راه دور"
   },
   "mediaSeekStep": {
     "message": "گام جابه‌جایی"
@@ -384,5 +384,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "در بازی‌هایی که به‌عنوان سرپرست سیستم (Administrator) اجرا می‌شوند، نگه داشتن Ctrl+Alt به PiP نمی‌رسد. به‌جای آن از Alt+G برای روشن/خاموش کردن عبور کلیک استفاده کنید."
+  },
+  "tipMediaHotkeys": {
+    "message": "هنگام پخش PiP، کلیدهای Alt+Left و Alt+Right و Alt+Space ویدیو را کنترل کرده و جایگزین عقب، جلو و منوی پنجره می‌شوند."
+  },
+  "allSitesNeedsPermission": {
+    "message": "برای استفاده از این ویژگی، اجازه دسترسی به همه سایت‌ها را بدهید."
   }
 }

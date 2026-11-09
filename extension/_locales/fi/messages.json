@@ -316,13 +316,13 @@
     "message": "Lopeta"
   },
   "peekMode": {
-    "message": "Kurkistustila"
+    "message": "Käänteinen läpinäkyvyys"
   },
   "peekModeHint": {
     "message": "Piilota, kunnes pidät kurkistusnäppäintä pohjassa"
   },
   "peekSettings": {
-    "message": "Kurkistustilan asetukset"
+    "message": "Käänteisen läpinäkyvyyden asetukset"
   },
   "peekKey": {
     "message": "Pidä pohjassa -näppäin"
@@ -346,7 +346,7 @@
     "message": "Peittävyys painettaessa"
   },
   "mediaRemote": {
-    "message": "Pelinsisäinen kaukosäädin"
+    "message": "Kaukosäädin"
   },
   "mediaRemoteHint": {
     "message": "Toisto, kelaus ja äänenvoimakkuus fokusta menettämättä"
@@ -384,5 +384,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Järjestelmänvalvojana suoritettavissa peleissä Ctrl+Alt-näppäinten painettuna pitäminen ei tavoita PiP-ikkunaa. Ota läpiklikkaus käyttöön tai pois käytöstä näppäinyhdistelmällä Alt+G."
+  },
+  "tipMediaHotkeys": {
+    "message": "Kun PiP-toisto on käynnissä, Alt+Left, Alt+Right ja Alt+Space ohjaavat videota ja korvaavat toiminnot Takaisin, Eteenpäin ja ikkunavalikon."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Salli pääsy kaikille sivustoille käyttääksesi tätä."
   }
 }

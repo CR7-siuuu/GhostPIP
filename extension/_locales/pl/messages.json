@@ -310,13 +310,13 @@
     "message": "Zakończ"
   },
   "peekMode": {
-    "message": "Tryb podglądu"
+    "message": "Odwrócona przezroczystość"
   },
   "peekModeHint": {
     "message": "Ukryj, dopóki nie przytrzymasz klawisza"
   },
   "peekSettings": {
-    "message": "Ustawienia trybu podglądu"
+    "message": "Ustawienia odwróconej przezroczystości"
   },
   "peekKey": {
     "message": "Klawisz podglądu"
@@ -340,13 +340,13 @@
     "message": "Krycie podczas podglądu"
   },
   "mediaRemote": {
-    "message": "Pilot w grze"
+    "message": "Pilot"
   },
   "mediaRemoteHint": {
     "message": "Odtwarzanie, przewijanie i głośność bez utraty fokusu"
   },
   "mediaSettings": {
-    "message": "Ustawienia pilota w grze"
+    "message": "Ustawienia pilota"
   },
   "mediaSeekStep": {
     "message": "Krok przewijania"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "W grach uruchomionych jako administrator przytrzymanie Ctrl+Alt nie dociera do PiP. Użyj Alt+G, aby przełączyć przeklikiwanie."
+  },
+  "tipMediaHotkeys": {
+    "message": "Gdy PiP odtwarza wideo, klawisze Alt+Left, Alt+Right i Alt+Space sterują odtwarzaniem i zastępują Wstecz, Dalej oraz menu okna."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Zezwól na dostęp do wszystkich stron, aby tego używać."
   }
 }

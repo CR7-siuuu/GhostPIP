@@ -310,13 +310,13 @@
     "message": "Esci"
   },
   "peekMode": {
-    "message": "Modalità sbirciata"
+    "message": "Trasparenza inversa"
   },
   "peekModeHint": {
     "message": "Nascondi finché non tieni premuto il tasto"
   },
   "peekSettings": {
-    "message": "Impostazioni modalità sbirciata"
+    "message": "Impostazioni trasparenza inversa"
   },
   "peekKey": {
     "message": "Tasto per mostrare"
@@ -340,13 +340,13 @@
     "message": "Opacità alla pressione"
   },
   "mediaRemote": {
-    "message": "Telecomando in gioco"
+    "message": "Telecomando"
   },
   "mediaRemoteHint": {
     "message": "Riproduzione, salto e volume senza perdere il focus"
   },
   "mediaSettings": {
-    "message": "Impostazioni telecomando in gioco"
+    "message": "Impostazioni telecomando"
   },
   "mediaSeekStep": {
     "message": "Intervallo di salto"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Nei giochi eseguiti come amministratore, tenere premuto Ctrl+Alt non raggiunge il PiP. Usa invece Alt+G per attivare o disattivare il clic passante."
+  },
+  "tipMediaHotkeys": {
+    "message": "Durante la riproduzione di un PiP, Alt+Left, Alt+Right e Alt+Space controllano il video e sostituiscono Indietro, Avanti e il menu della finestra."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Consenti l'accesso a tutti i siti per utilizzare questa funzione."
   }
 }

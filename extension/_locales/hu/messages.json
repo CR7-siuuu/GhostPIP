@@ -310,13 +310,13 @@
     "message": "Kilépés"
   },
   "peekMode": {
-    "message": "Bepillantó mód"
+    "message": "Fordított átlátszóság"
   },
   "peekModeHint": {
     "message": "Elrejtés, amíg lenyomva nem tartod a gombot"
   },
   "peekSettings": {
-    "message": "Bepillantó mód beállításai"
+    "message": "Fordított átlátszóság beállításai"
   },
   "peekKey": {
     "message": "Lenyomva tartandó gomb"
@@ -340,7 +340,7 @@
     "message": "Átlátszatlanság nyomva tartáskor"
   },
   "mediaRemote": {
-    "message": "Játékon belüli távirányító"
+    "message": "Távirányító"
   },
   "mediaRemoteHint": {
     "message": "Lejátszás, tekerés és hangerő fókuszvesztés nélkül"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "A rendszergazdaként futtatott játékok felett a Ctrl+Alt nyomva tartása nem éri el a PiP ablakot. Használja helyette az Alt+G billentyűkombinációt az átkattintás be- és kikapcsolásához."
+  },
+  "tipMediaHotkeys": {
+    "message": "PiP lejátszása közben az Alt+Left, Alt+Right és Alt+Space vezérli a videót, és felülbírálja a Vissza, Előre és az ablakmenü funkciót."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Ennek használatához engedélyezze a hozzáférést minden webhelyhez."
   }
 }

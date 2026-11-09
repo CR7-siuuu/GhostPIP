@@ -310,13 +310,13 @@
     "message": "종료"
   },
   "peekMode": {
-    "message": "역방향 고스트"
+    "message": "역 투명화"
   },
   "peekModeHint": {
     "message": "평소엔 숨기고 키를 누를 때만 표시"
   },
   "peekSettings": {
-    "message": "역방향 고스트 설정"
+    "message": "역 투명화 설정"
   },
   "peekKey": {
     "message": "탭 투 뷰 키"
@@ -340,13 +340,13 @@
     "message": "누를 때 투명도"
   },
   "mediaRemote": {
-    "message": "인게임 리모컨"
+    "message": "리모컨"
   },
   "mediaRemoteHint": {
     "message": "포커스 유지 재생 · 탐색 · 볼륨 조절"
   },
   "mediaSettings": {
-    "message": "인게임 리모컨 설정"
+    "message": "리모컨 설정"
   },
   "mediaSeekStep": {
     "message": "이동 간격"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "관리자 권한으로 실행한 게임 위에서는 Ctrl+Alt 대신 Alt+G로 클릭 통과를 켜고 끄세요."
+  },
+  "tipMediaHotkeys": {
+    "message": "PiP 재생 중에는 Alt+←/→/Space가 영상 조작에 쓰여 뒤로·앞으로 가기와 창 메뉴 대신 동작합니다."
+  },
+  "allSitesNeedsPermission": {
+    "message": "사용하려면 모든 사이트 접근 권한을 허용하세요."
   }
 }

@@ -1,22 +1,29 @@
-importScripts("shared/settings.js");
+importScripts("shared/settings.js", "shared/protocol.js");
 
+const Protocol = globalThis.GhostPiPProtocol;
 const HOST_NAME = "app.ghostpip.engine";
 const GENERIC_SITE = { siteId: "generic", site: { video: null, chatPopoutUrl: null } };
 const DEFAULT_ENGINE = {
   connected: false,
   installed: false,
   engineVersion: null,
+  elevated: null,
   hotkeyErrors: [],
   protocolMismatch: false,
 };
+const MEDIA_ACTIONS = ["PLAY_PAUSE", "SEEK", "VOLUME"];
 
 let settingsQueue = Promise.resolve();
 let pipQueue = Promise.resolve();
+let framingQueue = Promise.resolve();
 let sitesPromise = null;
 let nativePort = null;
 let engineAllowed = true;
 let engineInstalled = false;
 let enginePeekActive = false;
+let engineHostMissing = false;
+let reconnectAttempt = 0;
+let lastEngineJson = null;
 
 let inTabSeq = 0;
 let inTabOrderSeq = 0;
@@ -32,6 +39,36 @@ const receiverStreamPorts = new Map();
 const popupPipBySource = new Map();
 const sourceByPopupWindow = new Map();
 const sourceByPopupTab = new Map();
+let popupMapsLoaded = null;
+
+function loadPopupMaps() {
+  popupMapsLoaded ??= chrome.storage.session
+    .get("popupPips")
+    .then(({ popupPips }) => {
+      for (const [src, info] of Object.entries(popupPips || {})) {
+        const sourceTabId = Number(src);
+        if (!Number.isInteger(sourceTabId) || !info) continue;
+        popupPipBySource.set(sourceTabId, info);
+        if (info.popupWindowId != null) sourceByPopupWindow.set(info.popupWindowId, sourceTabId);
+        if (info.popupTabId != null) sourceByPopupTab.set(info.popupTabId, sourceTabId);
+      }
+    })
+    .catch(() => {});
+  return popupMapsLoaded;
+}
+
+function persistPopupMaps() {
+  return chrome.storage.session.set({ popupPips: Object.fromEntries(popupPipBySource) }).catch(() => {});
+}
+
+function setPopupTab(sourceTabId, popupTabId) {
+  const info = popupPipBySource.get(sourceTabId);
+  if (!info || info.popupTabId === popupTabId) return;
+  info.popupTabId = popupTabId;
+  sourceByPopupTab.set(popupTabId, sourceTabId);
+  persistPopupMaps();
+  allowChatFramingInTab(popupTabId);
+}
 
 function refreshLatestInTabSourceId() {
   let bestId = null;
@@ -51,48 +88,47 @@ async function ensureInTabSessions() {
   if (inTabLoaded) return inTabSessions;
   inTabLoaded = true;
   try {
-    const { inTabSessions: storedMap, inTab } = await chrome.storage.session.get(["inTabSessions", "inTab"]);
-    if (storedMap && typeof storedMap === "object") {
-      for (const s of Object.values(storedMap)) {
-        if (s && Number.isFinite(s.sourceTabId)) {
-          inTabSessions.set(s.sourceTabId, s);
-          inTabSeq = Math.max(inTabSeq, s.connId || 0);
-          inTabOrderSeq = Math.max(inTabOrderSeq, s.order || 0);
-        }
+    const { inTabSessions: storedMap } = await chrome.storage.session.get("inTabSessions");
+    for (const s of Object.values(storedMap || {})) {
+      if (s && Number.isFinite(s.sourceTabId)) {
+        inTabSessions.set(s.sourceTabId, s);
+        inTabSeq = Math.max(inTabSeq, s.connId || 0);
+        inTabOrderSeq = Math.max(inTabOrderSeq, s.order || 0);
       }
-    } else if (inTab && Number.isFinite(inTab.sourceTabId)) {
-      const migrated = { ...inTab, order: ++inTabOrderSeq };
-      inTabSessions.set(inTab.sourceTabId, migrated);
-      inTabSeq = Math.max(inTabSeq, inTab.connId || 0);
     }
     refreshLatestInTabSourceId();
   } catch {}
   return inTabSessions;
 }
 
+function ready() {
+  return Promise.all([ensureInTabSessions(), loadPopupMaps()]);
+}
+
 async function persistInTabSessions() {
   refreshLatestInTabSourceId();
   if (inTabSessions.size === 0) {
-    try {
-      await chrome.storage.session.remove?.(["inTabSessions", "inTab"]);
-    } catch {}
+    await chrome.storage.session.remove("inTabSessions").catch(() => {});
+    if (popupPipBySource.size === 0) clearChatFramingTabs();
     return;
   }
-  const obj = Object.fromEntries(inTabSessions.entries());
-  const latest = latestInTabSourceId != null ? inTabSessions.get(latestInTabSourceId) || null : null;
-  await chrome.storage.session.set({ inTabSessions: obj, inTab: latest }).catch(() => {});
+  await chrome.storage.session.set({ inTabSessions: Object.fromEntries(inTabSessions.entries()) }).catch(() => {});
 }
 
 chrome.storage.onChanged?.addListener((changes, area) => {
+  if (area === "local" && changes.settings) {
+    reconcileAllSitesScripts();
+    return;
+  }
   if (area !== "session") return;
-  if (changes.inTab && !changes.inTab.newValue && !changes.inTabSessions) {
+  if (changes.inTabSessions && !changes.inTabSessions.newValue && inTabSessions.size > 0) {
     inTabSessions.clear();
     lastFramesByTab.clear();
     lastSubtitlesByTab.clear();
     latestInTabSourceId = null;
     syncEngineSessionState();
   }
-  if (changes.engine) {
+  if (changes.engine && Boolean(changes.engine.oldValue?.connected) !== Boolean(changes.engine.newValue?.connected)) {
     broadcastEngineState(Boolean(changes.engine.newValue?.connected));
   }
 });
@@ -100,6 +136,38 @@ chrome.storage.onChanged?.addListener((changes, area) => {
 function sendTab(tabId, msg) {
   if (!Number.isFinite(tabId)) return Promise.resolve(null);
   return chrome.tabs.sendMessage(tabId, { v: 1, ...msg }).catch(() => null);
+}
+
+const sameIds = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
+
+// Session rules outlive the service worker, so they are the record of which tabs may frame chat.
+function updateChatFraming(mutate) {
+  const run = framingQueue.then(async () => {
+    const rules = await chrome.declarativeNetRequest.getSessionRules();
+    const before = [...new Set(rules.flatMap((r) => r.condition.tabIds ?? []))].sort((a, b) => a - b);
+    const ids = new Set(before);
+    mutate(ids);
+    const after = [...ids].sort((a, b) => a - b);
+    if (rules.length && sameIds(before, after)) return;
+    await chrome.declarativeNetRequest.updateSessionRules({
+      removeRuleIds: rules.map((r) => r.id),
+      addRules: Protocol.chatFramingRules(chrome.runtime.id, after),
+    });
+  });
+  framingQueue = run.catch(() => {});
+  return framingQueue;
+}
+
+function allowChatFramingInTab(tabId) {
+  if (Number.isInteger(tabId) && tabId >= 0) updateChatFraming((ids) => ids.add(tabId));
+}
+
+function forgetChatFramingTab(tabId) {
+  updateChatFraming((ids) => ids.delete(tabId));
+}
+
+function clearChatFramingTabs() {
+  updateChatFraming((ids) => ids.clear());
 }
 
 function isNormalWebTab(tab) {
@@ -130,6 +198,7 @@ function remoteSessionsForTab(tabId) {
 function syncTabRemoteOverlays(tabId) {
   if (!Number.isFinite(tabId) || sourceByPopupTab.has(tabId)) return Promise.resolve(null);
   const sessions = remoteSessionsForTab(tabId);
+  if (sessions.some((s) => s.chatUrl)) allowChatFramingInTab(tabId);
   return sendTab(tabId, { type: "REMOTE_INTAB_SYNC", sessions });
 }
 
@@ -152,6 +221,7 @@ function prewarmTab(tabId, session) {
   if (!Number.isFinite(tabId) || !session?.sourceTabId || tabId === session.sourceTabId || sourceByPopupTab.has(tabId)) {
     return Promise.resolve(null);
   }
+  if (session.chatUrl) allowChatFramingInTab(tabId);
   return sendTab(tabId, {
     type: "REMOTE_INTAB_START",
     ...toRemotePayload(session),
@@ -210,7 +280,9 @@ async function syncActiveTab(activeTabId, windowId = null) {
         live.vw = info.vw;
         live.vh = info.vh;
       }
-      if (info.chatUrl !== undefined) live.chatUrl = info.chatUrl;
+      if (info.chatUrl !== undefined) {
+        live.chatUrl = Protocol.isAllowedChatUrl(info.chatUrl) ? info.chatUrl : null;
+      }
       if (typeof info.subtitle === "string") {
         live.subtitle = info.subtitle;
         lastSubtitlesByTab.set(s.sourceTabId, info.subtitle);
@@ -235,11 +307,30 @@ function parseReceiverSourceId(portName) {
   return Number.isFinite(n) ? n : null;
 }
 
+// The source only captures frames while someone is watching them.
+function notifySenderReceivers(sourceTabId) {
+  const senderPort = senderStreamPorts.get(sourceTabId);
+  if (!senderPort) return;
+  const fallbackId = latestInTabSourceId;
+  let active = false;
+  for (const rp of receiverStreamPorts.values()) {
+    const target = rp.sourceTabId ?? fallbackId;
+    if (target === sourceTabId && rp.visible) active = true;
+  }
+  if (senderPort.__receiversActive === active) return;
+  senderPort.__receiversActive = active;
+  try {
+    senderPort.postMessage({ type: "RECEIVERS", active });
+  } catch {}
+}
+
 chrome.runtime.onConnect.addListener((port) => {
+  if (port.sender?.id !== chrome.runtime.id) return;
   if (port.name === "ghostpip-sender") {
     const sourceTabId = port.sender?.tab?.id;
     if (!Number.isFinite(sourceTabId)) return;
     senderStreamPorts.set(sourceTabId, port);
+    notifySenderReceivers(sourceTabId);
     port.onMessage.addListener((msg) => {
       if (!msg) return;
       const taggedOut = { ...msg, sourceTabId };
@@ -283,6 +374,7 @@ chrome.runtime.onConnect.addListener((port) => {
     const entry = {
       port,
       sourceTabId: parsedSrcId,
+      visible: true,
     };
     receiverStreamPorts.set(portId, entry);
     const receiverTabId = port.sender?.tab?.id;
@@ -292,8 +384,7 @@ chrome.runtime.onConnect.addListener((port) => {
       port.sender?.url?.startsWith(chrome.runtime.getURL("player/"))
     ) {
       sourceByPopupTab.set(receiverTabId, parsedSrcId);
-      const popupInfo = popupPipBySource.get(parsedSrcId);
-      if (popupInfo && popupInfo.popupTabId == null) popupInfo.popupTabId = receiverTabId;
+      if (popupPipBySource.get(parsedSrcId)?.popupTabId == null) setPopupTab(parsedSrcId, receiverTabId);
     }
 
     const sendInitialSnapshot = (srcId) => {
@@ -313,10 +404,14 @@ chrome.runtime.onConnect.addListener((port) => {
     };
 
     const initialTarget = entry.sourceTabId ?? refreshLatestInTabSourceId();
-    if (Number.isFinite(initialTarget)) sendInitialSnapshot(initialTarget);
+    if (Number.isFinite(initialTarget)) {
+      sendInitialSnapshot(initialTarget);
+      notifySenderReceivers(initialTarget);
+    }
 
     port.onMessage.addListener((msg) => {
       if (!msg) return;
+      const prevTarget = entry.sourceTabId ?? latestInTabSourceId;
       if (Number.isFinite(msg.sourceTabId) && entry.sourceTabId !== msg.sourceTabId) {
         entry.sourceTabId = msg.sourceTabId;
         sendInitialSnapshot(entry.sourceTabId);
@@ -325,6 +420,14 @@ chrome.runtime.onConnect.addListener((port) => {
       if (Number.isFinite(targetSrcId) && entry.sourceTabId == null) {
         entry.sourceTabId = targetSrcId;
       }
+      if (msg.type === "RECEIVER_STATE") {
+        entry.visible = msg.visible !== false;
+        if (Number.isFinite(prevTarget) && prevTarget !== targetSrcId) notifySenderReceivers(prevTarget);
+        if (Number.isFinite(targetSrcId)) notifySenderReceivers(targetSrcId);
+        return;
+      }
+      if (Number.isFinite(prevTarget) && prevTarget !== targetSrcId) notifySenderReceivers(prevTarget);
+      if (Number.isFinite(targetSrcId)) notifySenderReceivers(targetSrcId);
       const tagged = { ...msg, portId, sourceTabId: targetSrcId };
       const senderPort = Number.isFinite(targetSrcId) ? senderStreamPorts.get(targetSrcId) : null;
       if (senderPort) {
@@ -352,6 +455,7 @@ chrome.runtime.onConnect.addListener((port) => {
           senderPort.postMessage({ type: "RTC_CLOSE", portId });
         } catch {}
       }
+      if (Number.isFinite(targetSrcId)) notifySenderReceivers(targetSrcId);
     });
   }
 });
@@ -408,18 +512,6 @@ async function broadcastEngineState(connected) {
   } catch {}
 }
 
-async function broadcastSettings(settings) {
-  if (!chrome.tabs?.query) return;
-  try {
-    const tabs = await chrome.tabs.query({});
-    for (const t of tabs) {
-      if (t.id != null) {
-        sendTab(t.id, { type: "SETTINGS_CHANGED", settings });
-      }
-    }
-  } catch {}
-}
-
 function getDocPipStatus(pip) {
   const docEntry = Object.values(pip || {}).find((e) => e && e.kind === "document");
   return {
@@ -441,42 +533,6 @@ async function broadcastPipSessionsChanged(pip) {
   } catch {}
 }
 
-function buildPipOpenedEngineMsg(saved, pip, pipBounds) {
-  const payload = {
-    v: 1,
-    type: "PIP_OPENED",
-    tabId: saved.tabId,
-    kind: saved.kind,
-    rect: saved.rect,
-    dpr: saved.dpr,
-  };
-  const activeCount = Object.keys(pip || {}).length;
-  if (
-    pipBounds &&
-    typeof pipBounds === "object" &&
-    Number.isFinite(pipBounds.x) &&
-    Number.isFinite(pipBounds.y) &&
-    activeCount === 1
-  ) {
-    if (saved.kind === "native") {
-      payload.savedBounds = {
-        x: pipBounds.x,
-        y: pipBounds.y,
-        w: pipBounds.kind === "native" && Number.isFinite(pipBounds.w) ? pipBounds.w : 0,
-        h: pipBounds.kind === "native" && Number.isFinite(pipBounds.h) ? pipBounds.h : 0,
-      };
-    } else if (saved.kind === "document" || saved.kind === "popup") {
-      payload.savedBounds = {
-        x: pipBounds.x,
-        y: pipBounds.y,
-        w: 0,
-        h: 0,
-      };
-    }
-  }
-  return payload;
-}
-
 function updateSettings(mutator) {
   const run = settingsQueue.then(async () => {
     const { settings } = await chrome.storage.local.get("settings");
@@ -490,12 +546,64 @@ function updateSettings(mutator) {
         enginePeekActive = false;
         broadcastPeekState(false);
       }
-      broadcastSettings(res.settings);
+      if (current.allSites !== res.settings.allSites) reconcileAllSitesScripts();
     }
     return res;
   });
   settingsQueue = run.catch(() => {});
   return run;
+}
+
+// floatLayout has one writer; pages send partial patches that land here in order.
+function updateFloatLayout(mutator) {
+  const run = settingsQueue.then(async () => {
+    const { floatLayout } = await chrome.storage.local.get("floatLayout");
+    const current = Protocol.sanitizeLayout(floatLayout);
+    const next = mutator(current);
+    if (!next) return current;
+    const sanitized = Protocol.sanitizeLayout(next);
+    if (JSON.stringify(sanitized) !== JSON.stringify(floatLayout ?? null)) {
+      await chrome.storage.local.set({ floatLayout: sanitized });
+    }
+    return sanitized;
+  });
+  settingsQueue = run.catch(() => {});
+  return run;
+}
+
+async function hasAllSitesPermission() {
+  return chrome.permissions.contains({ origins: [...Protocol.ALL_SITES_ORIGINS] }).catch(() => false);
+}
+
+function supportedSiteMatches() {
+  return chrome.runtime.getManifest().host_permissions;
+}
+
+async function reconcileAllSitesScripts() {
+  if (!chrome.scripting?.registerContentScripts) return;
+  const [{ settings }, granted, registered] = await Promise.all([
+    chrome.storage.local.get("settings"),
+    hasAllSitesPermission(),
+    chrome.scripting.getRegisteredContentScripts({ ids: [Protocol.ALL_SITES_SCRIPT_ID] }).catch(() => []),
+  ]);
+  const want = granted && GhostPiPSettings.merge(settings).allSites;
+  if (want && registered.length === 0) {
+    await chrome.scripting
+      .registerContentScripts([
+        {
+          id: Protocol.ALL_SITES_SCRIPT_ID,
+          matches: [...Protocol.ALL_SITES_ORIGINS],
+          excludeMatches: supportedSiteMatches(),
+          js: [...Protocol.CONTENT_JS],
+          css: [...Protocol.CONTENT_CSS],
+          runAt: "document_idle",
+          persistAcrossSessions: true,
+        },
+      ])
+      .catch(() => {});
+  } else if (!want && registered.length > 0) {
+    await chrome.scripting.unregisterContentScripts({ ids: [Protocol.ALL_SITES_SCRIPT_ID] }).catch(() => {});
+  }
 }
 
 function updatePipEntry(tabId, mutator) {
@@ -517,12 +625,17 @@ function updatePipEntry(tabId, mutator) {
   return run;
 }
 
+function postPipOpened(saved, pip, pipBounds) {
+  const msg = Protocol.buildPipOpenedEngineMsg(saved, pip, pipBounds);
+  return msg ? postToEngine(msg) : false;
+}
+
 function pipChanged(tabId, entry) {
   const run = updatePipEntry(tabId, () => entry).then(async ({ saved, pip }) => {
     if (!nativePort) connectEngine();
     if (saved) {
       const { pipBounds } = await chrome.storage.local.get("pipBounds").catch(() => ({}));
-      postToEngine(buildPipOpenedEngineMsg(saved, pip, pipBounds));
+      postPipOpened(saved, pip, pipBounds);
     } else {
       postToEngine({ v: 1, type: "PIP_CLOSED", tabId });
     }
@@ -537,8 +650,10 @@ async function closePopupPipForSource(sourceTabId, { notifySource = false } = {}
   if (!info) return;
   popupPipBySource.delete(sourceTabId);
   if (info.popupWindowId != null) sourceByPopupWindow.delete(info.popupWindowId);
+  if (info.popupTabId != null) sourceByPopupTab.delete(info.popupTabId);
+  await persistPopupMaps();
   if (info.popupTabId != null) {
-    sourceByPopupTab.delete(info.popupTabId);
+    forgetChatFramingTab(info.popupTabId);
     await pipChanged(info.popupTabId, null);
   }
   if (info.popupWindowId != null) {
@@ -556,24 +671,38 @@ async function closeAllPopupPips() {
   }
 }
 
+function setEngineState(engine) {
+  const json = JSON.stringify(engine);
+  if (json === lastEngineJson) return;
+  lastEngineJson = json;
+  chrome.storage.session.set({ engine }).catch(() => {});
+}
+
+function setEngineInstalled(installed) {
+  if (engineInstalled === installed) return;
+  engineInstalled = installed;
+  chrome.storage.local.set({ engineInstalled: installed }).catch(() => {});
+}
+
+function onHello(msg) {
+  if (nativePort) nativePort.__gotHello = true;
+  reconnectAttempt = 0;
+  setHostMissing(false);
+  setEngineInstalled(true);
+  setEngineState({
+    connected: true,
+    installed: true,
+    engineVersion: typeof msg.engineVersion === "string" ? msg.engineVersion : null,
+    elevated: typeof msg.elevated === "boolean" ? msg.elevated : null,
+    hotkeyErrors: Array.isArray(msg.hotkeyErrors) ? msg.hotkeyErrors.map(String) : [],
+    protocolMismatch: msg.v !== 1,
+  });
+}
+
 function onEngineMessage(msg) {
-  if (!msg || typeof msg !== "object") return;
+  if (msg?.type === "HELLO") onHello(msg);
+  if (!Protocol.isEngineMessage(msg)) return;
   switch (msg.type) {
-    case "HELLO": {
-      if (nativePort) nativePort.__gotHello = true;
-      engineInstalled = true;
-      chrome.storage.local.set({ engineInstalled: true }).catch(() => {});
-      const engine = {
-        connected: true,
-        installed: true,
-        engineVersion: typeof msg.engineVersion === "string" ? msg.engineVersion : null,
-        hotkeyErrors: Array.isArray(msg.hotkeyErrors) ? msg.hotkeyErrors.map(String) : [],
-        protocolMismatch: msg.v !== 1,
-      };
-      chrome.storage.session.set({ engine });
-      broadcastEngineState(true);
-      break;
-    }
     case "INTENT": {
       if (msg.intent === "SET_HOME" && typeof msg.corner === "string") {
         updateSettings((s) => GhostPiPSettings.patch(s, { dodge: { home: msg.corner } }));
@@ -644,16 +773,16 @@ function onEngineMessage(msg) {
         };
         chrome.storage.local.set({ pipBounds: bounds }).catch(() => {});
         if (bounds.kind === "document" || bounds.kind === "popup") {
-          Promise.all([chrome.storage.local.get("floatLayout"), chrome.storage.session.get("pip")])
-            .then(([{ floatLayout }, { pip = {} }]) => {
+          chrome.storage.session
+            .get("pip")
+            .then(({ pip = {} }) => {
               const entry = Number.isFinite(msg.tabId) ? pip[msg.tabId] : null;
-              const dpr = Number.isFinite(entry?.dpr) && entry.dpr > 0 ? entry.dpr : 1;
+              const dpr = Protocol.isDpr(entry?.dpr) ? entry.dpr : 1;
               const cssW = Math.round(bounds.w / dpr);
-              if (cssW < 140 || cssW > 2560) return;
-              const base = floatLayout && typeof floatLayout === "object" ? floatLayout : {};
-              if (Math.abs((base.pipWidth ?? 0) - cssW) > 1) {
-                return chrome.storage.local.set({ floatLayout: { ...base, pipWidth: cssW } });
-              }
+              if (cssW < Protocol.LAYOUT.MIN_WIDTH || cssW > Protocol.LAYOUT.MAX_WIDTH) return;
+              return updateFloatLayout((cur) =>
+                Math.abs((cur.pipWidth ?? 0) - cssW) > 1 ? { ...cur, pipWidth: cssW } : null,
+              );
             })
             .catch(() => {});
         }
@@ -724,24 +853,40 @@ function disconnectEngine() {
     enginePeekActive = false;
     broadcastPeekState(false);
   }
-  chrome.storage.session.set({ engine: { ...DEFAULT_ENGINE, installed: engineInstalled } });
-  broadcastEngineState(false);
+  setEngineState({ ...DEFAULT_ENGINE, installed: engineInstalled });
+}
+
+// Survives service-worker restarts so a missing host is not re-probed on every wake.
+function setHostMissing(missing) {
+  if (engineHostMissing === missing) return;
+  engineHostMissing = missing;
+  chrome.storage.session.set({ engineHostMissing: missing }).catch(() => {});
+}
+
+function scheduleReconnect(errorMessage) {
+  clearTimeout(reconnectTimer);
+  reconnectTimer = null;
+  if (!engineAllowed) return;
+  if (Protocol.isHostMissingError(errorMessage)) {
+    setHostMissing(true);
+    return;
+  }
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    connectEngine();
+  }, Protocol.reconnectDelayMs(reconnectAttempt++));
 }
 
 function onEngineDisconnect(port) {
-  void chrome.runtime.lastError;
+  const errorMessage = chrome.runtime.lastError?.message;
   stopPing();
   if (nativePort === port) nativePort = null;
   if (enginePeekActive) {
     enginePeekActive = false;
     broadcastPeekState(false);
   }
-  if (!port?.__gotHello && !port?.__intentionalDisconnect && engineAllowed) {
-    engineInstalled = false;
-    chrome.storage.local.set({ engineInstalled: false }).catch(() => {});
-  }
-  chrome.storage.session.set({ engine: { ...DEFAULT_ENGINE, installed: engineInstalled } });
-  broadcastEngineState(false);
+  if (!port?.__gotHello && !port?.__intentionalDisconnect && engineAllowed) setEngineInstalled(false);
+  setEngineState({ ...DEFAULT_ENGINE, installed: engineInstalled });
   chrome.storage.session
     .get("pip")
     .then(({ pip = {} }) => {
@@ -755,16 +900,12 @@ function onEngineDisconnect(port) {
       if (changed) chrome.storage.session.set({ pip });
     })
     .catch(() => {});
-  clearTimeout(reconnectTimer);
-  if (!engineAllowed) return;
-  reconnectTimer = setTimeout(() => {
-    reconnectTimer = null;
-    if (engineAllowed) connectEngine();
-  }, 1000);
+  if (!port?.__intentionalDisconnect) scheduleReconnect(errorMessage);
 }
 
+// Implicit callers respect a known-missing host and a pending backoff; explicit user actions go through retryEngine.
 function connectEngine() {
-  if (!engineAllowed) return null;
+  if (!engineAllowed || engineHostMissing || reconnectTimer) return null;
   if (nativePort) return nativePort;
   if (typeof chrome.runtime?.connectNative !== "function") return null;
   let port;
@@ -773,8 +914,6 @@ function connectEngine() {
   } catch {
     return null;
   }
-  clearTimeout(reconnectTimer);
-  reconnectTimer = null;
   nativePort = port;
   port.onMessage.addListener(onEngineMessage);
   port.onDisconnect.addListener(() => onEngineDisconnect(port));
@@ -808,15 +947,33 @@ function connectEngine() {
         disconnectEngine();
         return;
       }
-      for (const entry of Object.values(pip)) {
-        if (entry && Number.isFinite(entry.tabId) && entry.rect) {
-          postToEngine(buildPipOpenedEngineMsg(entry, pip, pipBounds));
-        }
-      }
+      for (const entry of Object.values(pip)) postPipOpened(entry, pip, pipBounds);
     })
     .catch(() => {});
 
   return port;
+}
+
+function retryEngine() {
+  clearTimeout(reconnectTimer);
+  reconnectTimer = null;
+  reconnectAttempt = 0;
+  setHostMissing(false);
+  return connectEngine();
+}
+
+function reinjectContentScripts() {
+  if (!chrome.tabs?.query || !chrome.scripting?.executeScript) return;
+  chrome.tabs
+    .query({})
+    .then((tabs) => {
+      for (const t of tabs) {
+        if (t.id == null || !t.url || !/^https?:/i.test(t.url)) continue;
+        chrome.scripting.insertCSS({ target: { tabId: t.id }, files: [...Protocol.CONTENT_CSS] }).catch(() => {});
+        chrome.scripting.executeScript({ target: { tabId: t.id }, files: [...Protocol.CONTENT_JS] }).catch(() => {});
+      }
+    })
+    .catch(() => {});
 }
 
 chrome.runtime.onInstalled.addListener(({ reason }) => {
@@ -825,37 +982,30 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
     chrome.tabs.create({ url: chrome.runtime.getURL("guide/guide.html") }).catch(() => {});
   }
   updateSettings((s) => ({ ok: true, settings: s }));
-  connectEngine();
-  if (chrome.tabs?.query && chrome.scripting?.executeScript) {
-    chrome.tabs
-      .query({})
-      .then((tabs) => {
-        for (const t of tabs) {
-          if (t.id != null && t.url && /^https?:/i.test(t.url)) {
-            chrome.scripting
-              .insertCSS({
-                target: { tabId: t.id },
-                files: ["content/overlay.css"],
-              })
-              .catch(() => {});
-            chrome.scripting
-              .executeScript({
-                target: { tabId: t.id },
-                files: ["shared/settings.js", "content/dodge.js", "content/subtitles.js", "content/content.js"],
-              })
-              .catch(() => {});
-          }
-        }
-      })
-      .catch(() => {});
-  }
+  retryEngine();
+  reconcileAllSitesScripts();
+  reinjectContentScripts();
 });
 
 chrome.runtime.onStartup?.addListener(() => {
-  connectEngine();
+  retryEngine();
+  reconcileAllSitesScripts();
 });
 
-connectEngine();
+chrome.permissions?.onAdded?.addListener(() => {
+  reconcileAllSitesScripts();
+  reinjectContentScripts();
+});
+chrome.permissions?.onRemoved?.addListener(() => reconcileAllSitesScripts());
+
+updateChatFraming(() => {});
+chrome.storage.session
+  .get("engineHostMissing")
+  .then(({ engineHostMissing: missing }) => {
+    engineHostMissing = Boolean(missing);
+    connectEngine();
+  })
+  .catch(() => connectEngine());
 
 function loadSites() {
   sitesPromise ??= fetch(chrome.runtime.getURL("config/selectors.json"))
@@ -876,14 +1026,16 @@ chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
 });
 
 chrome.tabs.onUpdated?.addListener(async (tabId, changeInfo) => {
-  if (changeInfo.status !== "complete" || sourceByPopupTab.has(tabId)) return;
-  await ensureInTabSessions();
+  if (changeInfo.status !== "complete") return;
+  await ready();
+  if (sourceByPopupTab.has(tabId)) return;
   if (inTabSessions.size > 0) {
     syncTabRemoteOverlays(tabId);
   }
 });
 
 chrome.windows?.onRemoved?.addListener(async (windowId) => {
+  await ready();
   const sourceTabId = sourceByPopupWindow.get(windowId);
   if (sourceTabId != null) {
     await closePopupPipForSource(sourceTabId, { notifySource: true });
@@ -891,6 +1043,8 @@ chrome.windows?.onRemoved?.addListener(async (windowId) => {
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId) => {
+  await ready();
+  forgetChatFramingTab(tabId);
   if (sourceByPopupTab.has(tabId)) {
     const srcId = sourceByPopupTab.get(tabId);
     await closePopupPipForSource(srcId, { notifySource: true });
@@ -900,7 +1054,6 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
     await closePopupPipForSource(tabId, { notifySource: false });
   }
   pipChanged(tabId, null);
-  await ensureInTabSessions();
   if (inTabSessions.has(tabId)) {
     inTabSessions.delete(tabId);
     lastFramesByTab.delete(tabId);
@@ -911,64 +1064,28 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   }
 });
 
-async function findMuteTargetTab() {
+async function findMuteTargetTab(preferredTabId = null) {
+  await ready();
   const { pip = {} } = await chrome.storage.session.get("pip");
-  const pipEntries = Object.values(pip);
-  for (let i = pipEntries.length - 1; i >= 0; i--) {
-    const entry = pipEntries[i];
-    const targetId = Number.isFinite(entry?.sourceTabId) ? entry.sourceTabId : entry?.tabId;
-    if (Number.isFinite(targetId)) {
-      try {
-        return await chrome.tabs.get(targetId);
-      } catch {}
-    }
-  }
-  await ensureInTabSessions();
-  const srcId = refreshLatestInTabSourceId();
-  if (Number.isFinite(srcId)) {
-    try {
-      return await chrome.tabs.get(srcId);
-    } catch {}
+  const candidates = Protocol.mediaTargetCandidates({
+    preferredTabId,
+    sourceByPopupTab,
+    pip,
+    latestInTabSourceId: refreshLatestInTabSourceId(),
+  });
+  for (const targetId of candidates) {
+    const tab = await chrome.tabs.get(targetId).catch(() => null);
+    if (tab) return tab;
   }
   const tabs = await chrome.tabs.query({});
   const webTabs = tabs.filter(isNormalWebTab);
   const sites = await loadSites().catch(() => []);
   const isSite = (t) => Boolean(t.url) && sites.some(({ re }) => re.test(t.url));
-  return (
-    webTabs.find((t) => t.active && isSite(t)) ||
-    webTabs.find((t) => t.audible && isSite(t)) ||
-    webTabs.find(isSite) ||
-    webTabs.find((t) => t.active) ||
-    webTabs.find((t) => t.audible) ||
-    webTabs[0] ||
-    null
-  );
+  return Protocol.pickFallbackTab(webTabs, isSite);
 }
 
-async function findMediaTargetTab(preferredTabId = null) {
-  const [{ pip = {} }] = await Promise.all([chrome.storage.session.get("pip"), ensureInTabSessions()]);
-  if (Number.isFinite(preferredTabId) && preferredTabId >= 0) {
-    const mappedId = sourceByPopupTab.get(preferredTabId) ?? pip?.[preferredTabId]?.sourceTabId ?? preferredTabId;
-    if (Number.isFinite(mappedId)) {
-      const preferred = await chrome.tabs.get(mappedId).catch(() => null);
-      if (preferred) return preferred;
-    }
-  }
-  const pipEntries = Object.values(pip);
-  for (let i = pipEntries.length - 1; i >= 0; i--) {
-    const entry = pipEntries[i];
-    const targetId = Number.isFinite(entry?.sourceTabId) ? entry.sourceTabId : entry?.tabId;
-    if (Number.isFinite(targetId)) {
-      const tab = await chrome.tabs.get(targetId).catch(() => null);
-      if (tab) return tab;
-    }
-  }
-  const srcId = refreshLatestInTabSourceId();
-  if (Number.isFinite(srcId)) {
-    const tab = await chrome.tabs.get(srcId).catch(() => null);
-    if (tab) return tab;
-  }
-  return findMuteTargetTab();
+function findMediaTargetTab(preferredTabId = null) {
+  return findMuteTargetTab(preferredTabId);
 }
 
 async function executeMediaAction(action, { deltaSec = 0, deltaVolume = 0, tabId = null } = {}) {
@@ -1042,6 +1159,8 @@ async function executeMediaAction(action, { deltaSec = 0, deltaVolume = 0, tabId
 }
 
 const INTENTS = {
+  EMERGENCY_RELEASE: () =>
+    updateSettings((s) => GhostPiPSettings.patch(s, { clickThrough: false, peek: { enabled: false } })),
   TOGGLE_CLICK_THROUGH: () =>
     updateSettings((s) => GhostPiPSettings.patch(s, { clickThrough: !s.clickThrough })),
   TOGGLE_DODGE: () =>
@@ -1088,11 +1207,14 @@ function dispatchCommand(command) {
 
 globalThis.GhostPiPBackground = {
   dispatchCommand,
-  connectEngine,
+  connectEngine: retryEngine,
+  retryEngine,
+  disconnectEngine,
   onEngineMessage,
   postToEngine,
   executeMediaAction,
   syncEngineSessionState,
+  reconcileAllSitesScripts,
   patchSettings: (patch) => updateSettings((s) => GhostPiPSettings.patch(s, patch)),
 };
 
@@ -1100,13 +1222,36 @@ chrome.commands.onCommand.addListener((command) => {
   dispatchCommand(command);
 });
 
+async function resolveTargetSourceTabId(requestedId, sender, fallbackToSender = false) {
+  await ready();
+  const senderTabId = sender?.tab?.id;
+  const mappedPopupSrc = senderTabId != null ? sourceByPopupTab.get(senderTabId) : null;
+  if (Number.isInteger(requestedId) && requestedId >= 0) {
+    if (
+      senderTabId == null ||
+      senderTabId === requestedId ||
+      mappedPopupSrc === requestedId ||
+      inTabSessions.has(requestedId) ||
+      popupPipBySource.has(requestedId)
+    ) {
+      return requestedId;
+    }
+    const { pip = {} } = await chrome.storage.session.get("pip");
+    if (Object.values(pip).some((e) => (e?.sourceTabId ?? e?.tabId) === requestedId)) {
+      return requestedId;
+    }
+    return null;
+  }
+  return mappedPopupSrc ?? refreshLatestInTabSourceId() ?? (fallbackToSender ? senderTabId : null);
+}
+
 const handlers = {
   async GET_SITE_CONFIG({ url }, sender) {
     const [found, { pip = {}, engine }] = await Promise.all([
       loadSites().then((list) => list.find(({ re }) => re.test(url))),
       chrome.storage.session.get(["pip", "engine"]),
+      ready(),
     ]);
-    await ensureInTabSessions();
     const senderTabId = sender?.tab?.id ?? null;
     if (senderTabId != null && !sourceByPopupTab.has(senderTabId)) {
       if (sender.tab.active) {
@@ -1127,13 +1272,15 @@ const handlers = {
   async INTAB_OPENED({ ratio, vw, vh, chatUrl, frame, subtitle } = {}, sender) {
     const tabId = sender?.tab?.id;
     if (!Number.isFinite(tabId)) return { ok: false };
-    await ensureInTabSessions();
+    await ready();
     if (frame?.dataUrl) {
       lastFramesByTab.set(tabId, { ...frame, sourceTabId: tabId });
     }
     if (typeof subtitle === "string") {
       lastSubtitlesByTab.set(tabId, subtitle);
     }
+    const safeChatUrl = Protocol.isAllowedChatUrl(chatUrl) ? chatUrl : null;
+    if (safeChatUrl) allowChatFramingInTab(tabId);
     const existing = inTabSessions.get(tabId);
     const next = {
       sourceTabId: tabId,
@@ -1142,7 +1289,7 @@ const handlers = {
       ratio: Number.isFinite(ratio) && ratio > 0 ? ratio : 9 / 16,
       vw: Number.isFinite(vw) && vw > 0 ? vw : frame?.vw || 0,
       vh: Number.isFinite(vh) && vh > 0 ? vh : frame?.vh || 0,
-      chatUrl: chatUrl || null,
+      chatUrl: safeChatUrl,
       subtitle: typeof subtitle === "string" ? subtitle : lastSubtitlesByTab.get(tabId) || "",
     };
     inTabSessions.set(tabId, next);
@@ -1163,7 +1310,7 @@ const handlers = {
   async INTAB_CLOSED(_msg, sender) {
     const tabId = sender?.tab?.id;
     if (!Number.isFinite(tabId)) return { ok: true };
-    await ensureInTabSessions();
+    await ready();
     if (inTabSessions.has(tabId)) {
       inTabSessions.delete(tabId);
       lastFramesByTab.delete(tabId);
@@ -1174,9 +1321,8 @@ const handlers = {
     }
     return { ok: true };
   },
-  async INTAB_STOP_SINGLE({ sourceTabId } = {}) {
-    await ensureInTabSessions();
-    const targetId = Number.isFinite(sourceTabId) ? sourceTabId : refreshLatestInTabSourceId();
+  async INTAB_STOP_SINGLE({ sourceTabId } = {}, sender) {
+    const targetId = await resolveTargetSourceTabId(sourceTabId, sender);
     if (Number.isFinite(targetId) && inTabSessions.has(targetId)) {
       inTabSessions.delete(targetId);
       lastFramesByTab.delete(targetId);
@@ -1189,7 +1335,7 @@ const handlers = {
     return { ok: true };
   },
   async INTAB_STOP_ALL() {
-    await ensureInTabSessions();
+    await ready();
     const srcIds = [...inTabSessions.keys()];
     inTabSessions.clear();
     lastFramesByTab.clear();
@@ -1203,12 +1349,7 @@ const handlers = {
     return { ok: true };
   },
   async FOCUS_SOURCE_TAB({ sourceTabId } = {}, sender) {
-    await ensureInTabSessions();
-    const senderTabId = sender?.tab?.id;
-    const mappedPopupSrc = senderTabId != null ? sourceByPopupTab.get(senderTabId) : null;
-    const targetTabId = Number.isFinite(sourceTabId)
-      ? sourceTabId
-      : mappedPopupSrc ?? refreshLatestInTabSourceId() ?? senderTabId;
+    const targetTabId = await resolveTargetSourceTabId(sourceTabId, sender, true);
     if (Number.isFinite(targetTabId)) {
       const tab = await chrome.tabs.update(targetTabId, { active: true }).catch(() => null);
       if (tab?.windowId != null) {
@@ -1218,12 +1359,7 @@ const handlers = {
     return { ok: true };
   },
   async SKIP_AD({ sourceTabId } = {}, sender) {
-    await ensureInTabSessions();
-    const senderTabId = sender?.tab?.id;
-    const mappedPopupSrc = senderTabId != null ? sourceByPopupTab.get(senderTabId) : null;
-    const targetTabId = Number.isFinite(sourceTabId)
-      ? sourceTabId
-      : mappedPopupSrc ?? refreshLatestInTabSourceId();
+    const targetTabId = await resolveTargetSourceTabId(sourceTabId, sender);
     if (Number.isFinite(targetTabId)) {
       await sendTab(targetTabId, { type: "INTAB_SKIP_AD" });
     }
@@ -1232,10 +1368,12 @@ const handlers = {
   async OPEN_POPUP_PIP({ width, height, ratio, chatUrl, showChat, subtitle } = {}, sender) {
     const sourceTabId = sender?.tab?.id;
     if (!Number.isFinite(sourceTabId) || !chrome.windows?.create) return { ok: false };
+    await ready();
     await closePopupPipForSource(sourceTabId, { notifySource: false });
     if (typeof subtitle === "string") {
       lastSubtitlesByTab.set(sourceTabId, subtitle);
     }
+    const safeChatUrl = Protocol.isAllowedChatUrl(chatUrl) ? chatUrl : null;
     const w = Math.max(200, Math.round(Number(width) || 480));
     const h = Math.max(150, Math.round(Number(height) || 270));
     const qs = new URLSearchParams({
@@ -1244,7 +1382,7 @@ const handlers = {
       w: String(w),
       h: String(h),
     });
-    if (chatUrl) qs.set("chatUrl", chatUrl);
+    if (safeChatUrl) qs.set("chatUrl", safeChatUrl);
     if (Number.isFinite(ratio) && ratio > 0) qs.set("ratio", String(ratio));
     const url = chrome.runtime.getURL(`player/player.html?${qs.toString()}`);
     let win;
@@ -1261,18 +1399,24 @@ const handlers = {
     const popupWindowId = win?.id ?? null;
     const popupTabId = win?.tabs?.[0]?.id ?? null;
     if (popupWindowId == null) return { ok: false };
-    popupPipBySource.set(sourceTabId, { popupWindowId, popupTabId, chatUrl: chatUrl || null });
+    popupPipBySource.set(sourceTabId, { popupWindowId, popupTabId, chatUrl: safeChatUrl });
     sourceByPopupWindow.set(popupWindowId, sourceTabId);
-    if (popupTabId != null) sourceByPopupTab.set(popupTabId, sourceTabId);
+    if (popupTabId != null) {
+      sourceByPopupTab.set(popupTabId, sourceTabId);
+      if (safeChatUrl) allowChatFramingInTab(popupTabId);
+    }
+    await persistPopupMaps();
     return { ok: true, popupWindowId, popupTabId };
   },
   async CLOSE_POPUP_PIP({ sourceTabId } = {}, sender) {
+    await ready();
     const senderTabId = sender?.tab?.id;
-    const targetSrcId = Number.isFinite(sourceTabId)
-      ? sourceTabId
-      : senderTabId != null && sourceByPopupTab.has(senderTabId)
-        ? sourceByPopupTab.get(senderTabId)
-        : senderTabId;
+    const targetSrcId =
+      Number.isFinite(sourceTabId) && (senderTabId === sourceTabId || sourceByPopupTab.get(senderTabId) === sourceTabId)
+        ? sourceTabId
+        : senderTabId != null && sourceByPopupTab.has(senderTabId)
+          ? sourceByPopupTab.get(senderTabId)
+          : senderTabId;
     if (Number.isFinite(targetSrcId)) {
       const fromSource = senderTabId === targetSrcId;
       await closePopupPipForSource(targetSrcId, { notifySource: !fromSource });
@@ -1281,16 +1425,19 @@ const handlers = {
   },
   async PIP_OPENED({ kind, rect, dpr, sourceTabId }, sender) {
     const pipTabId = sender?.tab?.id;
-    if (!Number.isFinite(pipTabId)) return { ok: false };
-    const effectiveSourceTabId = Number.isFinite(sourceTabId)
-      ? sourceTabId
-      : sourceByPopupTab.get(pipTabId) ?? pipTabId;
+    const safeRect = Protocol.sanitizeRect(rect);
+    if (!Number.isInteger(pipTabId) || pipTabId < 0 || !Protocol.isPipKind(kind) || !safeRect || !Protocol.isDpr(dpr)) {
+      return { ok: false };
+    }
+    await ready();
+    const effectiveSourceTabId =
+      kind === "popup" && Number.isInteger(sourceTabId) && sourceTabId >= 0
+        ? sourceTabId
+        : sourceByPopupTab.get(pipTabId) ?? pipTabId;
     if (kind === "popup" && Number.isFinite(effectiveSourceTabId)) {
-      const info = popupPipBySource.get(effectiveSourceTabId);
-      if (info && info.popupTabId == null) {
-        info.popupTabId = pipTabId;
-        sourceByPopupTab.set(pipTabId, effectiveSourceTabId);
-      }
+      setPopupTab(effectiveSourceTabId, pipTabId);
+    } else if (kind === "document") {
+      allowChatFramingInTab(pipTabId);
     }
     const { pip } = await pipChanged(pipTabId, {
       v: 1,
@@ -1298,7 +1445,7 @@ const handlers = {
       tabId: pipTabId,
       sourceTabId: effectiveSourceTabId,
       kind,
-      rect,
+      rect: safeRect,
       dpr,
     });
     const { engine } = await chrome.storage.session.get("engine");
@@ -1310,12 +1457,13 @@ const handlers = {
     };
   },
   async PIP_RECT_UPDATED({ rect }, sender) {
-    if (sender?.tab?.id != null && rect) {
+    const safeRect = Protocol.sanitizeRect(rect);
+    if (sender?.tab?.id != null && safeRect) {
       if (!nativePort && engineAllowed) connectEngine();
-      const { saved, pip } = await updatePipEntry(sender.tab.id, (prev) => (prev ? { ...prev, rect } : null));
+      const { saved, pip } = await updatePipEntry(sender.tab.id, (prev) => (prev ? { ...prev, rect: safeRect } : null));
       if (saved && !saved.bound) {
         const { pipBounds } = await chrome.storage.local.get("pipBounds").catch(() => ({}));
-        postToEngine(buildPipOpenedEngineMsg(saved, pip, pipBounds));
+        postPipOpened(saved, pip, pipBounds);
       }
     }
     return { ok: true };
@@ -1328,7 +1476,7 @@ const handlers = {
   },
   async PIP_SUBTITLE({ text } = {}, sender) {
     const tabId = sender?.tab?.id;
-    if (Number.isFinite(tabId)) {
+    if (Number.isInteger(tabId) && tabId >= 0) {
       postToEngine({
         v: 1,
         type: "PIP_SUBTITLE",
@@ -1339,17 +1487,22 @@ const handlers = {
     return { ok: true };
   },
   async PIP_RESIZE({ deltaH, dpr }, sender) {
+    const clampedDelta = Protocol.clampDeltaH(deltaH);
+    if (clampedDelta === null || !Protocol.isDpr(dpr)) {
+      return { ok: false, handledByEngine: false };
+    }
     if (!nativePort) connectEngine();
     const tabId = sender?.tab?.id;
-    const msg = { v: 1, type: "PIP_RESIZE", deltaH, dpr };
-    if (Number.isFinite(tabId)) msg.tabId = tabId;
+    const msg = { v: 1, type: "PIP_RESIZE", deltaH: clampedDelta, dpr };
+    if (Number.isInteger(tabId) && tabId >= 0) msg.tabId = tabId;
     const handledByEngine = postToEngine(msg);
     return { ok: true, handledByEngine };
   },
   async GET_STATE() {
-    const [{ settings, engineInstalled: storedInstalled }, { pip = {}, engine }] = await Promise.all([
+    const [{ settings, engineInstalled: storedInstalled }, { pip = {}, engine }, allSitesGranted] = await Promise.all([
       chrome.storage.local.get(["settings", "engineInstalled"]),
       chrome.storage.session.get(["pip", "engine"]),
+      hasAllSitesPermission(),
     ]);
     if (typeof storedInstalled === "boolean") engineInstalled = storedInstalled;
     const merged = GhostPiPSettings.merge(settings);
@@ -1362,9 +1515,15 @@ const handlers = {
       settings: merged,
       pip,
       engine: baseEngine,
+      allSitesGranted,
       peekActive: Boolean(enginePeekActive),
       ...getDocPipStatus(pip),
     };
+  },
+  async PATCH_FLOAT_LAYOUT({ patch } = {}) {
+    if (!patch || typeof patch !== "object") return { ok: false };
+    const floatLayout = await updateFloatLayout((cur) => ({ ...cur, ...patch }));
+    return { ok: true, floatLayout };
   },
   async PATCH_SETTINGS({ patch, keepLayoutPos }) {
     const res = await updateSettings((current) => GhostPiPSettings.patch(current, patch));
@@ -1380,13 +1539,10 @@ const handlers = {
       }, 60);
     } else if (res.ok && patch?.enabled === true) {
       engineAllowed = true;
-      connectEngine();
+      retryEngine();
     }
     if (res.ok && patch?.dodge?.home && !keepLayoutPos) {
-      const { floatLayout } = await chrome.storage.local.get("floatLayout");
-      if (floatLayout && (floatLayout.pos || floatLayout.pipPos)) {
-        await chrome.storage.local.set({ floatLayout: { ...floatLayout, pos: null, pipPos: null } });
-      }
+      await updateFloatLayout((cur) => (cur.pos || cur.pipPos ? { ...cur, pos: null, pipPos: null } : null));
       await chrome.storage.local.remove("pipBounds").catch(() => {});
     }
     return res;
@@ -1395,16 +1551,17 @@ const handlers = {
     const fn = INTENTS[intent];
     return fn ? fn() : { ok: false };
   },
-  async MEDIA_ACTION({ action, deltaSec = 0, deltaVolume = 0, sourceTabId = null } = {}) {
-    if (!["PLAY_PAUSE", "SEEK", "VOLUME"].includes(action)) return { ok: false };
+  async MEDIA_ACTION({ action, deltaSec = 0, deltaVolume = 0, sourceTabId = null } = {}, sender) {
+    if (!MEDIA_ACTIONS.includes(action)) return { ok: false };
+    const targetTabId = await resolveTargetSourceTabId(sourceTabId, sender);
     return executeMediaAction(action, {
       deltaSec: Number(deltaSec) || 0,
       deltaVolume: Number(deltaVolume) || 0,
-      tabId: Number.isFinite(sourceTabId) ? sourceTabId : null,
+      tabId: targetTabId,
     });
   },
   async RECONNECT_ENGINE() {
-    connectEngine();
+    retryEngine();
     const { engine } = await chrome.storage.session.get("engine");
     return {
       ok: true,
@@ -1414,6 +1571,7 @@ const handlers = {
 };
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (sender?.id && sender.id !== chrome.runtime.id) return false;
   const handler = handlers[msg?.type];
   if (!handler) return false;
   handler(msg, sender).then(sendResponse, (e) => sendResponse({ error: String(e) }));

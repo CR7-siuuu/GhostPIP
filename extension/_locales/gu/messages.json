@@ -316,13 +316,13 @@
     "message": "બહાર નીકળો"
   },
   "peekMode": {
-    "message": "પીક મોડ"
+    "message": "રિવર્સ પારદર્શિતા"
   },
   "peekModeHint": {
     "message": "કી દબાવી રાખો ત્યાં સુધી છુપાવો"
   },
   "peekSettings": {
-    "message": "પીક મોડ સેટિંગ્સ"
+    "message": "રિવર્સ પારદર્શિતા સેટિંગ્સ"
   },
   "peekKey": {
     "message": "દબાવીને જોવાની કી"
@@ -346,13 +346,13 @@
     "message": "દબાવતી વખતે અપારદર્શકતા"
   },
   "mediaRemote": {
-    "message": "ઇન-ગેમ રિમોટ"
+    "message": "રિમોટ"
   },
   "mediaRemoteHint": {
     "message": "ફોકસ ગુમાવ્યા વિના પ્લે, સીક અને વોલ્યુમ"
   },
   "mediaSettings": {
-    "message": "ઇન-ગેમ રિમોટ સેટિંગ્સ"
+    "message": "રિમોટ સેટિંગ્સ"
   },
   "mediaSeekStep": {
     "message": "સીક અંતરાલ"
@@ -384,5 +384,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "ઍડમિનિસ્ટ્રેટર તરીકે ચાલતી રમતો પર, Ctrl+Alt દબાવી રાખવાથી તે PiP સુધી પહોંચતું નથી. તેના બદલે ક્લિક-થ્રૂ ચાલુ/બંધ કરવા માટે Alt+G વાપરો."
+  },
+  "tipMediaHotkeys": {
+    "message": "જ્યારે PiP ચાલી રહ્યું હોય, ત્યારે Alt+Left, Alt+Right અને Alt+Space વિડિઓ નિયંત્રિત કરે છે અને પાછળ, આગળ તથા વિન્ડો મેનૂની જગ્યાએ કાર્ય કરે છે."
+  },
+  "allSitesNeedsPermission": {
+    "message": "આનો ઉપયોગ કરવા માટે બધી સાઇટની ઍક્સેસની મંજૂરી આપો."
   }
 }

@@ -2,8 +2,8 @@
 1 24 "app.manifest"
 
 1 VERSIONINFO
- FILEVERSION 1,1,0,0
- PRODUCTVERSION 1,1,0,0
+ FILEVERSION 1,1,1,0
+ PRODUCTVERSION 1,1,1,0
  FILEFLAGSMASK 0x3fL
  FILEFLAGS 0x0L
  FILEOS 0x40004L
@@ -16,12 +16,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "GhostPiP"
             VALUE "FileDescription", "GhostPiP Local Helper (PiP window overlay for Chrome)"
-            VALUE "FileVersion", "1.1.0.0"
+            VALUE "FileVersion", "1.1.1.0"
             VALUE "InternalName", "GhostPiP.Engine"
             VALUE "LegalCopyright", "Copyright (C) 2026 GhostPiP"
             VALUE "OriginalFilename", "GhostPiP.Engine.exe"
             VALUE "ProductName", "GhostPiP"
-            VALUE "ProductVersion", "1.1.0"
+            VALUE "ProductVersion", "1.1.1"
         END
     END
     BLOCK "VarFileInfo"

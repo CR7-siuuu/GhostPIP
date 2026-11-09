@@ -316,13 +316,13 @@
     "message": "बाहर निकलें"
   },
   "peekMode": {
-    "message": "पीक मोड"
+    "message": "रिवर्स पारदर्शिता"
   },
   "peekModeHint": {
     "message": "कुंजी दबाए रखने तक विंडो छिपाएँ"
   },
   "peekSettings": {
-    "message": "पीक मोड सेटिंग्स"
+    "message": "रिवर्स पारदर्शिता सेटिंग्स"
   },
   "peekKey": {
     "message": "दबाकर देखने की कुंजी"
@@ -346,13 +346,13 @@
     "message": "दबाने पर अपारदर्शिता"
   },
   "mediaRemote": {
-    "message": "इन-गेम रिमोट"
+    "message": "रिमोट"
   },
   "mediaRemoteHint": {
     "message": "फ़ोकस खोए बिना प्ले, सीक और वॉल्यूम नियंत्रण"
   },
   "mediaSettings": {
-    "message": "इन-गेम रिमोट सेटिंग्स"
+    "message": "रिमोट सेटिंग्स"
   },
   "mediaSeekStep": {
     "message": "सीक अंतराल"
@@ -384,5 +384,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "व्यवस्थापक (administrator) के रूप में चल रहे गेम पर, Ctrl+Alt दबाए रखना PiP तक नहीं पहुँच पाता। इसके बजाय क्लिक-थ्रू चालू/बंद करने के लिए Alt+G का इस्तेमाल करें।"
+  },
+  "tipMediaHotkeys": {
+    "message": "जब कोई PiP चल रहा हो, तो Alt+Left, Alt+Right और Alt+Space वीडियो को नियंत्रित करते हैं और पीछे, आगे व विंडो मेनू की जगह काम करते हैं।"
+  },
+  "allSitesNeedsPermission": {
+    "message": "इसका इस्तेमाल करने के लिए सभी साइटों के एक्सेस की अनुमति दें।"
   }
 }

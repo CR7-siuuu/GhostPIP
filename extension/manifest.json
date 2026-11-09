@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extName__",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
   "minimum_chrome_version": "116",
@@ -17,23 +17,47 @@
     "nativeMessaging",
     "declarativeNetRequest"
   ],
-  "declarative_net_request": {
-    "rule_resources": [
-      {
-        "id": "chat_framing",
-        "enabled": true,
-        "path": "config/dnr_rules.json"
-      }
-    ]
-  },
   "host_permissions": [
-    "http://*/*",
-    "https://*/*",
-    "https://*.youtube.com/*",
+    "https://www.youtube.com/*",
+    "https://m.youtube.com/*",
     "https://chzzk.naver.com/*",
-    "https://*.sooplive.com/*",
-    "https://*.sooplive.co.kr/*",
-    "https://*.twitch.tv/*"
+    "https://play.sooplive.com/*",
+    "https://vod.sooplive.com/*",
+    "https://play.sooplive.co.kr/*",
+    "https://vod.sooplive.co.kr/*",
+    "https://www.twitch.tv/*",
+    "https://www.netflix.com/*",
+    "https://*.disneyplus.com/*",
+    "https://*.primevideo.com/*",
+    "https://*.amazon.com/*",
+    "https://*.amazon.co.jp/*",
+    "https://*.amazon.co.uk/*",
+    "https://*.amazon.de/*",
+    "https://*.amazon.fr/*",
+    "https://*.amazon.it/*",
+    "https://*.amazon.es/*",
+    "https://*.amazon.ca/*",
+    "https://*.amazon.in/*",
+    "https://*.amazon.com.au/*",
+    "https://*.amazon.com.br/*",
+    "https://*.amazon.com.mx/*",
+    "https://*.coupangplay.com/*",
+    "https://*.tving.com/*",
+    "https://*.wavve.com/*",
+    "https://*.watcha.com/*",
+    "https://*.laftel.net/*",
+    "https://serieson.naver.com/*",
+    "https://tv.apple.com/*",
+    "https://*.max.com/*",
+    "https://*.hbomax.com/*",
+    "https://www.hulu.com/*",
+    "https://www.paramountplus.com/*",
+    "https://www.peacocktv.com/*",
+    "https://www.crunchyroll.com/*"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -72,18 +96,52 @@
   "content_scripts": [
     {
       "matches": [
-        "http://*/*",
-        "https://*/*",
-        "https://*.youtube.com/*",
+        "https://www.youtube.com/*",
+        "https://m.youtube.com/*",
         "https://chzzk.naver.com/*",
-        "https://*.sooplive.com/*",
-        "https://*.sooplive.co.kr/*",
-        "https://*.twitch.tv/*"
+        "https://play.sooplive.com/*",
+        "https://vod.sooplive.com/*",
+        "https://play.sooplive.co.kr/*",
+        "https://vod.sooplive.co.kr/*",
+        "https://www.twitch.tv/*",
+        "https://www.netflix.com/*",
+        "https://*.disneyplus.com/*",
+        "https://*.primevideo.com/*",
+        "https://*.amazon.com/*",
+        "https://*.amazon.co.jp/*",
+        "https://*.amazon.co.uk/*",
+        "https://*.amazon.de/*",
+        "https://*.amazon.fr/*",
+        "https://*.amazon.it/*",
+        "https://*.amazon.es/*",
+        "https://*.amazon.ca/*",
+        "https://*.amazon.in/*",
+        "https://*.amazon.com.au/*",
+        "https://*.amazon.com.br/*",
+        "https://*.amazon.com.mx/*",
+        "https://*.coupangplay.com/*",
+        "https://*.tving.com/*",
+        "https://*.wavve.com/*",
+        "https://*.watcha.com/*",
+        "https://*.laftel.net/*",
+        "https://serieson.naver.com/*",
+        "https://tv.apple.com/*",
+        "https://*.max.com/*",
+        "https://*.hbomax.com/*",
+        "https://www.hulu.com/*",
+        "https://www.paramountplus.com/*",
+        "https://www.peacocktv.com/*",
+        "https://www.crunchyroll.com/*"
       ],
       "js": [
         "shared/settings.js",
+        "shared/protocol.js",
         "content/dodge.js",
         "content/subtitles.js",
+        "content/heuristics.js",
+        "content/overlay-ui.js",
+        "content/relay.js",
+        "content/doc-pip.js",
         "content/content.js"
       ],
       "css": [
@@ -97,8 +155,12 @@
         "https://www.youtube.com/live_chat*",
         "https://www.twitch.tv/popout/*/chat*"
       ],
-      "js": ["content/chat-frame.js"],
-      "css": ["content/chat-frame.css"],
+      "js": [
+        "content/chat-frame.js"
+      ],
+      "css": [
+        "content/chat-frame.css"
+      ],
       "all_frames": true,
       "run_at": "document_start"
     }

@@ -310,13 +310,13 @@
     "message": "Avsluta"
   },
   "peekMode": {
-    "message": "Kikläge"
+    "message": "Omvänd transparens"
   },
   "peekModeHint": {
     "message": "Dölj tills du håller ned kiktangenten"
   },
   "peekSettings": {
-    "message": "Inställningar för kikläge"
+    "message": "Inställningar för omvänd transparens"
   },
   "peekKey": {
     "message": "Håll-för-att-visa-tangent"
@@ -340,7 +340,7 @@
     "message": "Opacitet vid nedtryckning"
   },
   "mediaRemote": {
-    "message": "Fjärrkontroll i spel"
+    "message": "Fjärrkontroll"
   },
   "mediaRemoteHint": {
     "message": "Spela, spola och ändra volym utan att tappa fokus"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "I spel som körs som administratör når inte hållning av Ctrl+Alt fram till PiP. Använd Alt+G för att växla klickgenomsläpp i stället."
+  },
+  "tipMediaHotkeys": {
+    "message": "När en PiP spelas upp styr Alt+Left, Alt+Right och Alt+Space videon och åsidosätter Bakåt, Framåt och fönstermenyn."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Tillåt åtkomst till alla webbplatser för att använda detta."
   }
 }

@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Text;
 using System.Text.Json;
 
@@ -9,7 +10,7 @@ public static class SelfTest
     {
         try
         {
-            string vectorsPath = ResolveVectorsPath(args);
+            string vectorsPath = ResolveSharedPath("dodge-vectors.json", args.Length >= 2 ? args[1] : null);
             int vectorPassed = RunDodgeVectorTests(vectorsPath);
             int unitPassed = RunUnitTests();
 
@@ -23,26 +24,24 @@ public static class SelfTest
         }
     }
 
-    private static string ResolveVectorsPath(string[] args)
+    private static string ResolveSharedPath(string fileName, string? explicitPath = null)
     {
-        if (args.Length >= 2 && !string.IsNullOrWhiteSpace(args[1]) && File.Exists(args[1]))
-            return args[1];
+        if (!string.IsNullOrWhiteSpace(explicitPath) && File.Exists(explicitPath))
+            return Path.GetFullPath(explicitPath);
 
-        string[] candidates =
-        [
-            Path.Combine(Environment.CurrentDirectory, "shared", "dodge-vectors.json"),
-            Path.Combine(Environment.CurrentDirectory, "..", "shared", "dodge-vectors.json"),
-            Path.Combine(AppContext.BaseDirectory, "shared", "dodge-vectors.json"),
-            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "shared", "dodge-vectors.json")
-        ];
-
-        foreach (string c in candidates)
+        foreach (string start in new[] { Environment.CurrentDirectory, AppContext.BaseDirectory })
         {
-            if (File.Exists(c))
-                return Path.GetFullPath(c);
+            DirectoryInfo? dir = new(start);
+            while (dir is not null)
+            {
+                string candidate = Path.Combine(dir.FullName, "shared", fileName);
+                if (File.Exists(candidate))
+                    return candidate;
+                dir = dir.Parent;
+            }
         }
 
-        throw new FileNotFoundException("Could not find shared/dodge-vectors.json.");
+        throw new FileNotFoundException($"Could not find shared/{fileName}.");
     }
 
     private static int RunDodgeVectorTests(string path)
@@ -232,6 +231,12 @@ public static class SelfTest
         suites++;
 
         TestMultiWindowHelpers();
+        suites++;
+
+        TestPointerSession();
+        suites++;
+
+        TestDpi();
         suites++;
 
         TestSubtitleOverlayRasterizer();
@@ -468,11 +473,24 @@ public static class SelfTest
                msg4 is LocaleMessage lm && lm.Tray == TrayStrings.English,
                "LOCALE falls back to English for missing strings");
 
-        byte[] helloBytes = Protocol.SerializeOutgoing(new HelloMessage("1.0.0", ["Alt+G"]));
+        byte[] helloBytes = Protocol.SerializeOutgoing(new HelloMessage("1.1.1", ["Alt+G"], Elevated: false));
         using var helloDoc = JsonDocument.Parse(helloBytes);
         Assert(helloDoc.RootElement.GetProperty("type").GetString() == "HELLO" &&
+               helloDoc.RootElement.GetProperty("engineVersion").GetString() == "1.1.1" &&
+               !helloDoc.RootElement.GetProperty("elevated").GetBoolean() &&
                helloDoc.RootElement.GetProperty("hotkeyErrors")[0].GetString() == "Alt+G",
-               "HELLO serialized");
+               "HELLO serialized with elevated=false");
+
+        byte[] helloElevBytes = Protocol.SerializeOutgoing(new HelloMessage("1.1.1", [], Elevated: true));
+        using var helloElevDoc = JsonDocument.Parse(helloElevBytes);
+        Assert(helloElevDoc.RootElement.GetProperty("elevated").GetBoolean(),
+               "HELLO serialized with elevated=true");
+
+        byte[] emergBytes = Protocol.SerializeOutgoing(new IntentMessage("EMERGENCY_RELEASE"));
+        using var emergDoc = JsonDocument.Parse(emergBytes);
+        Assert(emergDoc.RootElement.GetProperty("type").GetString() == "INTENT" &&
+               emergDoc.RootElement.GetProperty("intent").GetString() == "EMERGENCY_RELEASE",
+               "EMERGENCY_RELEASE intent serialized");
 
         byte[] intentBytes = Protocol.SerializeOutgoing(new IntentMessage("SET_HOME", "TL"));
         using var intentDoc = JsonDocument.Parse(intentBytes);
@@ -510,10 +528,43 @@ public static class SelfTest
         Assert(!Protocol.TryParseIncoming("""{"v":1,"type":"SESSION_STATE"}""", out _),
                "SESSION_STATE without active rejected");
 
-        string? prevTestMode = Environment.GetEnvironmentVariable("GHOSTPIP_TEST_MODE");
+        Assert(Protocol.TryParseIncoming("""{"v":1,"type":"PIP_RESIZE","deltaH":99999,"dpr":1.0}""", out var msgResHigh) &&
+               msgResHigh is PipResizeMessage { DeltaH: 4000 },
+               "PIP_RESIZE deltaH clamps to +4000");
+        Assert(Protocol.TryParseIncoming("""{"v":1,"type":"PIP_RESIZE","deltaH":-99999,"dpr":1.0}""", out var msgResLow) &&
+               msgResLow is PipResizeMessage { DeltaH: -4000 },
+               "PIP_RESIZE deltaH clamps to -4000");
+        Assert(Protocol.TryParseIncoming("""{"v":1,"type":"PIP_RESIZE","deltaH":420.6,"dpr":1.5,"tabId":3}""", out var msgResFloat) &&
+               msgResFloat is PipResizeMessage { DeltaH: 421, Dpr: 1.5, TabId: 3 },
+               "PIP_RESIZE rounds finite float deltaH");
+        Assert(!Protocol.TryParseIncoming("""{"v":1,"type":"PIP_RESIZE","deltaH":100,"dpr":0.1}""", out _),
+               "PIP_RESIZE rejects dpr < 0.25");
+        Assert(!Protocol.TryParseIncoming("""{"v":1,"type":"PIP_RESIZE","deltaH":100,"dpr":9.0}""", out _),
+               "PIP_RESIZE rejects dpr > 8");
+        Assert(!Protocol.TryParseIncoming("""{"v":1,"type":"PIP_RESIZE","deltaH":100,"tabId":-2}""", out _),
+               "PIP_RESIZE rejects tabId < -1");
+
+        Assert(Protocol.TryParseIncoming("""{"v":1,"type":"PIP_OPENED","tabId":0,"kind":"native","rect":{"x":-100000,"y":100000,"w":1,"h":20000},"dpr":0.25}""", out _),
+               "PIP_OPENED accepts boundary rect and dpr");
+        Assert(!Protocol.TryParseIncoming("""{"v":1,"type":"PIP_OPENED","tabId":-1,"kind":"native","rect":{"x":0,"y":0,"w":400,"h":300}}""", out _),
+               "PIP_OPENED rejects negative tabId");
+        Assert(!Protocol.TryParseIncoming("""{"v":1,"type":"PIP_OPENED","tabId":1,"kind":"iframe","rect":{"x":0,"y":0,"w":400,"h":300}}""", out _),
+               "PIP_OPENED rejects unknown kind");
+        Assert(!Protocol.TryParseIncoming("""{"v":1,"type":"PIP_OPENED","tabId":1,"kind":"native","rect":{"x":100001,"y":0,"w":400,"h":300}}""", out _),
+               "PIP_OPENED rejects |x| > 100000");
+        Assert(!Protocol.TryParseIncoming("""{"v":1,"type":"PIP_OPENED","tabId":1,"kind":"native","rect":{"x":0,"y":-100001,"w":400,"h":300}}""", out _),
+               "PIP_OPENED rejects |y| > 100000");
+        Assert(!Protocol.TryParseIncoming("""{"v":1,"type":"PIP_OPENED","tabId":1,"kind":"native","rect":{"x":0,"y":0,"w":0,"h":300}}""", out _),
+               "PIP_OPENED rejects w == 0");
+        Assert(!Protocol.TryParseIncoming("""{"v":1,"type":"PIP_OPENED","tabId":1,"kind":"native","rect":{"x":0,"y":0,"w":400,"h":20001}}""", out _),
+               "PIP_OPENED rejects h > 20000");
+        Assert(!Protocol.TryParseIncoming("""{"v":1,"type":"PIP_OPENED","tabId":1,"kind":"native","rect":{"x":0,"y":0,"w":400,"h":300},"dpr":8.5}""", out _),
+               "PIP_OPENED rejects dpr > 8");
+
+        bool prevTestMode = Protocol.TestMode;
         try
         {
-            Environment.SetEnvironmentVariable("GHOSTPIP_TEST_MODE", null);
+            Protocol.TestMode = false;
             Assert(!Protocol.TryParseIncoming("""{"v":1,"type":"TEST_MOUSE","event":"down","x":10,"y":20}""", out _),
                    "TEST_MOUSE rejected outside GHOSTPIP_TEST_MODE");
             Assert(!Protocol.TryParseIncoming("""{"v":1,"type":"TEST_PEEK","peek":true}""", out _),
@@ -521,7 +572,7 @@ public static class SelfTest
             Assert(!Protocol.TryParseIncoming("""{"v":1,"type":"TEST_HOTKEY","id":"playPause"}""", out _),
                    "TEST_HOTKEY rejected outside GHOSTPIP_TEST_MODE");
 
-            Environment.SetEnvironmentVariable("GHOSTPIP_TEST_MODE", "1");
+            Protocol.TestMode = true;
             Assert(Protocol.TryParseIncoming("""{"v":1,"type":"TEST_MOUSE","event":"down","x":10,"y":20}""", out var msgMouse) &&
                    msgMouse is TestMouseMessage { Event: "down", X: 10, Y: 20 },
                    "TEST_MOUSE parsed in GHOSTPIP_TEST_MODE");
@@ -548,12 +599,31 @@ public static class SelfTest
         }
         finally
         {
-            Environment.SetEnvironmentVariable("GHOSTPIP_TEST_MODE", prevTestMode);
+            Protocol.TestMode = prevTestMode;
         }
     }
 
     private static void TestHotkeys()
     {
+        string hkVectorsPath = ResolveSharedPath("hotkey-vectors.json");
+        using var doc = JsonDocument.Parse(File.ReadAllBytes(hkVectorsPath));
+        var reservedJson = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var item in doc.RootElement.GetProperty("reserved").EnumerateArray())
+        {
+            string combo = item.GetString()!;
+            reservedJson.Add(combo);
+            Assert(!Hotkeys.TryParseHotkey(combo, out _, out _), $"Reserved hotkey '{combo}' must be rejected");
+        }
+        Assert(reservedJson.SetEquals(Hotkeys.Reserved), "Hotkeys.Reserved must match shared/hotkey-vectors.json");
+
+        foreach (var c in doc.RootElement.GetProperty("cases").EnumerateArray())
+        {
+            string spec = c.GetProperty("spec").GetString()!;
+            bool expected = c.GetProperty("valid").GetBoolean();
+            bool actual = Hotkeys.TryParseHotkey(spec, out _, out _, out _);
+            Assert(actual == expected, $"Hotkey vector '{spec}': expected valid={expected}, got {actual}");
+        }
+
         Assert(Hotkeys.TryParseHotkey("Alt+G", out uint m1, out uint vk1) &&
                m1 == Hotkeys.MOD_ALT && vk1 == 'G', "Alt+G parsed");
 
@@ -583,9 +653,6 @@ public static class SelfTest
 
         Assert(Hotkeys.TryParseHotkey("Alt+P", out uint m10, out uint vk10) &&
                m10 == Hotkeys.MOD_ALT && vk10 == 'P', "Alt+P parsed");
-
-        Assert(!Hotkeys.TryParseHotkey("G", out _, out _), "Modifier-less key rejected");
-        Assert(!Hotkeys.TryParseHotkey("", out _, out _), "Empty key rejected");
     }
 
     private static void TestNativeMessaging()
@@ -596,27 +663,48 @@ public static class SelfTest
         NativeMessagingHost.WriteMessage(ms, new PipBoundMessage(7));
 
         ms.Position = 0;
-        byte[]? f1 = NativeMessagingHost.ReadFrame(ms);
-        Assert(f1 is not null && Protocol.TryParseIncoming(f1, out var m1) && m1 is PipClosedMessage { TabId: 7 },
+        Assert(NativeMessagingHost.ReadFrame(ms, out byte[]? f1) == FrameStatus.Frame &&
+               f1 is not null && Protocol.TryParseIncoming(f1, out var m1) && m1 is PipClosedMessage { TabId: 7 },
                "Frame 1 round-trip");
 
-        byte[]? f2 = NativeMessagingHost.ReadFrame(ms);
-        Assert(f2 is not null && Encoding.UTF8.GetString(f2).Contains("\"PIP_BOUND\""),
+        Assert(NativeMessagingHost.ReadFrame(ms, out byte[]? f2) == FrameStatus.Frame &&
+               f2 is not null && Encoding.UTF8.GetString(f2).Contains("\"PIP_BOUND\""),
                "Frame 2 round-trip");
 
-        Assert(NativeMessagingHost.ReadFrame(ms) is null, "EOF returns null");
+        Assert(NativeMessagingHost.ReadFrame(ms, out byte[]? eofPayload) == FrameStatus.End && eofPayload is null,
+               "EOF returns FrameStatus.End");
 
-        using var badStream = new MemoryStream([0x00, 0x00, 0x10, 0x00]);
-        bool threw = false;
-        try
-        {
-            NativeMessagingHost.ReadFrame(badStream);
-        }
-        catch (InvalidDataException)
-        {
-            threw = true;
-        }
-        Assert(threw, "Oversize frame throws InvalidDataException");
+        using var overStream = new MemoryStream();
+        uint overLen = NativeMessagingHost.MaxFrameBytes + 128;
+        Span<byte> lenHdr = stackalloc byte[4];
+        BinaryPrimitives.WriteUInt32LittleEndian(lenHdr, overLen);
+        overStream.Write(lenHdr);
+        overStream.Write(new byte[overLen]);
+        NativeMessagingHost.WriteFrame(overStream, Encoding.UTF8.GetBytes(incomingJson));
+        overStream.Position = 0;
+
+        Assert(NativeMessagingHost.ReadFrame(overStream, out byte[]? skippedPayload) == FrameStatus.Oversize &&
+               skippedPayload is null,
+               "Oversize frame drained and returns FrameStatus.Oversize");
+        Assert(NativeMessagingHost.ReadFrame(overStream, out byte[]? recoveredPayload) == FrameStatus.Frame &&
+               recoveredPayload is not null &&
+               Protocol.TryParseIncoming(recoveredPayload, out var recoveredMsg) &&
+               recoveredMsg is PipClosedMessage { TabId: 7 },
+               "Valid frame after oversize frame is read intact");
+
+        var q = new OutgoingQueue();
+        q.Enqueue(new PipHoverMessage(5, true));
+        q.Enqueue(new PipHoverMessage(5, false));
+        Assert(q.Count == 1, "OutgoingQueue coalesces PIP_HOVER per tabId");
+        Assert(q.TryTake(0, out byte[]? coalescedBytes) && coalescedBytes is not null &&
+               Encoding.UTF8.GetString(coalescedBytes).Contains("\"hovered\":false"),
+               "Coalesced PIP_HOVER keeps latest value");
+
+        for (int i = 0; i < OutgoingQueue.Capacity + 10; i++)
+            q.Enqueue(new PipHoverMessage(1000 + i, true));
+        Assert(q.Count == OutgoingQueue.Capacity, "Coalesced state messages cap at OutgoingQueue.Capacity");
+        q.Enqueue(new IntentMessage("EMERGENCY_RELEASE"));
+        Assert(q.Count == OutgoingQueue.Capacity + 1, "Intent messages are never dropped when queue is full");
     }
 
     private static void TestGhostStyleAlpha()
@@ -647,12 +735,98 @@ public static class SelfTest
         };
         Assert(PipTracker.FindBestMatch(onlyMainBrowser, "popup", new PipRect(200, 200, 480, 270), 1.0) == IntPtr.Zero,
                "Popup matching never hijacks normal browser window via loose fallback");
+        Assert(PipTracker.FindBestMatch(onlyMainBrowser, "document", new PipRect(200, 200, 480, 270), 1.0) == IntPtr.Zero,
+               "Document matching never hijacks unrelated topmost window via loose fallback");
+
+        var winCandidates = new List<WindowCandidate>
+        {
+            new((nint)2001, new DodgeRect(200, 200, 680, 470), Topmost: true),
+            new((nint)2002, new DodgeRect(200, 200, 680, 470), Topmost: false)
+        };
+        Assert(PipTracker.MatchPending([], winCandidates).Count == 0,
+               "No window binds when there is no pending open request");
+
+        var docPending = new PendingOpen(10, "document", new PipRect(200, 200, 480, 270), 1.0, null, 100);
+        var onlyNonTopmost = new List<WindowCandidate> { winCandidates[1] };
+        Assert(PipTracker.MatchPending([docPending], onlyNonTopmost).Count == 0,
+               "Document PiP never binds a non-topmost candidate");
+
+        var popupPending = new PendingOpen(11, "popup", new PipRect(200, 200, 480, 270), 1.0, null, 110);
+        var matchedBoth = PipTracker.MatchPending([docPending, popupPending], winCandidates);
+        Assert(matchedBoth.Count == 2 &&
+               matchedBoth[0] == (10, (nint)2001) &&
+               matchedBoth[1] == (11, (nint)2002),
+               "MatchPending pairs topmost to document and remaining candidate to popup without double-binding");
 
         var cfg = Settings.Defaults.Dodge;
         Assert(Program.ChooseUnoccupiedCorner(cfg, []) == "BR", "First window chooses Home");
         Assert(Program.ChooseUnoccupiedCorner(cfg, ["BR"]) == "TL", "Second window chooses first unoccupied Allowed corner");
         Assert(Program.ChooseUnoccupiedCorner(cfg, ["BR", "TL"]) == "TR", "Third window chooses TR");
         Assert(Program.ChooseUnoccupiedCorner(cfg, ["BR", "TL", "TR"]) == "BL", "Fourth window chooses BL");
+    }
+
+    private static void TestPointerSession()
+    {
+        var target = new HitTarget((nint)3001, new DodgeRect(100, 100, 500, 350), Hosted: true, Native: false, TabId: 12, Scale: 1.0);
+        var snapshot = new HookSnapshot([target], Enabled: true, PassThrough: false, VolumeWheel: true);
+        var ps = new PointerSession();
+
+        Assert(!ps.OnButtonDown(snapshot, 200, 200, hold: false, out var obs1) && obs1 == target && ps.Phase == PointerPhase.Idle,
+               "Interior click without hold is observed but not swallowed");
+
+        Assert(ps.OnButtonDown(snapshot, 200, 200, hold: true, out _) && ps.Phase == PointerPhase.Down,
+               "Hold + interior click enters Down phase and swallows button-down");
+        Assert(ps.OnMove(202, 201).Kind == PointerActionKind.None && ps.Phase == PointerPhase.Down,
+               "Sub-threshold move stays in Down phase");
+        var clickEnd = ps.OnButtonUp(202, 201);
+        Assert(clickEnd is { Kind: PointerEndKind.Click, Hwnd: 3001 } && ps.Phase == PointerPhase.Idle,
+               "Button-up from Down emits Click and resets to Idle");
+
+        Assert(ps.OnButtonDown(snapshot, 200, 200, hold: true, out _) && ps.Phase == PointerPhase.Down,
+               "Start drag gesture");
+        var moveAct = ps.OnMove(220, 230);
+        Assert(moveAct is { Kind: PointerActionKind.Move, Hwnd: 3001, L: 120, T: 130, W: 400, H: 250 } &&
+               ps.Phase == PointerPhase.Dragging,
+               "Move past threshold enters Dragging and computes moved rect");
+        var dragEnd = ps.OnButtonUp(220, 230);
+        Assert(dragEnd is { Kind: PointerEndKind.Drag, Hwnd: 3001 } && ps.Phase == PointerPhase.Idle,
+               "Button-up from Dragging emits Drag and resets to Idle");
+
+        Assert(ps.OnButtonDown(snapshot, 496, 346, hold: false, out _) && ps.Phase == PointerPhase.Resizing,
+               "Corner button-down enters Resizing phase");
+        var resizeAct = ps.OnMove(50, 50);
+        Assert(resizeAct is { Kind: PointerActionKind.Resize, Hwnd: 3001, L: 100, T: 100, W: PointerSession.MinResizeW, H: PointerSession.MinResizeH },
+               "Resize clamps to minimum dimensions");
+        var resizeEnd = ps.OnButtonUp(50, 50);
+        Assert(resizeEnd is { Kind: PointerEndKind.Resize, Hwnd: 3001, Resized: true } && ps.Phase == PointerPhase.Idle,
+               "Button-up from Resizing emits Resize with Resized=true");
+
+        Assert(snapshot.DecideWheel(10, 10, hold: false, altOnly: true) == (WheelAction.Volume, true),
+               "Alt+Wheel triggers global volume wheel");
+        Assert(snapshot.DecideWheel(200, 200, hold: true, altOnly: false) == (WheelAction.Opacity, true),
+               "Hold+Wheel over PiP triggers opacity wheel");
+    }
+
+    private static void TestDpi()
+    {
+        Assert(Math.Abs(Dpi.ScaleOf(0) - 1.0) < 1e-9, "ScaleOf(0) defaults to 1.0");
+        Assert(Math.Abs(Dpi.ScaleOf(96) - 1.0) < 1e-9, "ScaleOf(96) == 1.0");
+        Assert(Math.Abs(Dpi.ScaleOf(144) - 1.5) < 1e-9, "ScaleOf(144) == 1.5");
+        Assert(Dpi.Px(16, 1.5) == 24, "Dpi.Px scales and rounds");
+        Assert(Dpi.HasSize(new PipRect(10, 20, 300, 200)), "HasSize true for positive w/h");
+        Assert(!Dpi.HasSize(new PipRect(10, 20, 0, 0)), "HasSize false for zero w/h");
+
+        var scaledCfg = Dpi.ScaleDodge(Settings.Defaults.Dodge, 1.5);
+        Assert(scaledCfg.MarginPx == 30 && scaledCfg.EdgeInsetPx == 24, "ScaleDodge scales MarginPx and EdgeInsetPx");
+
+        var area = new DodgeRect(1920, 0, 3840, 1080);
+        var clamped = Dpi.ClampSavedBounds(new PipRect(5000, -200, 100, 80), area, 1.5, 480, 270);
+        Assert(clamped.W == 270 && clamped.H == 180 && clamped.R == 3840 && clamped.T == 0,
+               "ClampSavedBounds enforces DPI-scaled min size and clamps into monitor work area");
+
+        var posOnly = Dpi.ClampSavedBounds(new PipRect(2000, 100, 0, 0), area, 1.0, 480, 270);
+        Assert(posOnly == new DodgeRect(2000, 100, 2480, 370),
+               "ClampSavedBounds preserves current size for position-only bounds");
     }
 
     private static void TestSubtitleOverlayRasterizer()

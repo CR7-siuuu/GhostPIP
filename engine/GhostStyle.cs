@@ -121,6 +121,14 @@ public sealed unsafe class GhostStyle
     private static bool _hostClassRegistered;
     private static WndProcDelegate? _hostWndProcDelegate;
 
+    private const uint WM_CLOSE = 0x0010;
+    private const uint GW_HWNDNEXT = 2;
+    private const int TopmostReassertTicks = 10;
+    private const int ChildProbeTicks = 32;
+
+    [DllImport("user32.dll")]
+    private static extern nint GetWindow(nint hWnd, uint uCmd);
+
     private readonly Dictionary<nint, AppliedState> _applied = new();
     private readonly EnumChildProc _enumChildDelegate;
     private nint _foundRenderChild;
@@ -131,8 +139,26 @@ public sealed unsafe class GhostStyle
         _enumChildDelegate = OnEnumChild;
     }
 
+    // A WM_CLOSE (e.g. a non-forced taskkill) must not reach DefWindowProc: destroying the host would
+    // destroy the reparented Chrome window with it. The engine window's WM_CLOSE detaches first.
     private static nint HostWndProc(nint hWnd, uint msg, nint wParam, nint lParam) =>
-        DefWindowProcW(hWnd, msg, wParam, lParam);
+        msg == WM_CLOSE ? IntPtr.Zero : DefWindowProcW(hWnd, msg, wParam, lParam);
+
+    /// <summary>True when <paramref name="upper"/> sits above <paramref name="lower"/> within <paramref name="maxSteps"/> z-order steps.</summary>
+    public static bool IsAbove(nint upper, nint lower, int maxSteps)
+    {
+        if (upper == IntPtr.Zero || lower == IntPtr.Zero || upper == lower)
+            return false;
+
+        nint cur = GetWindow(upper, GW_HWNDNEXT);
+        for (int i = 0; cur != IntPtr.Zero && i < maxSteps; i++)
+        {
+            if (cur == lower)
+                return true;
+            cur = GetWindow(cur, GW_HWNDNEXT);
+        }
+        return false;
+    }
 
     private static void EnsureHostClassRegistered()
     {
@@ -175,11 +201,14 @@ public sealed unsafe class GhostStyle
         return _foundRenderChild == IntPtr.Zero || _foundD3dChild == IntPtr.Zero;
     }
 
-    public bool TryGetContentRelRect(nint hwnd, out PipTracker.RECT relRect) =>
-        TryGetContentRelRect(hwnd, out relRect, out _, out _);
-
+    /// <summary>
+    /// Finds the content (render widget) rect relative to the window. A still-valid cached child is
+    /// reused so the per-tick path does not walk the child tree.
+    /// </summary>
     private bool TryGetContentRelRect(
         nint hwnd,
+        nint cachedRender,
+        nint cachedD3d,
         out PipTracker.RECT relRect,
         out nint renderChild,
         out nint d3dChild)
@@ -191,9 +220,17 @@ public sealed unsafe class GhostStyle
         if (hwnd == IntPtr.Zero || !PipTracker.GetWindowRect(hwnd, out var winRc))
             return false;
 
-        _foundRenderChild = IntPtr.Zero;
-        _foundD3dChild = IntPtr.Zero;
-        EnumChildWindows(hwnd, _enumChildDelegate, IntPtr.Zero);
+        if (cachedRender != IntPtr.Zero && IsWindow(cachedRender))
+        {
+            _foundRenderChild = cachedRender;
+            _foundD3dChild = cachedD3d != IntPtr.Zero && IsWindow(cachedD3d) ? cachedD3d : IntPtr.Zero;
+        }
+        else
+        {
+            _foundRenderChild = IntPtr.Zero;
+            _foundD3dChild = IntPtr.Zero;
+            EnumChildWindows(hwnd, _enumChildDelegate, IntPtr.Zero);
+        }
         if (_foundRenderChild == IntPtr.Zero || !PipTracker.GetWindowRect(_foundRenderChild, out var childRc))
             return false;
 
@@ -209,8 +246,6 @@ public sealed unsafe class GhostStyle
         relRect = new PipTracker.RECT { Left = l, Top = t, Right = r, Bottom = b };
         return true;
     }
-
-    public int GetHeaderShift(nint hwnd) => 0;
 
     public nint GetInputTargetHwnd(nint hwnd) =>
         _applied.TryGetValue(hwnd, out var state) && state.RenderChild != IntPtr.Zero && IsWindow(state.RenderChild)
@@ -387,11 +422,17 @@ public sealed unsafe class GhostStyle
 
         nint origExStyle = hadPrev ? prev.OrigExStyle : GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
         byte alpha = ComputeAlpha(opacity, allowZeroAlpha);
+        bool ghosted = clickThrough || alpha < 255;
+        int nextTick = hadPrev ? prev.TickCount + 1 : 0;
+        bool periodicTopmost = ghosted && nextTick % TopmostReassertTicks == 0;
         bool wantClip = false;
         int clipL = 0, clipT = 0, clipR = 0, clipB = 0;
         nint renderChild = IntPtr.Zero;
         nint d3dChild = IntPtr.Zero;
-        if (hideHeader && TryGetContentRelRect(hwnd, out var rel, out renderChild, out d3dChild))
+        bool probeChildren = !hadPrev || prev.Clipped || nextTick % ChildProbeTicks == 0;
+        if (hideHeader && probeChildren &&
+            TryGetContentRelRect(hwnd, hadPrev ? prev.RenderChild : IntPtr.Zero, hadPrev ? prev.D3dChild : IntPtr.Zero,
+                out var rel, out renderChild, out d3dChild))
         {
             wantClip = true;
             clipL = rel.Left;
@@ -486,8 +527,7 @@ public sealed unsafe class GhostStyle
                 if (hostCreated || hostExChanged || !hadPrev || prev.Alpha != alpha)
                     SetLayeredWindowAttributes(hostHwnd, 0, alpha, LWA_ALPHA);
 
-                int nextHostedTick = hadPrev ? prev.TickCount + 1 : 0;
-                if (hostCreated || hostExChanged || (curHostEx & WS_EX_TOPMOST) == 0 || nextHostedTick % 10 == 0)
+                if (hostCreated || hostExChanged || (curHostEx & WS_EX_TOPMOST) == 0 || periodicTopmost)
                 {
                     uint flags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | (hostExChanged ? SWP_FRAMECHANGED : 0u);
                     SetWindowPos(hostHwnd, HWND_TOPMOST, 0, 0, 0, 0, flags);
@@ -496,7 +536,7 @@ public sealed unsafe class GhostStyle
                 _applied[hwnd] = new AppliedState(
                     alpha,
                     clickThrough,
-                    nextHostedTick,
+                    nextTick,
                     true,
                     clipL,
                     clipT,
@@ -534,8 +574,7 @@ public sealed unsafe class GhostStyle
         if (!hadPrev || layeredWasMissing || exChanged || prev.Alpha != alpha)
             SetLayeredWindowAttributes(hwnd, 0, alpha, LWA_ALPHA);
 
-        int nextTick = hadPrev ? prev.TickCount + 1 : 0;
-        if ((curEx & WS_EX_TOPMOST) == 0 || exChanged || nextTick % 10 == 0)
+        if ((curEx & WS_EX_TOPMOST) == 0 || exChanged || periodicTopmost)
         {
             uint flags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | (exChanged ? SWP_FRAMECHANGED : 0u);
             SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, flags);

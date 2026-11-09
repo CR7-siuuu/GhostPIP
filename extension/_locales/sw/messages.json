@@ -310,13 +310,13 @@
     "message": "Ondoka"
   },
   "peekMode": {
-    "message": "Hali ya Kuchungulia"
+    "message": "Uwazi wa Kinyume"
   },
   "peekModeHint": {
     "message": "Ficha hadi ushikilie kitufe cha kuchungulia"
   },
   "peekSettings": {
-    "message": "Mipangilio ya Hali ya Kuchungulia"
+    "message": "Mipangilio ya Uwazi wa Kinyume"
   },
   "peekKey": {
     "message": "Kitufe cha kushikilia ili kuona"
@@ -340,13 +340,13 @@
     "message": "Uwazi unaposhikilia"
   },
   "mediaRemote": {
-    "message": "Kidhibiti Ndani ya Mchezo"
+    "message": "Kidhibiti cha Mbali"
   },
   "mediaRemoteHint": {
     "message": "Cheza, sogeza na sauti bila kupoteza umakini"
   },
   "mediaSettings": {
-    "message": "Mipangilio ya Kidhibiti cha Mchezo"
+    "message": "Mipangilio ya Kidhibiti cha Mbali"
   },
   "mediaSeekStep": {
     "message": "Hatua ya kusogeza"
@@ -378,5 +378,14 @@
         "content": "$1"
       }
     }
+  },
+  "tipElevated": {
+    "message": "Kwenye michezo inayofanya kazi kama msimamizi (administrator), kushikilia Ctrl+Alt hakuwezi kufikia PiP. Tumia Alt+G ili kuwasha au kuzima kubofya kupitia badala yake."
+  },
+  "tipMediaHotkeys": {
+    "message": "Wakati PiP inacheza, Alt+Left, Alt+Right na Alt+Space hudhibiti video na kuchukua nafasi ya Nyuma, Mbele na menyu ya dirisha."
+  },
+  "allSitesNeedsPermission": {
+    "message": "Ruhusu ufikiaji wa tovuti zote ili kutumia hii."
   }
 }

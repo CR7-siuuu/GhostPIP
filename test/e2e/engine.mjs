@@ -12,7 +12,7 @@ fs.mkdirSync(OUT, { recursive: true });
 
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
 const lib = {};
-vm.runInNewContext(read("extension/content/dodge.js") + "\n" + read("extension/shared/settings.js"), lib);
+vm.runInNewContext(read("extension/shared/settings.js") + "\n" + read("extension/content/dodge.js"), lib);
 const Dodge = lib.GhostPiPDodge;
 const DEFAULTS = JSON.parse(JSON.stringify(lib.GhostPiPSettings.DEFAULTS));
 
@@ -121,7 +121,7 @@ function getEnginePids() {
 
 execFileSync(
   "powershell",
-  ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(ROOT, "engine/installer/install.ps1"), "-InPlace"],
+  ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(ROOT, "engine/installer/install.ps1"), "-InPlace", "-Dev"],
   { stdio: "inherit" },
 );
 await sleep(1600);
@@ -159,6 +159,7 @@ try {
   );
   const sw = await swTarget.worker();
   await poll(() => sw.evaluate(() => typeof globalThis.GhostPiPBackground === "object"), Boolean, 3000);
+  await sw.evaluate(() => chrome.storage.local.set({ gpTestHooks: true }));
 
   const videoPage = (await browser.pages())[0] ?? (await browser.newPage());
   {
@@ -191,7 +192,7 @@ try {
       st.badge === "엔진 연결됨" &&
       st.bannerHidden === true &&
       engineState?.connected === true &&
-      engineState?.engineVersion === "1.1.0" &&
+      engineState?.engineVersion === "1.1.1" &&
       spawnedPids.length >= 1;
     return {
       ok,
